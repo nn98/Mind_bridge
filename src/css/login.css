@@ -16,12 +16,21 @@
 }
 
 .form-section {
-  padding: 2rem;
+  padding: 3rem;
   background: white;
   margin: 2rem auto;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  max-width: 500px;
+  max-width: 400px;
+  text-align: center;
+}
+.form-section2 {
+  padding: 3rem;
+  background: white;
+  margin: 2rem auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
   text-align: center;
 }
 

@@ -195,8 +195,8 @@ const App = () => {
 
       <div className="floating-sidebar">
         <div className="floating-button">?</div>
-        <div className="floating-button">?</div>
-        <div className="floating-button top" onClick={handleScrollToTop}>TOP</div>
+        <div className="floating-button">봇</div>
+        <div className="floating-button" onClick={handleScrollToTop}>TOP</div>
       </div>
 
       {activeSection === 'about' && (
@@ -336,9 +336,9 @@ const App = () => {
       )}
 
       {activeSection === 'self' && (
-        <section className="form-section">
-          <h2>우울 자가진단 테스트 (CES-D)</h2>
-          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p>
+        <section className="form-section2">
+          <h2>우울 자가진단 테스트 (CES-D)</h2><br/>
+          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p><br/>
 
           <ul className="self-test-list">
             {[
@@ -418,9 +418,12 @@ const App = () => {
       )}
 
       <footer className="footer">
-        <strong>주식회사 : (주) 화재감지기 | 주소 : 서울특별시 종로구 종로12길 15 코아빌딩<br />
-        이메일 : help@mindbridge.ai | 전화: 02-1234-5678</strong>
-        <img src="/문의.jpg" className="small-img" />
+        <strong>
+        <h4>Contact</h4><br/>
+        <h2>02-1234-5678</h2>
+        <h2>이메일 : help@mindbridge.ai</h2> <br/><br/><hr class="small-line"/><br/>
+        <h3>(주) 화재감지기</h3><br/> 
+        <h5>주소 : 서울특별시 종로구 종로12길 15 코아빌딩 5층</h5><br/></strong>
       </footer>
     </div>
   );

@@ -1,20 +1,22 @@
 /* 기본 리셋 */
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden; /* 스크롤 방지 */
+  overflow-x: hidden;
+  /* 스크롤 방지 */
   box-sizing: border-box;
 }
 
 /* 로고 이미지 */
 
 .logo {
-  width: 200px;
-  height: 150px;
-  margin: 0px;
+  width: 150px;
+  height: auto;
+  margin: -28px auto;
   position: absolute;
-  top: -40px;
 }
 
 /* 번역 버튼 위치 */
@@ -34,39 +36,42 @@ html, body, #root {
   text-align: left;
   padding: 2rem;
   background-color: #4a6fa5;
-  color: lightgray;
+  color: white;
   margin-top: -2rem;
 }
 
- /* 사이드바 */
+hr.small-line {
+  width: 25%;
+  height: 2px;
+  background-color: white;
+  border: none;
+}
+
+/* 사이드바 */
 .floating-sidebar {
   position: fixed;
-  top: 30%;
+  top: 50%;
   right: 20px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 }
 
 .floating-button {
-  background-color: #87CEEB;
-  border: 1px solid #ddd;
-  padding: 10px 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background-color: #5988ca;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 9px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: white;
   text-align: center;
   transition: all 0.2s ease-in-out;
+  margin: 0px 30px 0px 0px;
 }
 
 .floating-button:hover {
-  background-color: #f5f5f5;
+  background-color: #2c5083;
 }
 
-.floating-button.top {
-  background-color: #3a5b88;
-  color: #fff;
-}
