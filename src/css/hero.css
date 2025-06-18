@@ -1,0 +1,72 @@
+/* 전체 레이아웃 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* 루트 레벨에서 정렬 문제를 방지 */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 중앙 정렬 */
+}
+
+/* Hero 영역을 정확히 뷰포트에 맞춤 */
+.hero {
+  width: 100vw;
+  max-width: 100%;
+  margin: 0 auto;
+  background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+
+/* 메인 제목 */
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* 서브 텍스트 */
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 700px;
+}
+
+/* CTA 버튼 */
+.cta {
+  display: inline-block;
+  background-color: #4a6fa5;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.cta:hover {
+  background-color: #3a5b88;
+}

@@ -1,0 +1,17 @@
+/* ✅ 8. 기능 카드 섹션 */
+.feature-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.feature {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  text-align: center;
+  width: 250px;
+}

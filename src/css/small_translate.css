@@ -1,0 +1,22 @@
+/* ✅ 3. 이미지 관련 */
+.small-img {
+  width: 300px;
+  height: auto;
+  border-radius: 8px;
+  float: right;
+  margin: -50px 0px 0px 0px;
+}
+
+/* ✅ 4. 번역 위젯 */
+.translate {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2000;
+}
+
+@media (max-width: 768px) {
+  .small-img {
+    display: none;
+  }
+}

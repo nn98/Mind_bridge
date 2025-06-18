@@ -1,0 +1,68 @@
+/*dropdown css입니당당*/
+
+.nav-item-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-wrapper {
+  position: absolute;
+  top: calc(100% + 20px); 
+  left: 0;
+  z-index: 999;
+}
+.dropdown {
+  display: flex;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.dropdown-column {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: white;
+  min-width: 160px;
+  position: relative;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dropdown-item:hover,
+.dropdown-item.highlight {
+  background-color: #eef3ff;
+  color: #2a61d8;
+}
+
+.dropdown-submenu {
+  position: absolute;
+  top: 0; 
+  left: 100%;
+  background: white;        
+  border: 1px solid #ddd;
+  padding: 13px;
+  min-width: 160px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.dropdown-item:hover .dropdown-submenu,
+.dropdown-item.highlight .dropdown-submenu {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}

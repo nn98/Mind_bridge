@@ -1,0 +1,72 @@
+/* 기본 리셋 */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* 스크롤 방지 */
+  box-sizing: border-box;
+}
+
+/* 로고 이미지 */
+
+.logo {
+  width: 200px;
+  height: 150px;
+  margin: 0px;
+  position: absolute;
+  top: -40px;
+}
+
+/* 번역 버튼 위치 */
+.translate {
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+}
+
+/* section 및 footer */
+.section {
+  padding: 2rem;
+  background-color: #f0f3f8;
+}
+
+.footer {
+  text-align: left;
+  padding: 2rem;
+  background-color: #4a6fa5;
+  color: lightgray;
+  margin-top: -2rem;
+}
+
+ /* 사이드바 */
+.floating-sidebar {
+  position: fixed;
+  top: 30%;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.floating-button {
+  background-color: #87CEEB;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.floating-button:hover {
+  background-color: #f5f5f5;
+}
+
+.floating-button.top {
+  background-color: #3a5b88;
+  color: #fff;
+}
