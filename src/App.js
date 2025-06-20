@@ -196,7 +196,19 @@ const App = () => {
       <div className="floating-sidebar">
         <div className="floating-button">?</div>
         <div className="floating-button">봇</div>
-        <div className="floating-button" onClick={handleScrollToTop}>TOP</div>
+        <div className="floating-button" onClick={handleScrollToTop}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            className="bi bi-chevron-bar-up"
+            viewBox="0 0 16 16">
+            <path
+              fillRule="evenodd"
+              d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4"/>
+          </svg>
+        </div>
       </div>
 
       {activeSection === 'about' && (
@@ -291,6 +303,7 @@ const App = () => {
       )}
 
       {activeSection === 'chat' && (
+        
         <section className="chat-section">
           <h2>AI 상담 챗봇</h2>
           <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
@@ -337,8 +350,8 @@ const App = () => {
 
       {activeSection === 'self' && (
         <section className="form-section2">
-          <h2>우울 자가진단 테스트 (CES-D)</h2><br/>
-          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p><br/>
+          <h2>우울 자가진단 테스트 (CES-D)</h2><br />
+          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p><br />
 
           <ul className="self-test-list">
             {[
@@ -419,11 +432,11 @@ const App = () => {
 
       <footer className="footer">
         <strong>
-        <h4>Contact</h4><br/>
-        <h2>02-1234-5678</h2>
-        <h2>이메일 : help@mindbridge.ai</h2> <br/><br/><hr class="small-line"/><br/>
-        <h3>(주) 화재감지기</h3><br/> 
-        <h5>주소 : 서울특별시 종로구 종로12길 15 코아빌딩 5층</h5><br/></strong>
+          <h4>Contact</h4><br />
+          <h2>02-1234-5678</h2>
+          <h2>이메일 : help@mindbridge.ai</h2> <br /><br /><hr class="small-line" /><br />
+          <h3>(주) 화재감지기</h3><br />
+          <h5>주소 : 서울특별시 종로구 종로12길 15 코아빌딩 5층</h5><br /></strong>
       </footer>
     </div>
   );
