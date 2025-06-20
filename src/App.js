@@ -9,6 +9,7 @@ import '../src/css/hero.css';
 import '../src/css/login.css';
 import '../src/css/map.css';
 import '../src/css/small_translate.css';
+import '../src/css/FloatingChatButton.css';
 
 const App = () => {
   const [activeSection, setActiveSection] = useState('about');
@@ -20,57 +21,12 @@ const App = () => {
   const [visibility, setVisibility] = useState(null);
   const [signupState, setSignupState] = useState('');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
-
-
-  const chatHistory = [
-    { summary: '1차 상담 내용' },
-    { summary: '2차 상담 내용' },
-    { summary: '3차 상담 내용' }
-  ];
-
-  const handleScrollToTop = () => {
-    const root = document.getElementById('root');
-    if (root) {
-      root.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleSelfAnswer = (index, value) => {
-    const updated = [...selfAnswers];
-    updated[index] = value;
-    setSelfAnswers(updated);
-  };
-
-  const faqList = [
-    { q: 'Q. AI 상담이 실제 사람처럼 이야기하나요?', a: 'A. Mind Bridge는 자연어 이해와 공감 대화를 기반으로 상담 서비스를 제공드리기 위해 노력하고 있습니다' },
-    { q: 'Q. 개인 정보는 안전한가요?', a: 'A. 철저한 암호화와 보안 시스템으로 보호되고 있습니다' },
-    { q: 'Q. 이용 요금이 있나요?', a: 'A. 기본 상담은 무료로 진행되며 추후 업데이트를 통해 기능이 추가되면 유료 버전이 생길수도 있습니다' }
-  ];
-
-  const leaveTimer = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [tab, setTab] = useState('chat');
+  const [chatInput, setChatInput] = useState('');
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
-
-  const scrollToSection = (ref) => {
-    if (ref?.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleMouseEnter = (menu) => {
-    clearTimeout(leaveTimer.current);
-    setHoveredMenu(menu);
-  };
-
-  const handleMouseLeaveAll = () => {
-    leaveTimer.current = setTimeout(() => {
-      setHoveredMenu(null);
-      setSubMenuVisible(null);
-    }, 200);
-  };
 
   const showSection = (id) => {
     setActiveSection(id);
@@ -89,6 +45,54 @@ const App = () => {
     setActiveSection('board');
   };
 
+  const handleScrollToTop = () => {
+    const root = document.getElementById('root');
+    if (root) {
+      root.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+
+  const chatHistory = [
+    { summary: '상담 내용' },
+  ];
+
+  const scrollToSection = (ref) => {
+    if (ref?.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const leaveTimer = useRef(null);
+
+  const handleMouseEnter = (menu) => {
+    clearTimeout(leaveTimer.current);
+    setHoveredMenu(menu);
+  };
+
+  const handleMouseLeaveAll = () => {
+    leaveTimer.current = setTimeout(() => {
+      setHoveredMenu(null);
+      setSubMenuVisible(null);
+    }, 200);
+  };
+
+  const handleSelfAnswer = (index, value) => {
+    const updated = [...selfAnswers];
+    updated[index] = value;
+    setSelfAnswers(updated);
+  };
+
+
+  const faqList = [
+    { q: 'Q. AI 상담이 실제 사람처럼 이야기하나요?', a: 'A. Mind Bridge는 자연어 이해와 공감 대화를 기반으로 상담 서비스를 제공드리기 위해 노력하고 있습니다' },
+    { q: 'Q. 개인 정보는 안전한가요?', a: 'A. 철저한 암호화와 보안 시스템으로 보호되고 있습니다' },
+    { q: 'Q. 이용 요금이 있나요?', a: 'A. 기본 상담은 무료로 진행되며 추후 업데이트를 통해 기능이 추가되면 유료 버전이 생길수도 있습니다' }
+  ];
+
+
   const handleSendEmail = () => {
     if (selectedChat === null) {
       alert('보낼 상담 기록을 선택해주세요.');
@@ -103,6 +107,56 @@ const App = () => {
       return;
     }
     alert(`선택한 기록:\n${chatHistory[selectedChat].summary}`);
+  };
+
+  const renderContent = () => {
+    switch (tab) {
+      case 'chat':
+        return (
+          <div className="tab-content">
+            <h3>AI 상담 챗봇</h3>
+            <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
+            <input
+              type="text"
+              placeholder="메시지를 입력하세요..."
+              className="input-full"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+            />
+            <button className="button">입력</button>
+          </div>
+        );
+      case 'summary':
+        return (
+          <div className="tab-content">
+            <h3>AI 상담 기록 메일 요약</h3>
+            <ul style={{ textAlign: 'left' }}>
+              {chatHistory.map((item, idx) => (
+                <li key={idx}>
+                  <label>
+                    <input
+                      type="radio"
+                      name="chatSelect"
+                      value={idx}
+                      checked={selectedChat === idx}
+                      onChange={() => setSelectedChat(idx)}
+                    />
+                    {item.summary.length > 30 ? item.summary.slice(0, 30) + '...' : item.summary}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div style={{ marginTop: '1rem' }}>
+              <button className="button" onClick={handleRead}>텍스트 읽기</button>
+              <button className="button" onClick={handleSendEmail}>메일 전송</button>
+            </div>
+          </div>
+        );
+      case 'profile':
+        return <div className="tab-content">회원 정보 영역입니다.</div>;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -194,9 +248,9 @@ const App = () => {
       </nav>
 
       <div className="floating-sidebar">
-        <div className="floating-button">?</div>
-        <div className="floating-button">봇</div>
-        <div className="floating-button" onClick={handleScrollToTop}>TOP</div>
+        <div className="floating-button1" onClick={() => alert('도움말')}>?</div>
+        <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
+        <div className="floating-button1" onClick={handleScrollToTop}>TOP</div>
       </div>
 
       {activeSection === 'about' && (
@@ -337,8 +391,8 @@ const App = () => {
 
       {activeSection === 'self' && (
         <section className="form-section2">
-          <h2>우울 자가진단 테스트 (CES-D)</h2><br/>
-          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p><br/>
+          <h2>우울 자가진단 테스트 (CES-D)</h2><br />
+          <p>지난 1주일 동안의 느낌과 행동을 잘 보고 해당하는 항목을 선택해주세요.</p><br />
 
           <ul className="self-test-list">
             {[
@@ -391,6 +445,24 @@ const App = () => {
       )}
 
 
+      <>
+        <div className="floating-button" onClick={() => setIsOpen(true)}>버튼</div>
+        {isOpen && (
+          <div className="modal-container">
+            <div className="modal-header">
+              <button onClick={() => setIsOpen(false)} className="close-btn">✖</button>
+            </div>
+            <div className="modal-tabs">
+              <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
+              <button onClick={() => setTab('summary')} className={tab === 'summary' ? 'active' : ''}>요약</button>
+              <button onClick={() => setTab('profile')} className={tab === 'profile' ? 'active' : ''}>회원 정보</button>
+            </div>
+            <div className="modal-body">{renderContent()}</div>
+          </div>
+        )}
+      </>
+
+
       {activeSection === 'email' && (
         <section className="board-section">
           <h2>AI 상담 기록 메일 전송</h2>
@@ -419,11 +491,11 @@ const App = () => {
 
       <footer className="footer">
         <strong>
-        <h4>Contact</h4><br/>
-        <h2>02-1234-5678</h2>
-        <h2>이메일 : help@mindbridge.ai</h2> <br/><br/><hr class="small-line"/><br/>
-        <h3>(주) 화재감지기</h3><br/> 
-        <h5>주소 : 서울특별시 종로구 종로12길 15 코아빌딩 5층</h5><br/></strong>
+          <h4>Contact</h4><br />
+          <h2>02-1234-5678</h2>
+          <h2>이메일 : help@mindbridge.ai</h2> <br /><br /><hr class="small-line" /><br />
+          <h3>(주) 화재감지기</h3><br />
+          <h5>주소 : 서울특별시 종로구 종로12길 15 코아빌딩 5층</h5><br /></strong>
       </footer>
     </div>
   );
@@ -431,7 +503,7 @@ const App = () => {
 
 const sectionLabels = {
   about: '소개',
-  services: '서비스',
+  services: '병원 목록',
   board: '게시판',
   chat: 'AI 상담',
   map: '회사 위치',

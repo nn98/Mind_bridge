@@ -46,9 +46,9 @@
 
 .dropdown-submenu {
   position: absolute;
-  top: 0; 
+  top: 0;
   left: 100%;
-  background: white;        
+  background: white;
   border: 1px solid #ddd;
   padding: 13px;
   min-width: 160px;
