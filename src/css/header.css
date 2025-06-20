@@ -58,9 +58,9 @@ hr.small-line {
   gap: 20px;
 }
 
-.floating-button {
-  background-color: #4a6fa5;
-  padding: 23px;
+.floating-button1 {
+  background-color: #5988ca;
+  padding: 25px;
   border-radius: 15px;
   box-shadow: 0 5px 9px rgba(0, 0, 0, 0.1);
   cursor: pointer;
