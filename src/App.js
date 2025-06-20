@@ -10,6 +10,8 @@ import '../src/css/login.css';
 import '../src/css/map.css';
 import '../src/css/small_translate.css';
 import '../src/css/FloatingChatButton.css';
+import Chat from './Chat.js';
+
 import '../src/css/selfTest.css';
 import '../src/css/result.css';
 
@@ -408,20 +410,8 @@ const App = () => {
   const renderContent = () => {
     switch (tab) {
       case 'chat':
-        return (
-          <div className="tab-content">
-            <h3>AI 상담 챗봇</h3>
-            <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
-            <input
-              type="text"
-              placeholder="메시지를 입력하세요..."
-              className="input-full"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-            />
-            <button className="button" onClick={() => alert(`입력한 메시지: ${chatInput}`)}>입력</button>
-          </div>
-        );
+        return <Chat />;
+        
       case 'summary':
         return (
           <div className="tab-content">
