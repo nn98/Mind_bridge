@@ -1,8 +1,8 @@
 package database;
 
 import static database.SimpleConnectionPool.connectionPool;
-import java.sql.*; // DB 연결, 쿼리, 결과 처리 등
-import java.util.ArrayList; // 리스트 만들기
+import java.sql.*;
+import java.util.ArrayList; // DB 연결, 쿼리, 결과 처리 등
 
 public class UserDAO {
 
@@ -23,7 +23,9 @@ public class UserDAO {
                         rs.getString("user_password"),
                         rs.getString("user_phone"),
                         rs.getString("user_gender"),
-                        rs.getString("user_address"));
+                        rs.getString("user_address"),
+                        rs.getString("user_email"),
+                        rs.getString("user_nickname"));
                 list.add(user);// 리스트에 넣기
             }
         } catch (Exception e) {
@@ -39,7 +41,7 @@ public class UserDAO {
 
         try {
             //사용자 아이디가 일치하는 데이터를 찾는 sql쿼리 준비
-            String sql = "SELECT * FROM user WHERE user_id = ?";
+            String sql = "SELECT * FROM users WHERE user_id = ?";
 
             //커넥션 풀에서 db연결을 가져오고 쿼리의 ?에 사용자의 아이디를 설정
             Connection conn = connectionPool.getConnection();
@@ -53,11 +55,13 @@ public class UserDAO {
             System.out.println("UserDAO.login: rsNext: " + rs);
 
             //비밀번호 일치 여부 확인 
-            //확인 시 추가 정보(전화번호,성별,주소)를 가져가 user 객체에 설정
+            //확인 시 추가 정보(전화번호,성별,주소,이메일,닉네임)를 가져가 user 객체에 설정
             if (user.checkPW(rs.getString("user_password"))) {
                 user.setUser_phone(rs.getString("user_phone"));
                 user.setUser_gender(rs.getString("user_gender"));
                 user.setUser_address(rs.getString("user_address"));
+                user.setUser_email(rs.getString("user_email"));
+                user.setUser_nickname(rs.getString("user_nickname"));
                 return user;
             }
         } catch (Exception e) {
@@ -67,13 +71,14 @@ public class UserDAO {
     }
 
     //============================회원가입(아이디/비번/성별/전화번호/성별/주소)
-    public boolean register(String user_id, String user_password, String user_phone, String user_gender, String user_address) {
+    public boolean register(String user_id, String user_password, 
+    String user_phone, String user_gender, String user_address,String user_email,String user_nickname) {
         int result = 0;
 
         try {
             //DB연결 
             //SQL 문 준비
-            String sql = "INSERT INTO user (user_id, user_password, user_phone, user_gender , user_address) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (user_id, user_password, user_phone, user_gender , user_address ,String user_email,String user_nickname) VALUES (?, ?, ?, ?, ? , ? , ?)";
             //커넥션 풀을 통해 connection 객체를 가져옴
             Connection conn = connectionPool.getConnection();
             //sql문 실행 준비(pstmt는 sql 실행용 객체)
@@ -85,6 +90,9 @@ public class UserDAO {
             pstmt.setString(3, user_phone);
             pstmt.setString(4, user_gender);
             pstmt.setString(5, user_address);
+            pstmt.setString(6, user_email);
+            pstmt.setString(7, user_nickname);
+
 
             //executeUpdate 는 insert , update , delete 쿼리 실행 시 사용 
             result = pstmt.executeUpdate();
@@ -130,8 +138,8 @@ public class UserDAO {
 
         try {
             //sql 작성 및 실행
-            //user 테이블에서 입력한 아이디(userid)가 존재하는지 검색
-            String sql = "SELECT user_id FROM user WHERE user_id=?";
+            //users 테이블에서 입력한 아이디(user_id)가 존재하는지 검색
+            String sql = "SELECT user_id FROM users WHERE user_id=?";
             PreparedStatement pstmt = connectionPool.getConnection().prepareStatement(sql);
             // ? 에 입력값을 바인딩하여 sql 인젝션 방지
             pstmt.setString(1, userid);
