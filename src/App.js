@@ -411,7 +411,7 @@ const App = () => {
     switch (tab) {
       case 'chat':
         return <Chat />;
-        
+
       case 'summary':
         return (
           <div className="tab-content">
@@ -630,14 +630,6 @@ const App = () => {
         </section>
       )}
 
-      {activeSection === 'chat' && (
-        <section className="chat-section">
-          <h2>AI 상담 챗봇</h2>
-          <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
-          <input type="text" placeholder="메시지를 입력하세요..." className="input-full" />
-        </section>
-      )}
-
       {activeSection === 'board' && (
         <section className="board-section">
           <h2>게시판</h2>
@@ -706,7 +698,7 @@ const App = () => {
               <li key={index} className="self-test-item">
                 <p>{index + 1}. {question}</p>
                 <div className="self-option-group">
-                  {['거의 없다', '가끔 있다', '자주 있다', '항상 있다'].map((option, i) => (
+                  {['거의 없다', '가끔그렇다', '자주그렇다', '거의매일그렇다'].map((option, i) => (
                     <label key={i} className="self-option">
                       <input
                         type="radio"
