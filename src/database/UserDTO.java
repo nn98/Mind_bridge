@@ -3,32 +3,40 @@ package database;
 
 public class UserDTO{
 
-    //(아이디/비번/성별/주소/전화번호)
+    //(아이디/비번/성별/주소/전화번호/이메일/닉네임)
     private String User_id;
     private String User_password;
-    private String User_phone;
     private String User_gender;
     private String User_address;
+    private String User_phone;
+    private String User_email;
+    private String User_nickname;
 
+    
     @Override
     public String toString() {
         return "UserDTO{" +
                 "User_id='" + User_id + '\'' +
                 ", User_password='" + User_password + '\'' +
-                ", User_phone='" + User_phone + '\'' +
                 ", User_gender='" + User_gender + '\'' +
                 ", User_address='" + User_address + '\'' +
+                ", User_phone='" + User_phone + '\'' +
+                ", User_email='" + User_email + '\'' +
+                ", User_nickname='" + User_nickname + '\'' +
                 '}';
     }
 
     //--------------------------------------------------------------
     //생성자
-    public UserDTO(String User_id, String User_password, String User_phone, String User_gender , String User_address) {
+    public UserDTO(String User_id, String User_password,String User_gender , 
+    String User_address ,String User_phone ,String User_email , String User_nickname ) {
         this.User_id = User_id;
         this.User_password = User_password;
         this.User_phone = User_phone;
         this.User_gender = User_gender;
         this.User_address = User_address;
+        this.User_email = User_email;
+        this.User_nickname = User_nickname;
     }
 
     //--------------------------------------------------------------
@@ -71,6 +79,22 @@ public class UserDTO{
 
     public void setUser_address(String User_address) {
         this.User_address = User_address;
+    }
+
+    public String getUser_email() {
+        return this.User_email;
+    }
+
+    public void setUser_email(String User_email) {
+        this.User_email = User_email;
+    }
+
+    public String getUser_nickname() {
+        return this.User_nickname;
+    }
+
+    public void setUser_nickname(String User_nickname) {
+        this.User_nickname = User_nickname;
     }
 
     

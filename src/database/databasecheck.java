@@ -29,15 +29,15 @@ public class databasecheck {
             ResultSet rs = stmt.executeQuery("SELECT * FROM users"); //다 가져오라는 쿼리(명령)
 
             databasecheck databasecheck = new databasecheck();
+        
+            //----자료생성실행
             //databasecheck.inputUser("test1", "kimkim@naver.com", "1234qwer!");
-
-            rs = stmt.executeQuery("SELECT * FROM users"); //다 가져오라는 쿼리(명령)
-            databasecheck.printUserData(rs);
-
-            //databasecheck.deleteUser("test2", "kimkim@naver.com", "1234qwer!");
-            
+            //----생성확인실행
             //rs = stmt.executeQuery("SELECT * FROM users"); //다 가져오라는 쿼리(명령)//
             //databasecheck.printUserData(rs);
+            //----삭제확인실행
+            //databasecheck.deleteUser("test1", "kimkim@naver.com", "1234qwer!");
+            
 
             rs.close(); //쿼리 결과를 담고있는 객체 rs 를 닫음
             stmt.close(); // sql 실행에 사용된 객체 stmt 를 닫음 
