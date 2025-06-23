@@ -18,12 +18,8 @@ public class UserDAO {
                 ) {
             // 4. 결과를 GpuDTO 객체로 변환
             while (rs.next()) {
-                String UserId = rs.getString("userid");
-                String UserName = rs.getString("phone");
-                String UserGender = rs.getString("gender");
-                String UserAddress = rs.getString("address");
-
-                UserDTO user = new UserDTO(rs.getString("user_id"),
+                UserDTO user = 
+                new UserDTO(rs.getString("user_id"),
                         rs.getString("user_password"),
                         rs.getString("user_phone"),
                         rs.getString("user_gender"),
@@ -106,28 +102,6 @@ public class UserDAO {
 
     }
 
-    //============================아이디 중복 확인
-    public boolean isUserIdExist(String userId) {
-        //사용자 테이블에서 해당 user_id가 존재하는지 확인하는 SQL
-        final String SQL = "SELECT * FROM user WHERE user_id = ?";
-
-        //커넥션 풀에서 db연결을 가져오고 sql 준비
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement(SQL)) {
-
-            //sql의 ? 자리에 사용자가 입력한 아이디를 설정
-            pstmt.setString(1, userId);
-
-            //쿼리를 실행하고 결과가 존재하는지 확인
-            //rs.next(); 가 true면 이미 db에 해당 아이디가 존재함
-            try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next();
-            }
-            //예외 발생 시 처리 
-        } catch (SQLException e) {
-            throw new RuntimeException("아이디 확인 실패", e);
-        }
-    }
-
     //============================유효비밀번호 생성조건
     public boolean isValidPassword(String pw) {
         //8자리 이하면 false
@@ -147,8 +121,8 @@ public class UserDAO {
 
     }
 
-    //===============================아이디 중복확인
-    public boolean IdCheck1(String userid) {
+    //============================아이디 중복 확인
+    public boolean IdCheck(String userid) {
 
         //기본값 (false로 설정)
         boolean result = false;
@@ -184,7 +158,103 @@ public class UserDAO {
         return result;
 
     }
+    
+    //==================아이디 찾기
+    public String findUserIdByPhone(String user_phone){
+        String userId = null;
+
+        String sql = "SELECT user_id From users WHERE user_phone = ? ";
+
+        try (Connection conn = connectionPool.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            
+                pstmt.setString(1,user_phone);
+                try(ResultSet rs = pstmt.executeQuery()){
+                    if(rs.next()){
+                        userId = rs.getString("user_id");
+                    }
+                }
+        } catch (Exception e) {
+           e.printStackTrace();
+        }
+
+        return userId; // null 뜨면 아디찾기 실패
+    }
+
+    //==================비밀번호 찾기
+     public String findPassword(String user_id , String user_phone){
+        String password = null;
+
+        String sql = "SELECT user_password FROM users WHERE user_id = ? AND user_phone = ? ";
+        try (
+            Connection conn = connectionPool.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+                pstmt.setString(1, user_id);
+                pstmt.setString(2, user_phone);
+                try(ResultSet rs = pstmt.executeQuery()){
+                    if(rs.next()){
+                        password = rs.getString("user_password");
+                    }
+                }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return password; //null 뜨면 비번 찾기 실패
+    }
 
     //===============================회원탈퇴
+    public boolean deleteUser(String user_id , String user_password)throws SQLException{
+        
+        String sql = "Delete FROM users WHERE user_id = ? AND user_password = ? ";
+        int result = 0;
+
+        try (Connection conn = connectionPool.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setString(1, user_id);
+            pstmt.setString(2, user_password);
+            
+            result = pstmt.executeUpdate(); //성공 시 1 반환
+
+            if(result > 0 ){
+                System.out.println("사용자 삭제 성공");
+                return true;
+            }else{
+                System.out.println("사용자 삭제 실패");
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return result == 1;
+    }
     
 }
+
+
+/*
+ * //============================아이디 중복 확인
+    public boolean isUserIdExist(String userId) {
+        //사용자 테이블에서 해당 user_id가 존재하는지 확인하는 SQL
+        final String SQL = "SELECT * FROM user WHERE user_id = ?";
+
+        //커넥션 풀에서 db연결을 가져오고 sql 준비
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            //sql의 ? 자리에 사용자가 입력한 아이디를 설정
+            pstmt.setString(1, userId);
+
+            //쿼리를 실행하고 결과가 존재하는지 확인
+            //rs.next(); 가 true면 이미 db에 해당 아이디가 존재함
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+            //예외 발생 시 처리 
+        } catch (SQLException e) {
+            throw new RuntimeException("아이디 확인 실패", e);
+        }
+    }
+ */
+    
