@@ -33,7 +33,33 @@ const App = () => {
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
-  
+  const [aiImage, setAiImage] = useState(null);     // 이미지 URL
+  const [showImageModal, setShowImageModal] = useState(false); // 모달 표시 여부
+
+
+
+  const heroImages = [
+    "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
+    "url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0')",
+    "url('https://images.unsplash.com/photo-1496307653780-42ee777d4833')",
+    "url('https://images.unsplash.com/photo-1500048993959-df997f1e0d94')"
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const heroStyle = {
+    backgroundImage: heroImages[currentImageIndex]
+  };
+
+
 
   const testQuestions = {
     '우울증': [
@@ -552,11 +578,27 @@ const App = () => {
 
       {activeSection === 'about' && (
         <>
-          <section className="hero">
+          <section className="hero" style={heroStyle}>
+            <div className="hero-radio-group">
+              {heroImages.map((_, index) => (
+                <label key={index} className="hero-radio-button">
+                  <input
+                    type="radio"
+                    name="heroSlider"
+                    checked={currentImageIndex === index}
+                    onChange={() => setCurrentImageIndex(index)}
+                    style={{ display: 'none' }}
+                  />
+                  <span className={`hero-radio-dot ${currentImageIndex === index ? 'active' : ''}`}>●</span>
+                </label>
+              ))}
+            </div>
+
             <h1><strong>당신의 마음을 이해하는</strong> AI Mind Bridge</h1>
             <p>감성 분석, AI 상담, 번역, 이미지 기반 소통까지 한 번에</p>
             <a href="#faq" className="cta" onClick={() => showSection('faq')}>자주 묻는 질문</a>
           </section>
+
 
           <section ref={introRef} className="section">
             <h2>회사 소개</h2>
@@ -646,6 +688,22 @@ const App = () => {
           <h2>AI 상담 챗봇</h2>
           <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
           <input type="text" placeholder="메시지를 입력하세요..." className="input-full" />
+          <button onClick={() => {
+            // 예시용 임시 이미지
+            const imageUrl = 'https://via.placeholder.com/300x200.png?text=AI+Image';
+            setAiImage(imageUrl);
+            setShowImageModal(true);
+          }}>
+            AI 이미지 생성
+          </button>
+          {showImageModal && (
+            <div className="modal-backdrop">
+              <div className="modal-box">
+                <button className="close-btn" onClick={() => setShowImageModal(false)}>✖</button>
+                <img src={aiImage} alt="AI 생성 이미지" className="generated-image" />
+              </div>
+            </div>
+          )}
         </section>
       )}
 
