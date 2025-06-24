@@ -29,6 +29,8 @@ const App = () => {
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
+  const [aiImage, setAiImage] = useState(null);     // 이미지 URL
+  const [showImageModal, setShowImageModal] = useState(false); // 모달 표시 여부
 
   const showSection = (id) => {
     setActiveSection(id);
@@ -115,7 +117,7 @@ const App = () => {
     switch (tab) {
       case 'chat':
         return <Chat />;
-        
+
       case 'summary':
         return (
           <div className="tab-content">
@@ -350,6 +352,22 @@ const App = () => {
           <h2>AI 상담 챗봇</h2>
           <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
           <input type="text" placeholder="메시지를 입력하세요..." className="input-full" />
+          <button onClick={() => {
+            // 예시용 임시 이미지
+            const imageUrl = 'https://via.placeholder.com/300x200.png?text=AI+Image';
+            setAiImage(imageUrl);
+            setShowImageModal(true);
+          }}>
+            AI 이미지 생성
+          </button>
+          {showImageModal && (
+            <div className="modal-backdrop">
+              <div className="modal-box">
+                <button className="close-btn" onClick={() => setShowImageModal(false)}>✖</button>
+                <img src={aiImage} alt="AI 생성 이미지" className="generated-image" />
+              </div>
+            </div>
+          )}
         </section>
       )}
 
