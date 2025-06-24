@@ -7,7 +7,9 @@
   padding-left: 0;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
@@ -19,7 +21,8 @@ html, body, #root {
 body {
   display: flex;
   flex-direction: column;
-  align-items: center; /* 중앙 정렬 */
+  align-items: center;
+  /* 중앙 정렬 */
 }
 
 /* Hero 영역을 정확히 뷰포트에 맞춤 */
@@ -71,4 +74,23 @@ body {
 
 .cta:hover {
   background-color: #3a5b88;
+}
+
+.hero-radio-group {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.hero-radio-button {
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.hero-radio-dot {
+  font-size: 1.5rem;
+  color: #ccc;
+}
+
+.hero-radio-dot.active {
+  color: white;
 }

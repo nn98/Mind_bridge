@@ -34,6 +34,29 @@ const App = () => {
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
 
+  const heroImages = [
+    "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
+    "url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0')",
+    "url('https://images.unsplash.com/photo-1496307653780-42ee777d4833')",
+    "url('https://images.unsplash.com/photo-1500048993959-df997f1e0d94')"
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const heroStyle = {
+    backgroundImage: heroImages[currentImageIndex]
+  };
+
+
+
   const testQuestions = {
     '우울증': [
       '평소보다 식욕이 없었다',
@@ -541,11 +564,27 @@ const App = () => {
 
       {activeSection === 'about' && (
         <>
-          <section className="hero">
+          <section className="hero" style={heroStyle}>
+            <div className="hero-radio-group">
+              {heroImages.map((_, index) => (
+                <label key={index} className="hero-radio-button">
+                  <input
+                    type="radio"
+                    name="heroSlider"
+                    checked={currentImageIndex === index}
+                    onChange={() => setCurrentImageIndex(index)}
+                    style={{ display: 'none' }}
+                  />
+                  <span className={`hero-radio-dot ${currentImageIndex === index ? 'active' : ''}`}>●</span>
+                </label>
+              ))}
+            </div>
+
             <h1><strong>당신의 마음을 이해하는</strong> AI Mind Bridge</h1>
             <p>감성 분석, AI 상담, 번역, 이미지 기반 소통까지 한 번에</p>
             <a href="#faq" className="cta" onClick={() => showSection('faq')}>자주 묻는 질문</a>
           </section>
+
 
           <section ref={introRef} className="section">
             <h2>회사 소개</h2>
