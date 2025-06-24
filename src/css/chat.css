@@ -15,6 +15,38 @@
   height: 445px;
   overflow-y: auto;
   margin-bottom: 1rem;
+  text-align: left;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+}
+
+.chat-message.ai {
+  align-items: flex-start;
+}
+
+.chat-message.user {
+  align-items: flex-end;
+}
+.chat-message.user .message-text {
+  background-color: #5988ca;
+  color: white;
+}
+
+.sender-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.message-text {
+  background-color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  max-width: 80%;
 }
 
 .input-full {
