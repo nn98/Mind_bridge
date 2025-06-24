@@ -50,7 +50,7 @@ hr.small-line {
 /* 사이드바 */
 .floating-sidebar {
   position: fixed;
-  top: 50%;
+  top: 35%;
   right: 20px;
   z-index: 1000;
   display: flex;
@@ -74,4 +74,5 @@ hr.small-line {
 .floating-button:hover {
   background-color: #2c5083;
 }
+
 

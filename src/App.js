@@ -33,6 +33,10 @@ const App = () => {
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
+  const [aiImage, setAiImage] = useState(null);     // 이미지 URL
+  const [showImageModal, setShowImageModal] = useState(false); // 모달 표시 여부
+
+
 
   const heroImages = [
     "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
@@ -559,7 +563,17 @@ const App = () => {
       <div className="floating-sidebar">
         <div className="floating-button1" onClick={() => alert('도움말')}>?</div>
         <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
-        <div className="floating-button1" onClick={handleScrollToTop}>TOP</div>
+        <div className="floating-button1" onClick={handleScrollToTop}><svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          fill="currentColor"
+          className="bi bi-chevron-bar-up"
+          viewBox="0 0 16 16">
+          <path
+            fillRule="evenodd"
+            d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4" />
+        </svg></div>
       </div>
 
       {activeSection === 'about' && (
@@ -664,6 +678,30 @@ const App = () => {
               {formLinks[activeSection].map(({ label, id }) => (
                 <a key={id} href="#" onClick={() => showSection(id)}>{label}</a>
               ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {activeSection === 'chat' && (
+        <section className="chat-section">
+          <h2>AI 상담 챗봇</h2>
+          <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
+          <input type="text" placeholder="메시지를 입력하세요..." className="input-full" />
+          <button onClick={() => {
+            // 예시용 임시 이미지
+            const imageUrl = 'https://via.placeholder.com/300x200.png?text=AI+Image';
+            setAiImage(imageUrl);
+            setShowImageModal(true);
+          }}>
+            AI 이미지 생성
+          </button>
+          {showImageModal && (
+            <div className="modal-backdrop">
+              <div className="modal-box">
+                <button className="close-btn" onClick={() => setShowImageModal(false)}>✖</button>
+                <img src={aiImage} alt="AI 생성 이미지" className="generated-image" />
+              </div>
             </div>
           )}
         </section>
@@ -780,8 +818,8 @@ const App = () => {
       )}
 
 
-      <>
-        <div className="floating-button" onClick={() => setIsOpen(true)}>버튼</div>
+      <>{!isOpen && (
+        <div className="floating-button" onClick={(e) => setIsOpen(true)}>버튼</div>)}
         {isOpen && (
           <div className="modal-container">
             <div className="modal-header">

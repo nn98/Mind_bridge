@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+
 const questionOrder = [
   '이름을 입력해주세요.',
   '성별을 입력해주세요.',
@@ -186,6 +187,7 @@ const Chat = () => {
         입력
       </button>
     </div>
+    
   );
 };
 
