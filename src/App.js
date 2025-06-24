@@ -11,7 +11,7 @@ import '../src/css/map.css';
 import '../src/css/small_translate.css';
 import '../src/css/FloatingChatButton.css';
 import Chat from './Chat.js';
-
+import Picture from './Picture.js';
 import '../src/css/selfTest.css';
 import '../src/css/result.css';
 
