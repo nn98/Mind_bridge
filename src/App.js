@@ -11,7 +11,7 @@ import '../src/css/map.css';
 import '../src/css/small_translate.css';
 import '../src/css/FloatingChatButton.css';
 import Chat from './Chat.js';
-
+import Picture from './Picture.js';
 import '../src/css/selfTest.css';
 import '../src/css/result.css';
 
@@ -33,6 +33,10 @@ const App = () => {
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
+  const [aiImage, setAiImage] = useState(null);     // 이미지 URL
+  const [showImageModal, setShowImageModal] = useState(false); // 모달 표시 여부
+
+
 
   const heroImages = [
     "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
@@ -559,7 +563,17 @@ const App = () => {
       <div className="floating-sidebar">
         <div className="floating-button1" onClick={() => alert('도움말')}>?</div>
         <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
-        <div className="floating-button1" onClick={handleScrollToTop}>TOP</div>
+        <div className="floating-button1" onClick={handleScrollToTop}><svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          fill="currentColor"
+          className="bi bi-chevron-bar-up"
+          viewBox="0 0 16 16">
+          <path
+            fillRule="evenodd"
+            d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4" />
+        </svg></div>
       </div>
 
       {activeSection === 'about' && (
@@ -666,6 +680,12 @@ const App = () => {
               ))}
             </div>
           )}
+        </section>
+      )}
+
+      {activeSection === 'chat' && (
+        <section className="chat-section">
+          <Picture />;
         </section>
       )}
 
@@ -780,8 +800,8 @@ const App = () => {
       )}
 
 
-      <>
-        <div className="floating-button" onClick={() => setIsOpen(true)}>버튼</div>
+      <>{!isOpen && (
+        <div className="floating-button" onClick={(e) => setIsOpen(true)}>버튼</div>)}
         {isOpen && (
           <div className="modal-container">
             <div className="modal-header">
