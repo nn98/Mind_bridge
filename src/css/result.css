@@ -1,0 +1,40 @@
+.result-card {
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fffdf6;
+  margin-top: 2rem;
+}
+
+.result-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.result-subtitle {
+  font-size: 1.2rem;
+  color: #5988ca;
+  margin-bottom: 1rem;
+}
+
+.result-description {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  white-space: pre-line; /* ← JSX에서 인라인으로 쓰던 것 반영 */
+}
+
+.result-category-block {
+  margin-bottom: 1.5rem;
+}
+
+.result-category-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.recommendation-list {
+  padding-left: 1.2rem;
+  margin: 0;
+}

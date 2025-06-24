@@ -1,0 +1,112 @@
+.form-section2 {
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.form-title {
+  background-color: #fff8c6;
+  display: inline-block;
+  padding: 0.3em 0.6em;
+}
+
+.test-type-selector {
+  display: flex;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.test-type-option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-right: 1px solid #ddd;
+  color: black;
+}
+
+.test-type-option:last-child {
+  border-right: none;
+}
+
+.test-type-option.active {
+  color: #5988ca;
+  font-weight: bold;
+}
+
+.test-subtitle {
+  color: #5988ca;
+  margin-top: 2rem;
+}
+
+.self-test-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.self-test-item {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem 0;
+}
+
+.self-option-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.self-option {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+}
+
+.button {
+  background-color: #5988ca;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  margin-right: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #5988ca;
+}
+
+.result-card {
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fffdf6;
+  margin-top: 2rem;
+}
+
+.result-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.result-subtitle {
+  font-size: 1.2rem;
+  color: #5988ca;
+  margin-bottom: 1rem;
+}
+
+.result-description {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  white-space: pre-line;
+}
+
+.recommendation-list {
+  padding-left: 1.2rem;
+  margin: 0;
+}

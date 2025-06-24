@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const questionOrder = [
   '이름을 입력해주세요.',
@@ -32,6 +32,13 @@ function Chat() {
   const [chatHistory, setChatHistory] = useState([
     { sender: 'ai', message: questionOrder[0] }
   ]);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory, isTyping]);
 
   const handleSubmit = async () => {
     if (!chatInput.trim()) return;
@@ -42,13 +49,15 @@ function Chat() {
     setChatHistory(prev => [...prev, { sender: 'user', message: chatInput }]);
     setForm(prev => ({ ...prev, [currentKey]: updatedValue }));
     setChatInput('');
+    setIsTyping(true);
 
     if (step < fieldKeys.length - 1) {
       const nextQuestion = questionOrder[step + 1];
       setTimeout(() => {
         setChatHistory(prev => [...prev, { sender: 'ai', message: nextQuestion }]);
         setStep(prev => prev + 1);
-      }, 500);
+        setIsTyping(false);
+      }, 700);
     } else {
       await sendToBackend({ ...form, [currentKey]: updatedValue });
     }
@@ -80,7 +89,9 @@ function Chat() {
       ]);
     } catch (error) {
       setChatHistory(prev => [...prev, { sender: 'ai', message: '서버 오류가 발생했습니다.' }]);
-      console.log(error);
+      console.error(error);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -89,17 +100,16 @@ function Chat() {
       <h3>AI 상담 챗봇</h3>
       <div className="chat-box">
         {chatHistory.map((msg, i) => (
-          <div
-            key={i}
-            className={`chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`}
-          >
-            {/* 이름은 AI만 표시 */}
-            {msg.sender === 'ai' && <div className="sender-name">AI</div>}
-            {msg.sender === 'user' && <div className="sender-name-user"></div>}
-            <div className="message-text">{msg.message}</div>
+          <div key={i} className={`bubble ${msg.sender}`}>
+            {msg.message}
           </div>
         ))}
+        {chatInput.trim() && (
+          <div className="bubble user typing">입력 중...</div>
+        )}
+        <div ref={chatEndRef} />
       </div>
+
       <input
         type="text"
         placeholder="메시지를 입력하세요..."
@@ -110,6 +120,7 @@ function Chat() {
       />
       <button className="button" onClick={handleSubmit}>입력</button>
     </div>
+    
   );
 }
 
