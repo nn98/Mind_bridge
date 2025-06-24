@@ -14,7 +14,7 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const API_KEY = '';
+const API_KEY = ''; //키값 넣기
 
 const Chat = () => {
   const [step, setStep] = useState(0);
@@ -146,7 +146,7 @@ const Chat = () => {
       ];
 
       if (result.세션_종료) {
-        botMessages.push('세션이 종료되었습니다. 감사합니다.');
+        botMessages.push('상담이 종료되었습니다. 감사합니다.');
       }
 
       setChatHistory(prev => [

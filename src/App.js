@@ -685,25 +685,7 @@ const App = () => {
 
       {activeSection === 'chat' && (
         <section className="chat-section">
-          <h2>AI 상담 챗봇</h2>
-          <div className="chat-box"><p><strong>AI:</strong> 안녕하세요 어떤 고민이 있으신가요?</p></div>
-          <input type="text" placeholder="메시지를 입력하세요..." className="input-full" />
-          <button onClick={() => {
-            // 예시용 임시 이미지
-            const imageUrl = 'https://via.placeholder.com/300x200.png?text=AI+Image';
-            setAiImage(imageUrl);
-            setShowImageModal(true);
-          }}>
-            AI 이미지 생성
-          </button>
-          {showImageModal && (
-            <div className="modal-backdrop">
-              <div className="modal-box">
-                <button className="close-btn" onClick={() => setShowImageModal(false)}>✖</button>
-                <img src={aiImage} alt="AI 생성 이미지" className="generated-image" />
-              </div>
-            </div>
-          )}
+          <Picture />;
         </section>
       )}
 
