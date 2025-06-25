@@ -4,6 +4,7 @@ import static database.SimpleConnectionPool.connectionPool;
 import java.sql.*;
 import java.util.ArrayList; // DB 연결, 쿼리, 결과 처리 등
 
+
 public class UserDAO {
 
     //============================유저전체목록 가져오기============================
@@ -13,19 +14,19 @@ public class UserDAO {
         try (
                 // 3. SQL 실행 & 결과 처리
                 Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM user"); // SQL 실행을 준비하는 PreparedStatement
-                // 생성 ("GPU 테이블 전체 조회" 쿼리 준비)
+                // 생성 (쿼리 준비)
                  ResultSet rs = pstmt.executeQuery() // 결과는 rs (ResultSet)에 담김
                 ) {
             // 4. 결과를 GpuDTO 객체로 변환
             while (rs.next()) {
                 UserDTO user = 
                 new UserDTO(rs.getString("user_id"),
-                        rs.getString("user_password"),
-                        rs.getString("user_phone"),
-                        rs.getString("user_gender"),
-                        rs.getString("user_address"),
                         rs.getString("user_email"),
-                        rs.getString("user_nickname"));
+                        rs.getString("user_password"),
+                        rs.getString("user_phone")
+                        );
+                        
+                        
                 list.add(user);// 리스트에 넣기
             }
         } catch (Exception e) {
@@ -46,7 +47,7 @@ public class UserDAO {
             //커넥션 풀에서 db연결을 가져오고 쿼리의 ?에 사용자의 아이디를 설정
             Connection conn = connectionPool.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, user.getUser_id());
+            pstmt.setString(1, user.getUserId());
 
             //쿼리를 실행하여 결과(ResultSet)를 받음
             ResultSet rs = pstmt.executeQuery();
@@ -57,11 +58,8 @@ public class UserDAO {
             //비밀번호 일치 여부 확인 
             //확인 시 추가 정보(전화번호,성별,주소,이메일,닉네임)를 가져가 user 객체에 설정
             if (user.checkPW(rs.getString("user_password"))) {
-                user.setUser_phone(rs.getString("user_phone"));
-                user.setUser_gender(rs.getString("user_gender"));
-                user.setUser_address(rs.getString("user_address"));
-                user.setUser_email(rs.getString("user_email"));
-                user.setUser_nickname(rs.getString("user_nickname"));
+                user.setUserPhone(rs.getString("user_phone"));
+                user.setUserEmail(rs.getString("user_email"));
                 return user;
             }
         } catch (Exception e) {
@@ -71,14 +69,13 @@ public class UserDAO {
     }
 
     //============================회원가입(아이디/비번/성별/전화번호/성별/주소)
-    public boolean register(String user_id, String user_password, 
-    String user_phone, String user_gender, String user_address,String user_email,String user_nickname) {
+    public boolean register(String user_id, String user_password,String user_phone, String user_email) {
         int result = 0;
 
         try {
             //DB연결 
             //SQL 문 준비
-            String sql = "INSERT INTO users (user_id, user_password, user_phone, user_gender , user_address ,String user_email,String user_nickname) VALUES (?, ?, ?, ?, ? , ? , ?)";
+            String sql = "INSERT INTO users (user_id, user_email , user_password, user_phone) VALUES (?, ?, ?, ?)";
             //커넥션 풀을 통해 connection 객체를 가져옴
             Connection conn = connectionPool.getConnection();
             //sql문 실행 준비(pstmt는 sql 실행용 객체)
@@ -86,12 +83,9 @@ public class UserDAO {
 
             // ? 에 값 넣기
             pstmt.setString(1, user_id);
-            pstmt.setString(2, user_password);
-            pstmt.setString(3, user_phone);
-            pstmt.setString(4, user_gender);
-            pstmt.setString(5, user_address);
-            pstmt.setString(6, user_email);
-            pstmt.setString(7, user_nickname);
+            pstmt.setString(2, user_email);
+            pstmt.setString(3, user_password);
+            pstmt.setString(4, user_phone);
 
 
             //executeUpdate 는 insert , update , delete 쿼리 실행 시 사용 

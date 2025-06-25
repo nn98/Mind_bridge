@@ -3,105 +3,93 @@ package database;
 
 public class UserDTO{
 
-    //(아이디/비번/성별/주소/전화번호/이메일/닉네임)
-    private String User_id;
-    private String User_password;
-    private String User_gender;
-    private String User_address;
-    private String User_phone;
-    private String User_email;
-    private String User_nickname;
+
+    //-----------------내부 enum 선언
+    public enum UserStatus {
+        ACTIVE, INACTIVE, BANNED
+    }
+
+    public enum UserRole {
+        USER, ADMIN, COUNSELOR
+    }
+
+    public enum UserMentalState {
+        MELANCHOLIA,
+        ANXIETY_DISORDER,
+        ADHD,
+        GAME_ADDICTION,
+        OPPOSITIONAL_DEFIANT_DISORDER
+    }
+    
+    //(아이디/이메일/비번/닉네임/가입일/프로필이미지/상태/권한/유저정신상태)
+    private String userId;
+    private String userEmail;
+    private String userPassword;
+    private String userPhone;
+    
+
+    //private UserStatus User_status;
+    //private UserRole User_role;
+    //private UserMentalState User_mental_state;
 
     
     @Override
     public String toString() {
         return "UserDTO{" +
-                "User_id='" + User_id + '\'' +
-                ", User_password='" + User_password + '\'' +
-                ", User_gender='" + User_gender + '\'' +
-                ", User_address='" + User_address + '\'' +
-                ", User_phone='" + User_phone + '\'' +
-                ", User_email='" + User_email + '\'' +
-                ", User_nickname='" + User_nickname + '\'' +
+                "user_id='" + userId + '\'' +
+                ", user_email='" + userEmail + '\'' +
+                ", user_password='" + userPassword + '\'' +
+                ", user_phone='" + userPhone + '\'' +
                 '}';
     }
 
     //--------------------------------------------------------------
     //생성자
-    public UserDTO(String User_id, String User_password,String User_gender , 
-    String User_address ,String User_phone ,String User_email , String User_nickname ) {
-        this.User_id = User_id;
-        this.User_password = User_password;
-        this.User_phone = User_phone;
-        this.User_gender = User_gender;
-        this.User_address = User_address;
-        this.User_email = User_email;
-        this.User_nickname = User_nickname;
+    public UserDTO(String User_id , String User_email , String User_password , String User_phone ) {
+        this.userId = User_id;
+        this.userEmail = User_email;
+        this.userPassword = User_password;
+        this.userPhone = User_phone;
     }
 
-    //--------------------------------------------------------------
+    //---------getter setter-----------------------------------------------------
 
-    public String getUser_id() {
-        return User_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(String User_id) {
-        this.User_id = User_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getUser_password() {
-        return User_password;
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public void setUser_password(String User_password) {
-        this.User_password = User_password;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
-    public String getUser_phone() {
-        return User_phone;
+    public String getUserPassword() {
+        return userPassword;
     }
 
-    public void setUser_phone(String User_phone) {
-        this.User_phone = User_phone;
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
     }
 
-    public String getUser_gender() {
-        return User_gender;
+    public String getUserPhone() {
+        return userPhone;
     }
 
-    public void setUser_gender(String User_gender) {
-        this.User_gender = User_gender;
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
     }
-
-    public String getUser_address() {
-        return User_address;
-    }
-
-    public void setUser_address(String User_address) {
-        this.User_address = User_address;
-    }
-
-    public String getUser_email() {
-        return this.User_email;
-    }
-
-    public void setUser_email(String User_email) {
-        this.User_email = User_email;
-    }
-
-    public String getUser_nickname() {
-        return this.User_nickname;
-    }
-
-    public void setUser_nickname(String User_nickname) {
-        this.User_nickname = User_nickname;
-    }
-
+    
     
     //비밀번호 확인 
-    public boolean checkPW(String user_password){
-        return this.User_password.equals(user_password);
+    public boolean checkPW(String userPassword){
+        return this.userPassword.equals(userPassword);
     }
-
 
 }
