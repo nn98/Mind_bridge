@@ -45,11 +45,11 @@ public class UserDTO{
 
     //--------------------------------------------------------------
     //생성자
-    public UserDTO(String User_id , String User_email , String User_password , String User_phone ) {
-        this.userId = User_id;
-        this.userEmail = User_email;
-        this.userPassword = User_password;
-        this.userPhone = User_phone;
+    public UserDTO(String userId , String userEmail , String userPassword , String userPhone ) {
+        this.userId = userId;
+        this.userEmail = userEmail;
+        this.userPassword = userPassword;
+        this.userPhone = userPhone;
     }
 
     //---------getter setter-----------------------------------------------------

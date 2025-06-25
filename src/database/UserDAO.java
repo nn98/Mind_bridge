@@ -4,7 +4,6 @@ import static database.SimpleConnectionPool.connectionPool;
 import java.sql.*;
 import java.util.ArrayList; // DB 연결, 쿼리, 결과 처리 등
 
-
 public class UserDAO {
 
     //============================유저전체목록 가져오기============================
@@ -13,20 +12,19 @@ public class UserDAO {
 
         try (
                 // 3. SQL 실행 & 결과 처리
-                Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM user"); // SQL 실행을 준비하는 PreparedStatement
+                Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM users"); // SQL 실행을 준비하는 PreparedStatement
                 // 생성 (쿼리 준비)
                  ResultSet rs = pstmt.executeQuery() // 결과는 rs (ResultSet)에 담김
                 ) {
             // 4. 결과를 GpuDTO 객체로 변환
             while (rs.next()) {
-                UserDTO user = 
-                new UserDTO(rs.getString("user_id"),
-                        rs.getString("user_email"),
-                        rs.getString("user_password"),
-                        rs.getString("user_phone")
+                UserDTO user
+                        = new UserDTO(rs.getString("user_id"),
+                                rs.getString("user_email"),
+                                rs.getString("user_password"),
+                                rs.getString("user_phone")
                         );
-                        
-                        
+
                 list.add(user);// 리스트에 넣기
             }
         } catch (Exception e) {
@@ -69,7 +67,7 @@ public class UserDAO {
     }
 
     //============================회원가입(아이디/비번/성별/전화번호/성별/주소)
-    public boolean register(String user_id, String user_password,String user_phone, String user_email) {
+    public boolean register(String user_id, String user_password, String user_phone, String user_email) {
         int result = 0;
 
         try {
@@ -87,15 +85,14 @@ public class UserDAO {
             pstmt.setString(3, user_password);
             pstmt.setString(4, user_phone);
 
-
             //executeUpdate 는 insert , update , delete 쿼리 실행 시 사용 
             result = pstmt.executeUpdate();
 
             // 자원 정리
             //pstmt 와 connection을 정리하여 리소스 누수 방지
-            pstmt.close();
-            conn.close();
-            connectionPool.releaseConnection(conn);
+            //pstmt.close();
+            //conn.close();
+            //connectionPool.releaseConnection(conn);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +126,6 @@ public class UserDAO {
         //기본값 (false로 설정)
         boolean result = false;
 
-
         try {
             //sql 작성 및 실행
             //users 테이블에서 입력한 아이디(user_id)가 존재하는지 검색
@@ -160,44 +156,42 @@ public class UserDAO {
         return result;
 
     }
-    
+
     //==================아이디 찾기
-    public String findUserIdByPhone(String user_phone){
+    public String findUserIdByPhone(String user_phone) {
         String userId = null;
 
         String sql = "SELECT user_id From users WHERE user_phone = ? ";
 
-        try (Connection conn = connectionPool.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
-            
-                pstmt.setString(1,user_phone);
-                try(ResultSet rs = pstmt.executeQuery()){
-                    if(rs.next()){
-                        userId = rs.getString("user_id");
-                    }
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, user_phone);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    userId = rs.getString("user_id");
                 }
+            }
         } catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
 
         return userId; // null 뜨면 아디찾기 실패
     }
 
     //==================비밀번호 찾기
-     public String findPassword(String user_id , String user_phone){
+    public String findPassword(String user_id, String user_phone) {
         String password = null;
 
         String sql = "SELECT user_password FROM users WHERE user_id = ? AND user_phone = ? ";
         try (
-            Connection conn = connectionPool.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
-                pstmt.setString(1, user_id);
-                pstmt.setString(2, user_phone);
-                try(ResultSet rs = pstmt.executeQuery()){
-                    if(rs.next()){
-                        password = rs.getString("user_password");
-                    }
+                Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, user_id);
+            pstmt.setString(2, user_phone);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    password = rs.getString("user_password");
                 }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -206,33 +200,31 @@ public class UserDAO {
     }
 
     //===============================회원탈퇴
-    public boolean deleteUser(String user_id , String user_password)throws SQLException{
-        
+    public boolean deleteUser(String user_id, String user_password) throws SQLException {
+
         String sql = "Delete FROM users WHERE user_id = ? AND user_password = ? ";
         int result = 0;
 
-        try (Connection conn = connectionPool.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql))
-        {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user_id);
             pstmt.setString(2, user_password);
-            
+
             result = pstmt.executeUpdate(); //성공 시 1 반환
 
-            if(result > 0 ){
+            if (result > 0) {
                 System.out.println("사용자 삭제 성공");
                 return true;
-            }else{
+            } else {
                 System.out.println("사용자 삭제 실패");
                 return false;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return result == 1;
     }
-    
+
 }
 
 
@@ -259,4 +251,3 @@ public class UserDAO {
         }
     }
  */
-    
