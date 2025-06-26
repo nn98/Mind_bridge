@@ -62,7 +62,7 @@ body {
 /* CTA 버튼 */
 .cta {
   display: inline-block;
-  background-color: #4a6fa5;
+  background-color: #000000;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -75,23 +75,3 @@ body {
 .cta:hover {
   background-color: #3a5b88;
 }
-
-.hero-radio-group {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.hero-radio-button {
-  margin: 0 6px;
-  cursor: pointer;
-}
-
-.hero-radio-dot {
-  font-size: 1.5rem;
-  color: #ccc;
-}
-
-.hero-radio-dot.active {
-  color: white;
-}
-
