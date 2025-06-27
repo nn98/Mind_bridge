@@ -33,7 +33,7 @@ const Header = ({
             style={{ cursor: 'pointer' }}
           />
         </div>
-        
+
         <div
           className="nav-center"
           onMouseLeave={(e) => {
@@ -92,7 +92,7 @@ const Header = ({
                             >
                               {item === '상담' && (
                                 <>
-                                  <div className="dropdown-item" onClick={() => showSection('chat')}>AI 상담</div>
+                                  <div className="dropdown-item" onClick={() => showSection('img')}>이미지</div>
                                   <div className="dropdown-item" onClick={() => showSection('email')}>메일</div>
                                 </>
                               )}

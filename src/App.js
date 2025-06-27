@@ -15,8 +15,6 @@ import './css/result.css';
 import './css/banner.css';
 
 import Header from './components/Header';
-import BannerSlider from './components/BannerSlider';
-import Chat from './Chat.js';
 import Picture from './Picture.js';
 import SelfTest from './components/SelfTest';
 import BoardSection from './components/BoardSection';
@@ -170,14 +168,8 @@ const App = () => {
         />
       )}
 
-      {activeSection === 'chat' && (
-        <section className="chat-section">
-          <Picture />
-        </section>
-      )}
-
-      {activeSection === 'image' && (
-        <section className="image-section">
+      {activeSection === 'img' && (
+        <section className="img-section">
           <Picture />
         </section>
       )}
@@ -201,7 +193,7 @@ const App = () => {
         />
       )}
 
-      {activeSection !== 'image' && (
+      {activeSection !== 'chat' && (
         <ChatModal
           isOpen={isOpen}
           setIsOpen={setIsOpen}

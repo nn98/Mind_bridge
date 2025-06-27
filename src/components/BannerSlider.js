@@ -1,4 +1,3 @@
-// components/BannerSlider.js
 import React, { useRef, useState, useEffect } from 'react';
 
 const BannerSlider = () => {
