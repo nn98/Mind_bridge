@@ -168,8 +168,14 @@ const App = () => {
         />
       )}
 
-      {activeSection === 'img' && (
-        <section className="img-section">
+      {activeSection === 'chat' && (
+        <section className="chat-section">
+          <Picture />
+        </section>
+      )}
+
+      {activeSection === 'image' && (
+        <section className="image-section">
           <Picture />
         </section>
       )}

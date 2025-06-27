@@ -24,6 +24,11 @@
         text-decoration: none;
     }
 
+    @media (max-width: 768px){
+        .banner-container{
+            height: 300px;
+        }
+    }
     .banner-slides img {
         width: 100%;
         height: 400px;

@@ -29,6 +29,7 @@ const Chat = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isTyping]);
+  const inputRef = useRef(null);
 
   const handleSubmit = async () => {
     if (!chatInput.trim()) return;
@@ -39,6 +40,8 @@ const Chat = () => {
     setChatHistory(prev => [...prev, { sender: 'user', message: chatInput }]);
     setForm(prev => ({ ...prev, [currentKey]: updatedValue }));
     setChatInput('');
+    inputRef.current?.focus();
+
     setIsTyping(true);
 
     if (step < fieldKeys.length - 1) {
@@ -155,13 +158,19 @@ const Chat = () => {
       </div>
 
       <input
+        ref={inputRef}
         type="text"
         placeholder="메시지를 입력하세요..."
         className="input-full"
         value={chatInput}
         onChange={(e) => setChatInput(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-        disabled={isTyping}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // ✅ Enter 줄바꿈 방지
+            handleSubmit();     // ✅ 전송 실행
+          }
+        }}
+        readOnly={isTyping}
       />
       <button className="button" onClick={handleSubmit} disabled={isTyping}>
         입력
