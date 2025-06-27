@@ -43,10 +43,10 @@ const BannerSlider = () => {
     <div className="banner-container">
       <div className="banner-slides" ref={slidesRef}>
         <a href="#">
-          <img src="/main.png" alt="마음건강전용구역 헬로스마일" />
+          <img src="/main.png" alt="마인드브릿지 설명 배너" />
         </a>
         <a href="#">
-          <img src="http://hellosmile.kr/main/slideshow/main_banner05.png" alt="소비자선정 최고의브랜드 대상" />
+          <img src="/main2.png" alt="자가진단" />
         </a>
         <a href="https://hellosmile.kr/bbs/board.php?bo_table=15" target="_blank" rel="noopener noreferrer">
           <img src="http://hellosmile.kr/main/slideshow/main_banner01.png" alt="헬로스마일 in TV" />
