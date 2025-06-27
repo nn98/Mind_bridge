@@ -2,27 +2,25 @@
     position: fixed;
     bottom: 80px;
     right: 90px;
-    background: #7db7aa;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
     font-size: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+    background-color: transparent;
+}
+
+.floating-button:hover {
+    background-color: transparent;
 }
 
 
 .modal-container {
     position: fixed;
-    bottom: 150px;
+    bottom: 180px;
     right: 150px;
     width: 380px;
-    height: 700px;
+    height: 630px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
@@ -30,19 +28,23 @@
     flex-direction: column;
     overflow: hidden;
     z-index: 1000;
-    
 }
 
-.modal-header {
-    padding: 10px;
-    text-align: right;
-}
+
 
 .close-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
+    position: absolute;
+    top: 790px;
+    right: 100px;
+    background: white;
+    border: 2px solid #acacac;
+    border-radius: 18px;
+    font-size: 30px;
+    width: 70px;
+    height: 70px;
     cursor: pointer;
+    z-index: 1000;
+    box-shadow: 10px 8px 6px rgba(0, 0, 0, 0.2);
 }
 
 .modal-tabs {

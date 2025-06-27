@@ -46,19 +46,34 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
     }
   };
 
-  if (!isOpen) return <div className="floating-button" onClick={() => setIsOpen(true)}>버튼</div>;
+  if (!isOpen)
+    return (
+      <div
+        className="floating-button"
+        onClick={() => setIsOpen(true)}
+      >
+        <img
+          src="/채팅상담.png"
+          alt="채팅 아이콘"
+          style={{
+            width: '100px',
+            height: '100px'
+          }}
+        />
+      </div>
+    );
 
   return (
-    <div className="modal-container">
-      <div className="modal-header">
-        <button onClick={() => setIsOpen(false)} className="close-btn">✖</button>
+    <div className="modal-wrapper">
+      <button onClick={() => setIsOpen(false)} className="close-btn">✖</button>
+      <div className="modal-container">
+        <div className="modal-tabs">
+          <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
+          <button onClick={() => setTab('summary')} className={tab === 'summary' ? 'active' : ''}>요약</button>
+          <button onClick={() => setTab('profile')} className={tab === 'profile' ? 'active' : ''}>회원 정보</button>
+        </div>
+        <div className="modal-body">{renderContent()}</div>
       </div>
-      <div className="modal-tabs">
-        <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
-        <button onClick={() => setTab('summary')} className={tab === 'summary' ? 'active' : ''}>요약</button>
-        <button onClick={() => setTab('profile')} className={tab === 'profile' ? 'active' : ''}>회원 정보</button>
-      </div>
-      <div className="modal-body">{renderContent()}</div>
     </div>
   );
 };
