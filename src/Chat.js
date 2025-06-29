@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-
+const apiKey = process.env.REACT_APP_API_KEY;
+const apiAddress = process.env.REACT_APP_API_CHAT_ADDRESS;
 
 const questionOrder = [
   '이름을 입력해주세요.',
@@ -14,7 +15,7 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const API_KEY = ''; //키값 넣기
+const API_KEY = `${apiKey}`; //키값 넣기
 
 const Chat = () => {
   const [step, setStep] = useState(0);
@@ -87,7 +88,7 @@ const Chat = () => {
   `  ;
 
     try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      const res = await fetch(`${apiAddress}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

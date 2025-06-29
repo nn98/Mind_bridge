@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 
+const apiKey = process.env.REACT_APP_API_KEY;
+const apiAddress = process.env.REACT_APP_API_PICTURE_ADDRESS;
+
+
 const promptTemplate = `
 쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 $Picture 일러스트입니다.  
     1. 그림은 $Picture 에서 요구하는 사항을 우선시 하며 가장 중요한 것은 감정이 보여야 한다.
@@ -22,11 +26,11 @@ function App() {
       const finalPrompt = promptTemplate.replace(/\$Picture/g, userInput.trim() || 'dog');
 
       // OpenAI API 직접 호출
-      const res = await fetch('https://api.openai.com/v1/images/generations', {
+      const res = await fetch(`${apiAddress}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer `, // Bearer 옆에 키값 넣기
+          'Authorization': `Bearer ${apiKey}`, // Bearer 옆에 키값 넣기
         },
         body: JSON.stringify({
           model: 'dall-e-3',
