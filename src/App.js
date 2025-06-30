@@ -1,9 +1,6 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from 'react-router-dom';
 import React, { useState, useRef } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+
 import './css/App.css';
 import './css/board.css';
 import './css/chat.css';
@@ -54,6 +51,8 @@ const App = () => {
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
 
+  const navigate = useNavigate();
+
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
     try {
@@ -63,7 +62,7 @@ const App = () => {
         setHoveredMenu(null);
         setSubMenuVisible(null);
       }
-    } catch (error) {
+    } catch {
       setHoveredMenu(null);
       setSubMenuVisible(null);
     }
@@ -75,10 +74,25 @@ const App = () => {
       return;
     }
     setSelectedBoard(value);
+    navigate('/board');
+  };
+
+  const showSection = (section) => {
+    const routes = {
+      about: '/',
+      faq: '/faq',
+      self: '/self',
+      board: '/board',
+      img: '/img',
+      email: '/email',
+      signup: '/signup',
+      login: '/login',
+    };
+    navigate(routes[section] || '/');
   };
 
   return (
-    <Router>
+    <>
       <Header
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
@@ -89,63 +103,82 @@ const App = () => {
         introRef={introRef}
         noticeRef={noticeRef}
         locationRef={locationRef}
+        showSection={showSection}
       />
 
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
-        <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
+        <Route
+          path="/"
+          element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />}
+        />
         <Route path="/faq" element={<FaqSection />} />
-        <Route path="/self" element={
-          <SelfTest
-            testType={testType}
-            setTestType={setTestType}
-            selfAnswers={selfAnswers}
-            handleSelfAnswer={(i, v) => {
-              const newAnswers = [...selfAnswers];
-              newAnswers[i] = v;
-              setSelfAnswers(newAnswers);
-            }}
-            handleSelfSubmit={(r) => setResultText(r)}
-            resultText={resultText}
-            setSelfAnswers={setSelfAnswers}
-            setResultText={setResultText}
-          />
-        } />
-        <Route path="/board" element={
-          <BoardSection
-            selectedBoard={selectedBoard}
-            visibility={visibility}
-            setVisibility={setVisibility}
-          />
-        } />
+        <Route
+          path="/self"
+          element={
+            <SelfTest
+              testType={testType}
+              setTestType={setTestType}
+              selfAnswers={selfAnswers}
+              handleSelfAnswer={(i, v) => {
+                const newAnswers = [...selfAnswers];
+                newAnswers[i] = v;
+                setSelfAnswers(newAnswers);
+              }}
+              handleSelfSubmit={(r) => setResultText(r)}
+              resultText={resultText}
+              setSelfAnswers={setSelfAnswers}
+              setResultText={setResultText}
+            />
+          }
+        />
+        <Route
+          path="/board"
+          element={
+            <BoardSection
+              selectedBoard={selectedBoard}
+              visibility={visibility}
+              setVisibility={setVisibility}
+            />
+          }
+        />
         <Route path="/img" element={<section className="img-section"><Picture /></section>} />
-        <Route path="/email" element={
-          <section className="board-section">
-            <h2>AI 상담 기록 메일 전송</h2>
-          </section>
-        } />
-        <Route path="/signup" element={
-          <AuthSection
-            type="signup"
-            sectionLabels={sectionLabels}
-            formInputs={formInputs}
-            buttonLabels={buttonLabels}
-            formLinks={formLinks}
-            setActiveSection={() => {}}
-            signupState={signupState}
-            setSignupState={setSignupState}
-          />
-        } />
-        <Route path="/login" element={
-          <section className="form-section">
-            <h2>{sectionLabels.login}</h2>
-            {formInputs.login.map((input, i) => (
-              <input key={i} type={input.type} placeholder={input.placeholder} className="input" />
-            ))}
-            <button className="button">{buttonLabels.login}</button>
-          </section>
-        } />
+        <Route
+          path="/email"
+          element={
+            <section className="board-section">
+              <h2>AI 상담 기록 메일 전송</h2>
+            </section>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <AuthSection
+              type="signup"
+              sectionLabels={sectionLabels}
+              formInputs={formInputs}
+              buttonLabels={buttonLabels}
+              formLinks={formLinks}
+              setActiveSection={() => {}}
+              signupState={signupState}
+              setSignupState={setSignupState}
+            />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <section className="form-section">
+              <h2>{sectionLabels.login}</h2>
+              {formInputs.login.map((input, i) => (
+                <input key={i} type={input.type} placeholder={input.placeholder} className="input" />
+              ))}
+              <button className="button">{buttonLabels.login}</button>
+            </section>
+          }
+        />
         <Route path="*" element={<div>404: 페이지를 찾을 수 없습니다</div>} />
       </Routes>
 
@@ -161,7 +194,7 @@ const App = () => {
       />
 
       <Footer />
-    </Router>
+    </>
   );
 };
 
