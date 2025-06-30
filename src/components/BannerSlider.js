@@ -44,7 +44,7 @@ const BannerSlider = () => {
         <a href="#">
           <img src="/main.png" alt="마인드브릿지 설명 배너" />
         </a>
-        <a href="#">
+        <a href="http://localhost:3000/self">
           <img src="/main2.png" alt="자가진단" />
         </a>
         <a href="https://hellosmile.kr/bbs/board.php?bo_table=15" target="_blank" rel="noopener noreferrer">

@@ -1,9 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
 
 const Header = ({
-  activeSection,
-  showSection,
   hoveredMenu,
   handleMouseEnter,
   handleMouseLeaveAll,
@@ -24,13 +23,14 @@ const Header = ({
       <div id="google_translate_element" className="translate"></div>
       <nav className="nav">
         <div className="nav-left">
-          <img
-            src="/로고2.png"
-            alt="Mind Bridge 로고"
-            className="logo"
-            onClick={() => showSection('about')}
-            style={{ cursor: 'pointer' }}
-          />
+          <Link to="/">
+            <img
+              src="/로고2.png"
+              alt="Mind Bridge 로고"
+              className="logo"
+              style={{ cursor: 'pointer' }}
+            />
+          </Link>
         </div>
 
         <div
@@ -52,20 +52,27 @@ const Header = ({
                 ['services', 'about'].includes(sec) && handleMouseEnter(sec)
               }
             >
-              <a
-                href="#"
-                onClick={(e) => {
-                  if (['about', 'services'].includes(sec)) {
-                    e.preventDefault(); 
-                    return;
-                  }
-                  showSection(sec);
-                }}
-                className={`nav-link ${activeSection === sec && sec !== 'about' ? 'nav-link-hover' : ''}`}
-              >
-                {sectionLabels[sec]}
-              </a>
+              {/* 메뉴 클릭 시 Link or scroll 처리 */}
+              {['board', 'self'].includes(sec) ? (
+                <Link
+                  to={`/${sec}`}
+                  className="nav-link"
+                >
+                  {sectionLabels[sec]}
+                </Link>
+              ) : (
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                  }}
+                  className="nav-link"
+                >
+                  {sectionLabels[sec]}
+                </a>
+              )}
 
+              {/* 드롭다운 메뉴 - about */}
               {sec === 'about' && hoveredMenu === 'about' && (
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
@@ -78,6 +85,7 @@ const Header = ({
                 </div>
               )}
 
+              {/* 드롭다운 메뉴 - services */}
               {sec === 'services' && hoveredMenu === 'services' && (
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
@@ -96,8 +104,8 @@ const Header = ({
                             >
                               {item === '상담' && (
                                 <>
-                                  <div className="dropdown-item" onClick={() => showSection('img')}>이미지</div>
-                                  <div className="dropdown-item" onClick={() => showSection('email')}>메일</div>
+                                  <Link to="/img" className="dropdown-item">이미지</Link>
+                                  <Link to="/email" className="dropdown-item">메일</Link>
                                 </>
                               )}
                               {item === '고객 서비스' && (
@@ -119,7 +127,7 @@ const Header = ({
         </div>
 
         <div className="nav-right">
-          <button onClick={() => showSection('login')} className="auth-button">로그인</button>
+          <Link to="/login" className="auth-button">로그인</Link>
         </div>
       </nav>
     </header>

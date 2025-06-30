@@ -1,4 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from 'react-router-dom';
+import React, { useState, useRef } from 'react';
 import './css/App.css';
 import './css/board.css';
 import './css/chat.css';
@@ -31,7 +36,6 @@ import { buttonLabels } from './constants/buttonLabels';
 import { formLinks } from './constants/formLinks';
 
 const App = () => {
-  const [activeSection, setActiveSection] = useState('about');
   const [selectedBoard, setSelectedBoard] = useState('');
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
@@ -49,11 +53,6 @@ const App = () => {
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
-
-  const showSection = (section) => {
-    setActiveSection(section);
-  };
-
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
@@ -76,46 +75,11 @@ const App = () => {
       return;
     }
     setSelectedBoard(value);
-    setActiveSection('board');
-  };
-
-  const handleSelfAnswer = (index, value) => {
-    const updatedAnswers = [...selfAnswers];
-    updatedAnswers[index] = value;
-    setSelfAnswers(updatedAnswers);
-  };
-
-  const handleSelfSubmit = (result) => {
-    setResultText(result);
-  };
-
-  const renderForms = () => {
-    if (["login", "id", "password"].includes(activeSection)) {
-      return (
-        <section className="form-section">
-          <h2>{sectionLabels[activeSection]}</h2>
-          {formInputs[activeSection].map((input, i) => (
-            <input key={i} type={input.type} placeholder={input.placeholder} className="input" />
-          ))}
-          <button className="button">{buttonLabels[activeSection]}</button>
-          {formLinks[activeSection] && (
-            <div className="form-links">
-              {formLinks[activeSection].map(({ label, id }) => (
-                <a key={id} href="#" onClick={() => showSection(id)}>{label}</a>
-              ))}
-            </div>
-          )}
-        </section>
-      );
-    }
-    return null;
   };
 
   return (
-    <div>
+    <Router>
       <Header
-        activeSection={activeSection}
-        showSection={showSection}
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeaveAll={handleMouseLeaveAll}
@@ -129,75 +93,75 @@ const App = () => {
 
       <FloatingSidebar />
 
-      {activeSection === 'about' && (
-        <AboutSection refs={{ introRef, noticeRef, locationRef }} />
-      )}
+      <Routes>
+        <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
+        <Route path="/faq" element={<FaqSection />} />
+        <Route path="/self" element={
+          <SelfTest
+            testType={testType}
+            setTestType={setTestType}
+            selfAnswers={selfAnswers}
+            handleSelfAnswer={(i, v) => {
+              const newAnswers = [...selfAnswers];
+              newAnswers[i] = v;
+              setSelfAnswers(newAnswers);
+            }}
+            handleSelfSubmit={(r) => setResultText(r)}
+            resultText={resultText}
+            setSelfAnswers={setSelfAnswers}
+            setResultText={setResultText}
+          />
+        } />
+        <Route path="/board" element={
+          <BoardSection
+            selectedBoard={selectedBoard}
+            visibility={visibility}
+            setVisibility={setVisibility}
+          />
+        } />
+        <Route path="/img" element={<section className="img-section"><Picture /></section>} />
+        <Route path="/email" element={
+          <section className="board-section">
+            <h2>AI 상담 기록 메일 전송</h2>
+          </section>
+        } />
+        <Route path="/signup" element={
+          <AuthSection
+            type="signup"
+            sectionLabels={sectionLabels}
+            formInputs={formInputs}
+            buttonLabels={buttonLabels}
+            formLinks={formLinks}
+            setActiveSection={() => {}}
+            signupState={signupState}
+            setSignupState={setSignupState}
+          />
+        } />
+        <Route path="/login" element={
+          <section className="form-section">
+            <h2>{sectionLabels.login}</h2>
+            {formInputs.login.map((input, i) => (
+              <input key={i} type={input.type} placeholder={input.placeholder} className="input" />
+            ))}
+            <button className="button">{buttonLabels.login}</button>
+          </section>
+        } />
+        <Route path="*" element={<div>404: 페이지를 찾을 수 없습니다</div>} />
+      </Routes>
 
-      {activeSection === 'faq' && <FaqSection />}
-
-      {activeSection === 'self' && (
-        <SelfTest
-          testType={testType}
-          setTestType={setTestType}
-          selfAnswers={selfAnswers}
-          handleSelfAnswer={handleSelfAnswer}
-          handleSelfSubmit={handleSelfSubmit}
-          resultText={resultText}
-          setSelfAnswers={setSelfAnswers}
-          setResultText={setResultText}
-        />
-      )}
-
-      {activeSection === 'board' && (
-        <BoardSection
-          selectedBoard={selectedBoard}
-          visibility={visibility}
-          setVisibility={setVisibility}
-        />
-      )}
-
-      {activeSection === 'img' && (
-        <section className="img-section">
-          <Picture />
-        </section>
-      )}
-
-      {activeSection === 'email' && (
-        <section className="board-section">
-          <h2>AI 상담 기록 메일 전송</h2>
-        </section>
-      )}
-
-      {activeSection === 'signup' && (
-        <AuthSection
-          type="signup"
-          sectionLabels={sectionLabels}
-          formInputs={formInputs}
-          buttonLabels={buttonLabels}
-          formLinks={formLinks}
-          setActiveSection={setActiveSection}
-          signupState={signupState}
-          setSignupState={setSignupState}
-        />
-      )}
-
-      {activeSection !== 'chat' && (
-        <ChatModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          tab={tab}
-          setTab={setTab}
-          selectedChat={selectedChat}
-          setSelectedChat={setSelectedChat}
-          chatInput={chatInput}
-          resultText={resultText}
-        />
-      )}
-
-      {renderForms()}
+      <ChatModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        tab={tab}
+        setTab={setTab}
+        selectedChat={selectedChat}
+        setSelectedChat={setSelectedChat}
+        chatInput={chatInput}
+        resultText={resultText}
+      />
 
       <Footer />
-    </div>
+    </Router>
   );
 };
 
