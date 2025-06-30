@@ -34,8 +34,8 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
               ))}
             </ul>
             <div style={{ marginTop: '1rem' }}>
-              <button className="button" onClick={handleRead}>텍스트 읽기</button>
-              <button className="button" onClick={handleSendEmail}>메일 전송</button>
+              <button className="chat-button" onClick={handleRead}>텍스트 읽기</button>
+              <button className="chat-button" onClick={handleSendEmail}>메일 전송</button>
             </div>
           </div>
         );

@@ -1,4 +1,3 @@
-/* ✅ 6. 인증(로그인/회원가입) 버튼 */
 .auth-button {
   background-color: white;
   color: #3a5b88;
@@ -11,47 +10,19 @@
   transition: background-color 0.3s ease-in-out;
 }
 
-.auth-button-hover {
+.auth-button:hover {
   background-color: #e0e0e0;
 }
 
 .form-section {
-  padding: 3rem;
+  padding: 3rem 2rem;
   background: white;
-  margin: 2rem auto;
+  margin: 3rem auto 4rem;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   max-width: 400px;
   text-align: center;
-}
-.form-section2 {
-  padding: 3rem;
-  background: white;
-  margin: 2rem auto;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  max-width: 600px;
-  text-align: center;
-}
-
-.input {
-  padding: 0.4rem;
-  margin: 0.3rem 0;
-  width: 65%;
-  font-size: 0.9rem;
-}
-
-.button {
-  padding: 0.4rem;
-  margin: 0.3rem 0;
-  width: 60%;
-  font-size: 0.9rem;
-}
-
-.form-links {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
+  overflow: visible;
 }
 
 .form-section-flex {
@@ -60,17 +31,70 @@
   align-items: flex-start;
   gap: 2rem;
   max-width: 800px;
+  margin: 2rem auto;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.form-left, .form-right {
-  width: 48%;
-}
 
 .form-right {
   background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 320px;
+  min-width: 300px;
+}
+
+
+.input {
+  padding: 0.4rem;
+  margin: 0.3rem 0;
+  width: 65%;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-button {
+  padding: 0.4rem;
+  margin: 0.8rem 0 1rem;
+  width: 60%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  background-color: #3a5b88;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #2a4370;
+}
+
+
+.form-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.form-link {
+  color: #2a61d8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.form-link:hover {
+  text-decoration: underline;
 }
 
 .radio-list {
@@ -87,32 +111,3 @@
 .radio-list input[type="radio"] {
   margin-right: 0.5rem;
 }
-
-.self-test-item {
-  margin-bottom: 1.2rem;
-  background: #fafafa;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  text-align: left;
-}
-
-.self-test-item p {
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.self-option-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 0.4rem;
-}
-
-.self-option {
-  white-space: nowrap;
-  font-size: 0.9rem;
-}
-
-
-

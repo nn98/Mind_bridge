@@ -8,9 +8,9 @@ const Header = ({
   handleMouseLeaveAll,
   introRef,
   noticeRef,
-  locationRef
+  locationRef,
+  showSection
 }) => {
-  // 어떤 서브메뉴 아이템에 마우스가 올라가 있는지 추적하는 상태
   const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
 
   const scrollToSection = (ref) => {
@@ -19,15 +19,14 @@ const Header = ({
     }
   };
 
-  // 서비스 드롭다운의 서브메뉴 데이터 정의 (기존 항목들을 사용)
   const serviceSubMenus = {
-    '상담': [ // 기존 '상담' 항목
+    '상담': [
       { label: '이미지', path: '/img' },
       { label: '메일', path: '/email' },
     ],
-    '고객 서비스': [ // 기존 '고객 서비스' 항목
-      { label: '서비스 준비 중', path: '#' }, // 첫 번째 '서비스 준비 중'
-      { label: '서비스 준비 중', path: '#' }, // 두 번째 '서비스 준비 중'
+    '고객 서비스': [
+      { label: '서비스 준비 중', path: '#' },
+      { label: '서비스 준비 중', path: '#' },
     ],
   };
 
@@ -54,7 +53,7 @@ const Header = ({
 
             if (!(nav instanceof Node) || !(related instanceof Node) || !nav.contains(related)) {
               handleMouseLeaveAll();
-              setHoveredSubMenuItem(null); // 메뉴 전체를 떠날 때 서브메뉴 상태 초기화
+              setHoveredSubMenuItem(null);
             }
           }}
         >
@@ -64,9 +63,8 @@ const Header = ({
               className="nav-item-wrapper"
               onMouseEnter={() => {
                 ['services', 'about'].includes(sec) && handleMouseEnter(sec);
-                // 메인 메뉴 진입 시 서브메뉴 상태 초기화
                 if (sec === 'services') {
-                    setHoveredSubMenuItem(null);
+                  setHoveredSubMenuItem(null);
                 }
               }}
             >
@@ -75,17 +73,13 @@ const Header = ({
                   {sectionLabels[sec]}
                 </Link>
               ) : (
-                <a
-                  href="https://mind-bridge-zeta.vercel.app"
-                  onClick={(e) => {
-                    if (['about', 'services'].includes(sec)) {
-                        e.preventDefault();
-                    }
-                  }}
+                <div
+                  onClick={() => showSection(sec)}
                   className="nav-link"
+                  style={{ cursor: 'pointer' }}
                 >
                   {sectionLabels[sec]}
-                </a>
+                </div>
               )}
 
               {sec === 'about' && hoveredMenu === 'about' && (
@@ -100,20 +94,16 @@ const Header = ({
                 </div>
               )}
 
-              {/* services 드롭다운 부분 - 기존 항목들을 서브메뉴로 변경 */}
               {sec === 'services' && hoveredMenu === 'services' && (
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
-                    {/* 단일 컬럼: 상담, 고객 서비스 (각각 서브메뉴 가짐) */}
                     <div className="dropdown-column">
-                      {/* '상담' 항목 */}
                       <div
                         className={`dropdown-item ${hoveredSubMenuItem === '상담' ? 'highlight' : ''}`}
                         onMouseEnter={() => setHoveredSubMenuItem('상담')}
                         onMouseLeave={() => setHoveredSubMenuItem(null)}
                       >
                         상담
-                        {/* '상담'에 마우스 올리면 나타나는 서브메뉴 */}
                         {hoveredSubMenuItem === '상담' && serviceSubMenus['상담'] && (
                           <div className="dropdown-submenu">
                             {serviceSubMenus['상담'].map((subItem) => (
@@ -124,19 +114,15 @@ const Header = ({
                           </div>
                         )}
                       </div>
-
-                      {/* '고객 서비스' 항목 */}
                       <div
                         className={`dropdown-item ${hoveredSubMenuItem === '고객 서비스' ? 'highlight' : ''}`}
                         onMouseEnter={() => setHoveredSubMenuItem('고객 서비스')}
                         onMouseLeave={() => setHoveredSubMenuItem(null)}
                       >
                         고객 서비스
-                        {/* '고객 서비스'에 마우스 올리면 나타나는 서브메뉴 */}
                         {hoveredSubMenuItem === '고객 서비스' && serviceSubMenus['고객 서비스'] && (
                           <div className="dropdown-submenu">
                             {serviceSubMenus['고객 서비스'].map((subItem, index) => (
-                              // '서비스 준비 중'은 Link가 아닐 수 있으므로 div로 처리
                               <div key={index} className="dropdown-item">
                                 {subItem.label}
                               </div>

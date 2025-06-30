@@ -7,8 +7,8 @@ export const sectionLabels = {
   email: '메일',
   login: '로그인',
   signup: '회원가입',
-  id: '아이디 찾기',
-  password: '비밀번호 찾기',
+  'find-id': '아이디 찾기',
+  'find-password': '비밀번호 찾기',
   faq: '자주 묻는 질문',
   self: '자가진단'
 };

@@ -15,7 +15,7 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const API_KEY = `${apiKey}`; //키값 넣기
+const API_KEY = ` `; //키값 넣기
 
 const Chat = () => {
   const [step, setStep] = useState(0);
@@ -167,13 +167,13 @@ const Chat = () => {
         onChange={(e) => setChatInput(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // ✅ Enter 줄바꿈 방지
-            handleSubmit();     // ✅ 전송 실행
+            e.preventDefault();
+            handleSubmit();
           }
         }}
         readOnly={isTyping}
       />
-      <button className="button" onClick={handleSubmit} disabled={isTyping}>
+      <button className="chat-button" onClick={handleSubmit} disabled={isTyping}>
         입력
       </button>
     </div>

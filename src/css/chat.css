@@ -65,11 +65,15 @@
   border: 1px solid #ccc;
 }
 
-.button {
+.chat-button {
+  display: block;
+  width: 200px;
+  margin: 1rem auto;
   padding: 0.6rem 1.2rem;
   background-color: #3a5b88;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  text-align: center;
 }

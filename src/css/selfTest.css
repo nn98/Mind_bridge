@@ -1,6 +1,8 @@
 .form-section2 {
-  margin-top: 2rem;
+  max-width: 600px;
+  margin: 2rem auto;
   padding: 1rem;
+  text-align: center;  /* 전체 가운데 정렬 */
 }
 
 .form-title {
@@ -44,26 +46,34 @@
   margin-top: 1rem;
 }
 
+
 .self-test-item {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 1rem 0;
+  margin-bottom: 1.2rem;
+  background: #fafafa;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  text-align: left;
+}
+
+.self-test-item p {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .self-option-group {
   display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
   flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.4rem;
 }
 
 .self-option {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.95rem;
+  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
-.button {
+.self-button {
   background-color: #5988ca;
   color: white;
   padding: 0.6rem 1.2rem;
@@ -75,8 +85,8 @@
   transition: background-color 0.3s;
 }
 
-.button:hover {
-  background-color: #5988ca;
+.self-button:hover {
+  background-color: #507dc0;
 }
 
 .result-card {

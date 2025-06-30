@@ -17,7 +17,7 @@ import './css/result.css';
 import './css/banner.css';
 
 import Header from './components/Header';
-// import Picture from './Picture.js'; // <-- 이 줄을 제거하거나 주석 처리
+import Picture from './Picture.js';
 import SelfTest from './components/SelfTest';
 import BoardSection from './components/BoardSection';
 import ChatModal from './components/ChatModal';
@@ -84,9 +84,8 @@ const App = () => {
       self: '/self',
       board: '/board',
       img: '/img',
-      email: '/email',
       signup: '/signup',
-      login: '/login',
+      login: '/login'
     };
     navigate(routes[section] || '/');
   };
@@ -109,10 +108,7 @@ const App = () => {
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
-        <Route
-          path="/"
-          element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />}
-        />
+        <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
           path="/self"
@@ -133,26 +129,19 @@ const App = () => {
             />
           }
         />
+        <Route path="/board" element={<BoardSection />} />
+        <Route path="/img" element={<Picture />} />
         <Route
-          path="/board"
+          path="/login"
           element={
-            <BoardSection
-              selectedBoard={selectedBoard}
-              visibility={visibility}
-              setVisibility={setVisibility}
+            <AuthSection
+              type="login"
+              sectionLabels={sectionLabels}
+              formInputs={formInputs}
+              buttonLabels={buttonLabels}
+              formLinks={formLinks}
+              setActiveSection={() => {}}
             />
-          }
-        />
-        {/* <Route path="/img" element={<section className="img-section"><Picture /></section>} /> */}
-        {/* 이 /img 경로는 이제 ChatModal에서 이미지를 생성하므로 필요 없거나 다른 용도로 사용될 수 있습니다. */}
-        {/* 만약 /img 경로로 직접 접근해서 이미지 생성 기능을 사용하고 싶다면, ImageGenerator 컴포넌트를 직접 렌더링해야 합니다. */}
-        {/* 예시: <Route path="/img" element={<section className="img-section"><ImageGenerator promptText="default image prompt" /></section>} /> */}
-        <Route
-          path="/email"
-          element={
-            <section className="board-section">
-              <h2>AI 상담 기록 메일 전송</h2>
-            </section>
           }
         />
         <Route
@@ -171,15 +160,29 @@ const App = () => {
           }
         />
         <Route
-          path="/login"
+          path="/find-id"
           element={
-            <section className="form-section">
-              <h2>{sectionLabels.login}</h2>
-              {formInputs.login.map((input, i) => (
-                <input key={i} type={input.type} placeholder={input.placeholder} className="input" />
-              ))}
-              <button className="button">{buttonLabels.login}</button>
-            </section>
+            <AuthSection
+              type="find-id"
+              sectionLabels={sectionLabels}
+              formInputs={formInputs}
+              buttonLabels={buttonLabels}
+              formLinks={formLinks}
+              setActiveSection={() => {}}
+            />
+          }
+        />
+        <Route
+          path="/find-password"
+          element={
+            <AuthSection
+              type="find-password"
+              sectionLabels={sectionLabels}
+              formInputs={formInputs}
+              buttonLabels={buttonLabels}
+              formLinks={formLinks}
+              setActiveSection={() => {}}
+            />
           }
         />
         <Route path="*" element={<div>404: 페이지를 찾을 수 없습니다</div>} />

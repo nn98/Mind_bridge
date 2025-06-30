@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const AuthSection = ({
   type,
@@ -6,7 +7,6 @@ const AuthSection = ({
   formInputs,
   buttonLabels,
   formLinks,
-  setActiveSection,
   signupState,
   setSignupState
 }) => {
@@ -14,6 +14,7 @@ const AuthSection = ({
     <section className={`form-section${type === 'signup' ? ' form-section-flex' : ''}`}>
       <div className="form-left">
         <h2>{sectionLabels[type]}</h2>
+
         {formInputs[type].map((input, i) => (
           <input
             key={i}
@@ -22,7 +23,18 @@ const AuthSection = ({
             className="input"
           />
         ))}
-        <button className="button">{buttonLabels[type]}</button>
+
+        <button className="login-button">{buttonLabels[type]}</button>
+
+        {formLinks[type] && (
+          <div className="form-links">
+            {formLinks[type].map(({ label, id }, i) => (
+              <Link key={i} to={`/${id}`} className="form-link">
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {type === 'signup' && (
@@ -44,14 +56,6 @@ const AuthSection = ({
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {formLinks[type] && (
-        <div className="form-links">
-          {formLinks[type].map(({ label, id }) => (
-            <a key={id} href="https://mind-bridge-zeta.vercel.app" onClick={() => setActiveSection(id)}>{label}</a>
-          ))}
         </div>
       )}
     </section>
