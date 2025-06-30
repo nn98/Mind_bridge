@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
 
@@ -6,16 +6,29 @@ const Header = ({
   hoveredMenu,
   handleMouseEnter,
   handleMouseLeaveAll,
-  setSubMenuVisible,
-  subMenuVisible,
   introRef,
   noticeRef,
   locationRef
 }) => {
+  // 어떤 서브메뉴 아이템에 마우스가 올라가 있는지 추적하는 상태
+  const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
+
   const scrollToSection = (ref) => {
     if (ref && ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // 서비스 드롭다운의 서브메뉴 데이터 정의 (기존 항목들을 사용)
+  const serviceSubMenus = {
+    '상담': [ // 기존 '상담' 항목
+      { label: '이미지', path: '/img' },
+      { label: '메일', path: '/email' },
+    ],
+    '고객 서비스': [ // 기존 '고객 서비스' 항목
+      { label: '서비스 준비 중', path: '#' }, // 첫 번째 '서비스 준비 중'
+      { label: '서비스 준비 중', path: '#' }, // 두 번째 '서비스 준비 중'
+    ],
   };
 
   return (
@@ -41,6 +54,7 @@ const Header = ({
 
             if (!(nav instanceof Node) || !(related instanceof Node) || !nav.contains(related)) {
               handleMouseLeaveAll();
+              setHoveredSubMenuItem(null); // 메뉴 전체를 떠날 때 서브메뉴 상태 초기화
             }
           }}
         >
@@ -48,23 +62,25 @@ const Header = ({
             <div
               key={sec}
               className="nav-item-wrapper"
-              onMouseEnter={() =>
-                ['services', 'about'].includes(sec) && handleMouseEnter(sec)
-              }
+              onMouseEnter={() => {
+                ['services', 'about'].includes(sec) && handleMouseEnter(sec);
+                // 메인 메뉴 진입 시 서브메뉴 상태 초기화
+                if (sec === 'services') {
+                    setHoveredSubMenuItem(null);
+                }
+              }}
             >
-              {/* 메뉴 클릭 시 Link or scroll 처리 */}
               {['board', 'self'].includes(sec) ? (
-                <Link
-                  to={`/${sec}`}
-                  className="nav-link"
-                >
+                <Link to={`/${sec}`} className="nav-link">
                   {sectionLabels[sec]}
                 </Link>
               ) : (
                 <a
-                  href="#"
+                  href="https://mind-bridge-zeta.vercel.app"
                   onClick={(e) => {
-                    e.preventDefault();
+                    if (['about', 'services'].includes(sec)) {
+                        e.preventDefault();
+                    }
                   }}
                   className="nav-link"
                 >
@@ -72,7 +88,6 @@ const Header = ({
                 </a>
               )}
 
-              {/* 드롭다운 메뉴 - about */}
               {sec === 'about' && hoveredMenu === 'about' && (
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
@@ -85,39 +100,50 @@ const Header = ({
                 </div>
               )}
 
-              {/* 드롭다운 메뉴 - services */}
+              {/* services 드롭다운 부분 - 기존 항목들을 서브메뉴로 변경 */}
               {sec === 'services' && hoveredMenu === 'services' && (
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
+                    {/* 단일 컬럼: 상담, 고객 서비스 (각각 서브메뉴 가짐) */}
                     <div className="dropdown-column">
-                      {['상담', '고객 서비스'].map((item, i) => (
-                        <div
-                          key={i}
-                          className={`dropdown-item ${subMenuVisible === item ? 'highlight' : ''}`}
-                          onMouseEnter={() => setSubMenuVisible(item)}
-                        >
-                          {item}
-                          {subMenuVisible === item && (
-                            <div
-                              className="dropdown-submenu"
-                              onMouseEnter={(e) => e.stopPropagation()}
-                            >
-                              {item === '상담' && (
-                                <>
-                                  <Link to="/img" className="dropdown-item">이미지</Link>
-                                  <Link to="/email" className="dropdown-item">메일</Link>
-                                </>
-                              )}
-                              {item === '고객 서비스' && (
-                                <>
-                                  <div className="dropdown-item">서비스 준비 중</div>
-                                  <div className="dropdown-item">서비스 준비 중</div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                      {/* '상담' 항목 */}
+                      <div
+                        className={`dropdown-item ${hoveredSubMenuItem === '상담' ? 'highlight' : ''}`}
+                        onMouseEnter={() => setHoveredSubMenuItem('상담')}
+                        onMouseLeave={() => setHoveredSubMenuItem(null)}
+                      >
+                        상담
+                        {/* '상담'에 마우스 올리면 나타나는 서브메뉴 */}
+                        {hoveredSubMenuItem === '상담' && serviceSubMenus['상담'] && (
+                          <div className="dropdown-submenu">
+                            {serviceSubMenus['상담'].map((subItem) => (
+                              <Link key={subItem.label} to={subItem.path} className="dropdown-item">
+                                {subItem.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* '고객 서비스' 항목 */}
+                      <div
+                        className={`dropdown-item ${hoveredSubMenuItem === '고객 서비스' ? 'highlight' : ''}`}
+                        onMouseEnter={() => setHoveredSubMenuItem('고객 서비스')}
+                        onMouseLeave={() => setHoveredSubMenuItem(null)}
+                      >
+                        고객 서비스
+                        {/* '고객 서비스'에 마우스 올리면 나타나는 서브메뉴 */}
+                        {hoveredSubMenuItem === '고객 서비스' && serviceSubMenus['고객 서비스'] && (
+                          <div className="dropdown-submenu">
+                            {serviceSubMenus['고객 서비스'].map((subItem, index) => (
+                              // '서비스 준비 중'은 Link가 아닐 수 있으므로 div로 처리
+                              <div key={index} className="dropdown-item">
+                                {subItem.label}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

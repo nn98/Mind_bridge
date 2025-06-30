@@ -17,7 +17,7 @@ import './css/result.css';
 import './css/banner.css';
 
 import Header from './components/Header';
-import Picture from './Picture.js';
+// import Picture from './Picture.js'; // <-- 이 줄을 제거하거나 주석 처리
 import SelfTest from './components/SelfTest';
 import BoardSection from './components/BoardSection';
 import ChatModal from './components/ChatModal';
@@ -143,7 +143,10 @@ const App = () => {
             />
           }
         />
-        <Route path="/img" element={<section className="img-section"><Picture /></section>} />
+        {/* <Route path="/img" element={<section className="img-section"><Picture /></section>} /> */}
+        {/* 이 /img 경로는 이제 ChatModal에서 이미지를 생성하므로 필요 없거나 다른 용도로 사용될 수 있습니다. */}
+        {/* 만약 /img 경로로 직접 접근해서 이미지 생성 기능을 사용하고 싶다면, ImageGenerator 컴포넌트를 직접 렌더링해야 합니다. */}
+        {/* 예시: <Route path="/img" element={<section className="img-section"><ImageGenerator promptText="default image prompt" /></section>} /> */}
         <Route
           path="/email"
           element={

@@ -50,7 +50,7 @@ const AuthSection = ({
       {formLinks[type] && (
         <div className="form-links">
           {formLinks[type].map(({ label, id }) => (
-            <a key={id} href="#" onClick={() => setActiveSection(id)}>{label}</a>
+            <a key={id} href="https://mind-bridge-zeta.vercel.app" onClick={() => setActiveSection(id)}>{label}</a>
           ))}
         </div>
       )}
