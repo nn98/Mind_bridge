@@ -127,7 +127,7 @@ const App = () => {
         locationRef={locationRef}
       />
 
-      <FloatingSidebar />
+      <FloatingSidebar showSection={showSection} />
 
       {activeSection === 'about' && (
         <AboutSection refs={{ introRef, noticeRef, locationRef }} />
