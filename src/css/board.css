@@ -1,19 +1,140 @@
-/* ✅ 11. 게시판 섹션 */
 .board-section {
-  padding: 2rem;
-  background: white;
-  margin: 2rem auto;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  max-width: 700px;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* 상단 타이틀 */
+.banner-area {
   text-align: center;
+  margin-bottom: 30px;
+}
+
+.board-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.board-subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+/* 컨트롤 영역 */
+.board-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.left-controls,
+.right-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.board-selector,
+.sort-selector,
+.search-input {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* 검색창은 고정 넓이 */
+.search-input {
+  width: 200px;
+}
+
+.write-button {
+  padding: 8px 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 작성 폼 */
+.write-form {
+  margin-bottom: 30px;
+  background: #f5f7fa;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .textarea {
-  height: 150px;
   width: 100%;
-  font-family: 'Noto Sans KR';
-  padding: 0.5rem;
-  font-size: 1rem;
+  height: 100px;
+  padding: 10px;
+  font-size: 15px;
   border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+.radio-group label {
+  margin-right: 15px;
+  font-size: 14px;
+}
+
+.submit-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 게시글 카드 */
+.post-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.post-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.post-content {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.post-meta {
+  font-size: 12px;
+  color: #888;
+  display: block;
+  text-align: right;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.no-posts {
+  text-align: center;
+  color: #aaa;
+  font-size: 16px;
+  margin-top: 40px;
 }

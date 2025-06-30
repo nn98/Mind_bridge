@@ -1,4 +1,3 @@
-// components/FloatingSidebar.js
 import React from 'react';
 
 const handleScrollToTop = () => {
@@ -14,7 +13,7 @@ const handleScrollToTop = () => {
 const FloatingSidebar = () => {
   return (
     <div className="floating-sidebar">
-      <div className="floating-button1" onClick={() => alert('안내 섹션으로 이동 예정')}>안내</div>
+      <div className="floating-button1" onClick={() => alert('안내 섹션으로 이동 예정')}>F&Q</div>
       <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
       <div className="floating-button1" onClick={handleScrollToTop}>
         <svg

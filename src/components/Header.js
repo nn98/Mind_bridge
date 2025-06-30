@@ -9,7 +9,6 @@ const Header = ({
   handleMouseLeaveAll,
   setSubMenuVisible,
   subMenuVisible,
-  handleBoardSelect,
   introRef,
   noticeRef,
   locationRef
@@ -39,7 +38,8 @@ const Header = ({
           onMouseLeave={(e) => {
             const related = e.relatedTarget;
             const nav = document.querySelector('.nav');
-            if (!nav || !related || !nav.contains(related)) {
+
+            if (!(nav instanceof Node) || !(related instanceof Node) || !nav.contains(related)) {
               handleMouseLeaveAll();
             }
           }}
@@ -49,14 +49,18 @@ const Header = ({
               key={sec}
               className="nav-item-wrapper"
               onMouseEnter={() =>
-                ['services', 'board', 'about'].includes(sec) && handleMouseEnter(sec)
+                ['services', 'about'].includes(sec) && handleMouseEnter(sec)
               }
             >
               <a
                 href="#"
-                onClick={() =>
-                  !['services', 'board', 'about'].includes(sec) && showSection(sec)
-                }
+                onClick={(e) => {
+                  if (['about', 'services'].includes(sec)) {
+                    e.preventDefault(); 
+                    return;
+                  }
+                  showSection(sec);
+                }}
                 className={`nav-link ${activeSection === sec && sec !== 'about' ? 'nav-link-hover' : ''}`}
               >
                 {sectionLabels[sec]}
@@ -106,18 +110,6 @@ const Header = ({
                           )}
                         </div>
                       ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {sec === 'board' && hoveredMenu === 'board' && (
-                <div className="dropdown-wrapper">
-                  <div className="dropdown">
-                    <div className="dropdown-column">
-                      <div className="dropdown-item" onClick={() => handleBoardSelect('generalBoard')}>일반 게시판</div>
-                      <div className="dropdown-item" onClick={() => handleBoardSelect('adminBoard')}>관리자 게시판</div>
-                      <div className="dropdown-item" onClick={() => handleBoardSelect('noticeBoard')}>공지사항</div>
                     </div>
                   </div>
                 </div>

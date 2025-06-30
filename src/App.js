@@ -23,6 +23,7 @@ import Footer from './components/Footer';
 import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
+import FloatingSidebar from './components/FloatingSidebar';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -78,15 +79,6 @@ const App = () => {
     setActiveSection('board');
   };
 
-  const handleScrollToTop = () => {
-    const root = document.getElementById('root');
-    if (root) {
-      root.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   const handleSelfAnswer = (index, value) => {
     const updatedAnswers = [...selfAnswers];
     updatedAnswers[index] = value;
@@ -135,11 +127,7 @@ const App = () => {
         locationRef={locationRef}
       />
 
-      <div className="floating-sidebar">
-        <div className="floating-button1" onClick={() => showSection('faq')}>안내</div>
-        <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
-        <div className="floating-button1" onClick={handleScrollToTop}>↑</div>
-      </div>
+      <FloatingSidebar />
 
       {activeSection === 'about' && (
         <AboutSection refs={{ introRef, noticeRef, locationRef }} />
