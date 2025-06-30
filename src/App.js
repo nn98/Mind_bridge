@@ -91,7 +91,7 @@ const App = () => {
         locationRef={locationRef}
       />
 
-      <FloatingSidebar />
+      <FloatingSidebar showSection={showSection} />
 
       <Routes>
         <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />

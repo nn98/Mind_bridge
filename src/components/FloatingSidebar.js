@@ -9,12 +9,15 @@ const handleScrollToTop = () => {
   }
 };
 
-
-const FloatingSidebar = () => {
+const FloatingSidebar = ({ showSection }) => {
   return (
     <div className="floating-sidebar">
-      <div className="floating-button1" onClick={() => alert('안내 섹션으로 이동 예정')}>F&Q</div>
-      <div className="floating-button1" onClick={() => alert('챗봇 호출')}>봇</div>
+      <div className="floating-button1" onClick={() => showSection('faq')}>
+        F&Q
+      </div>
+      <div className="floating-button1" onClick={() => showSection('chat')}>
+        봇
+      </div>
       <div className="floating-button1" onClick={handleScrollToTop}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
