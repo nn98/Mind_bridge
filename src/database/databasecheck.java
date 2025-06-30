@@ -31,10 +31,10 @@ public class Databasecheck {
             Statement stmt = conn.createStatement(); //준비완료 
 
             //ResultSet rs = stmt.executeQuery("SELECT * FROM users"); //다 가져오라는 쿼리(명령)
-            Databasecheck Databasecheck = new Databasecheck();
+            Databasecheck databasecheck = new Databasecheck();
 
             //----자료생성실행
-            Databasecheck.inputUser("test1", "kim@naver.com", "010-1234-1234","1234qwer!");
+            databasecheck.inputUser("test1", "kim@naver.com", "010-1234-1234","1234qwer!");
             //----생성확인실행
             //rs = stmt.executeQuery("SELECT * FROM users"); //다 가져오라는 쿼리(명령)//
             //Databasecheck.printUserData(rs);

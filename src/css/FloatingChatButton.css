@@ -50,7 +50,7 @@
 .modal-tabs {
     display: flex;
     justify-content: space-around;
-    background: #e6f0ee;
+    background: #8fb3e5;
 }
 
 .modal-tabs button {
@@ -63,7 +63,7 @@
 }
 
 .modal-tabs .active {
-    background: #7db7aa;
+    background: #3a5b88;
     color: white;
 }
 

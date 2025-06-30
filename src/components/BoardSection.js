@@ -111,7 +111,6 @@ const BoardSection = () => {
       )}
 
       <div className="post-list">
-        <p className="no-posts">게시글이 없습니다</p>
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
