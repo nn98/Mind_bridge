@@ -63,7 +63,7 @@ const SelfTest = ({ testType, setTestType, selfAnswers, handleSelfAnswer, handle
       </ul>
 
       <div style={{ marginTop: '1.5rem' }}>
-        <button className="self-button">검사 제출</button>
+        <button className="self-button" onClick={submitAnswers}>검사 제출</button>
         <button className="self-button" onClick={() => {
           setSelfAnswers(Array(testQuestions[testType].length).fill(''));
           setResultText('');

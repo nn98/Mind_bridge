@@ -28,7 +28,7 @@ import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
 import Gps from './Gps';
-import GoogleMapView from './components/GoogleMapView';
+import KakaoMapView from './components/KakaoMapView.js';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -114,7 +114,7 @@ const App = () => {
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
-        <Route path="/map" element={<GoogleMapView />} />
+        <Route path="/map" element={<KakaoMapView />} />
         <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
