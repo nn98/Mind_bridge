@@ -26,6 +26,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
+import Gps from './Gps';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -92,6 +93,7 @@ const App = () => {
 
   return (
     <>
+    <Gps />
       <Header
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}

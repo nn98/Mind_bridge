@@ -30,7 +30,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer`, // Bearer 옆에 키값 넣기
+          'Authorization': `Bearer ${apiKey}`, // Bearer 옆에 키값 넣기
         },
         body: JSON.stringify({
           model: 'dall-e-3',

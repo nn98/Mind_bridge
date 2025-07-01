@@ -15,7 +15,7 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const API_KEY = ` `; //키값 넣기
+const API_KEY = `${apiKey}`; //키값 넣기
 
 const Chat = () => {
   const [step, setStep] = useState(0);
