@@ -8,6 +8,7 @@
     justify-content: center;
     cursor: pointer;
     background-color: transparent;
+    
 }
 
 .floating-button:hover {
@@ -69,7 +70,7 @@
 
 .modal-body {
     flex: 1;
-    padding: 20px;
+    padding: 18px;
     overflow-y: auto;
     text-align: center;
 }

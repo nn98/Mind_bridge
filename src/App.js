@@ -16,6 +16,7 @@ import './css/selfTest.css';
 import './css/result.css';
 import './css/banner.css';
 
+
 import Header from './components/Header';
 import Picture from './Picture.js';
 import SelfTest from './components/SelfTest';
@@ -26,6 +27,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
+import GoogleMapView from './components/GoogleMapView';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -85,10 +87,12 @@ const App = () => {
       board: '/board',
       img: '/img',
       signup: '/signup',
-      login: '/login'
+      login: '/login',
+      map: '/map'
     };
     navigate(routes[section] || '/');
   };
+
 
   return (
     <>
@@ -108,6 +112,7 @@ const App = () => {
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
+        <Route path="/map" element={<GoogleMapView />} />
         <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
@@ -140,7 +145,7 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => {}}
+              setActiveSection={() => { }}
             />
           }
         />
@@ -153,7 +158,7 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => {}}
+              setActiveSection={() => { }}
               signupState={signupState}
               setSignupState={setSignupState}
             />
@@ -168,7 +173,7 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => {}}
+              setActiveSection={() => { }}
             />
           }
         />
@@ -181,11 +186,11 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => {}}
+              setActiveSection={() => { }}
             />
           }
         />
-        <Route path="*" element={<div>404: 페이지를 찾을 수 없습니다</div>} />
+
       </Routes>
 
       <ChatModal

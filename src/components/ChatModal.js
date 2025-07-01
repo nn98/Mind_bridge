@@ -57,7 +57,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
           alt="채팅 아이콘"
           style={{
             width: '100px',
-            height: '100px'
+            height: '100px',
           }}
         />
       </div>

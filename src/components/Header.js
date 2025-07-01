@@ -22,7 +22,7 @@ const Header = ({
   const serviceSubMenus = {
     '상담': [
       { label: '이미지', path: '/img' },
-      { label: '메일', path: '/email' },
+      { label: '지도', path: '/map' },
     ],
     '고객 서비스': [
       { label: '서비스 준비 중', path: '#' },

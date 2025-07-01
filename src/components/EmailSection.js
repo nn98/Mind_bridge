@@ -30,7 +30,7 @@ const EmailSection = ({ chatHistory, selectedChat, setSelectedChat, handleRead, 
 
       <div style={{ marginTop: '1rem' }}>
         <button className="button" onClick={handleRead} disabled={!Array.isArray(chatHistory) || chatHistory.length === 0}>
-          텍스트 읽기
+          텍스트 
         </button>
         <button className="button" onClick={handleSendEmail} disabled={!Array.isArray(chatHistory) || chatHistory.length === 0}>
           메일 전송

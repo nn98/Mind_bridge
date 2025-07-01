@@ -24,6 +24,8 @@
   cursor: pointer;
   border-right: 1px solid #ddd;
   color: black;
+  flex: 1;
+  padding: 10px;
 }
 
 .test-type-option:last-child {
