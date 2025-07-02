@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Papa from 'papaparse';
 
-// 거리 계산 함수 (Haversine)
+const apiKey = process.env.REACT_APP_API_MAP_KEY;  // ✅ 변수 이름 수정 확인
+
 function haversineDistance(lat1, lon1, lat2, lon2) {
   const toRad = (x) => (x * Math.PI) / 180;
   const R = 6371;
@@ -17,14 +18,31 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 const Map = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyHospitals, setNearbyHospitals] = useState([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const infoWindowRef = useRef(null);
 
   const DEFAULT_CENTER = { lat: 37.5665, lon: 126.9780 }; // 서울시청
 
-  // 1. 사용자 위치 수집
+  // 1. Kakao Maps SDK 동적 로드
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`;
+    script.async = true;
+    script.onload = () => {
+      window.kakao.maps.load(() => {
+        setMapLoaded(true);  // ✅ 지도 로드 완료 후 실행
+      });
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  // 2. 사용자 위치 수집
+  useEffect(() => {
+    if (!mapLoaded) return;
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -42,11 +60,11 @@ const Map = () => {
     } else {
       console.warn('Geolocation을 지원하지 않습니다.');
     }
-  }, []);
+  }, [mapLoaded]);
 
-  // 2. 병원 CSV 불러오기
+  // 3. 병원 CSV 로딩
   useEffect(() => {
-    if (!userLocation) return;
+    if (!mapLoaded || !userLocation) return;
 
     Papa.parse('/Hospital_Range.csv', {
       download: true,
@@ -70,12 +88,13 @@ const Map = () => {
         setNearbyHospitals(withDistance.slice(0, 20));
       },
     });
-  }, [userLocation]);
+  }, [userLocation, mapLoaded]);
 
-  // 3. 지도 표시
+  // 4. 지도 생성 및 마커 표시
   useEffect(() => {
-    const center = userLocation || DEFAULT_CENTER;
+    if (!mapLoaded) return;
 
+    const center = userLocation || DEFAULT_CENTER;
     const container = mapRef.current;
     const options = {
       center: new window.kakao.maps.LatLng(center.lat, center.lon),
@@ -85,7 +104,6 @@ const Map = () => {
     const map = new window.kakao.maps.Map(container, options);
     mapInstance.current = map;
 
-    // 사용자 위치 마커
     if (userLocation) {
       new window.kakao.maps.Marker({
         position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lon),
@@ -98,7 +116,7 @@ const Map = () => {
       });
     }
 
-    // 병원 마커
+    // 병원 마커 표시
     nearbyHospitals.forEach((hospital) => {
       const marker = new window.kakao.maps.Marker({
         position: new window.kakao.maps.LatLng(hospital.lat, hospital.lon),
@@ -123,7 +141,7 @@ const Map = () => {
         infoWindowRef.current = infowindow;
       });
     });
-  }, [userLocation, nearbyHospitals]);
+  }, [nearbyHospitals, mapLoaded]);
 
   return (
     <div>
@@ -138,8 +156,9 @@ const Map = () => {
           border: '1px solid #ccc',
         }}
       />
+      {!nearbyHospitals.length && (
         <p>위치 정보를 불러오거나 주변 병원 데이터를 로딩 중입니다...</p>
-      )
+      )}
     </div>
   );
 };
