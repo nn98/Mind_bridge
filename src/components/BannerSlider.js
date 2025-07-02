@@ -47,8 +47,8 @@ const BannerSlider = () => {
         <a href="http://localhost:3000/self">
           <img src="/main2.png" alt="자가진단" />
         </a>
-        <a href="https://hellosmile.kr/bbs/board.php?bo_table=15" target="_blank" rel="noopener noreferrer">
-          <img src="http://hellosmile.kr/main/slideshow/main_banner01.png" alt="헬로스마일 in TV" />
+        <a href="*">
+          <img src="/main3.png" alt="병원위치 안내문" />
         </a>
         <a href="http://www.hellosmile.kr/bbs/board.php?bo_table=26" target="_blank" rel="noopener noreferrer">
           <img src="http://hellosmile.kr/main/slideshow/main_banner04.png" alt="상담고객 리얼후기" />

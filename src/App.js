@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import Map from './Map';
 
 import './css/App.css';
 import './css/board.css';
@@ -27,8 +28,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
-import Gps from './Gps';
-import KakaoMapView from './components/KakaoMapView.js';
+
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -49,6 +49,7 @@ const App = () => {
   const [resultText, setResultText] = useState('');
   const [testType, setTestType] = useState('우울증');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
+  const [userLocation, setUserLocation] = useState(null);  // 상태 선언
 
   const introRef = useRef(null);
   const noticeRef = useRef(null);
@@ -97,7 +98,6 @@ const App = () => {
 
   return (
     <>
-    <Gps />
       <Header
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
@@ -114,7 +114,7 @@ const App = () => {
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
-        <Route path="/map" element={<KakaoMapView />} />
+        <Route path="/map" element={<Map />} />
         <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
@@ -194,18 +194,16 @@ const App = () => {
         />
 
       </Routes>
-
       <ChatModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         tab={tab}
         setTab={setTab}
-        selectedChat={selectedChat}
+        selectedz={selectedChat}
         setSelectedChat={setSelectedChat}
         chatInput={chatInput}
         resultText={resultText}
       />
-
       <Footer />
     </>
   );
