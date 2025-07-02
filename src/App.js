@@ -28,6 +28,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
+import Chat from './Chat';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -89,7 +90,8 @@ const App = () => {
       img: '/img',
       signup: '/signup',
       login: '/login',
-      map: '/map'
+      map: '/map',
+      chat: '/Chat'
     };
     navigate(routes[section] || '/');
   };
@@ -193,18 +195,16 @@ const App = () => {
         />
 
       </Routes>
-
       <ChatModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         tab={tab}
         setTab={setTab}
-        selectedChat={selectedChat}
+        selectedz={selectedChat}
         setSelectedChat={setSelectedChat}
         chatInput={chatInput}
         resultText={resultText}
       />
-
       <Footer />
     </>
   );
