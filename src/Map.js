@@ -148,11 +148,13 @@ const Map = () => {
       <div
         ref={mapRef}
         style={{
-          width: '100%',
-          height: '500px',
+          width: '40vw',
+          height: 'calc(50vh - 60px)',
           borderRadius: '10px',
           border: '1px solid #ccc',
-          marginTop: '10px',
+          margin: '10px',
+          marginBottom:'80px',
+          
         }}
       />
     </div>
