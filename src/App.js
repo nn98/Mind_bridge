@@ -90,8 +90,7 @@ const App = () => {
       img: '/img',
       signup: '/signup',
       login: '/login',
-      map: '/map',
-      chat: '/Chat'
+      map: '/map'
     };
     navigate(routes[section] || '/');
   };
