@@ -17,7 +17,6 @@ import './css/selfTest.css';
 import './css/result.css';
 import './css/banner.css';
 
-
 import Header from './components/Header';
 import Picture from './Picture.js';
 import SelfTest from './components/SelfTest';
@@ -28,7 +27,6 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
-
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -49,7 +47,8 @@ const App = () => {
   const [resultText, setResultText] = useState('');
   const [testType, setTestType] = useState('우울증');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
-  const [userLocation, setUserLocation] = useState(null);  // 상태 선언
+  const [userLocation, setUserLocation] = useState(null);
+  const [mapVisible, setMapVisible] = useState(false); // 추가됨
 
   const introRef = useRef(null);
   const noticeRef = useRef(null);
@@ -90,11 +89,16 @@ const App = () => {
       img: '/img',
       signup: '/signup',
       login: '/login',
-      map: '/map'
+      map: '/map',
+      chat: 'popup-map',
     };
-    navigate(routes[section] || '/');
-  };
 
+    if (section === 'chat') {
+      setMapVisible(true);
+    } else {
+      navigate(routes[section] || '/');
+    }
+  };
 
   return (
     <>
@@ -112,6 +116,37 @@ const App = () => {
       />
 
       <FloatingSidebar showSection={showSection} />
+
+      {mapVisible && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '80px',
+            right: '20px',
+            zIndex: 1000,
+            background: 'white',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            borderRadius: '12px',
+            padding: '10px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: '0 auto'}}>내 주변 병원 지도</h2>
+            <button
+              onClick={() => setMapVisible(false)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                fontSize: '18px',
+                cursor: 'pointer',
+              }}
+            >
+              ✖
+            </button>
+          </div>
+          <Map />
+        </div>
+      )}
 
       <Routes>
         <Route path="/map" element={<Map />} />
@@ -192,8 +227,8 @@ const App = () => {
             />
           }
         />
-
       </Routes>
+
       <ChatModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -204,6 +239,7 @@ const App = () => {
         chatInput={chatInput}
         resultText={resultText}
       />
+
       <Footer />
     </>
   );

@@ -144,7 +144,6 @@ const Map = () => {
 
   return (
     <div>
-      <h2>내 주변 병원 지도</h2>
       <div
         ref={mapRef}
         style={{
@@ -154,7 +153,6 @@ const Map = () => {
           border: '1px solid #ccc',
           margin: '10px',
           marginBottom:'80px',
-          
         }}
       />
     </div>

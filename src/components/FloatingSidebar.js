@@ -16,7 +16,7 @@ const FloatingSidebar = ({ showSection }) => {
         F&Q
       </div>
       <div className="floating-button1" onClick={() => showSection('chat')}>
-        봇
+        지도
       </div>
       <div className="floating-button1" onClick={handleScrollToTop}>
         <svg
