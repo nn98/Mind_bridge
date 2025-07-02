@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import Map from './Map';
 
 import './css/App.css';
 import './css/board.css';
@@ -114,7 +115,7 @@ const App = () => {
       <FloatingSidebar showSection={showSection} />
 
       <Routes>
-        <Route path="/map" element={<KakaoMapView />} />
+        <Route path="/map" element={<Map/>} />
         <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
