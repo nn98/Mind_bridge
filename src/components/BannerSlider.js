@@ -44,7 +44,7 @@ const BannerSlider = () => {
         <a href="https://mind-bridge-zeta.vercel.app">
           <img src="/main.png" alt="마인드브릿지 설명 배너" />
         </a>
-        <a href="http://localhost:3000/self">
+        <a href="https://mind-bridge-zeta.vercel.app/self">
           <img src="/main2.png" alt="자가진단" />
         </a>
         <a href="*">
