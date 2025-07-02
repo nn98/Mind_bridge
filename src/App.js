@@ -28,7 +28,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
-import Chat from './Chat';
+
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -90,8 +90,7 @@ const App = () => {
       img: '/img',
       signup: '/signup',
       login: '/login',
-      map: '/map',
-      chat: '/Chat'
+      map: '/map'
     };
     navigate(routes[section] || '/');
   };
