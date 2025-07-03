@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-const apiKey = process.env.REACT_APP_API_KEY;
-const apiAddress = process.env.REACT_APP_API_PICTURE_ADDRESS;
+const apiKey = process.env.API_KEY;
+const apiAddress = process.env.API_PICTURE_ADDRESS;
 
 
 const promptTemplate = `

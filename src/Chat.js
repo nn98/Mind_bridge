@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-const apiKey = process.env.REACT_APP_API_KEY;
-const apiAddress = process.env.REACT_APP_API_CHAT_ADDRESS;
+const apiKey = process.env.API_KEY;
+const apiAddress = process.env.API_CHAT_ADDRESS;
 
 const questionOrder = [
   '이름을 입력해주세요.',

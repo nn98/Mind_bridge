@@ -1,4 +1,3 @@
-// src/sections/AboutSection.js
 import React from 'react';
 import BannerSlider from './BannerSlider';
 import NoticeBoard from '../components/NoticeBoard';
@@ -57,10 +56,10 @@ const AboutSection = ({ refs }) => {
         <div className="about-box">
           <h2>Mind_bridge가 지향하는 가치</h2>
           <ul className="about-list">
-            <li>💬 누구나 쉽게 이용할 수 있는 정서 케어</li>
-            <li>🔐 안전한 데이터 보호와 익명성 보장</li>
-            <li>📈 데이터 기반 맞춤형 피드백 제공</li>
-            <li>🌱 지속 가능한 마음 건강 지원</li>
+            <li>누구나 쉽게 이용할 수 있는 정서 케어</li>
+            <li>안전한 데이터 보호와 익명성 보장</li>
+            <li>데이터 기반 맞춤형 피드백 제공</li>
+            <li>지속 가능한 마음 건강 지원</li>
           </ul>
         </div>
       </section>
