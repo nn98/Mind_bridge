@@ -1,0 +1,72 @@
+/* src/sections/AboutSection.css */
+
+.about-section {
+    padding: 2rem 0;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.about-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.about-box {
+    max-width: 900px;
+    margin: 0 auto 2rem auto;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.about-box h2 {
+    margin-bottom: 1rem;
+    color: #3a5b88;
+    font-size: 1.2rem;
+}
+
+.about-box p {
+    margin-bottom: 1rem;
+    color: #333;
+    line-height: 1.7;
+}
+
+.about-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.about-table th,
+.about-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.about-table th {
+    background-color: #f0f4ff;
+    font-weight: bold;
+}
+
+.about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-list li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.about-list li::before {
+    content: '✔';
+    position: absolute;
+    left: 0;
+    color: #3a5b88;
+    font-weight: bold;
+}

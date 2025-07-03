@@ -5,8 +5,8 @@ const NoticeBoard = () => {
     const [notices] = useState([
         {
             id: 1,
-            title: '[정기점검] 7월 10일 시스템 점검 안내',
-            content: '7월 10일(수) 01:00~03:00 사이 정기 점검이 진행됩니다.',
+            title: '[정기점검] 시스템 점검 안내',
+            content: '매주(수) 01:00~03:00 사이 정기 점검이 진행됩니다.',
             date: '2025-07-01',
         },
         {
@@ -27,6 +27,12 @@ const NoticeBoard = () => {
             content:'내 주변 가까운 병원 위치 확인과 간단한 병원 안내 창이 생겼습니다.',
             date: '2025-07-02',
         },
+        {
+            id: 5,
+            title: '[횡령 사원] 현재 Mind_bridge 회사에 공금 횡령 사원 발생',
+            content: '이름:나세종/나이:26살/출신지:전라도 광주/생김새:건장한 척 하는 성인 남성 해당하는 사람을 발견시 즉시 회사로 전화주시기 바랍니다.',
+            date: '2025-07-03',
+        }
     ]);
 
     const [selectedNotice, setSelectedNotice] = useState(null);
