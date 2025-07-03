@@ -1,5 +1,5 @@
-// sections/AboutSection.js
-import React, { useRef } from 'react';
+
+import NoticeBoard from './NoticeBoard';
 import BannerSlider from './BannerSlider';
 
 const AboutSection = ({ refs }) => {
@@ -16,7 +16,7 @@ const AboutSection = ({ refs }) => {
 
       <section ref={noticeRef} className="section">
         <h2>공지 사항</h2>
-        <p>현재 정기 점검 중이며, 서비스가 일부 제한될 수 있습니다.</p>
+        <NoticeBoard/>
       </section>
 
       <section ref={locationRef} className="section">

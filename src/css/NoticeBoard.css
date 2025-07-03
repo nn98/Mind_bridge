@@ -1,0 +1,41 @@
+/* src/css/NoticeBoard.css */
+
+.notice-board {
+    padding: 1rem 0;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.notice-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.notice-table th,
+.notice-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+    cursor: pointer;
+}
+
+.notice-table tr:hover {
+    background-color: #f1f7ff;
+}
+
+.notice-detail {
+    margin-top: 1rem;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.notice-detail button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #3a5b88;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
