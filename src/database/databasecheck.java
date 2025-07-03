@@ -9,7 +9,7 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 
-public class databasecheck {
+public class DatabaseCheck {
     //DB 접속 정보
 
     static String url = "jdbc:mysql://sol-skhu.duckdns.org:3306/gabia_first?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&useSSL=false&allowPublicKeyRetrieval=true";
