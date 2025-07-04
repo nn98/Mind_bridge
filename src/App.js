@@ -34,6 +34,8 @@ import { buttonLabels } from './constants/buttonLabels';
 import { formLinks } from './constants/formLinks';
 
 const App = () => {
+  console.log(process.env.REACT_APP_KEY);
+  console.log(process.env.REACT_APP_MAP_KEY);
   const [selectedBoard, setSelectedBoard] = useState('');
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
