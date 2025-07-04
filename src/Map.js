@@ -88,7 +88,7 @@ const Map = () => {
     });
 
     // 병원 CSV 로드
-    Papa.parse('/Hospital_Range.csv', {
+    Papa.parse('/HospitalInfoWithPhone.csv', {
       download: true,
       header: true,
       complete: (res) => {
