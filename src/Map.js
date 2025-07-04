@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Papa from 'papaparse';
 
-const apiKey = process.env.API_MAP_KEY;
+const apiKey = process.env.REACT_APP_MAP_KEY;
 
 const DEFAULT_CENTER = {
   lat: 37.5665,
@@ -88,7 +88,7 @@ const Map = () => {
     });
 
     // 병원 CSV 로드
-    Papa.parse('/Hospital_Range.csv', {
+    Papa.parse('/HospitalInfoWithPhone.csv', {
       download: true,
       header: true,
       complete: (res) => {

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-const apiKey = process.env.API_KEY;
-const apiAddress = process.env.API_CHAT_ADDRESS;
+const apiKey = process.env.REACT_APP_KEY;
+const apiAddress = process.env.REACT_APP_CHAT_ADDRESS;
 
 const questionOrder = [
   '이름을 입력해주세요.',
@@ -15,7 +15,7 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const API_KEY = `${apiKey}`; //키값 넣기
+const REACT_APP_KEY = `${apiKey}`; //키값 넣기
 
 const Chat = () => {
   const [step, setStep] = useState(0);
@@ -92,7 +92,7 @@ const Chat = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`
+          Authorization: `Bearer ${REACT_APP_KEY}`
         },
         body: JSON.stringify({
           model: 'gpt-4',
