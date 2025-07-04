@@ -2,7 +2,6 @@
     position: fixed;
     bottom: 80px;
     right: 90px;
-    font-size: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,6 +12,19 @@
 
 .floating-button:hover {
     background-color: transparent;
+}
+
+.floating-button1 {
+  width: 75px;          /* 고정 너비 */
+  height: 75px;         /* 고정 높이 */
+  background-color: #4a6fa5;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;     /* 내부 콘텐츠가 넘칠 경우 자르기 */
+  text-align: center;
 }
 
 

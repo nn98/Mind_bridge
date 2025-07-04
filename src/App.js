@@ -121,8 +121,8 @@ const App = () => {
         <div
           style={{
             position: 'fixed',
-            bottom: '80px',
-            right: '20px',
+            bottom: '200px',
+            right: '150px',
             zIndex: 1000,
             background: 'white',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',

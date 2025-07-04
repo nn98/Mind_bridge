@@ -147,6 +147,7 @@ const Map = () => {
       <div
         ref={mapRef}
         style={{
+          
           width: '40vw',
           height: 'calc(50vh - 60px)',
           borderRadius: '10px',
