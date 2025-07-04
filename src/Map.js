@@ -98,6 +98,7 @@ const Map = () => {
             address: item['주소'],
             lat: parseFloat(item['위도']),
             lon: parseFloat(item['경도']),
+            phone: item['전화번호'],
           }))
           .filter((h) => !isNaN(h.lat) && !isNaN(h.lon));
 
@@ -125,7 +126,8 @@ const Map = () => {
             <div style="padding:8px; font-size:13px;">
               <strong>${h.name}</strong><br/>
               거리: ${h.distance.toFixed(2)} km<br/>
-              주소: ${h.address}
+              주소: ${h.address}<br/>
+              전화번호: ${h.phone}
             </div>
           `;
 
