@@ -16,7 +16,7 @@ const FloatingSidebar = ({ showSection }) => {
         F&Q
       </div>
       <div className="floating-button1" onClick={() => showSection('chat')}>
-        <img src='/map.png' alt='지도' style={{ width: '60px', height: '60px' }} />
+        <img src='/map.png' alt='지도' style={{ width: '60px', height: '60 px' }} />
         
       </div>
       <div className="floating-button1" onClick={handleScrollToTop}>
