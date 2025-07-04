@@ -1,0 +1,8 @@
+{
+  "devCommand": "next dev",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
