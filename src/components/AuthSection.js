@@ -11,14 +11,14 @@ const AuthSection = ({
   setSignupState
 }) => {
   const handleGoogleLogin = () => {
-    const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+    const GOOGLE_CLIENT_ID = ' '; //클라이언트 아이디 추가
     const redirectUri = encodeURIComponent('http://localhost:8080/auth/google/callback');
     const scope = encodeURIComponent('profile email');
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
   };
 
   const handleKakaoLogin = () => {
-    const KAKAO_REST_API_KEY = 'YOUR_KAKAO_REST_API_KEY';
+    const KAKAO_REST_API_KEY = ' '; //클라이언트 아이디 추가
     const redirectUri = encodeURIComponent('http://localhost:8080/auth/kakao/callback');
     window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${redirectUri}&response_type=code`;
   };
