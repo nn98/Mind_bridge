@@ -111,3 +111,40 @@
 .radio-list input[type="radio"] {
   margin-right: 0.5rem;
 }
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.social-button {
+  width: 65%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-button.google {
+  background-color: #db4437;
+  color: white;
+}
+
+.social-button.google:hover {
+  background-color: #c1351d;
+}
+
+.social-button.kakao {
+  background-color: #fee500;
+  color: #3c1e1e;
+}
+
+.social-button.kakao:hover {
+  background-color: #f5d900;
+}

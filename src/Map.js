@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Papa from 'papaparse';
 
-const apiKey = process.env.REACT_APP_MAP_KEY;
+const apiKey = process.env.REACT_APP_API_MAP_KEY;
 
 const DEFAULT_CENTER = {
   lat: 37.5665,
@@ -123,17 +123,22 @@ const Map = () => {
           });
 
           const content = `
-            <div style="padding:8px; font-size:13px;">
-              <strong>${h.name}</strong><br/>
-              거리: ${h.distance.toFixed(2)} km<br/>
-              주소: ${h.address}<br/>
-              전화번호: ${h.phone}
-            </div>
-          `;
+  <div style="padding:10px; font-size:12px; max-width:300px; line-height:1.6; white-space:normal; word-break:break-word; overflow-wrap:break-word; overflow:hidden;">
+    <strong style="font-size:13px;">${h.name}</strong><br/>
+    <span style="display:block;">거리: ${h.distance.toFixed(2)} km</span>
+    <span style="display:block;">주소: ${h.address}</span>
+    <span style="display:block;">전화번호: ${h.phone}</span>
+  </div>
+`;
 
           marker.addListener('click', () => {
             if (infoWindowRef.current) infoWindowRef.current.close();
-            const infowindow = new window.kakao.maps.InfoWindow({ content });
+
+            const infowindow = new window.kakao.maps.InfoWindow({
+              content,
+              maxWidth: 320
+            });
+
             infowindow.open(map, marker);
             infoWindowRef.current = infowindow;
           });
@@ -149,13 +154,12 @@ const Map = () => {
       <div
         ref={mapRef}
         style={{
-          
           width: '40vw',
           height: 'calc(50vh - 60px)',
           borderRadius: '10px',
           border: '1px solid #ccc',
           margin: '10px',
-          marginBottom:'80px',
+          marginBottom: '80px',
         }}
       />
     </div>
