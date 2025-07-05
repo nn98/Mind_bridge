@@ -11,7 +11,7 @@ const AuthSection = ({
   setSignupState
 }) => {
   const handleGoogleLogin = () => {
-    const GOOGLE_CLIENT_ID = '837817012424-1ddqhoh6p1fn32vpoq984nlbo6vnpmkc.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
     const redirectUri = encodeURIComponent('http://localhost:8080/auth/google/callback');
     const scope = encodeURIComponent('profile email');
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
