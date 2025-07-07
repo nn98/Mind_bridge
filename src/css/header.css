@@ -75,4 +75,27 @@ hr.small-line {
   background-color: #2c5083;
 }
 
+.custom-blue-btn {
+  width: 70px;
+  height: 30px;
+  background: linear-gradient(135deg, #a8d0ff, #5a9eff); /* 옅은 파란색 그라데이션 */
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 0 12px 3px rgba(90, 158, 255, 0.35); /* 전체적으로 번지는 그림자 */
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-right: 10px;
+}
 
+.custom-blue-btn:hover {
+  background: linear-gradient(135deg, #8cc0ff, #3f7fe0);
+  box-shadow: 0 0 18px 6px rgba(90, 158, 255, 0.45);
+}
+
+.custom-blue-btn:focus {
+  outline: none;
+  box-shadow: 0 0 20px 8px rgba(90, 158, 255, 0.55);
+}

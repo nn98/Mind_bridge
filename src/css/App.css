@@ -174,11 +174,11 @@
 .close-modal-btn {
   position: absolute;
   top: 105%;
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   background: transparent;
   border: none;
-  border-radius: 20%;
+  border-radius: 10%;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   cursor: pointer;
   z-index: 1001;

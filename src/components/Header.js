@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
-import { SignedIn, SignedOut, UserButton, RedirectToSignIn, SignInButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, UserButton, RedirectToSignIn, SignInButton, SignUpButton } from '@clerk/clerk-react';
 
 const Header = ({
   hoveredMenu,
@@ -15,7 +15,8 @@ const Header = ({
   locationRef,
   showSection,
   navigate,
-  onLoginClick,
+  onSignupClick,
+  onSigninClick,
 }) => {
   const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
 
@@ -149,10 +150,10 @@ const Header = ({
             <UserButton />
           </SignedIn>
           <SignedOut>
-            <SignInButton>
-
-            </SignInButton>
-            <button onClick={onLoginClick}>로그인</button>
+            {/*<SignUpButton>*/}
+            {/*</SignUpButton>*/}
+            <button className="custom-blue-btn" onClick={onSignupClick}>SignUp</button>
+            <button className="custom-blue-btn" onClick={onSigninClick}>SignIn</button>
           </SignedOut>
         </div>
       </nav>

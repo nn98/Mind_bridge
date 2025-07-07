@@ -51,6 +51,7 @@ const App = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false); // 추가됨
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
   const introRef = useRef(null);
@@ -59,18 +60,19 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!showSignIn) return;
+    if (!showSignIn || !showSignUp) return;
     const handleEsc = (e) => {
       if (e.key === 'Escape') setFadeOutAndClose();
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [showSignIn]);
+  }, [showSignUp, showSignIn]);
 
   // 페이드아웃 후 완전 닫기
   const setFadeOutAndClose = () => {
     setFadeOut(true);
     setTimeout(() => {
+      setShowSignUp(false);
       setShowSignIn(false);
       setFadeOut(false);
     }, 300); // CSS 애니메이션 시간과 맞춰주세요
@@ -123,7 +125,14 @@ const App = () => {
   return (
     <>
       <Header
-        onLoginClick={() => setShowSignIn(true)}
+        onSigninClick={() => {
+          setShowSignUp(false);
+          setShowSignIn(true);
+        }}
+        onSignupClick={() => {
+          setShowSignUp(true);
+          setShowSignIn(false);
+        }}
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeaveAll={handleMouseLeaveAll}
@@ -146,6 +155,22 @@ const App = () => {
             onClick={e => e.stopPropagation()} // 모달 내용 클릭 시 닫기 방지
           >
             <SignIn routing="virtual" />
+            <button className="close-modal-btn" onClick={setFadeOutAndClose}>
+              <span className="close-x-icon" aria-label="닫기">&times;</span>
+            </button>
+          </div>
+        </div>
+      )}
+      {showSignUp && (
+        <div
+          className={`modal-backdrop ${fadeOut ? 'fade-out' : 'fade-in'}`}
+          onClick={setFadeOutAndClose}
+        >
+          <div
+            className={`modal-content ${fadeOut ? 'fade-out' : 'fade-in'}`}
+            onClick={e => e.stopPropagation()} // 모달 내용 클릭 시 닫기 방지
+          >
+            <SignUp routing="virtual" />
             <button className="close-modal-btn" onClick={setFadeOutAndClose}>
               <span className="close-x-icon" aria-label="닫기">&times;</span>
             </button>
