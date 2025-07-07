@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { SignIn, SignUp, SignedIn, SignedOut, UserButton, RedirectToSignIn } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import Map from './Map';
 
 import './css/App.css';
@@ -58,6 +59,7 @@ const App = () => {
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
   const navigate = useNavigate();
+  const { isSignedIn, user } = useUser();
 
   useEffect(() => {
     if (!showSignIn || !showSignUp) return;
@@ -193,7 +195,7 @@ const App = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: '0 auto'}}>내 주변 병원 지도</h2>
+            <h2 style={{ margin: '0 auto' }}>내 주변 병원 지도</h2>
             <button
               onClick={() => setMapVisible(false)}
               style={{
@@ -233,7 +235,10 @@ const App = () => {
             />
           }
         />
-        <Route path="/board" element={<BoardSection />} />
+        <Route
+          path="/board"
+          element={<BoardSection user={user} isSignedIn={isSignedIn} />}
+        />
         <Route path="/img" element={<Picture />} />
         <Route path="/sign-in" element={<SignIn routing="path" path="/sign-in" />} />
         <Route path="/sign-up" element={<SignUp routing="path" path="/sign-up" />} />

@@ -10,6 +10,7 @@ const AuthSection = ({
   signupState,
   setSignupState
 }) => {
+
   const handleGoogleLogin = () => {
     const GOOGLE_CLIENT_ID = ' '; //클라이언트 아이디 추가
     const redirectUri = encodeURIComponent('http://localhost:8080/auth/google/callback');

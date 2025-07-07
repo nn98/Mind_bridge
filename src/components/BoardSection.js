@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-const BoardSection = () => {
+
+const BoardSection = ({ user, isSignedIn }) => {
+  console.log('user:', user);
   const [selectedBoard, setSelectedBoard] = useState('general');
   const [visibility, setVisibility] = useState('공개');
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
+
 
   const [posts, setPosts] = useState(() => {
     const saved = localStorage.getItem('posts');
@@ -18,6 +21,11 @@ const BoardSection = () => {
   }, [posts]);
 
   const handleSubmit = () => {
+    if (!isSignedIn) {
+      alert('로그인 후 작성 가능합니다.');
+      return;
+    }
+
     if (!content.trim()) return;
 
     const newPost = {
@@ -25,6 +33,8 @@ const BoardSection = () => {
       content,
       visibility,
       date: new Date().toLocaleString(),
+      userId: user.id,
+      userName: user.fullName || user.username || '익명',
     };
 
     setPosts([newPost, ...posts]);
@@ -32,6 +42,7 @@ const BoardSection = () => {
     setVisibility('공개');
     setShowForm(false);
   };
+
 
   const handleDelete = (id) => {
     setPosts(posts.filter(post => post.id !== id));
@@ -115,8 +126,11 @@ const BoardSection = () => {
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
               <p className="post-content">{post.content}</p>
-              <span className="post-meta">{post.date} ・ {post.visibility}</span>
-              <button className="delete-button" onClick={() => handleDelete(post.id)}>삭제</button>
+              <span className="post-meta">
+                {post.date} ・ {post.visibility} ・ 작성자: {post.userName}</span>
+              {isSignedIn && user?.id === post.userId && (
+                <button className="delete-button" onClick={() => handleDelete(post.id)}>삭제</button>
+              )}
             </div>
           ))
         ) : (
