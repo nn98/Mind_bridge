@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
+import { SignedIn, SignedOut, UserButton, RedirectToSignIn, SignInButton } from '@clerk/clerk-react';
 
 const Header = ({
   hoveredMenu,
   handleMouseEnter,
   handleMouseLeaveAll,
+  setSubMenuVisible,
+  subMenuVisible,
+  handleBoardSelect,
   introRef,
   noticeRef,
   locationRef,
-  showSection
+  showSection,
+  navigate,
+  onLoginClick,
 }) => {
   const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
 
@@ -139,7 +145,15 @@ const Header = ({
         </div>
 
         <div className="nav-right">
-          <Link to="/login" className="auth-button">로그인</Link>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          <SignedOut>
+            <SignInButton>
+
+            </SignInButton>
+            <button onClick={onLoginClick}>로그인</button>
+          </SignedOut>
         </div>
       </nav>
     </header>

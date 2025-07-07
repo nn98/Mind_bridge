@@ -15,8 +15,6 @@ const fieldKeys = [
   '이름', '성별', '나이', '상태', '상담받고싶은내용', '이전상담경험'
 ];
 
-const REACT_APP_KEY = `${apiKey}`; //키값 넣기
-
 const Chat = () => {
   const [step, setStep] = useState(0);
   const [chatInput, setChatInput] = useState('');
@@ -92,7 +90,7 @@ const Chat = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${REACT_APP_KEY}`
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: 'gpt-4',

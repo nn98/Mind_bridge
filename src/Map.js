@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Papa from 'papaparse';
 
-const apiKey = process.env.REACT_APP_API_MAP_KEY;
+const apiKey = process.env.REACT_APP_MAP_KEY;
 
 const DEFAULT_CENTER = {
   lat: 37.5665,

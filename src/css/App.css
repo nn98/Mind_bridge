@@ -58,6 +58,7 @@
   display: flex;
   justify-content: flex-end;
 }
+
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0;
@@ -142,6 +143,8 @@
   justify-content: center;
   align-items: center;
   z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .modal-box {
@@ -168,6 +171,55 @@
   object-fit: contain;
 }
 
+.close-modal-btn {
+  position: absolute;
+  top: 105%;
+  width: 80px;
+  height: 80px;
+  background: transparent;
+  border: none;
+  border-radius: 20%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  padding: 0;
+}
 
+.close-modal-btn:hover {
+  background: #00000088;
+}
 
+.close-x-icon {
+  font-size: 7.5rem;      /* 기존 3rem의 2.5배 크기 */
+  color: #fff;            /* 흰 글씨 */
+  line-height: 1;
+  pointer-events: none;   /* 클릭은 버튼에만 적용 */
+  user-select: none;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8); /* 흰색 그림자 추가 */
+}
 
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 가로 중앙 정렬 */
+  justify-content: center; /* 세로 중앙 정렬(필요시) */
+  position: relative;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+/* 페이드 아웃 */
+.fade-out {
+  opacity: 0;
+}

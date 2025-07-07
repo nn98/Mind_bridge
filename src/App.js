@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import { SignIn, SignUp, SignedIn, SignedOut, UserButton, RedirectToSignIn } from '@clerk/clerk-react';
 import Map from './Map';
 
 import './css/App.css';
@@ -49,12 +50,31 @@ const App = () => {
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
   const [userLocation, setUserLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false); // 추가됨
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
 
   const introRef = useRef(null);
   const noticeRef = useRef(null);
   const locationRef = useRef(null);
-
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!showSignIn) return;
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setFadeOutAndClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showSignIn]);
+
+  // 페이드아웃 후 완전 닫기
+  const setFadeOutAndClose = () => {
+    setFadeOut(true);
+    setTimeout(() => {
+      setShowSignIn(false);
+      setFadeOut(false);
+    }, 300); // CSS 애니메이션 시간과 맞춰주세요
+  };
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
@@ -103,6 +123,7 @@ const App = () => {
   return (
     <>
       <Header
+        onLoginClick={() => setShowSignIn(true)}
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeaveAll={handleMouseLeaveAll}
@@ -113,8 +134,24 @@ const App = () => {
         noticeRef={noticeRef}
         locationRef={locationRef}
         showSection={showSection}
+        navigate={navigate}
       />
-
+      {showSignIn && (
+        <div
+          className={`modal-backdrop ${fadeOut ? 'fade-out' : 'fade-in'}`}
+          onClick={setFadeOutAndClose}
+        >
+          <div
+            className={`modal-content ${fadeOut ? 'fade-out' : 'fade-in'}`}
+            onClick={e => e.stopPropagation()} // 모달 내용 클릭 시 닫기 방지
+          >
+            <SignIn routing="virtual" />
+            <button className="close-modal-btn" onClick={setFadeOutAndClose}>
+              <span className="close-x-icon" aria-label="닫기">&times;</span>
+            </button>
+          </div>
+        </div>
+      )}
       <FloatingSidebar showSection={showSection} />
 
       {mapVisible && (
@@ -173,34 +210,8 @@ const App = () => {
         />
         <Route path="/board" element={<BoardSection />} />
         <Route path="/img" element={<Picture />} />
-        <Route
-          path="/login"
-          element={
-            <AuthSection
-              type="login"
-              sectionLabels={sectionLabels}
-              formInputs={formInputs}
-              buttonLabels={buttonLabels}
-              formLinks={formLinks}
-              setActiveSection={() => { }}
-            />
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <AuthSection
-              type="signup"
-              sectionLabels={sectionLabels}
-              formInputs={formInputs}
-              buttonLabels={buttonLabels}
-              formLinks={formLinks}
-              setActiveSection={() => { }}
-              signupState={signupState}
-              setSignupState={setSignupState}
-            />
-          }
-        />
+        <Route path="/sign-in" element={<SignIn routing="path" path="/sign-in" />} />
+        <Route path="/sign-up" element={<SignUp routing="path" path="/sign-up" />} />
         <Route
           path="/find-id"
           element={
