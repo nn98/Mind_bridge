@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Papa from 'papaparse';
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
@@ -61,7 +63,8 @@ const Map = () => {
         setUserLoc({ lat, lon });
       },
       (err) => {
-        alert('GPS 사용 불가: ' + err.message);
+        // alert('GPS 사용 불가: ' + err.message);
+        toast.error('GPS 사용 불가');
       },
       { enableHighAccuracy: true }
     );
@@ -150,19 +153,31 @@ const Map = () => {
   }, [userLoc]);
 
   return (
-    <div>
-      <div
-        ref={mapRef}
-        style={{
-          width: '40vw',
-          height: 'calc(50vh - 60px)',
-          borderRadius: '10px',
-          border: '1px solid #ccc',
-          margin: '10px',
-          marginBottom: '80px',
-        }}
-      />
-    </div>
+    <>
+      <div>
+        <div
+          ref={mapRef}
+          style={{
+            width: '40vw',
+            height: 'calc(50vh - 60px)',
+            borderRadius: '10px',
+            border: '1px solid #ccc',
+            margin: '10px',
+            marginBottom: '80px',
+          }}
+        />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          draggable
+          limit={2}
+        />
+      </div>
+    </>
   );
 };
 

@@ -18,3 +18,7 @@
   color: #777;
 }
 
+.Toastify__toast {
+  box-shadow: 0 6px 24px 4px rgba(0,0,0,0.22);
+  margin: 0 10rem 9rem 0;
+}
