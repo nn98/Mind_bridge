@@ -125,7 +125,7 @@ const Map = () => {
           });
 
           const infoContent = `
-            <div style="padding:10px; font-size:12px; max-width:300px; line-height:1.6;">
+            <div style="padding:20px; font-size:12px; max-width:300px; line-height:1.6;">
               <strong style="font-size:13px;">${h.name}</strong><br/>
               ${userLoc ? `거리: ${h.distance.toFixed(2)} km<br/>` : ''}
               주소: ${h.address}<br/>
