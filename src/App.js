@@ -50,7 +50,7 @@ const App = () => {
   const [testType, setTestType] = useState('우울증');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
   const [userLocation, setUserLocation] = useState(null);
-  const [mapVisible, setMapVisible] = useState(false); // 추가됨
+  const [mapVisible, setMapVisible] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);

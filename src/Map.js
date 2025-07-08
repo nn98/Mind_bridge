@@ -4,13 +4,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import Papa from 'papaparse';
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
+const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
 
 const DEFAULT_CENTER = {
   lat: 37.5665,
   lon: 126.9780,
 };
 
-// 거리 계산 함수 (Haversine)
 function haversineDistance(lat1, lon1, lat2, lon2) {
   const toRad = (x) => (x * Math.PI) / 180;
   const R = 6371;
@@ -28,11 +28,11 @@ const Map = () => {
   const mapInstanceRef = useRef(null);
   const userMarkerRef = useRef(null);
   const infoWindowRef = useRef(null);
+  const routePolylineRef = useRef(null);
   const [gpsReady, setGpsReady] = useState(false);
-  const [userLoc, setUserLoc] = useState(null);
+  const [userLoc, setUserLoc] = useState(undefined);
   const markersRef = useRef([]);
 
-  // 1. 카카오맵 SDK 로드
   useEffect(() => {
     const script = document.createElement('script');
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false&libraries=services`;
@@ -52,7 +52,6 @@ const Map = () => {
     return () => document.head.removeChild(script);
   }, []);
 
-  // 2. GPS 수집
   useEffect(() => {
     if (!gpsReady) return;
 
@@ -63,34 +62,31 @@ const Map = () => {
         setUserLoc({ lat, lon });
       },
       (err) => {
-        // alert('GPS 사용 불가: ' + err.message);
-        toast.error('GPS 사용 불가');
+        setUserLoc(null);
       },
       { enableHighAccuracy: true }
     );
   }, [gpsReady]);
 
-  // 3. 내 위치 마커 + 병원 표시
   useEffect(() => {
-    if (!userLoc || !window.kakao?.maps || !mapInstanceRef.current) return;
+    if (typeof userLoc === 'undefined' || !window.kakao?.maps || !mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
-    const userLatLng = new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon);
-    map.setCenter(userLatLng);
+    if (userLoc) {
+      const userLatLng = new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon);
+      map.setCenter(userLatLng);
+      if (userMarkerRef.current) userMarkerRef.current.setMap(null);
+      userMarkerRef.current = new window.kakao.maps.Marker({
+        position: userLatLng,
+        map,
+        title: '내 위치',
+        image: new window.kakao.maps.MarkerImage(
+          'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+          new window.kakao.maps.Size(24, 35)
+        ),
+      });
+    }
 
-    // 내 위치 마커
-    if (userMarkerRef.current) userMarkerRef.current.setMap(null);
-    userMarkerRef.current = new window.kakao.maps.Marker({
-      position: userLatLng,
-      map,
-      title: '내 위치',
-      image: new window.kakao.maps.MarkerImage(
-        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-        new window.kakao.maps.Size(24, 35)
-      ),
-    });
-
-    // 병원 CSV 로드
     Papa.parse('/HospitalInfoWithPhone.csv', {
       download: true,
       header: true,
@@ -105,19 +101,22 @@ const Map = () => {
           }))
           .filter((h) => !isNaN(h.lat) && !isNaN(h.lon));
 
-        const withDistance = hospitals.map((h) => ({
-          ...h,
-          distance: haversineDistance(userLoc.lat, userLoc.lon, h.lat, h.lon),
-        }));
+        let hospitalsToShow = [];
+        if (userLoc) {
+          const withDistance = hospitals.map((h) => ({
+            ...h,
+            distance: haversineDistance(userLoc.lat, userLoc.lon, h.lat, h.lon),
+          }));
+          withDistance.sort((a, b) => a.distance - b.distance);
+          hospitalsToShow = withDistance.slice(0, 20);
+        } else {
+          hospitalsToShow = hospitals;
+        }
 
-        withDistance.sort((a, b) => a.distance - b.distance);
-        const topHospitals = withDistance.slice(0, 20);
-
-        // 기존 마커 제거
         markersRef.current.forEach((m) => m.setMap(null));
         markersRef.current = [];
 
-        topHospitals.forEach((h) => {
+        hospitalsToShow.forEach((h) => {
           const pos = new window.kakao.maps.LatLng(h.lat, h.lon);
           const marker = new window.kakao.maps.Marker({
             position: pos,
@@ -125,25 +124,39 @@ const Map = () => {
             title: h.name,
           });
 
-          const content = `
-  <div style="padding:10px; font-size:12px; max-width:300px; line-height:1.6; white-space:normal; word-break:break-word; overflow-wrap:break-word; overflow:hidden;">
-    <strong style="font-size:13px;">${h.name}</strong><br/>
-    <span style="display:block;">거리: ${h.distance.toFixed(2)} km</span>
-    <span style="display:block;">주소: ${h.address}</span>
-    <span style="display:block;">전화번호: ${h.phone}</span>
-  </div>
-`;
+          const infoContent = `
+            <div style="padding:10px; font-size:12px; max-width:300px; line-height:1.6;">
+              <strong style="font-size:13px;">${h.name}</strong><br/>
+              ${userLoc ? `거리: ${h.distance.toFixed(2)} km<br/>` : ''}
+              주소: ${h.address}<br/>
+              전화번호: ${h.phone}<br/>
+              ${userLoc ? '<div id="timeBox" style="margin-top:4px; color:green;"></div>' : ''}
+              ${userLoc ? '<button id="routeBtn" style="margin-top:8px; padding:4px 8px;">길찾기</button>' : ''}
+            </div>
+          `;
 
           marker.addListener('click', () => {
             if (infoWindowRef.current) infoWindowRef.current.close();
-
             const infowindow = new window.kakao.maps.InfoWindow({
-              content,
-              maxWidth: 320
+              content: infoContent,
+              maxWidth: 320,
             });
-
             infowindow.open(map, marker);
             infoWindowRef.current = infowindow;
+
+            if (userLoc) {
+              setTimeout(() => {
+                const btn = document.getElementById('routeBtn');
+                if (btn) {
+                  btn.onclick = () => {
+                    drawRoute(
+                      new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon),
+                      pos
+                    );
+                  };
+                }
+              }, 100);
+            }
           });
 
           markersRef.current.push(marker);
@@ -152,31 +165,83 @@ const Map = () => {
     });
   }, [userLoc]);
 
+  const drawRoute = (startLatLng, endLatLng) => {
+    const origin = `${startLatLng.getLng()},${startLatLng.getLat()}`;
+    const destination = `${endLatLng.getLng()},${endLatLng.getLat()}`;
+    const profile = 'foot';
+
+    fetch(
+      `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin}&destination=${destination}&profile=${profile}`,
+      {
+        headers: {
+          Authorization: `KakaoAK ${REST_API_KEY}`,
+        },
+      }
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error(`API 호출 실패: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        const section = data.routes?.[0]?.sections?.[0];
+        if (!section?.roads) throw new Error('경로 데이터(vertexes)가 없습니다.');
+
+        const coords = section.roads.flatMap((road) =>
+          road.vertexes.reduce((arr, val, idx) => {
+            if (idx % 2 === 0) {
+              arr.push(new window.kakao.maps.LatLng(road.vertexes[idx + 1], val));
+            }
+            return arr;
+          }, [])
+        );
+
+        if (routePolylineRef.current) {
+          routePolylineRef.current.setMap(null);
+        }
+
+        routePolylineRef.current = new window.kakao.maps.Polyline({
+          path: coords,
+          strokeWeight: 5,
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeStyle: 'solid',
+        });
+        routePolylineRef.current.setMap(mapInstanceRef.current);
+        mapInstanceRef.current.setCenter(coords[0]);
+
+        const durationMin = Math.round(section.duration / 60);
+        const timeBox = document.getElementById('timeBox');
+        if (timeBox) timeBox.innerText = `소요 시간: 약 ${durationMin}분`;
+      })
+      .catch((err) => {
+        toast.error('길찾기 실패: ' + err.message);
+        console.error(err);
+      });
+  };
+
   return (
     <>
-      <div>
-        <div
-          ref={mapRef}
-          style={{
-            width: '40vw',
-            height: 'calc(50vh - 60px)',
-            borderRadius: '10px',
-            border: '1px solid #ccc',
-            margin: '10px',
-            marginBottom: '80px',
-          }}
-        />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnHover
-          draggable
-          limit={2}
-        />
-      </div>
+      <div
+        ref={mapRef}
+        style={{
+          width: '40vw',
+          height: 'calc(50vh - 60px)',
+          borderRadius: '10px',
+          border: '1px solid #ccc',
+          margin: '10px',
+          marginBottom: '80px',
+        }}
+      />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        limit={2}
+      />
     </>
   );
 };
