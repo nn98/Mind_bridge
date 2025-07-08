@@ -1,23 +1,26 @@
 import React from 'react';
 
-const handleScrollToTop = () => {
-  const root = document.getElementById('root');
-  if (root) {
-    root.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
+const FloatingSidebar = ({ showSection, mapVisible, setMapVisible }) => {
+  const handleScrollToTop = () => {
+    const root = document.getElementById('root');
+    if (root) {
+      root.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
-const FloatingSidebar = ({ showSection }) => {
+  const handleMapClick = () => {
+    setMapVisible(!mapVisible);
+  };
+
   return (
     <div className="floating-sidebar">
       <div className="floating-button1" onClick={() => showSection('faq')}>
         F&Q
       </div>
-      <div className="floating-button1" onClick={() => showSection('chat')}>
-        <img src='/map.png' alt='지도' style={{ width: '60px', height: '60 px' }} />
-        
+      <div className="floating-button1" onClick={handleMapClick}>
+        <img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
       </div>
       <div className="floating-button1" onClick={handleScrollToTop}>
         <svg

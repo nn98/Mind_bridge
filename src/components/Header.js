@@ -1,30 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
-import { SignedIn, SignedOut, UserButton, RedirectToSignIn, SignInButton, SignUpButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 const Header = ({
   hoveredMenu,
   handleMouseEnter,
   handleMouseLeaveAll,
-  setSubMenuVisible,
-  subMenuVisible,
-  handleBoardSelect,
-  introRef,
-  noticeRef,
-  locationRef,
   showSection,
-  navigate,
   onSignupClick,
   onSigninClick,
+  setScrollTarget,
 }) => {
   const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
-
-  const scrollToSection = (ref) => {
-    if (ref && ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   const serviceSubMenus = {
     '상담': [
@@ -57,7 +45,6 @@ const Header = ({
           onMouseLeave={(e) => {
             const related = e.relatedTarget;
             const nav = document.querySelector('.nav');
-
             if (!(nav instanceof Node) || !(related instanceof Node) || !nav.contains(related)) {
               handleMouseLeaveAll();
               setHoveredSubMenuItem(null);
@@ -93,9 +80,33 @@ const Header = ({
                 <div className="dropdown-wrapper">
                   <div className="dropdown">
                     <div className="dropdown-column">
-                      <div className="dropdown-item" onClick={() => scrollToSection(introRef)}>회사 소개</div>
-                      <div className="dropdown-item" onClick={() => scrollToSection(noticeRef)}>회사 공지</div>
-                      <div className="dropdown-item" onClick={() => scrollToSection(locationRef)}>회사 위치</div>
+                      <div
+                        className="dropdown-item"
+                        onClick={() => {
+                          setScrollTarget('intro');
+                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                        }}
+                      >
+                        회사 소개
+                      </div>
+                      <div
+                        className="dropdown-item"
+                        onClick={() => {
+                          setScrollTarget('notice');
+                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                        }}
+                      >
+                        회사 공지
+                      </div>
+                      <div
+                        className="dropdown-item"
+                        onClick={() => {
+                          setScrollTarget('location');
+                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                        }}
+                      >
+                        회사 위치
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -111,7 +122,7 @@ const Header = ({
                         onMouseLeave={() => setHoveredSubMenuItem(null)}
                       >
                         상담
-                        {hoveredSubMenuItem === '상담' && serviceSubMenus['상담'] && (
+                        {hoveredSubMenuItem === '상담' && (
                           <div className="dropdown-submenu">
                             {serviceSubMenus['상담'].map((subItem) => (
                               <Link key={subItem.label} to={subItem.path} className="dropdown-item">
@@ -127,7 +138,7 @@ const Header = ({
                         onMouseLeave={() => setHoveredSubMenuItem(null)}
                       >
                         고객 서비스
-                        {hoveredSubMenuItem === '고객 서비스' && serviceSubMenus['고객 서비스'] && (
+                        {hoveredSubMenuItem === '고객 서비스' && (
                           <div className="dropdown-submenu">
                             {serviceSubMenus['고객 서비스'].map((subItem, index) => (
                               <div key={index} className="dropdown-item">
@@ -150,8 +161,6 @@ const Header = ({
             <UserButton />
           </SignedIn>
           <SignedOut>
-            {/*<SignUpButton>*/}
-            {/*</SignUpButton>*/}
             <button className="custom-blue-btn" onClick={onSignupClick}>SignUp</button>
             <button className="custom-blue-btn" onClick={onSigninClick}>SignIn</button>
           </SignedOut>

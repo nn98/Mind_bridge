@@ -54,6 +54,7 @@ const App = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [scrollTarget, setScrollTarget] = useState(null);
 
   const introRef = useRef(null);
   const noticeRef = useRef(null);
@@ -146,6 +147,7 @@ const App = () => {
         locationRef={locationRef}
         showSection={showSection}
         navigate={navigate}
+        setScrollTarget={setScrollTarget}
       />
       {showSignIn && (
         <div
@@ -179,7 +181,11 @@ const App = () => {
           </div>
         </div>
       )}
-      <FloatingSidebar showSection={showSection} />
+      <FloatingSidebar
+        showSection={showSection}
+        mapVisible={mapVisible}
+        setMapVisible={setMapVisible}
+      />
 
       {mapVisible && (
         <div
@@ -214,7 +220,6 @@ const App = () => {
 
       <Routes>
         <Route path="/map" element={<Map />} />
-        <Route path="/" element={<AboutSection refs={{ introRef, noticeRef, locationRef }} />} />
         <Route path="/faq" element={<FaqSection />} />
         <Route
           path="/self"
@@ -232,6 +237,16 @@ const App = () => {
               resultText={resultText}
               setSelfAnswers={setSelfAnswers}
               setResultText={setResultText}
+            />
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <AboutSection
+              refs={{ introRef, noticeRef, locationRef }}
+              scrollTarget={scrollTarget}
+              setScrollTarget={setScrollTarget}
             />
           }
         />

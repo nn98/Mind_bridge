@@ -1,10 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BannerSlider from './BannerSlider';
-import NoticeBoard from '../components/NoticeBoard';
+import NoticeBoard from './NoticeBoard';
 import '../css/AboutSection.css';
 
-const AboutSection = ({ refs }) => {
+const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
   const { introRef, noticeRef, locationRef } = refs;
+
+  useEffect(() => {
+    if (scrollTarget) {
+      const refMap = {
+        intro: introRef,
+        notice: noticeRef,
+        location: locationRef,
+      };
+
+      const targetRef = refMap[scrollTarget];
+      if (targetRef && targetRef.current) {
+        // scroll 후 scrollTarget 초기화
+        targetRef.current.scrollIntoView({ behavior: 'smooth' });
+
+         setScrollTarget(null);
+      }
+    }
+  }, [scrollTarget]);
 
   return (
     <>
