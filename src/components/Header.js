@@ -161,8 +161,8 @@ const Header = ({
             <UserButton />
           </SignedIn>
           <SignedOut>
-            <button className="custom-blue-btn" onClick={onSignupClick}>SignUp</button>
-            <button className="custom-blue-btn" onClick={onSigninClick}>SignIn</button>
+            <button className="custom-blue-btn" onClick={onSignupClick}>회원가입</button>
+            <button className="custom-blue-btn" onClick={onSigninClick}>로그인</button>
           </SignedOut>
         </div>
       </nav>

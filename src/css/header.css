@@ -76,26 +76,28 @@ hr.small-line {
 }
 
 .custom-blue-btn {
-  width: 70px;
+  width: 80px;
   height: 30px;
-  background: linear-gradient(135deg, #a8d0ff, #5a9eff); /* 옅은 파란색 그라데이션 */
+  background: #fff;
+  color: #4a6fa5;
+  box-shadow: 0 2px 8px 0 rgba(74, 111, 165, 0.10);
   border: none;
   border-radius: 6px;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 0 12px 3px rgba(90, 158, 255, 0.35); /* 전체적으로 번지는 그림자 */
   transition: background 0.2s, box-shadow 0.2s;
   margin-right: 10px;
+  padding: 0 10px 3px 10px;
+  user-select: none;
 }
 
 .custom-blue-btn:hover {
-  background: linear-gradient(135deg, #8cc0ff, #3f7fe0);
-  box-shadow: 0 0 18px 6px rgba(90, 158, 255, 0.45);
+  background: linear-gradient(135deg, #365080 85%, #4a6fa5 100%);
+  box-shadow: 0 4px 12px 2px rgba(74, 111, 165, 0.18);
 }
 
 .custom-blue-btn:focus {
   outline: none;
-  box-shadow: 0 0 20px 8px rgba(90, 158, 255, 0.55);
+  box-shadow: 0 0 0 3px #c7d6f2;
 }
