@@ -61,9 +61,7 @@ const Map = () => {
         const lon = pos.coords.longitude;
         setUserLoc({ lat, lon });
       },
-      (err) => {
-        setUserLoc(null);
-      },
+      () => setUserLoc(null),
       { enableHighAccuracy: true }
     );
   }, [gpsReady]);
@@ -72,6 +70,7 @@ const Map = () => {
     if (typeof userLoc === 'undefined' || !window.kakao?.maps || !mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
+
     if (userLoc) {
       const userLatLng = new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon);
       map.setCenter(userLatLng);
@@ -125,21 +124,32 @@ const Map = () => {
           });
 
           const infoContent = `
-            <div style="padding:20px; font-size:12px; max-width:300px; line-height:1.6;">
-              <strong style="font-size:13px;">${h.name}</strong><br/>
-              ${userLoc ? `거리: ${h.distance.toFixed(2)} km<br/>` : ''}
-              주소: ${h.address}<br/>
-              전화번호: ${h.phone}<br/>
-              ${userLoc ? '<div id="timeBox" style="margin-top:4px; color:green;"></div>' : ''}
-              ${userLoc ? '<button id="routeBtn" style="margin-top:8px; padding:4px 8px;">길찾기</button>' : ''}
-            </div>
-          `;
+  <div style="
+    width: 240px;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    box-sizing: border-box;
+  ">
+    <div style="font-weight: bold; font-size: 13px;">
+      ${h.name}
+    </div>
+    ${userLoc ? `<div>거리: ${h.distance.toFixed(2)} km</div>` : ''}
+    <div style="margin-top: 4px;">주소: ${h.address}</div>
+    <div style="margin-top: 2px; word-break: break-all;">전화번호: ${h.phone}</div>
+    ${userLoc ? '<div id="timeBox" style="margin-top:6px; color:green;"></div>' : ''}
+    ${userLoc ? '<button id="routeBtn" style="margin-top:6px; padding:4px 8px; font-size:12px;">길찾기</button>' : ''}
+  </div>
+`;
 
           marker.addListener('click', () => {
             if (infoWindowRef.current) infoWindowRef.current.close();
             const infowindow = new window.kakao.maps.InfoWindow({
               content: infoContent,
-              maxWidth: 320,
+              maxWidth: 260,
             });
             infowindow.open(map, marker);
             infoWindowRef.current = infowindow;
@@ -184,7 +194,7 @@ const Map = () => {
       })
       .then((data) => {
         const section = data.routes?.[0]?.sections?.[0];
-        if (!section?.roads) throw new Error('경로 데이터(vertexes)가 없습니다.');
+        if (!section?.roads) throw new Error('경로 데이터가 없습니다.');
 
         const coords = section.roads.flatMap((road) =>
           road.vertexes.reduce((arr, val, idx) => {

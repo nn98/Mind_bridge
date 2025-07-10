@@ -5,7 +5,7 @@ const apiAddress = process.env.REACT_APP_PICTURE_ADDRESS;
 
 
 const promptTemplate = `
-쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 $Picture 일러스트입니다.  
+쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 $Picture 일러스트입니다.
     1. 그림은 $Picture 에서 요구하는 사항을 우선시 하며 가장 중요한 것은 감정이 보여야 한다.
     2. 요구하는 사항은 상담 결과를 제공하며 상황에 맞게 그림을 그려줘야 한다.
     3. 상담받는 사람이 볼 수 있기에 그림체는 강압적이지 않게 보여야 한다.
