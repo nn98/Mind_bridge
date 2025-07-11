@@ -20,7 +20,9 @@ const FloatingSidebar = ({ showSection, mapVisible, setMapVisible }) => {
         F&Q
       </div>
       <div className="floating-button1" onClick={handleMapClick}>
-        <img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
+        {mapVisible ? (<span style={{ fontSize: '32px', fontWeight: '900' }}>X</span>) 
+        : 
+        (<img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />)}
       </div>
       <div className="floating-button1" onClick={handleScrollToTop}>
         <svg

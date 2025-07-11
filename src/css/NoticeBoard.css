@@ -5,14 +5,30 @@
 
 .notice-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
 }
 
-.notice-table th,
-.notice-table td {
+.notice-table th {
+    text-align: center;
+    padding: 10px;
+    font-size: 20px;
+    color: #ffffff;
+    background-color: #4a6fa5;
+}
+
+/* 제목 내용 */
+.td1 {
     padding: 0.75rem;
     border-bottom: 1px solid #ccc;
     text-align: left;
+    cursor: pointer;
+}
+
+/* 날짜 */
+.td2 {
+    padding: 0.75rem;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
     cursor: pointer;
 }
 
