@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
@@ -8,11 +8,10 @@ const Header = ({
   handleMouseEnter,
   handleMouseLeaveAll,
   showSection,
-  onSignupClick,
-  onSigninClick,
   setScrollTarget,
 }) => {
   const [hoveredSubMenuItem, setHoveredSubMenuItem] = useState(null);
+  const navigate = useNavigate();
 
   const serviceSubMenus = {
     '상담': [
@@ -84,7 +83,7 @@ const Header = ({
                         className="dropdown-item"
                         onClick={() => {
                           setScrollTarget('intro');
-                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                          showSection('about');
                         }}
                       >
                         회사 소개
@@ -93,7 +92,7 @@ const Header = ({
                         className="dropdown-item"
                         onClick={() => {
                           setScrollTarget('notice');
-                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                          showSection('about');
                         }}
                       >
                         회사 공지
@@ -102,7 +101,7 @@ const Header = ({
                         className="dropdown-item"
                         onClick={() => {
                           setScrollTarget('location');
-                          showSection('about'); // ✅ 항상 메인 페이지로 이동
+                          showSection('about');
                         }}
                       >
                         회사 위치
@@ -161,8 +160,8 @@ const Header = ({
             <UserButton />
           </SignedIn>
           <SignedOut>
-            <button className="custom-blue-btn" onClick={onSignupClick}>회원가입</button>
-            <button className="custom-blue-btn" onClick={onSigninClick}>로그인</button>
+            <button className="custom-blue-btn" onClick={() => navigate('/signup')}>회원가입</button>
+            <button className="custom-blue-btn" onClick={() => navigate('/login')}>로그인</button>
           </SignedOut>
         </div>
       </nav>

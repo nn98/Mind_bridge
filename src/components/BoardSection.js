@@ -1,53 +1,67 @@
 import React, { useState, useEffect } from 'react';
-
+import axios from 'axios';
 
 const BoardSection = ({ user, isSignedIn }) => {
-  console.log('user:', user);
   const [selectedBoard, setSelectedBoard] = useState('general');
   const [visibility, setVisibility] = useState('공개');
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
+  const [posts, setPosts] = useState([]);
 
-
-  const [posts, setPosts] = useState(() => {
-    const saved = localStorage.getItem('posts');
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  // 게시글 불러오기
   useEffect(() => {
-    localStorage.setItem('posts', JSON.stringify(posts));
-  }, [posts]);
+    fetchPosts();
+  }, []);
 
-  const handleSubmit = () => {
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get('http://localhost:8080/api/posts');
+      setPosts(res.data);
+    } catch (error) {
+      console.error('게시글 불러오기 실패:', error);
+    }
+  };
+
+  // 게시글 작성
+  const handleSubmit = async () => {
     if (!isSignedIn) {
-      alert('로그인 후 작성 가능합니다.');
+      alert('로그인 후 작성해주세요.');
       return;
     }
 
     if (!content.trim()) return;
 
     const newPost = {
-      id: Date.now(),
       content,
       visibility,
-      date: new Date().toLocaleString(),
       userId: user.id,
       userName: user.fullName || user.username || '익명',
     };
 
-    setPosts([newPost, ...posts]);
-    setContent('');
-    setVisibility('공개');
-    setShowForm(false);
+    try {
+      await axios.post('http://localhost:8080/api/posts', newPost);
+      setContent('');
+      setVisibility('공개');
+      setShowForm(false);
+      fetchPosts(); // 작성 후 다시 불러오기
+    } catch (error) {
+      console.error('게시글 작성 실패:', error);
+    }
   };
 
-
-  const handleDelete = (id) => {
-    setPosts(posts.filter(post => post.id !== id));
+  // 게시글 삭제
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/posts/${id}`);
+      fetchPosts(); // 삭제 후 다시 불러오기
+    } catch (error) {
+      console.error('게시글 삭제 실패:', error);
+    }
   };
 
+  // 필터링 및 정렬
   const filteredPosts = posts.filter((post) => {
     const matchBoard =
       selectedBoard === 'general' ? post.visibility === '공개' : post.visibility === '비공개';
@@ -68,40 +82,34 @@ const BoardSection = ({ user, isSignedIn }) => {
 
       <div className="board-controls">
         <div className="left-controls">
-          <select className="board-selector" value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
+          <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
             <option value="general">일반 게시판</option>
             <option value="admin">관리자 게시판</option>
           </select>
-
-          <select className="sort-selector" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
             <option value="newest">최신순</option>
             <option value="oldest">오래된순</option>
           </select>
         </div>
-
         <div className="right-controls">
           <input
             type="text"
-            className="search-input"
             placeholder="검색어 입력"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="write-button" onClick={() => setShowForm(true)}>
-            작성하기
-          </button>
+          <button onClick={() => setShowForm(true)}>작성하기</button>
         </div>
       </div>
 
       {showForm && (
         <div className="write-form">
           <textarea
-            className="textarea"
             placeholder="고민을 다같이 들어드립니다"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          <div className="radio-group">
+          <div>
             {['공개', '비공개'].map((label) => (
               <label key={label}>
                 <input
@@ -115,9 +123,7 @@ const BoardSection = ({ user, isSignedIn }) => {
               </label>
             ))}
           </div>
-          <button className="submit-button" onClick={handleSubmit}>
-            작성 완료
-          </button>
+          <button onClick={handleSubmit}>작성 완료</button>
         </div>
       )}
 
@@ -125,16 +131,17 @@ const BoardSection = ({ user, isSignedIn }) => {
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
-              <p className="post-content">{post.content}</p>
-              <span className="post-meta">
-                {post.date} ・ {post.visibility} ・ 작성자: {post.userName}</span>
+              <p>{post.content}</p>
+              <span>
+                {post.createdAt || post.date} ・ {post.visibility} ・ 작성자: {post.userName}
+              </span>
               {isSignedIn && user?.id === post.userId && (
-                <button className="delete-button" onClick={() => handleDelete(post.id)}>삭제</button>
+                <button onClick={() => handleDelete(post.id)}>삭제</button>
               )}
             </div>
           ))
         ) : (
-          <p className="no-posts">게시글이 없습니다</p>
+          <p>게시글이 없습니다</p>
         )}
       </div>
     </section>

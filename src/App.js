@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { SignIn, SignUp, SignedIn, SignedOut, UserButton, RedirectToSignIn } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
+import { Navigate } from 'react-router-dom';
 import Map from './Map';
 
 import './css/App.css';
@@ -41,7 +41,6 @@ const App = () => {
   const [isAdmin] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [subMenuVisible, setSubMenuVisible] = useState(null);
-  const [visibility, setVisibility] = useState(null);
   const [signupState, setSignupState] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState('chat');
@@ -51,9 +50,6 @@ const App = () => {
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
   const [userLocation, setUserLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
 
   const introRef = useRef(null);
@@ -61,25 +57,6 @@ const App = () => {
   const locationRef = useRef(null);
   const navigate = useNavigate();
   const { isSignedIn, user } = useUser();
-
-  useEffect(() => {
-    if (!showSignIn || !showSignUp) return;
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') setFadeOutAndClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [showSignUp, showSignIn]);
-
-  // 페이드아웃 후 완전 닫기
-  const setFadeOutAndClose = () => {
-    setFadeOut(true);
-    setTimeout(() => {
-      setShowSignUp(false);
-      setShowSignIn(false);
-      setFadeOut(false);
-    }, 300); // CSS 애니메이션 시간과 맞춰주세요
-  };
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
@@ -128,14 +105,6 @@ const App = () => {
   return (
     <>
       <Header
-        onSigninClick={() => {
-          setShowSignUp(false);
-          setShowSignIn(true);
-        }}
-        onSignupClick={() => {
-          setShowSignUp(true);
-          setShowSignIn(false);
-        }}
         hoveredMenu={hoveredMenu}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeaveAll={handleMouseLeaveAll}
@@ -149,38 +118,7 @@ const App = () => {
         navigate={navigate}
         setScrollTarget={setScrollTarget}
       />
-      {showSignIn && (
-        <div
-          className={`modal-backdrop ${fadeOut ? 'fade-out' : 'fade-in'}`}
-          onClick={setFadeOutAndClose}
-        >
-          <div
-            className={`modal-content ${fadeOut ? 'fade-out' : 'fade-in'}`}
-            onClick={e => e.stopPropagation()} // 모달 내용 클릭 시 닫기 방지
-          >
-            <SignIn routing="virtual" />
-            <button className="close-modal-btn" onClick={setFadeOutAndClose}>
-              <span className="close-x-icon" aria-label="닫기">&times;</span>
-            </button>
-          </div>
-        </div>
-      )}
-      {showSignUp && (
-        <div
-          className={`modal-backdrop ${fadeOut ? 'fade-out' : 'fade-in'}`}
-          onClick={setFadeOutAndClose}
-        >
-          <div
-            className={`modal-content ${fadeOut ? 'fade-out' : 'fade-in'}`}
-            onClick={e => e.stopPropagation()} // 모달 내용 클릭 시 닫기 방지
-          >
-            <SignUp routing="virtual" />
-            <button className="close-modal-btn" onClick={setFadeOutAndClose}>
-              <span className="close-x-icon" aria-label="닫기">&times;</span>
-            </button>
-          </div>
-        </div>
-      )}
+
       <FloatingSidebar
         showSection={showSection}
         mapVisible={mapVisible}
@@ -255,8 +193,44 @@ const App = () => {
           element={<BoardSection user={user} isSignedIn={isSignedIn} />}
         />
         <Route path="/img" element={<Picture />} />
-        <Route path="/sign-in" element={<SignIn routing="path" path="/sign-in" />} />
-        <Route path="/sign-up" element={<SignUp routing="path" path="/sign-up" />} />
+
+        <Route
+          path="/login"
+          element={
+            isSignedIn ? (
+              <Navigate to="/board" />
+            ) : (
+              <AuthSection
+                type="login"
+                sectionLabels={sectionLabels}
+                formInputs={formInputs}
+                buttonLabels={buttonLabels}
+                formLinks={formLinks}
+                signupState={signupState}
+                setSignupState={setSignupState}
+              />
+            )
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            isSignedIn ? (
+              <Navigate to="/board" />
+            ) : (
+              <AuthSection
+                type="signup"
+                sectionLabels={sectionLabels}
+                formInputs={formInputs}
+                buttonLabels={buttonLabels}
+                formLinks={formLinks}
+                signupState={signupState}
+                setSignupState={setSignupState}
+              />
+            )
+          }
+        />
+
         <Route
           path="/find-id"
           element={
@@ -266,7 +240,8 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => { }}
+              signupState={signupState}
+              setSignupState={setSignupState}
             />
           }
         />
@@ -279,7 +254,8 @@ const App = () => {
               formInputs={formInputs}
               buttonLabels={buttonLabels}
               formLinks={formLinks}
-              setActiveSection={() => { }}
+              signupState={signupState}
+              setSignupState={setSignupState}
             />
           }
         />

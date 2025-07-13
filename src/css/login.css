@@ -131,20 +131,11 @@
   transition: all 0.3s ease;
 }
 
-.social-button.google {
-  background-color: #db4437;
+.social-button {
+  background-color: #2a61d8;
   color: white;
 }
 
-.social-button.google:hover {
-  background-color: #c1351d;
-}
-
-.social-button.kakao {
-  background-color: #fee500;
-  color: #3c1e1e;
-}
-
-.social-button.kakao:hover {
-  background-color: #f5d900;
+.social-button:hover {
+  background-color: #3a5b88;
 }
