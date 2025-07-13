@@ -35,10 +35,11 @@
   transition: all 0.2s ease-in-out;
   flex: 1 1 auto;
   text-align: center;
+  display: inline-block;
 }
-.nav-link-hover {
-  border-bottom: 2px solid #ffffff;
+.nav-link:hover {
   color: #d3d3d3;
+  transform: scale(1.1);
 }
 
 .nav-left {

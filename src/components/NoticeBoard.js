@@ -49,8 +49,8 @@ const NoticeBoard = () => {
                 <tbody>
                     {notices.map((notice) => (
                         <tr key={notice.id} onClick={() => setSelectedNotice(notice)}>
-                            <td>{notice.title}</td>
-                            <td>{notice.date}</td>
+                            <td className="td1">{notice.title}</td>
+                            <td className="td2">{notice.date}</td>
                         </tr>
                     ))}
                 </tbody>
