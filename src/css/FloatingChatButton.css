@@ -1,7 +1,7 @@
 .floating-button {
     position: fixed;
     bottom: 80px;
-    right: 90px;
+    right: 290px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,6 +35,16 @@
     
 }
 
+.floating-button2{
+    position: fixed;
+    bottom: 20px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
 .modal-container {
     position: fixed;
     bottom: 180px;
@@ -50,12 +60,35 @@
     z-index: 1000;
 }
 
-
+.faq-container{
+    position: fixed;
+    bottom: 250px;
+    right: 150px;
+    width: 380px;
+    height: 630px;
+    padding: 1rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+}
+.faq-body{
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    flex: 1;
+    padding: 18px;
+    overflow-y: auto;
+    text-align: center;
+}
 
 .close-btn {
     position: absolute;
     top: 83vh;
-    right: 108px;
+    right: 304px;
     background: white;
     border: 2px solid #acacac;
     border-radius: 18px;
@@ -96,4 +129,5 @@
 
 .tab-content {
     font-size: 16px;
+    text-align: center;
 }
