@@ -3,26 +3,30 @@
     bottom: 250px;
     right: 150px;
     width: 380px;
-    height: 550px;
     padding: 2rem;
     background: white;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     z-index: 1000;
+
+    /* 자연스럽게 크기 조절 + 너무 커질 경우 대비 */
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .faq-title {
     text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
 }
 
 .faq-buttons {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
     margin-top: 1rem;
 }
 
@@ -42,10 +46,13 @@
 }
 
 .faq-answer-box {
-    margin-top: 80px;
-    padding: 20px;
+    margin-top: 20px;
+    padding: 16px;
     border: 1px solid #ddd;
     border-radius: 10px;
     background-color: #f9f9f9;
     font-size: 1rem;
+    line-height: 1.6;
+    word-break: keep-all;
+    white-space: pre-wrap;
 }

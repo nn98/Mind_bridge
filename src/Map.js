@@ -32,6 +32,7 @@ const Map = () => {
   const [gpsReady, setGpsReady] = useState(false);
   const [userLoc, setUserLoc] = useState(undefined);
   const markersRef = useRef([]);
+  const [selectedHospital, setSelectedHospital] = useState(null);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -126,6 +127,7 @@ const Map = () => {
           const infoContent = `
   <div style="
     width: 240px;
+    min-height: 140px;
     padding: 8px;
     font-size: 12px;
     line-height: 1.6;
@@ -167,6 +169,12 @@ const Map = () => {
                 }
               }, 100);
             }
+            setSelectedHospital({
+              name: h.name,
+              address: h.address,
+              phone: h.phone,
+              distance: h.distance?.toFixed(2),
+            });
           });
 
           markersRef.current.push(marker);
@@ -239,9 +247,34 @@ const Map = () => {
           borderRadius: '10px',
           border: '1px solid #ccc',
           margin: '10px',
-          marginBottom: '80px',
+          marginBottom: '20px',
         }}
       />
+
+      {selectedHospital && (
+        <div
+          style={{
+            margin: '0 10px 15px',
+            padding: '16px',
+            background: '#f7f7f7',
+            borderRadius: '10px',
+            border: '1px solid #ccc',
+            maxWidth: '40vw',
+            fontSize: '18px',
+            lineHeight: '1.6',
+          }}
+        >
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+            {selectedHospital.name}
+          </h3>
+          <p><strong>주소:</strong> {selectedHospital.address}</p>
+          <p><strong>전화번호:</strong> {selectedHospital.phone}</p>
+          {selectedHospital.distance && (
+            <p><strong>거리:</strong> {selectedHospital.distance} km</p>
+          )}
+        </div>
+      )}
+
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
