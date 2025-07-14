@@ -28,6 +28,7 @@ import Footer from './components/Footer';
 import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FloatingSidebar from './components/FloatingSidebar';
+import Faq from "./components/Faq";
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -129,20 +130,7 @@ const App = () => {
 
 
       {faqVisible && (
-        <>
-          <div className="faq-container">
-            <h2 style={{ margin: '0 auto' }}>자주묻는질문</h2>
-            <div className="faq-body">
-              <div className="tab-content">
-                <h3>Q. AI 상담이 실제 사람처럼 이야기하나요?</h3>
-                A. Mind Bridge는 자연어 이해와 공감 대화를 기반으로 상담 서비스를 제공드리기 위해 노력하고 있습니다.
-                <h3>Q. 개인 정보는 안전한가요?</h3> 
-                A. 철저한 암호화와 보안 시스템으로 보호되고 있습니다
-                <h3>Q. 이용 요금이 있나요?</h3>
-                A. 기본 상담은 무료로 진행되며 추후 업데이트를 통해 기능이 추가되면 유료 버전이 생길수도 있습니다'</div>
-            </div>
-          </div>
-        </>
+        <Faq />
       )}
       {mapVisible && (
         <div
