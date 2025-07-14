@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FloatingSidebar = ({ showSection, mapVisible, setMapVisible }) => {
+const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible }) => {
   const handleScrollToTop = () => {
     const root = document.getElementById('root');
     if (root) {
@@ -14,32 +14,37 @@ const FloatingSidebar = ({ showSection, mapVisible, setMapVisible }) => {
     setMapVisible(!mapVisible);
   };
 
+  const handleFaqClick = () => {
+    setFaqVisible(!faqVisible);
+  };
+
   return (
-    <div className="floating-sidebar">
-      <div className="floating-button1" onClick={() => showSection('faq')}>
-        F&Q
+    <>
+      <div className="floating-sidebar">
+        {/* ✅ Q 버튼 (FAQ 박스) */}
+        <div className="floating-button1" onClick={handleFaqClick}>
+          {faqVisible ? (
+            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
+          ) : (
+            <img src="/qna.png" alt="자주묻는질문" style={{ width: '60px', height: '60px' }} />
+          )}
+        </div>
+
+        {/* 🗺 지도 버튼 */}
+        <div className="floating-button1" onClick={handleMapClick}>
+          {mapVisible ? (
+            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
+          ) : (
+            <img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
+          )}
+        </div>
+
+        {/* ⬆ 위로 버튼 */}
+        <div className="floating-button2" onClick={handleScrollToTop}>
+          <img src="/up.png" alt="맨 위" style={{ width: '60px', height: '60px' }} />
+        </div>
       </div>
-      <div className="floating-button1" onClick={handleMapClick}>
-        {mapVisible ? (<span style={{ fontSize: '32px', fontWeight: '900' }}>X</span>) 
-        : 
-        (<img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />)}
-      </div>
-      <div className="floating-button1" onClick={handleScrollToTop}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          fill="currentColor"
-          className="bi bi-chevron-bar-up"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fillRule="evenodd"
-            d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4"
-          />
-        </svg>
-      </div>
-    </div>
+    </>
   );
 };
 

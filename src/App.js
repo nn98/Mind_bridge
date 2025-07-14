@@ -27,8 +27,8 @@ import ChatModal from './components/ChatModal';
 import Footer from './components/Footer';
 import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
-import FaqSection from './components/FaqSection';
 import FloatingSidebar from './components/FloatingSidebar';
+import Faq from "./components/Faq";
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -51,6 +51,8 @@ const App = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
+  const [faqVisible, setFaqVisible] = useState(false);
+
 
   const introRef = useRef(null);
   const noticeRef = useRef(null);
@@ -120,11 +122,16 @@ const App = () => {
       />
 
       <FloatingSidebar
-        showSection={showSection}
         mapVisible={mapVisible}
         setMapVisible={setMapVisible}
+        faqVisible={faqVisible}
+        setFaqVisible={setFaqVisible}
       />
 
+
+      {faqVisible && (
+        <Faq />
+      )}
       {mapVisible && (
         <div
           style={{
@@ -149,7 +156,6 @@ const App = () => {
                 cursor: 'pointer',
               }}
             >
-              ✖
             </button>
           </div>
           <Map />
@@ -158,7 +164,6 @@ const App = () => {
 
       <Routes>
         <Route path="/map" element={<Map />} />
-        <Route path="/faq" element={<FaqSection />} />
         <Route
           path="/self"
           element={

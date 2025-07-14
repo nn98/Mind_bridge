@@ -1,7 +1,7 @@
 .floating-button {
     position: fixed;
     bottom: 80px;
-    right: 90px;
+    right: 290px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,6 +35,16 @@
     
 }
 
+.floating-button2{
+    position: fixed;
+    bottom: 20px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
 .modal-container {
     position: fixed;
     bottom: 180px;
@@ -50,12 +60,10 @@
     z-index: 1000;
 }
 
-
-
 .close-btn {
     position: absolute;
     top: 83vh;
-    right: 108px;
+    right: 304px;
     background: white;
     border: 2px solid #acacac;
     border-radius: 18px;
@@ -96,4 +104,5 @@
 
 .tab-content {
     font-size: 16px;
+    text-align: center;
 }
