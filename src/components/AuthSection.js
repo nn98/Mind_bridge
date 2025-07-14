@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 import { SignInButton, SignUpButton } from '@clerk/clerk-react';
+//
+import React, { useState } from 'react';
+import { signup, login } from '../api/authApi';
+
 
 const AuthSection = ({
   type,
@@ -10,21 +14,76 @@ const AuthSection = ({
   signupState,
   setSignupState
 }) => {
+  //
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    tel: '',
+    gender: '',
+    email: '',
+    mentalState: '',
+  });
+  //
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log('name:', name, 'value:', value);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  //
+  const handleSubmit = async () => {
+    try {
+      if (type === 'signup') {
+
+        console.log('보낼 데이터:', {
+          ...formData,
+          mentalState: signupState
+        });
+
+        await signup({
+          user_id: formData.username,
+          user_pw: formData.password,
+          phone: formData.tel,
+          gender: formData.gender,
+          mentalState: formData.mentalState,
+        });
+
+        alert('회원가입 성공!');
+      } else {
+        await login({
+          user_id: formData.username,
+          user_pw: formData.password,
+        });
+        alert('로그인 성공!');
+      }
+    } catch (err) {
+      alert('에러 발생: ' + err.message);
+    }
+  };
+
   return (
     <section className={`form-section${type === 'signup' ? ' form-section-flex' : ''}`}>
       <div className="form-left">
         <h2>{sectionLabels[type]}</h2>
 
+
+
         {formInputs[type].map((input, i) => (
           <input
             key={i}
             type={input.type}
+            name={input.name}
             placeholder={input.placeholder}
+            value={formData[input.name] || ''}
+            onChange={handleChange}
             className="input"
           />
         ))}
 
-        <button className="login-button">{buttonLabels[type]}</button>
+
+        <button className="login-button" onClick={handleSubmit}>
+          {buttonLabels[type]}
+        </button>
 
         <div className="social-buttons">
           {type === 'login' ? (
