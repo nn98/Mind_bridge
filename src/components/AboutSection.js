@@ -26,6 +26,46 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
   }, [scrollTarget]);
 
   useEffect(() => {
+    let chart = null;
+
+    const drawChart = () => {
+      const data = window.google.visualization.arrayToDataTable([
+        ['연령대', '스트레스 경험 비율 (%)', { role: 'style' }, { role: 'annotation' }],
+        ['10대', 23, '#6c63ff', '23%'],
+        ['20대', 36, '#6c63ff', '36%'],
+        ['30대', 29, '#6c63ff', '29%'],
+        ['40대 이상', 12, '#6c63ff', '12%'],
+      ]);
+
+      const options = {
+        chartArea: { width: '85%', height: '70%' },
+        fontName: 'Pretendard',
+        vAxis: {
+          title: '',
+          gridlines: { count: 5 },
+          textStyle: { color: '#666' },
+        },
+        bar: { groupWidth: '55%' },
+        legend: { position: 'none' },
+        annotations: {
+          alwaysOutside: true,
+          textStyle: {
+            fontSize: 13,
+            bold: true,
+            color: '#6c63ff',
+          },
+        },
+        animation: {
+          startup: true,
+          duration: 800,
+          easing: 'out',
+        },
+      };
+
+      chart = new window.google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    };
+
     const script = document.createElement('script');
     script.src = 'https://www.gstatic.com/charts/loader.js';
     script.onload = () => {
@@ -33,47 +73,16 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
         window.google.charts.load('current', { packages: ['corechart'] });
         window.google.charts.setOnLoadCallback(drawChart);
       }
-
-      function drawChart() {
-        const data = window.google.visualization.arrayToDataTable([
-          ['연령대', '스트레스 경험 비율 (%)', { role: 'style' }, { role: 'annotation' }],
-          ['10대', 23, '#6c63ff', '23%'],
-          ['20대', 36, '#6c63ff', '36%'],
-          ['30대', 29, '#6c63ff', '29%'],
-          ['40대 이상', 12, '#6c63ff', '12%'],
-        ]);
-
-        const options = {
-          chartArea: { width: '85%', height: '70%' },
-          fontName: 'Pretendard',
-          vAxis: {
-            title: '',
-            gridlines: { count: 5 },
-            textStyle: { color: '#666' },
-          },
-          bar: { groupWidth: '55%' },
-          legend: { position: 'none' },
-          annotations: {
-            alwaysOutside: true,
-            textStyle: {
-              fontSize: 13,
-              bold: true,
-              color: '#6c63ff',
-            },
-          },
-          animation: {
-            startup: true,
-            duration: 800,
-            easing: 'out',
-          },
-        };
-
-        const chart = new window.google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
     };
     document.body.appendChild(script);
+
+    window.addEventListener('resize', drawChart);
+
+    return () => {
+      window.removeEventListener('resize', drawChart);
+    };
   }, []);
+
 
   const services = [
     {
