@@ -102,3 +102,51 @@ hr.small-line {
   outline: none;
   box-shadow: 0 0 0 3px #c7d6f2;
 }
+
+.footer-icons img {
+  width: 44px;
+  height: auto;
+  vertical-align: middle;
+  margin: 0 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.footer-left {
+  flex: 1;
+}
+
+/* ✅ 기존 스타일 유지 + 우측 정렬 */
+.footer-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 너비 반응형 */
+@media (max-width: 991.98px) {
+  .footer-icons img {
+    width: 32px;
+  }
+}
+
+/* hover 효과 */
+.footer-icons a:hover img {
+  transform: scale(1.1);
+}
+
+/* 기본 테두리 제거 */
+.footer-icons a img {
+  border: 0;
+}
+
+/* 전역 box-sizing */
+.footer * {
+  box-sizing: border-box;
+}
