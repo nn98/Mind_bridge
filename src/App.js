@@ -56,6 +56,7 @@ const App = () => {
   const introRef = useRef(null);
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
+  const infoRef = useRef(null);
   const navigate = useNavigate();
   const { isSignedIn, user } = useUser();
 
@@ -186,7 +187,7 @@ const App = () => {
           path="/"
           element={
             <AboutSection
-              refs={{ introRef, locationRef, servicesRef }}
+              refs={{ introRef, locationRef, servicesRef, infoRef  }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
             />
