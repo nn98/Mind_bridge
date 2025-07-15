@@ -19,7 +19,6 @@ const AuthSection = ({
     username: '',
     password: '',
     tel: '',
-    gender: '',
     email: '',
     mentalState: '',
   });
@@ -44,7 +43,6 @@ const AuthSection = ({
           user_id: formData.username,
           user_pw: formData.password,
           phone: formData.tel,
-          gender: formData.gender,
           mentalState: formData.mentalState,
         });
 

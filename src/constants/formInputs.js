@@ -8,7 +8,6 @@ export const formInputs = {
     { type: 'email', placeholder: '이메일', name:'email' },
     { type: 'tel', placeholder: '전화번호', name:'tel'},
     { type: 'password', placeholder: '비밀번호' , name:'password' },
-    { type: 'gender', placeholder: '성별', name:'gender'},
   ],
   'find-id': [
     { type: 'text', placeholder: '이름' },
