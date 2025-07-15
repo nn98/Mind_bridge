@@ -6,17 +6,15 @@ body,
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  /* 스크롤 방지 */
   box-sizing: border-box;
 }
 
 /* 로고 이미지 */
-
 .logo {
   width: 150px;
   height: auto;
-  margin: -30px auto;
-  position: absolute;
+  margin: 0px 0px -5px 200px;
+  position: relative;
 }
 
 /* 번역 버튼 위치 */
@@ -26,18 +24,80 @@ body,
   right: 2rem;
 }
 
-/* section 및 footer */
+/* section 및 기본 배경 */
 .section {
   padding: 2rem;
   background-color: #f0f3f8;
 }
 
+/* Footer 전체 구조 */
 .footer {
-  text-align: left;
-  padding: 2rem;
   background-color: #4a6fa5;
   color: white;
-  margin-top: -2rem;
+  padding: 2rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.footer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.footer-header h4 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.footer-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-icons img {
+  width: 44px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  vertical-align: middle;
+  border: 0;
+}
+
+.footer-icons a:hover img {
+  transform: scale(1.1);
+}
+
+/* Footer 내용 영역 */
+.footer h2,
+.footer h3,
+.footer h4,
+.footer h5 {
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.footer h2 {
+  font-size: 1.4rem;
+}
+
+.footer h3 {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+.footer h5 {
+  font-size: 0.95rem;
+  color: #f0f0f0;
+}
+
+.line {
+  height: 1px;
+  background-color: #ffffff66;
+  border: none;
+  margin: 1.5rem 0;
 }
 
 hr.small-line {
@@ -47,7 +107,7 @@ hr.small-line {
   border: none;
 }
 
-/* 사이드바 */
+/* 사이드 floating 버튼 */
 .floating-sidebar {
   position: fixed;
   top: 35%;
@@ -68,19 +128,20 @@ hr.small-line {
   color: white;
   text-align: center;
   transition: all 0.2s ease-in-out;
-  margin: 0px 30px 0px 0px;
+  margin-right: 30px;
 }
 
 .floating-button:hover {
   background-color: #2c5083;
 }
 
+/* 공통 커스텀 버튼 */
 .custom-blue-btn {
   width: 80px;
   height: 30px;
   background: #fff;
   color: #4a6fa5;
-  box-shadow: 0 2px 8px 0 rgba(74, 111, 165, 0.10);
+  box-shadow: 0 2px 8px 0 rgba(74, 111, 165, 0.1);
   border: none;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -103,50 +164,20 @@ hr.small-line {
   box-shadow: 0 0 0 3px #c7d6f2;
 }
 
-.footer-icons img {
-  width: 44px;
-  height: auto;
-  vertical-align: middle;
-  margin: 0 8px;
-  transition: transform 0.2s ease-in-out;
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.footer-left {
-  flex: 1;
-}
-
-/* ✅ 기존 스타일 유지 + 우측 정렬 */
-.footer-icons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-/* 너비 반응형 */
+/* 반응형 */
 @media (max-width: 991.98px) {
   .footer-icons img {
     width: 32px;
   }
+
+  .footer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
-/* hover 효과 */
-.footer-icons a:hover img {
-  transform: scale(1.1);
-}
-
-/* 기본 테두리 제거 */
-.footer-icons a img {
-  border: 0;
-}
-
-/* 전역 box-sizing */
+/* box-sizing inheritance */
 .footer * {
   box-sizing: border-box;
 }

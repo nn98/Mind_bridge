@@ -7,7 +7,6 @@ import Map from './Map';
 import './css/App.css';
 import './css/board.css';
 import './css/chat.css';
-import './css/dropdown.css';
 import './css/feature.css';
 import './css/header.css';
 import './css/hero.css';
@@ -55,7 +54,7 @@ const App = () => {
 
 
   const introRef = useRef(null);
-  const noticeRef = useRef(null);
+  const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const navigate = useNavigate();
   const { isSignedIn, user } = useUser();
@@ -114,7 +113,7 @@ const App = () => {
         subMenuVisible={subMenuVisible}
         handleBoardSelect={handleBoardSelect}
         introRef={introRef}
-        noticeRef={noticeRef}
+        servicesRef={servicesRef}
         locationRef={locationRef}
         showSection={showSection}
         navigate={navigate}
@@ -187,7 +186,7 @@ const App = () => {
           path="/"
           element={
             <AboutSection
-              refs={{ introRef, noticeRef, locationRef }}
+              refs={{ introRef, locationRef, servicesRef }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
             />

@@ -1,6 +1,7 @@
 export const sectionLabels = {
   about: '소개',
-  services: '병원 목록',
+  services: '기능',
+  info: '문의하기',
   board: '게시판',
   chat: 'AI 상담',
   map: '회사 위치',

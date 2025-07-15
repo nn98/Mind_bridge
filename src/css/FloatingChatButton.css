@@ -1,7 +1,7 @@
 .floating-button {
     position: fixed;
-    bottom: 80px;
-    right: 290px;
+    bottom: 0;
+    right: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,7 +47,7 @@
 
 .modal-container {
     position: fixed;
-    bottom: 180px;
+    bottom: 100px;
     right: 150px;
     width: 380px;
     height: 630px;
@@ -62,8 +62,8 @@
 
 .close-btn {
     position: absolute;
-    top: 83vh;
-    right: 304px;
+    top: 90.5vh;
+    right: 130px;
     background: white;
     border: 2px solid #acacac;
     border-radius: 18px;

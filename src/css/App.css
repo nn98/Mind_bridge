@@ -1,9 +1,10 @@
 .nav {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  background-color: #4a6fa5;
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #c9d5e6, #4a6fa5);
+  padding: 0rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -49,13 +50,13 @@
 .nav-center {
   flex: 2;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 4vw;
+  gap: 2vw;
 }
 
 .nav-right {
-  flex: 1;
+  flex: 0.5;
   display: flex;
   justify-content: flex-end;
 }
