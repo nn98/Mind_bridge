@@ -140,7 +140,7 @@ hr.small-line {
   width: 80px;
   height: 30px;
   background: #fff;
-  color: #4a6fa5;
+  color: #000000;
   box-shadow: 0 2px 8px 0 rgba(74, 111, 165, 0.1);
   border: none;
   border-radius: 6px;
@@ -154,7 +154,7 @@ hr.small-line {
 }
 
 .custom-blue-btn:hover {
-  background: linear-gradient(135deg, #365080 85%, #4a6fa5 100%);
+  background: linear-gradient(135deg, #bf00ff , #f7acff );
   box-shadow: 0 4px 12px 2px rgba(74, 111, 165, 0.18);
   color: white;
 }
