@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class UserBean {
 
     //권한
-    public enum UserRole {  //enum 타입을 정의 
+    public enum UserRole {  //enum 타입을 정의
         USER, ADMIN //enum 상수
     }
 

@@ -192,6 +192,15 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       <section className="section mental-health-chart-section">
         <h2 className="section-title">연령대별 정신적 스트레스 비율</h2>
         <div id="chart_div" style={{ width: '100%', height: '400px' }}></div>
+        <p style={{
+          fontSize: '0.85rem',
+          color: '#666',
+          textAlign: 'right',
+          marginTop: '0.5rem',
+          fontStyle: 'italic'
+        }}>
+          ※ 출처: 보건복지부 「2023년 정신건강실태조사」
+        </p>
       </section>
 
       <section ref={servicesRef} className="service-grid-section">
