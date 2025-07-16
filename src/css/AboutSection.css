@@ -31,7 +31,7 @@
 
 .about-card {
     background-color: #f8faff;
-    border-left: 6px solid #6c63ff;
+    border-left: 6px solid #a18cd1;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     padding: 1.8rem 2rem;
@@ -42,7 +42,7 @@
 
 .about-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 1px 10px rgb(255, 166, 255);
+    box-shadow: 0 1px 10px #a18cd1
 }
 
 .about-card h2 {

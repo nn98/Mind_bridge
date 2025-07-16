@@ -32,7 +32,7 @@ body,
 
 /* Footer 전체 구조 */
 .footer {
-  background-color: #0f172a;
+  background-color: #a18cd1;
   color: white;
   padding: 2rem 1rem;
   font-family: 'Noto Sans KR', sans-serif;
@@ -94,7 +94,7 @@ body,
 .footer-bottom {
   text-align: center;
   font-size: 0.85rem;
-  color: #a1a1aa;
+  color: #cfcfd1;
   margin-top: 2rem;
 }
 

@@ -29,7 +29,7 @@
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 1px 10px rgb(255, 166, 255);
+  box-shadow: 0 1px 10px #a18cd1;
 }
 
 .icon {
@@ -110,7 +110,7 @@
 
 .contact-form button {
   padding: 14px;
-  background-color: #5e4fff;
+  background-color: #a18cd1;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -120,7 +120,7 @@
 }
 
 .contact-form button:hover {
-  background-color: #443de6;
+  background-color: #d47eff;
 }
 
 /* name & email 나란히 */
@@ -243,11 +243,11 @@
 
 .howitworks-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 1px 10px rgb(255, 166, 255);
+  box-shadow: 0 1px 10px #a18cd1;
 }
 
 .step-circle {
-  background-color: #4a6fa5;
+  background-color: #a18cd1;
   color: #fff;
   width: 36px;
   height: 36px;
@@ -262,7 +262,6 @@
 
 .icon {
   font-size: 3rem;
-  margin: 1rem 0;
   color: #8ca9ff;
 }
 
