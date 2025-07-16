@@ -28,6 +28,7 @@ const BoardSection = ({ user, isSignedIn }) => {
   const handleSubmit = async () => {
     if (!isSignedIn) {
       alert('로그인 후 작성해주세요.');
+      console.log('작성 완료 버튼 눌림');
       return;
     }
 

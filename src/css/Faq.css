@@ -1,58 +1,84 @@
 .faq-container {
     position: fixed;
-    bottom: 400px;
-    right: 150px;
-    width: 380px;
+    bottom: 380px;
+    right: 160px;
+    width: 360px;
     padding: 2rem;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     z-index: 1000;
-
-    /* 자연스럽게 크기 조절 + 너무 커질 경우 대비 */
-    max-height: 90vh;
+    max-height: 85vh;
     overflow-y: auto;
+    transition: all 0.3s ease-in-out;
+    animation: fadeInUp 0.4s ease-out;
+    font-family: 'Pretendard', sans-serif;
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .faq-title {
     text-align: center;
-    font-size: 1.25rem;
-    font-weight: bold;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2f365f;
+    margin-bottom: 1.2rem;
 }
 
 .faq-buttons {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-top: 1rem;
+    gap: 8px;
+    margin-bottom: 1rem;
 }
 
 .faq-button {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #888;
-    background: #fff;
-    color: #333;
+    padding: 9px 16px;
+    border-radius: 12px;
+    border: 1px solid #dbe2ee;
+    background: #f4f6fb;
+    color: #2f3a5d;
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.faq-button:hover {
+    background: #e8ecf7;
+    color: #1f2a45;
 }
 
 .faq-button.active {
-    background: #3a5b88;
-    color: #fff;
+    background: #6c63ff;
+    color: #ffffff;
+    border-color: #6c63ff;
+    font-weight: 600;
 }
 
 .faq-answer-box {
-    margin-top: 20px;
-    padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    font-size: 1rem;
-    line-height: 1.6;
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background-color: #f8f9fc;
+    font-size: 0.97rem;
+    line-height: 1.65;
+    color: #2f2f2f;
     word-break: keep-all;
     white-space: pre-wrap;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }

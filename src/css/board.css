@@ -1,26 +1,27 @@
 .board-section {
   max-width: 1100px;
-  margin: 50px auto;
-  padding: 0 20px;
+  margin: 60px auto;
+  padding: 0 24px;
   font-family: 'Pretendard', sans-serif;
+  color: #333;
 }
 
 /* 상단 타이틀 */
 .banner-area {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
 .board-title {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #333;
+  color: #2c2c2c;
 }
 
 .board-subtitle {
-  font-size: 1rem;
-  color: #888;
-  margin-top: 6px;
+  font-size: 1.05rem;
+  color: #777;
+  margin-top: 8px;
 }
 
 /* 컨트롤 영역 */
@@ -28,9 +29,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
 
 .left-controls,
@@ -42,12 +43,13 @@
 
 select,
 input[type="text"] {
-  padding: 8px 14px;
-  font-size: 14px;
-  border: 1px solid #ccc;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   background-color: #fff;
-  transition: border 0.2s ease;
+  transition: border-color 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 input[type="text"]:focus,
@@ -56,109 +58,119 @@ select:focus {
   outline: none;
 }
 
+/* 공통 버튼 */
 button {
-  padding: 8px 16px;
+  padding: 9px 18px;
   background-color: #6c63ff;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   transition: background-color 0.2s ease;
 }
 
 button:hover {
-  background-color: #574fd6;
+  background-color: #5b56e7;
 }
 
 /* 작성 폼 */
 .write-form {
-  background: #f7f8fb;
+  background: #f8f9fc;
   padding: 20px;
   border-radius: 12px;
-  margin-bottom: 30px;
-  border: 1px solid #e0e4f1;
+  margin-bottom: 32px;
+  border: 1px solid #e3e7ed;
 }
 
 .write-form textarea {
   width: 100%;
-  height: 100px;
+  height: 120px;
   padding: 12px;
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
   resize: vertical;
-  margin-bottom: 16px;
   font-family: inherit;
+  margin-bottom: 16px;
+  line-height: 1.5;
 }
 
 .write-form label {
   margin-right: 20px;
   font-size: 14px;
+  color: #444;
 }
 
 .write-form input[type="radio"] {
-  margin-right: 5px;
+  margin-right: 6px;
 }
 
 .write-form button {
   background-color: #3a5b88;
+  font-weight: 500;
 }
 
 .write-form button:hover {
-  background-color: #2f4e77;
+  background-color: #2d4e78;
 }
 
 /* 게시글 리스트 */
 .post-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
 .post-card {
   background-color: #fff;
-  padding: 18px 20px;
+  padding: 20px 22px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ebedf1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   position: relative;
-  transition: box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .post-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
 }
 
 .post-card p {
   font-size: 15px;
-  color: #333;
-  margin-bottom: 10px;
+  color: #2e2e2e;
+  margin-bottom: 12px;
   line-height: 1.6;
   word-break: break-word;
 }
 
 .post-card span {
+  display: block;
   font-size: 13px;
-  color: #999;
+  color: #888;
+  margin-top: 8px;
 }
 
+/* 삭제 버튼 */
 .post-card button {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: transparent;
+  top: 10px;
+  right: 10px;
+  background: none;
   border: none;
-  color: #bbb;
+  color: #aaa;
   font-size: 13px;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .post-card button:hover {
-  color: #ff5f5f;
+  color: #ff4f4f;
 }
 
-/* 글 없을 때 */
+/* 글이 없을 때 */
 .post-list p {
   grid-column: 1 / -1;
   text-align: center;
