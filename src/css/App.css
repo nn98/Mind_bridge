@@ -39,7 +39,7 @@
   display: inline-block;
 }
 .nav-link:hover {
-  color: #d3d3d3;
+  color: #db6eff;
   transform: scale(1.1);
 }
 
@@ -59,6 +59,7 @@
   flex: 0.5;
   display: flex;
   justify-content: flex-end;
+  margin-left: -50px;
 }
 
 .modal-backdrop {

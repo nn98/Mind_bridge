@@ -60,18 +60,19 @@ select:focus {
 
 /* 공통 버튼 */
 button {
-  padding: 9px 18px;
-  background-color: #6c63ff;
+  padding: 8px 16px;
+  background-color: #a18cd1;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
   transition: background-color 0.2s ease;
+  color: white;
 }
 
 button:hover {
-  background-color: #8b59ff;
+  background-color: #805dd1;
   color: white;
 }
 
@@ -108,12 +109,13 @@ button:hover {
 }
 
 .write-form button {
-  background-color: #3a5b88;
-  font-weight: 500;
+  background-color: #a18cd1;
+  color: white;
 }
 
 .write-form button:hover {
-  background-color: #2d4e78;
+  background-color: #805dd1;
+  color: white;
 }
 
 /* 게시글 리스트 */

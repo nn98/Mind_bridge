@@ -1,9 +1,9 @@
-/* eslint-disable no-undef */
 import React, { useEffect } from 'react';
 import BannerSlider from './BannerSlider';
 import '../css/AboutSection.css';
 import '../css/ServiceGrid.css';
 import { Link } from 'react-router-dom';
+import emailjs from 'emailjs-com';
 
 const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
   const { introRef, locationRef, servicesRef, infoRef } = refs;
@@ -30,59 +30,56 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
 
     const drawChart = () => {
       const data = window.google.visualization.arrayToDataTable([
-        ['연령대', '스트레스 경험 비율 (%)', { role: 'style' }, { role: 'annotation' }],
-        ['10대', 23, '#6c63ff', '23%'],
-        ['20대', 36, '#6c63ff', '36%'],
-        ['30대', 29, '#6c63ff', '29%'],
-        ['40대 이상', 12, '#6c63ff', '12%'],
+        ['월', '의뢰 건수'],
+        ['2023-01', 108	], ['2023-02', 112], ['2023-03', 125], ['2023-04', 134], ['2023-05', 141], ['2023-06', 137],
+        ['2023-07', 145], ['2023-08', 152], ['2023-09', 147], ['2023-10', 138], ['2023-11', 130], ['2023-12', 135],
+        ['2024-01', 138], ['2024-02', 131], ['2024-03', 144], ['2024-04', 152	], ['2024-05', 160], ['2024-06', 158],
+        ['2024-07', 167], ['2024-08', 173], ['2024-09', 165], ['2024-10', 162], ['2024-11', 158], ['2024-12', 161],
+        ['2025-01', 160], ['2025-02', 155], ['2025-03', 168], ['2025-04', 178], ['2025-05', 190], ['2025-06', 185],
+        ['2025-07', 192],
       ]);
 
       const options = {
-        chartArea: { width: '85%', height: '70%' },
+        title: '2023 ~ 2025 월간 의뢰 현황',
+        chartArea: { width: '90%', height: '65%' },
         fontName: 'Pretendard',
-        vAxis: {
-          title: '',
-          gridlines: { count: 5 },
-          textStyle: { color: '#666' },
-        },
-        bar: { groupWidth: '55%' },
+        curveType: 'function',
         legend: { position: 'none' },
-        annotations: {
-          alwaysOutside: true,
-          textStyle: {
-            fontSize: 13,
-            bold: true,
+        lineWidth: 4,
+        pointSize: 6,
+        hAxis: {
+          slantedText: true,
+          slantedTextAngle: 45,
+          textStyle: { fontSize: 11 }
+        },
+        vAxis: {
+          title: '건수',
+          gridlines: { count: 6 },
+        },
+        series: {
+          0: {
             color: '#6c63ff',
           },
         },
         animation: {
           startup: true,
-          duration: 800,
+          duration: 900,
           easing: 'out',
         },
       };
 
-      chart = new window.google.visualization.ColumnChart(document.getElementById('chart_div'));
+      const chart = new window.google.visualization.LineChart(document.getElementById('monthly_chart'));
       chart.draw(data, options);
     };
 
     const script = document.createElement('script');
     script.src = 'https://www.gstatic.com/charts/loader.js';
     script.onload = () => {
-      if (window.google) {
-        window.google.charts.load('current', { packages: ['corechart'] });
-        window.google.charts.setOnLoadCallback(drawChart);
-      }
+      window.google.charts.load('current', { packages: ['corechart'] });
+      window.google.charts.setOnLoadCallback(drawChart);
     };
     document.body.appendChild(script);
-
-    window.addEventListener('resize', drawChart);
-
-    return () => {
-      window.removeEventListener('resize', drawChart);
-    };
   }, []);
-
 
   const services = [
     {
@@ -94,6 +91,7 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       icon: '🏥',
       title: '병원 목록',
       description: '전국 심리상담센터 위치를 목록을 통해 알 수 있습니다.',
+      path: '/hospital-region',
     },
     {
       icon: '📧',
@@ -119,7 +117,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       path: '/self',
     },
   ];
-
 
   const steps = [
     {
@@ -191,7 +188,7 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       {/* ✅ 추가된 정신 건강 그래프 섹션 */}
       <section className="section mental-health-chart-section">
         <h2 className="section-title">연령대별 정신적 스트레스 비율</h2>
-        <div id="chart_div" style={{ width: '100%', height: '400px' }}></div>
+        <div id="monthly_chart" style={{ width: '100%', height: '500px' }}></div>
         <p style={{
           fontSize: '0.85rem',
           color: '#666',
@@ -242,7 +239,17 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
           <div className="card2">
             <form className="contact-form" onSubmit={(e) => {
               e.preventDefault();
-              alert('메시지가 전송되었습니다!');
+              emailjs.sendForm(
+                process.env.REACT_APP_EMAILJS_SERVICE_ID,
+                process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+                e.target,
+                process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+              ).then(() => {
+                alert('메시지가 전송되었습니다!');
+                e.target.reset();
+              }).catch((error) => {
+                alert('전송 실패: ' + error.text);
+              });
             }}>
               <div className="row-two">
                 <div className="form-group">
@@ -272,7 +279,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
           <div className="card2">
             <div className="contact-info">
               <h3>연락처 정보</h3>
-
               <div className="info-row">
                 <span className="icon">📧</span>
                 <div className="info-text">
@@ -280,7 +286,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
                   <p className="sub-text">이메일로 문의하기</p>
                 </div>
               </div>
-
               <div className="info-row">
                 <span className="icon">☎️</span>
                 <div className="info-text">
@@ -288,7 +293,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
                   <p className="sub-text">평일 9:00 - 18:00</p>
                 </div>
               </div>
-
               <div className="info-row">
                 <span className="icon">🏥</span>
                 <div className="info-text">
@@ -296,7 +300,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
                   <p className="sub-text">코아빌딩 5층</p>
                 </div>
               </div>
-
               <h4>소셜 미디어</h4>
               <div className="social-icons">
                 <a href="https://open.kakao.com/o/s2eNHUGh" target="_blank" rel="noopener noreferrer">

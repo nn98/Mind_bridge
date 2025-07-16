@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { Navigate } from 'react-router-dom';
 import Map from './Map';
+
 
 import './css/App.css';
 import './css/board.css';
@@ -17,6 +17,8 @@ import './css/FloatingChatButton.css';
 import './css/selfTest.css';
 import './css/result.css';
 import './css/banner.css';
+import './css/HospitalRegionPage.css';
+
 
 import Header from './components/Header';
 import Picture from './Picture.js';
@@ -28,6 +30,7 @@ import AboutSection from './components/AboutSection';
 import AuthSection from './components/AuthSection';
 import FloatingSidebar from './components/FloatingSidebar';
 import Faq from "./components/Faq";
+import HospitalRegionPage from './components/HospitalRegionPage.js';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -51,7 +54,6 @@ const App = () => {
   const [mapVisible, setMapVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
   const [faqVisible, setFaqVisible] = useState(false);
-
 
   const introRef = useRef(null);
   const servicesRef = useRef(null);
@@ -94,6 +96,7 @@ const App = () => {
       signup: '/signup',
       login: '/login',
       map: '/map',
+      region: '/hospital-region',
       chat: 'popup-map',
     };
 
@@ -128,10 +131,8 @@ const App = () => {
         setFaqVisible={setFaqVisible}
       />
 
+      {faqVisible && <Faq />}
 
-      {faqVisible && (
-        <Faq />
-      )}
       {mapVisible && (
         <div
           style={{
@@ -156,6 +157,7 @@ const App = () => {
                 cursor: 'pointer',
               }}
             >
+              ✖
             </button>
           </div>
           <Map />
@@ -163,84 +165,37 @@ const App = () => {
       )}
 
       <Routes>
+        <Route path="/" element={
+          <AboutSection
+            refs={{ introRef, locationRef, servicesRef, infoRef }}
+            scrollTarget={scrollTarget}
+            setScrollTarget={setScrollTarget}
+          />
+        } />
         <Route path="/map" element={<Map />} />
-        <Route
-          path="/self"
-          element={
-            <SelfTest
-              testType={testType}
-              setTestType={setTestType}
-              selfAnswers={selfAnswers}
-              handleSelfAnswer={(i, v) => {
-                const newAnswers = [...selfAnswers];
-                newAnswers[i] = v;
-                setSelfAnswers(newAnswers);
-              }}
-              handleSelfSubmit={(r) => setResultText(r)}
-              resultText={resultText}
-              setSelfAnswers={setSelfAnswers}
-              setResultText={setResultText}
-            />
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <AboutSection
-              refs={{ introRef, locationRef, servicesRef, infoRef  }}
-              scrollTarget={scrollTarget}
-              setScrollTarget={setScrollTarget}
-            />
-          }
-        />
-        <Route
-          path="/board"
-          element={<BoardSection user={user} isSignedIn={isSignedIn} />}
-        />
+        <Route path="/hospital-region" element={<HospitalRegionPage />} />
+        <Route path="/board" element={<BoardSection user={user} isSignedIn={isSignedIn} />} />
         <Route path="/img" element={<Picture />} />
-
-        <Route
-          path="/login"
-          element={
-            isSignedIn ? (
-              <Navigate to="/board" />
-            ) : (
-              <AuthSection
-                type="login"
-                sectionLabels={sectionLabels}
-                formInputs={formInputs}
-                buttonLabels={buttonLabels}
-                formLinks={formLinks}
-                signupState={signupState}
-                setSignupState={setSignupState}
-              />
-            )
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            isSignedIn ? (
-              <Navigate to="/board" />
-            ) : (
-              <AuthSection
-                type="signup"
-                sectionLabels={sectionLabels}
-                formInputs={formInputs}
-                buttonLabels={buttonLabels}
-                formLinks={formLinks}
-                signupState={signupState}
-                setSignupState={setSignupState}
-              />
-            )
-          }
-        />
-
-        <Route
-          path="/find-id"
-          element={
+        <Route path="/self" element={
+          <SelfTest
+            testType={testType}
+            setTestType={setTestType}
+            selfAnswers={selfAnswers}
+            handleSelfAnswer={(i, v) => {
+              const newAnswers = [...selfAnswers];
+              newAnswers[i] = v;
+              setSelfAnswers(newAnswers);
+            }}
+            handleSelfSubmit={(r) => setResultText(r)}
+            resultText={resultText}
+            setSelfAnswers={setSelfAnswers}
+            setResultText={setResultText}
+          />
+        } />
+        <Route path="/login" element={
+          isSignedIn ? <Navigate to="/board" /> : (
             <AuthSection
-              type="find-id"
+              type="login"
               sectionLabels={sectionLabels}
               formInputs={formInputs}
               buttonLabels={buttonLabels}
@@ -248,13 +203,12 @@ const App = () => {
               signupState={signupState}
               setSignupState={setSignupState}
             />
-          }
-        />
-        <Route
-          path="/find-password"
-          element={
+          )
+        } />
+        <Route path="/signup" element={
+          isSignedIn ? <Navigate to="/board" /> : (
             <AuthSection
-              type="find-password"
+              type="signup"
               sectionLabels={sectionLabels}
               formInputs={formInputs}
               buttonLabels={buttonLabels}
@@ -262,8 +216,30 @@ const App = () => {
               signupState={signupState}
               setSignupState={setSignupState}
             />
-          }
-        />
+          )
+        } />
+        <Route path="/find-id" element={
+          <AuthSection
+            type="find-id"
+            sectionLabels={sectionLabels}
+            formInputs={formInputs}
+            buttonLabels={buttonLabels}
+            formLinks={formLinks}
+            signupState={signupState}
+            setSignupState={setSignupState}
+          />
+        } />
+        <Route path="/find-password" element={
+          <AuthSection
+            type="find-password"
+            sectionLabels={sectionLabels}
+            formInputs={formInputs}
+            buttonLabels={buttonLabels}
+            formLinks={formLinks}
+            signupState={signupState}
+            setSignupState={setSignupState}
+          />
+        } />
       </Routes>
 
       <ChatModal
