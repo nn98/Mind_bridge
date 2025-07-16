@@ -170,18 +170,21 @@
   font-size: 1.3rem;
   color: #7b84f9;
 }
-.social-icons img{
+
+.social-icons img {
   width: 44px;
 }
 
 .info-row {
   display: flex;
   align-items: center;
-  gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+  gap: 10px;
+  /* 아이콘과 텍스트 사이 간격 */
 }
 
 .icon {
-  font-size: 20px; /* 아이콘 크기 */
+  font-size: 20px;
+  /* 아이콘 크기 */
 }
 
 .info-text {
@@ -199,4 +202,81 @@
   font-size: 14px;
   color: #666;
   margin-bottom: 1rem;
+}
+/* 이용 방법*/
+.howitworks-section {
+  background-color: #ffffff;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.howitworks-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.howitworks-subtitle {
+  color: #666;
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+}
+
+.howitworks-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.howitworks-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.howitworks-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1px 10px rgb(255, 166, 255);
+}
+
+.step-circle {
+  background-color: #4a6fa5;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.icon {
+  font-size: 3rem;
+  margin: 1rem 0;
+  color: #8ca9ff;
+}
+
+.step-button {
+  background-color: #dee8ff;
+  color: #3b4b80;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.step-button:hover {
+  background-color: #c0d5ff;
 }

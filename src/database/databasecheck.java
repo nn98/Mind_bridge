@@ -41,11 +41,11 @@ public class DatabaseCheck {
             //showAllTables(); //테이블 목록 확인
             //createTable("") //테이블 생성
             //showColumns("Total_Board"); //특정 테이블 컬럼 확인
-            //selectAll("users");//특정 테이블 데이터 확인
+            selectAll("users");//특정 테이블 데이터 확인
             //deleteData("", "", ""); //특정 테이블에서 특정 데이터 삭제 
             //showPrimaryKeys("users"); //특정 테이블의 PK키 확인 
             //updateData("","","",""); //컬럼 업데이트
-            //addColumn("", "", "");
+            //addColumn("users", "user_name", "VARCHAR(20)");
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -21,16 +21,40 @@
     border-radius: 8px;
 }
 
-.about-box h2 {
-    margin-bottom: 1rem;
-    color: #3a5b88;
-    font-size: 1.2rem;
+.about-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.about-box p {
-    margin-bottom: 1rem;
-    color: #333;
-    line-height: 1.7;
+.about-card {
+    background-color: #f8faff;
+    border-left: 6px solid #6c63ff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 1.8rem 2rem;
+    max-width: 420px;
+    flex: 1 1 300px;
+    transition: transform 0.3s ease;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1px 10px rgb(255, 166, 255);
+}
+
+.about-card h2 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+}
+
+.about-card p {
+    color: #444;
+    line-height: 1.75;
+    margin-bottom: 0.6rem;
 }
 
 .about-table {
@@ -68,4 +92,38 @@
     left: 0;
     color: #3a5b88;
     font-weight: bold;
+}
+
+/* ✅ 정신 건강 통계 차트 영역 추가 */
+.mental-health-chart-section {
+    background-color: #ffffff;
+    padding: 3rem 1rem;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.mental-health-chart-section .section-title {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+}
+
+/* 반응형 대응 */
+@media (max-width: 768px) {
+    .about-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .about-box {
+        padding: 1rem;
+    }
+
+    .about-card {
+        max-width: 90%;
+    }
+
+    .mental-health-chart-section {
+        padding: 2rem 1rem;
+    }
 }

@@ -1,25 +1,26 @@
-// src/components/Header.js
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { sectionLabels } from '../constants/sectionLabels';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
-const Header = ({ introRef, servicesRef }) => {
+const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 소개로 스크롤
-  const handleScrollToIntro = () => {
-    if (introRef?.current) {
-      introRef.current.scrollIntoView({ behavior: 'smooth' });
+  const scrollOrNavigate = (ref, target) => {
+    if (ref?.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      if (location.pathname !== '/') {
+        navigate('/');
+      }
+      setScrollTarget?.(target); // fallback when not on home page
     }
   };
 
-  // 서비스로 스크롤
-  const handleScrollToServices = () => {
-    if (servicesRef?.current) {
-      servicesRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const handleScrollToIntro = () => scrollOrNavigate(introRef, 'intro');
+  const handleScrollToServices = () => scrollOrNavigate(servicesRef, 'services');
+  const handleScrollToInfo = () => scrollOrNavigate(infoRef, 'info');
 
   return (
     <header className="header">
@@ -45,9 +46,9 @@ const Header = ({ introRef, servicesRef }) => {
           </div>
 
           <div className="nav-item-wrapper">
-            <Link to="/info" className="nav-link">
+            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={handleScrollToInfo}>
               {sectionLabels['info']}
-            </Link>
+            </div>
           </div>
         </div>
 
@@ -56,7 +57,6 @@ const Header = ({ introRef, servicesRef }) => {
             <UserButton />
           </SignedIn>
           <SignedOut>
-            <button className="custom-blue-btn" onClick={() => navigate('/signup')}>회원가입</button>
             <button className="custom-blue-btn" onClick={() => navigate('/login')}>로그인</button>
           </SignedOut>
         </div>
@@ -66,4 +66,3 @@ const Header = ({ introRef, servicesRef }) => {
 };
 
 export default Header;
-

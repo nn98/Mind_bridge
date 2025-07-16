@@ -32,26 +32,81 @@ body,
 
 /* Footer 전체 구조 */
 .footer {
-  background-color: #4a6fa5;
+  background-color: #0f172a;
   color: white;
-  padding: 2rem;
+  padding: 2rem 1rem;
   font-family: 'Noto Sans KR', sans-serif;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
-.footer-header {
+/* 푸터 4열 구조 */
+.footer-grid {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.footer-header h4 {
-  font-size: 1.2rem;
+.footer-column {
+  flex: 1 1 200px;
+  min-width: 180px;
+  margin-bottom: 1rem;
+}
+
+.footer-column h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.footer-column p,
+.footer-column li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e5e7eb;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
+.footer-column li {
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.footer-column li:hover {
+  text-decoration: underline;
+}
+
+.left-align {
+  align-items: flex-start;
+  text-align: left;
+  margin-right: auto;
+}
+
+/* Footer 하단 바 */
+.footer-bottom {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a1a1aa;
+  margin-top: 2rem;
+}
+
+/* 구분선 */
+.line {
+  height: 1px;
+  background-color: #ffffff33;
+  border: none;
+  margin: 1.5rem 0;
+}
+
+/* 아이콘 스타일 */
 .footer-icons {
   display: flex;
   gap: 12px;
@@ -68,71 +123,6 @@ body,
 
 .footer-icons a:hover img {
   transform: scale(1.1);
-}
-
-/* Footer 내용 영역 */
-.footer h2,
-.footer h3,
-.footer h4,
-.footer h5 {
-  margin: 0.5rem 0;
-  font-weight: 500;
-}
-
-.footer h2 {
-  font-size: 1.4rem;
-}
-
-.footer h3 {
-  font-size: 1.1rem;
-  margin-top: 1rem;
-}
-
-.footer h5 {
-  font-size: 0.95rem;
-  color: #f0f0f0;
-}
-
-.line {
-  height: 1px;
-  background-color: #ffffff66;
-  border: none;
-  margin: 1.5rem 0;
-}
-
-hr.small-line {
-  width: 25%;
-  height: 2px;
-  background-color: white;
-  border: none;
-}
-
-/* 사이드 floating 버튼 */
-.floating-sidebar {
-  position: fixed;
-  top: 35%;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.floating-button1 {
-  background-color: #5988ca;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 9px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  font-size: 14px;
-  color: white;
-  text-align: center;
-  transition: all 0.2s ease-in-out;
-  margin-right: 30px;
-}
-
-.floating-button:hover {
-  background-color: #2c5083;
 }
 
 /* 공통 커스텀 버튼 */
@@ -164,10 +154,43 @@ hr.small-line {
   box-shadow: 0 0 0 3px #c7d6f2;
 }
 
+/* 플로팅 사이드바 - 건드리지 않음 */
+.floating-sidebar {
+  position: fixed;
+  top: 35%;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.floating-button1 {
+  background-color: #5988ca;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 9px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  margin-right: 30px;
+}
+
+.floating-button:hover {
+  background-color: #2c5083;
+}
+
 /* 반응형 */
 @media (max-width: 991.98px) {
   .footer-icons img {
     width: 32px;
+  }
+
+  .footer-grid {
+    flex-direction: column;
+    gap: 2rem;
   }
 
   .footer-header {
