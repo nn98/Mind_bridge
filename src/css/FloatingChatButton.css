@@ -64,6 +64,7 @@
     position: absolute;
     top: 91vh;
     right: 140px;
+    color: black;
     background: white;
     border: 2px solid #acacac;
     border-radius: 18px;
@@ -78,7 +79,7 @@
 .modal-tabs {
     display: flex;
     justify-content: space-around;
-    background: #8fb3e5;
+    background: #a18cd1;
 }
 
 .modal-tabs button {
@@ -88,10 +89,11 @@
     background: none;
     cursor: pointer;
     font-weight: bold;
+    color: rgb(202, 202, 202)
 }
 
 .modal-tabs .active {
-    background: #3a5b88;
+    background: #7e5ad1;
     color: white;
 }
 

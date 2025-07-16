@@ -59,7 +59,6 @@ select:focus {
 button {
   padding: 8px 16px;
   background-color: #6c63ff;
-  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -68,7 +67,8 @@ button {
 }
 
 button:hover {
-  background-color: #574fd6;
+  background-color: #8b59ff;
+  color: white;
 }
 
 /* 작성 폼 */

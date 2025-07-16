@@ -29,7 +29,7 @@
 }
 
 .bubble.user {
-  background-color: #3a5b88;
+  background-color: #9377d4;
   color: white;
   float: right;
   border-bottom-right-radius: 4px;
@@ -37,7 +37,7 @@
 }
 
 .bubble.ai {
-  background-color: #e6ecf4;
+  background-color: #d5caf0;
   color: #333;
   float: left;
   border-bottom-left-radius: 4px;
@@ -70,7 +70,7 @@
   width: 200px;
   margin: 1rem auto;
   padding: 0.6rem 1.2rem;
-  background-color: #3a5b88;
+  background-color: #a18cd1;
   color: white;
   border: none;
   border-radius: 6px;
