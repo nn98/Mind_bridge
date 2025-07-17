@@ -88,15 +88,15 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       description: '사용자 인터렉티브 기반으로 감정을 분석하고 요약하여 자신의 감정 상태를 객관적으로 이해할 수 있도록 도와드립니다.',
     },
     {
+      icon: '📧',
+      title: '웹 메일 호스팅',
+      description: '유관 기관 연결 및 번역을 지원하는 웹 메일 호스팅으로 도움을 요청하고 받을 수 있습니다.',
+    },
+    {
       icon: '🏥',
       title: '병원 목록',
       description: '전국 심리상담센터 위치를 목록을 통해 알 수 있습니다.',
       path: '/hospital-region',
-    },
-    {
-      icon: '📧',
-      title: '웹 메일 호스팅',
-      description: '유관 기관 연결 및 번역을 지원하는 웹 메일 호스팅으로 도움을 요청하고 받을 수 있습니다.',
     },
     {
       icon: '🖼️',
