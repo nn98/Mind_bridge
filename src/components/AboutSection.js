@@ -297,7 +297,7 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
                 <span className="icon">🏥</span>
                 <div className="info-text">
                   <p className="bold-text">서울특별시 종로구 종로12길 15</p>
-                  <p className="sub-text">코아빌딩 5층</p>
+                  <p className="sub-text">코아빌딩 2층</p>
                 </div>
               </div>
               <h4>소셜 미디어</h4>

@@ -54,7 +54,7 @@ const Faq = () => {
 
     return (
         <div className="faq-container">
-            <h2 className="faq-title">자주 묻는 질문 </h2>
+            <h2 className="faq-title">자주 묻는 질문</h2>
 
             <div className="faq-buttons">
                 {faqList.map((item, idx) => (
@@ -68,12 +68,14 @@ const Faq = () => {
                 ))}
             </div>
 
+            {/* ✅ 버튼 아래, 컨테이너 내부에 위치 */}
             {openIndex !== null && (
-                <div className="faq-answer-box">
+                <div className={`faq-answer-box open`}>
                     <strong>수달이:</strong> {faqList[openIndex].answer}
                 </div>
             )}
         </div>
+
     );
 };
 

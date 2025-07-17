@@ -96,6 +96,7 @@
 .contact-form textarea {
   padding: 12px;
   font-size: 14px;
+  font-family: inherit; /* ✅ 이 줄 추가! */
   border: 1px solid #ddd;
   border-radius: 6px;
   resize: none;
@@ -105,7 +106,7 @@
 
 .contact-form input:focus,
 .contact-form textarea:focus {
-  border-color: #5e4fff;
+  border-color: #a14fff;
 }
 
 .contact-form button {
@@ -120,7 +121,7 @@
 }
 
 .contact-form button:hover {
-  background-color: #d47eff;
+  background-color: #805dd1;
 }
 
 /* name & email 나란히 */
@@ -168,11 +169,14 @@
   display: flex;
   gap: 1.2rem;
   font-size: 1.3rem;
-  color: #7b84f9;
 }
 
 .social-icons img {
   width: 55px;
+}
+
+.social-icons img:hover {
+  transform: scale(1.1);
 }
 
 .info-row {
