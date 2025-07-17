@@ -43,7 +43,7 @@ const Footer = () => {
 
       <div className="footer-bottom">
         <p>© 2025 MindBridge. All rights reserved.</p>
-        <p>서울특별시 종로구 종로12길 15 코아빌딩 5층 | 사업자등록번호: 123-45-67890</p>
+        <p>서울특별시 종로구 종로12길 15 코아빌딩 2층 | 사업자등록번호: 123-45-67890</p>
       </div>
     </footer>
   );
