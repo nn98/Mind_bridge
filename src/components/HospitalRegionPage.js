@@ -30,6 +30,7 @@ const HospitalRegionPage = () => {
                     .map((row) => ({
                         name: row['병원명'],
                         address: row['주소'],
+                        region: row['지역'],
                         phone: row['전화번호'],
                         lat: parseFloat(row['위도']),
                         lon: parseFloat(row['경도']),
@@ -38,7 +39,7 @@ const HospitalRegionPage = () => {
 
                 setHospitals(parsed);
 
-                const regions = new Set(parsed.map((h) => h.address.split(' ')[0]));
+                const regions = new Set(parsed.map((h) => h.region.split(' ')[0]));
                 setRegionList(['전체', ...Array.from(regions)]);
             },
         });

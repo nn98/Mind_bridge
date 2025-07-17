@@ -196,7 +196,7 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
           marginTop: '0.5rem',
           fontStyle: 'italic'
         }}>
-          ※ 출처: 보건복지부 「2023년 정신건강실태조사」
+          ※ 출처: 보건복지부 「2023~2025년 모의 집계 」
         </p>
       </section>
 
