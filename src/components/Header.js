@@ -50,6 +50,12 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
               {sectionLabels['info']}
             </div>
           </div>
+
+          <div className="nav-item-wrapper">
+            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={() => (window.location.href = 'https://mind-bridge-zeta.vercel.app/board')}>
+              {sectionLabels['board']}
+            </div>
+          </div>
         </div>
 
         <div className="nav-right">

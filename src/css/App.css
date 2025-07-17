@@ -53,13 +53,16 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 2vw;
+  margin-right: 45px;
 }
 
 .nav-right {
-  flex: 0.5;
   display: flex;
   justify-content: flex-end;
-  margin-left: -50px;
+  align-items: center;
+  gap: 16px;          /* 버튼 사이 간격 고정 */
+  flex: 0 0 auto;     /* 크기 비율에 따라 늘어나지 않게 고정 */
+  margin-left: 0;
 }
 
 .modal-backdrop {
