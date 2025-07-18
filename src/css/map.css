@@ -19,6 +19,32 @@
 }
 
 .Toastify__toast {
-  box-shadow: 0 6px 24px 4px rgba(0,0,0,0.22);
+  box-shadow: 0 6px 24px 4px rgba(0, 0, 0, 0.22);
   margin: 0 10rem 9rem 0;
+}
+
+.map-box {
+  width: 40vw;
+  height: calc(50vh - 60px);
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin: 10px;
+  margin-bottom: 20px;
+}
+
+.hospital-info-box {
+  margin: 0 10px 15px;
+  padding: 16px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  max-width: 40vw;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.hospital-info-box h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
 }

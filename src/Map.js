@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Papa from 'papaparse';
+import "./css/map.css";
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
 const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
@@ -238,34 +239,11 @@ const Map = () => {
 
   return (
     <>
-      <div
-        ref={mapRef}
-        style={{
-          width: '40vw',
-          height: 'calc(50vh - 60px)',
-          borderRadius: '10px',
-          border: '1px solid #ccc',
-          margin: '10px',
-          marginBottom: '20px',
-        }}
-      />
+      <div ref={mapRef} className="map-box" />
 
       {selectedHospital && (
-        <div
-          style={{
-            margin: '0 10px 15px',
-            padding: '16px',
-            background: '#f7f7f7',
-            borderRadius: '10px',
-            border: '1px solid #ccc',
-            maxWidth: '40vw',
-            fontSize: '18px',
-            lineHeight: '1.6',
-          }}
-        >
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
-            {selectedHospital.name}
-          </h3>
+        <div className="hospital-info-box">
+          <h3>{selectedHospital.name}</h3>
           <p><strong>주소:</strong> {selectedHospital.address}</p>
           <p><strong>전화번호:</strong> {selectedHospital.phone}</p>
           {selectedHospital.distance && (

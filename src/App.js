@@ -137,7 +137,7 @@ const App = () => {
         <div
           style={{
             position: 'fixed',
-            bottom: '200px',
+            top: '150px',
             right: '150px',
             zIndex: 1000,
             background: 'white',
@@ -148,17 +148,6 @@ const App = () => {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ margin: '0 auto' }}>내 주변 병원 지도</h2>
-            <button
-              onClick={() => setMapVisible(false)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontSize: '18px',
-                cursor: 'pointer',
-              }}
-            >
-              ✖
-            </button>
           </div>
           <Map />
         </div>
