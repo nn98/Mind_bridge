@@ -1,7 +1,6 @@
-import React from 'react';
 import Chat from '../Chat';
 
-const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat, chatInput, resultText }) => {
+const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat }) => {
   const chatHistory = [
     { summary: "최근 상담 요약 1" },
   ];

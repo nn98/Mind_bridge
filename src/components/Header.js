@@ -14,7 +14,7 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
       if (location.pathname !== '/') {
         navigate('/');
       }
-      setScrollTarget?.(target); // fallback when not on home page
+      setScrollTarget?.(target);
     }
   };
 

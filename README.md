@@ -17,4 +17,5 @@
 |`07/08`|README 정리 및 기초 DevLog 작성|`KYS`|
 |`07/08`|지도 열기/닫기 상태를 mapVisible로 관리 가능하게 변경하였음 const [mapVisible, setMapVisible] = useState(false);|`LJJ`|
 |`07/08`|scrollTarget 상태를 통해 스크롤할 섹션 아이디에('intro', 'notice')를 저장후 AboutSection 컴포넌트에서 useEffect로 scrollTarget이 변경되면 해당하는 ref로 scrollIntoView({ behavior: 'smooth' }) 실행하게 만들어서 스크롤 후 setScrollTarget(null)로 상태 초기화하여 재사용가능하게 만듦|`LJJ`|
+|`07/19`|그날 하루를 입력하면 키워드를 분석하여 상태를 알려주는 page를 만드는 와중에 작성중인 코드에 no-loop-func라는 ESLint 경고가 나와 찾아보니 for 안에서 foreach를 사용하여 경고가 뜬 것이 확인되어 foreach를 사용하지 않고 for만 사용하여 로직을 수정 하였습니다 추후 API을 활용하여 감정 키워드에 대한 한 문장을 완성하는 페이지로 수정할 예정이며 감정 분석이 원할하게 진행이 가능하도록 키워드를 더 추가할 예정입니다.|`LJJ`|
 ||||

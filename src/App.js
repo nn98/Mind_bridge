@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import Map from './Map';
@@ -31,6 +31,7 @@ import AuthSection from './components/AuthSection';
 import FloatingSidebar from './components/FloatingSidebar';
 import Faq from "./components/Faq";
 import HospitalRegionPage from './components/HospitalRegionPage.js';
+import EmotionAnalysisPage from './components/EmotionAnalysisPage.js';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -38,7 +39,7 @@ import { buttonLabels } from './constants/buttonLabels';
 import { formLinks } from './constants/formLinks';
 
 const App = () => {
-  const [selectedBoard, setSelectedBoard] = useState('');
+  const [setSelectedBoard] = useState('');
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState(null);
@@ -46,11 +47,10 @@ const App = () => {
   const [signupState, setSignupState] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState('chat');
-  const [chatInput, setChatInput] = useState('');
+  const [chatInput ] = useState('');
   const [resultText, setResultText] = useState('');
   const [testType, setTestType] = useState('우울증');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
-  const [userLocation, setUserLocation] = useState(null);
   const [mapVisible, setMapVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
   const [faqVisible, setFaqVisible] = useState(false);
@@ -181,6 +181,9 @@ const App = () => {
             setResultText={setResultText}
           />
         } />
+
+        <Route path="/emotion-analysis" element={<EmotionAnalysisPage />} />
+
         <Route path="/login" element={
           isSignedIn ? <Navigate to="/board" /> : (
             <AuthSection
