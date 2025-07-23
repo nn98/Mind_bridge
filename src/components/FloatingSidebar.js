@@ -26,7 +26,7 @@ const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible 
           {faqVisible ? (
             <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
           ) : (
-            <img src="/qna.png" alt="자주묻는질문" style={{ width: '60px', height: '60px' }} />
+            <img src="/img/qna.png" alt="자주묻는질문" style={{ width: '60px', height: '60px' }} />
           )}
         </div>
 
@@ -35,13 +35,13 @@ const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible 
           {mapVisible ? (
             <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
           ) : (
-            <img src="/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
+            <img src="/img/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
           )}
         </div>
 
         {/* ⬆ 위로 버튼 */}
         <div className="floating-button2" onClick={handleScrollToTop}>
-          <img src="/up.png" alt="맨 위" style={{ width: '60px', height: '60px' }} />
+          <img src="/img/up.png" alt="맨 위" style={{ width: '60px', height: '60px' }} />
         </div>
       </div>
     </>

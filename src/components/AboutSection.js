@@ -303,10 +303,10 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
               <h4>소셜 미디어</h4>
               <div className="social-icons">
                 <a href="https://open.kakao.com/o/s2eNHUGh" target="_blank" rel="noopener noreferrer">
-                  <img src="/mindcafe.png" alt="카카오채널" />
+                  <img src="/img/mindcafe.png" alt="카카오채널" />
                 </a>
                 <a href="https://www.instagram.com/mindbridge2020/" target="_blank" rel="noopener noreferrer">
-                  <img src="/instagram.png" alt="인스타그램" />
+                  <img src="/img/instagram.png" alt="인스타그램" />
                 </a>
               </div>
             </div>
