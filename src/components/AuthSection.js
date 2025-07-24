@@ -49,7 +49,7 @@ const AuthSection = ({
         alert('회원가입 성공!');
       } else {
         await login({
-          user_id: formData.username,
+          user_id: formData.email,
           user_pw: formData.password,
         });
         alert('로그인 성공!');

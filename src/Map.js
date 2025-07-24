@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Papa from 'papaparse';
-import "./css/map.css";
+import './css/map.css';
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
 const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
@@ -40,7 +40,10 @@ const Map = () => {
     script.async = true;
     script.onload = () => {
       window.kakao.maps.load(() => {
-        const center = new window.kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lon);
+        const center = new window.kakao.maps.LatLng(
+          DEFAULT_CENTER.lat,
+          DEFAULT_CENTER.lon
+        );
         const map = new window.kakao.maps.Map(mapRef.current, {
           center,
           level: 4,
@@ -68,7 +71,12 @@ const Map = () => {
   }, [gpsReady]);
 
   useEffect(() => {
-    if (typeof userLoc === 'undefined' || !window.kakao?.maps || !mapInstanceRef.current) return;
+    if (
+      typeof userLoc === 'undefined' ||
+      !window.kakao?.maps ||
+      !mapInstanceRef.current
+    )
+      return;
 
     const map = mapInstanceRef.current;
 
@@ -125,27 +133,29 @@ const Map = () => {
           });
 
           const infoContent = `
-  <div style="
-    width: 240px;
-    min-height: 140px;
-    padding: 8px;
-    font-size: 12px;
-    line-height: 1.6;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    box-sizing: border-box;
-  ">
-    <div style="font-weight: bold; font-size: 13px;">
-      ${h.name}
-    </div>
-    ${userLoc ? `<div>거리: ${h.distance.toFixed(2)} km</div>` : ''}
-    <div style="margin-top: 4px;">주소: ${h.address}</div>
-    <div style="margin-top: 2px; word-break: break-all;">전화번호: ${h.phone}</div>
-    ${userLoc ? '<div id="timeBox" style="margin-top:6px; color:green;"></div>' : ''}
-    ${userLoc ? '<button id="routeBtn" style="margin-top:6px; padding:4px 8px; font-size:12px;">길찾기</button>' : ''}
-  </div>
-`;
+            <div style="
+              position: relative;
+              width: 240px;
+              min-height: 140px;
+              padding: 8px;
+              font-size: 12px;
+              line-height: 1.6;
+              word-break: break-word;
+              overflow-wrap: break-word;
+              white-space: normal;
+              box-sizing: border-box;
+            ">
+              <div id="info-close" title="닫기" style="position:absolute; top:8px; right:8px; cursor:pointer; font-size:14px;">✖️</div>
+              <div style="font-weight: bold; font-size: 13px;">
+                ${h.name}
+              </div>
+              ${userLoc ? `<div>거리: ${h.distance.toFixed(2)} km</div>` : ''}
+              <div style="margin-top: 4px;">주소: ${h.address}</div>
+              <div style="margin-top: 2px; word-break: break-all;">전화번호: ${h.phone}</div>
+              ${userLoc ? '<div id="timeBox" style="margin-top:6px; color:green;"></div>' : ''}
+              ${userLoc ? '<button id="routeBtn" style="margin-top:6px; padding:4px 8px; font-size:12px;">길찾기</button>' : ''}
+            </div>
+          `;
 
           marker.addListener('click', () => {
             if (infoWindowRef.current) infoWindowRef.current.close();
@@ -155,6 +165,13 @@ const Map = () => {
             });
             infowindow.open(map, marker);
             infoWindowRef.current = infowindow;
+
+            const closeBtn = document.getElementById('info-close');
+            if (closeBtn) {
+              closeBtn.onclick = () => {
+                infowindow.close();
+              };
+            }
 
             if (userLoc) {
               setTimeout(() => {
@@ -207,7 +224,9 @@ const Map = () => {
         const coords = section.roads.flatMap((road) =>
           road.vertexes.reduce((arr, val, idx) => {
             if (idx % 2 === 0) {
-              arr.push(new window.kakao.maps.LatLng(road.vertexes[idx + 1], val));
+              arr.push(
+                new window.kakao.maps.LatLng(road.vertexes[idx + 1], val)
+              );
             }
             return arr;
           }, [])
@@ -244,10 +263,16 @@ const Map = () => {
       {selectedHospital && (
         <div className="hospital-info-box">
           <h3>{selectedHospital.name}</h3>
-          <p><strong>주소:</strong> {selectedHospital.address}</p>
-          <p><strong>전화번호:</strong> {selectedHospital.phone}</p>
+          <p>
+            <strong>주소:</strong> {selectedHospital.address}
+          </p>
+          <p>
+            <strong>전화번호:</strong> {selectedHospital.phone}
+          </p>
           {selectedHospital.distance && (
-            <p><strong>거리:</strong> {selectedHospital.distance} km</p>
+            <p>
+              <strong>거리:</strong> {selectedHospital.distance} km
+            </p>
           )}
         </div>
       )}
