@@ -52,7 +52,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
         onClick={() => setIsOpen(true)}
       >
         <img
-          src="/채팅상담.png"
+          src="/img/채팅상담.png"
           alt="채팅 아이콘"
           style={{
             width: '100px',
