@@ -50,7 +50,7 @@
     bottom: 100px;
     right: 150px;
     width: 380px;
-    height: 630px;
+    height: 640px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
@@ -61,7 +61,7 @@
 }
 
 .close-btn {
-    position: absolute;
+    position: fixed;
     top: 91vh;
     right: 140px;
     color: black;
