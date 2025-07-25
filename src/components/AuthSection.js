@@ -57,8 +57,8 @@ const AuthSection = ({
         alert('회원가입 성공!');
       } else {
         await axios.post(`${BACKEND_URL}/api/users/login`, {
-          username: formData.username,
-          password: formData.password,
+          user_id: formData.email,
+          user_pw: formData.password,
         });
         alert('로그인 성공!');
       }

@@ -42,16 +42,16 @@ const BannerSlider = () => {
     <div className="banner-container">
       <div className="banner-slides" ref={slidesRef}>
         <a href="https://mind-bridge-zeta.vercel.app/?">
-          <img src="/main4.png" alt="격려 문구" />
+          <img src="/img/main4.png" alt="격려 문구" />
         </a>
         <a href="https://mind-bridge-zeta.vercel.app/?">
-          <img src="/main.png" alt="마인드브릿지 설명 배너" />
+          <img src="/img/main.png" alt="마인드브릿지 설명 배너" />
         </a>
         <a href="https://mind-bridge-zeta.vercel.app/?">
-          <img src="/main3.png" alt="병원위치 안내문" />
+          <img src="/img/main3.png" alt="병원위치 안내문" />
         </a>
         <a href="https://mind-bridge-zeta.vercel.app/self">
-          <img src="/main2.png" alt="자가진단" />
+          <img src="/img/main2.png" alt="자가진단" />
         </a>
       </div>
       <div className="button-container">
