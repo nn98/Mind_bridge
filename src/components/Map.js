@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Papa from 'papaparse';
-import "./css/map.css";
+
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
 const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;

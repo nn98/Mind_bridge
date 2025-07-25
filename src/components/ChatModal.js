@@ -1,4 +1,4 @@
-import Chat from '../Chat';
+import Chat from './Chat';
 
 const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat }) => {
   const chatHistory = [

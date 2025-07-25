@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { SignInButton, SignUpButton } from '@clerk/clerk-react';
-//
-import React, { useState } from 'react';
-import { signup, login } from '../api/authApi';
+import { SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
+const BACKEND_URL = 'http://localhost:8080';  // 백엔드 주소 명시
 
 const AuthSection = ({
   type,
@@ -14,7 +14,6 @@ const AuthSection = ({
   signupState,
   setSignupState
 }) => {
-  //
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -22,40 +21,49 @@ const AuthSection = ({
     email: '',
     mentalState: '',
   });
-  //
+
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user) {
+      axios.post(`${BACKEND_URL}/api/users/clerk-login`, {
+        userId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        username: user.firstName || user.fullName || 'clerkUser',
+      })
+      .then(res => {
+        console.log('Clerk user saved to DB:', res.data);
+      })
+      .catch(err => {
+        console.error('Clerk user save error:', err);
+      });
+    }
+  }, [user]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log('name:', name, 'value:', value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  //
   const handleSubmit = async () => {
     try {
       if (type === 'signup') {
-
-        console.log('보낼 데이터:', {
-          ...formData,
-          mentalState: signupState
+        await axios.post(`${BACKEND_URL}/api/users/register`, {
+          username: formData.username,
+          password: formData.password,
+          email: formData.email,
+          // 필요한 추가 데이터 포함 가능
         });
-
-        await signup({
-          user_id: formData.username,
-          user_pw: formData.password,
-          phone: formData.tel,
-          mentalState: formData.mentalState,
-        });
-
         alert('회원가입 성공!');
       } else {
-        await login({
-          user_id: formData.username,
-          user_pw: formData.password,
+        await axios.post(`${BACKEND_URL}/api/users/login`, {
+          username: formData.username,
+          password: formData.password,
         });
         alert('로그인 성공!');
       }
     } catch (err) {
-      alert('에러 발생: ' + err.message);
+      alert('에러 발생: ' + (err.response?.data || err.message));
     }
   };
 
@@ -63,8 +71,6 @@ const AuthSection = ({
     <section className={`form-section${type === 'signup' ? ' form-section-flex' : ''}`}>
       <div className="form-left">
         <h2>{sectionLabels[type]}</h2>
-
-
 
         {formInputs[type].map((input, i) => (
           <input
@@ -77,7 +83,6 @@ const AuthSection = ({
             className="input"
           />
         ))}
-
 
         <button className="login-button" onClick={handleSubmit}>
           {buttonLabels[type]}
