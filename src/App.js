@@ -239,7 +239,7 @@ const App = () => {
         setIsOpen={setIsOpen}
         tab={tab}
         setTab={setTab}
-        selectedz={selectedChat}
+        selected={selectedChat}
         setSelectedChat={setSelectedChat}
         chatInput={chatInput}
         resultText={resultText}

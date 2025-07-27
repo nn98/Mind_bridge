@@ -1,5 +1,3 @@
-import React from 'react';
-
 const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible }) => {
   const handleScrollToTop = () => {
     const root = document.getElementById('root');

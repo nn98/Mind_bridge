@@ -1,3 +1,5 @@
+/* src/css/auth.css */
+
 /* 공통 버튼 스타일 */
 .auth-button,
 .login-button,
@@ -31,7 +33,7 @@
   text-align: center;
 }
 
-/* 폼 좌우 배치 (예: 로그인/소셜) */
+/* 폼 좌우 배치 */
 .form-section-flex {
   display: flex;
   justify-content: space-between;
@@ -53,6 +55,7 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
   width: 340px;
   min-width: 300px;
+  margin-bottom: 50px;
 }
 
 /* 입력 필드 */
@@ -123,4 +126,14 @@
   font-size: 0.95rem;
   font-weight: bold;
   border-radius: 8px;
+}
+
+.form-right-legend {
+  background: #ffffff;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  width: 340px;
+  min-width: 350px;
+  margin-top: 15vh;
 }
