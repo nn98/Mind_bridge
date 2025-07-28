@@ -63,8 +63,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
     );
 
   return (
-    <div className="modal-wrapper">
-      <button onClick={() => setIsOpen(false)} className="close-btn">✖</button>
+      <><button onClick={() => setIsOpen(false)} className="close-btn">✖</button><div>
       <div className="modal-container">
         <div className="modal-tabs">
           <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
@@ -73,7 +72,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
         </div>
         <div className="modal-body">{renderContent()}</div>
       </div>
-    </div>
+    </div></>
   );
 };
 
