@@ -1,26 +1,36 @@
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { sectionLabels } from '../constants/sectionLabels';
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { sectionLabels } from "../constants/sectionLabels";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
 
 const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { isSignedIn } = useUser(); // Clerk 로그인 상태
+
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false); // localStorage 토큰 기반 상태
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsCustomLoggedIn(!!token);
+  }, [location]);
+
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth' });
+      ref.current.scrollIntoView({ behavior: "smooth" });
     } else {
-      if (location.pathname !== '/') {
-        navigate('/');
+      if (location.pathname !== "/") {
+        navigate("/");
       }
       setScrollTarget?.(target);
     }
   };
 
-  const handleScrollToIntro = () => scrollOrNavigate(introRef, 'intro');
-  const handleScrollToServices = () => scrollOrNavigate(servicesRef, 'services');
-  const handleScrollToInfo = () => scrollOrNavigate(infoRef, 'info');
+  const handleScrollToIntro = () => scrollOrNavigate(introRef, "intro");
+  const handleScrollToServices = () =>
+    scrollOrNavigate(servicesRef, "services");
+  const handleScrollToInfo = () => scrollOrNavigate(infoRef, "info");
 
   return (
     <header className="header">
@@ -34,37 +44,68 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
 
         <div className="nav-center">
           <div className="nav-item-wrapper">
-            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={handleScrollToIntro}>
-              {sectionLabels['about']}
+            <div
+              className="nav-link"
+              style={{ cursor: "pointer" }}
+              onClick={handleScrollToIntro}
+            >
+              {sectionLabels["about"]}
             </div>
           </div>
 
           <div className="nav-item-wrapper">
-            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={handleScrollToServices}>
-              {sectionLabels['services']}
+            <div
+              className="nav-link"
+              style={{ cursor: "pointer" }}
+              onClick={handleScrollToServices}
+            >
+              {sectionLabels["services"]}
             </div>
           </div>
 
           <div className="nav-item-wrapper">
-            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={handleScrollToInfo}>
-              {sectionLabels['info']}
+            <div
+              className="nav-link"
+              style={{ cursor: "pointer" }}
+              onClick={handleScrollToInfo}
+            >
+              {sectionLabels["info"]}
             </div>
           </div>
 
           <div className="nav-item-wrapper">
-            <div className="nav-link" style={{ cursor: 'pointer' }} onClick={() => (window.location.href = 'https://mind-bridge-zeta.vercel.app/board')}>
-              {sectionLabels['board']}
+            <div
+              className="nav-link"
+              style={{ cursor: "pointer" }}
+              onClick={() =>
+                (window.location.href =
+                  "https://mind-bridge-zeta.vercel.app/board")
+              }
+            >
+              {sectionLabels["board"]}
             </div>
           </div>
         </div>
 
         <div className="nav-right">
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          <SignedOut>
-            <button className="custom-blue-btn" onClick={() => navigate('/login')}>로그인</button>
-          </SignedOut>
+          {isSignedIn || isCustomLoggedIn ? (
+            <>
+              <UserButton />
+              <button
+                onClick={() => navigate("/logout")}
+                className="custom-blue-btn"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="custom-blue-btn"
+            >
+              로그인
+            </button>
+          )}
         </div>
       </nav>
     </header>
