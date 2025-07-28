@@ -9,7 +9,7 @@ import { SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
 
 import '../css/login.css';
 
-const BACKEND_URL = 'http://121.78.183.18:8080';
+const BACKEND_URL = 'http://localhost:8080';
 
 const AuthSection = ({ type }) => {
   const [formData, setFormData] = useState({
@@ -102,6 +102,9 @@ const AuthSection = ({ type }) => {
           email: formData.email,
           password: formData.password,
         });
+        const token = response.data.token; 
+        localStorage.setItem('token', token);
+        console.log('Received token:', token);  // 토큰 출력
         alert('로그인 성공!');
         navigate('/'); // 로그인 성공 후 메인 페이지로 이동
       } else if (type === 'signup') {
