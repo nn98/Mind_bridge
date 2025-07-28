@@ -9,7 +9,7 @@ import { SignInButton, SignUpButton, useUser } from '@clerk/clerk-react';
 
 import '../css/login.css';
 
-const BACKEND_URL = 'http://121.78.183.18:8080';
+const BACKEND_URL = 'http://localhost:8080';
 
 const AuthSection = ({ type }) => {
   const [formData, setFormData] = useState({
@@ -25,6 +25,7 @@ const AuthSection = ({ type }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Clerk 소셜 로그인 성공 시, 백엔드에 정보 저장 후 메인 페이지로 이동
     if (user) {
       axios.post(`${BACKEND_URL}/api/users/clerk-login`, {
         userId: user.id,
@@ -101,9 +102,13 @@ const AuthSection = ({ type }) => {
           email: formData.email,
           password: formData.password,
         });
+        const token = response.data.token; 
+        localStorage.setItem('token', token);
+        console.log('Received token:', token);  // 토큰 출력
         alert('로그인 성공!');
-        navigate('/');
+        navigate('/'); // 로그인 성공 후 메인 페이지로 이동
       } else if (type === 'signup') {
+        // 회원가입 전 최종 유효성 검사
         if (Object.keys(errors).length > 0 || !emailCheck.isAvailable || !formData.termsAgreed) {
           alert('입력 정보를 다시 확인해주세요.');
           return;
@@ -116,7 +121,7 @@ const AuthSection = ({ type }) => {
           mentalState: formData.mentalState,
         });
         alert('회원가입이 완료되었습니다. 로그인 해주세요.');
-        navigate('/login');
+        navigate('/login'); // 회원가입 성공 후 로그인 페이지로 이동
       } else if (type === 'find-id') {
         await axios.post(`${BACKEND_URL}/api/users/find-id`, { phoneNumber: formData.phoneNumber });
         alert('입력하신 번호로 가입된 이메일 정보를 전송했습니다.');
@@ -138,20 +143,12 @@ const AuthSection = ({ type }) => {
             <Typography variant="h4" component="h1" gutterBottom>로그인</Typography>
             <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
             <TextField className="input-wrapper" fullWidth label="비밀번호" name="password" type="password" margin="normal" value={formData.password} onChange={handleChange} />
-
-            {!user && (
-              <>
-                <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>
-                  로그인
-                </Button>
-                <Box className="social-buttons">
-                  <SignInButton mode="modal">
-                    <Button className="social-button" variant="contained">소셜 로그인</Button>
-                  </SignInButton>
-                </Box>
-              </>
-            )}
-
+            <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>로그인</Button>
+            <Box className="social-buttons">
+              <SignInButton mode="modal">
+                <Button className="social-button" variant="contained">소셜 로그인</Button>
+              </SignInButton>
+            </Box>
             <Box className="form-links">
               <RouterLink to="/signup" className="form-link">회원가입</RouterLink>
               <RouterLink to="/find-id" className="form-link">아이디 찾기</RouterLink>
