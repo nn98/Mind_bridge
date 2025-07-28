@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import Map from './Map';
+
 
 
 import './css/App.css';
@@ -19,9 +19,9 @@ import './css/result.css';
 import './css/banner.css';
 import './css/HospitalRegionPage.css';
 
-
+import Map from './components/Map.js';
 import Header from './components/Header';
-import Picture from './Picture.js';
+import Picture from './components/Picture.js';
 import SelfTest from './components/SelfTest';
 import BoardSection from './components/BoardSection';
 import ChatModal from './components/ChatModal';
@@ -239,7 +239,7 @@ const App = () => {
         setIsOpen={setIsOpen}
         tab={tab}
         setTab={setTab}
-        selectedz={selectedChat}
+        selected={selectedChat}
         setSelectedChat={setSelectedChat}
         chatInput={chatInput}
         resultText={resultText}

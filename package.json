@@ -5,6 +5,10 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.33.0",
     "@clerk/localizations": "^3.18.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.2.0",
+    "@mui/material": "^7.2.0",
     "@react-google-maps/api": "^2.20.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

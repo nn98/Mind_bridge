@@ -137,7 +137,7 @@ const Chat = () => {
       if (!res.ok) {
         console.error('OpenAI 응답 오류:', data);
         setChatHistory(prev => [...prev, { sender: 'ai', message: 'AI 응답 오류 발생' }]);
-        setIsTyping(false);
+        setIsTyping(false); 
         return;
       }
 

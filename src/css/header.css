@@ -144,7 +144,7 @@ body,
 }
 
 .custom-blue-btn:hover {
-  background: linear-gradient(135deg, #bf00ff , #f7acff );
+  background: linear-gradient(135deg, #bf00ff, #f7acff);
   box-shadow: 0 4px 12px 2px rgba(74, 111, 165, 0.18);
   color: white;
 }
@@ -203,4 +203,185 @@ body,
 /* box-sizing inheritance */
 .footer * {
   box-sizing: border-box;
+}
+
+/* 사용자 프로필 섹션들을 구분 */
+.profile-section {
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 10px;
+}
+
+/* 프로필 섹션 제목 (h3, h4) */
+.user-profile h3,
+.user-profile h4 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-profile h4 {
+  margin-bottom: 16px;
+  /* 작은 제목의 하단 마진 조정 */
+}
+
+
+/* 텍스트 정렬을 위한 핵심 수정 부분 */
+.profile-field {
+  display: flex;
+  align-items: center;
+  /* 수직 중앙 정렬 (기본) */
+  gap: 15px;
+  /* 라벨과 컨텐츠 사이 간격 */
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+/* 라벨(span) 스타일 */
+.profile-field span {
+  font-weight: bold;
+  color: #555;
+  width: 80px;
+  /* 모든 라벨 너비 고정 */
+  flex-shrink: 0;
+  /* 너비가 줄어들지 않도록 설정 */
+  text-align: left;
+  /* 라벨 텍스트 왼쪽 정렬 */
+}
+
+/* 컨텐츠(p, input 등) 영역이 남은 공간을 모두 차지하도록 설정 */
+.profile-field p,
+.profile-field input,
+.profile-field select,
+.profile-field textarea {
+  flex-grow: 1;
+  width: 100%;
+  /* 너비 100%로 유연하게 채움 */
+}
+
+/* 컨텐츠 기본 스타일 */
+.profile-field p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+  padding: 8px 0;
+  /* input, select와 높이를 맞추기 위한 패딩 */
+}
+
+.profile-field p.pre-wrap {
+  white-space: pre-wrap;
+}
+
+/* input, select, textarea 공통 스타일 */
+.profile-field input,
+.profile-field select,
+.profile-field textarea {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+/* 상담 목표처럼 라벨이 위로 가는 필드 */
+.profile-field.full-width {
+  flex-direction: column;
+  /* 세로 방향으로 변경 */
+  align-items: flex-start;
+  /* 전체를 왼쪽 정렬 */
+  gap: 8px;
+  /* 라벨과 textarea 사이 간격 */
+}
+
+.profile-field.full-width span {
+  width: auto;
+  /* 너비 고정 해제 */
+}
+
+.profile-field textarea {
+  resize: vertical;
+  min-height: 80px;
+  /* 최소 높이 지정 */
+}
+
+
+/* 버튼 영역 스타일 */
+.profile-actions {
+  text-align: right;
+  margin-top: 24px;
+}
+
+.profile-actions .chat-button.cancel {
+  background-color: #888;
+}
+
+
+/* 상담 이력(Session History) 섹션 스타일 */
+.session-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.session-history li {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border: 1px solid #eee;
+}
+
+.session-history .history-date {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.session-history .history-summary {
+  font-size: 15px;
+  color: #666;
+}
+
+
+/* 계정 관리(Account Management) 섹션 스타일 */
+.account-actions {
+  display: flex;
+  gap: 10px;
+  display: flex;
+  justify-content: center;
+  /* 버튼 사이 간격 */
+}
+
+.account-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.account-button:hover {
+  background-color: #e9e9e9;
+}
+
+.account-button.danger {
+  border-color: #d9534f;
+  background-color: #fdf2f2;
+  color: #d9534f;
+}
+
+.account-button.danger:hover {
+  background-color: #f8e0e0;
 }

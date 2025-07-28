@@ -17,7 +17,9 @@ const BoardSection = ({ user, isSignedIn }) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/posts');
+      const res = await axios.get('http://localhost:8080/api/posts', {
+        withCredentials: true, // 인증 쿠키 포함
+      });
       setPosts(res.data);
     } catch (error) {
       console.error('게시글 불러오기 실패:', error);
@@ -28,7 +30,6 @@ const BoardSection = ({ user, isSignedIn }) => {
   const handleSubmit = async () => {
     if (!isSignedIn) {
       alert('로그인 후 작성해주세요.');
-      console.log('작성 완료 버튼 눌림');
       return;
     }
 
@@ -41,8 +42,14 @@ const BoardSection = ({ user, isSignedIn }) => {
       userName: user.fullName || user.username || '익명',
     };
 
+
     try {
-      await axios.post('http://localhost:8080/api/posts', newPost);
+      const res = await axios.post(
+        'http://localhost:8080/api/posts',
+        newPost,
+        { withCredentials: true } // 인증 쿠키 포함
+      );
+      console.log('게시글 작성 성공:', res.data);
       setContent('');
       setVisibility('공개');
       setShowForm(false);
@@ -55,7 +62,9 @@ const BoardSection = ({ user, isSignedIn }) => {
   // 게시글 삭제
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/posts/${id}`);
+      await axios.delete(`http://localhost:8080/api/posts/${id}`, {
+        withCredentials: true, // 인증 쿠키 포함
+      });
       fetchPosts(); // 삭제 후 다시 불러오기
     } catch (error) {
       console.error('게시글 삭제 실패:', error);
