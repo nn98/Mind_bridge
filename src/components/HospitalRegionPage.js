@@ -45,7 +45,6 @@ const HospitalRegionPage = () => {
         });
     }, []);
 
-    // 사용자 위치 가져오기
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -60,22 +59,27 @@ const HospitalRegionPage = () => {
         );
     }, []);
 
-    // 선택된 지역 기준 병원 필터링
     const filtered = selectedRegion === '전체'
         ? hospitals
         : hospitals.filter((h) => h.address.startsWith(selectedRegion));
 
-    // 사용자 위치가 있을 경우 거리/시간 정보 포함
-    const enriched = filtered.map((h) => {
-        if (!userLoc) return h;
-        const distance = haversineDistance(userLoc.lat, userLoc.lon, h.lat, h.lon);
-        const drivingTime = Math.round((distance / 70) * 60); // 차량 속도 기준 (70km/h)
-        return {
-            ...h,
-            distance: distance.toFixed(2),
-            drivingTime,
-        };
-    });
+    const sortedHospitals = filtered
+        .map((h) => {
+            if (!userLoc) return h;
+            const distance = haversineDistance(userLoc.lat, userLoc.lon, h.lat, h.lon);
+            const drivingTime = Math.round((distance / 40) * 60);
+            return {
+                ...h,
+                distance: distance.toFixed(2),
+                drivingTime,
+            };
+        })
+        .sort((a, b) => {
+            if (a.distance && b.distance) {
+                return parseFloat(a.distance) - parseFloat(b.distance);
+            }
+            return 0;
+        });
 
     return (
         <div className="region-page" style={{ padding: '1rem' }}>
@@ -97,8 +101,8 @@ const HospitalRegionPage = () => {
             </div>
 
             <div className="hospital-list">
-                {enriched.length > 0 ? (
-                    enriched.map((h, idx) => (
+                {sortedHospitals.length > 0 ? (
+                    sortedHospitals.map((h, idx) => (
                         <div
                             key={idx}
                             className="hospital-card"
@@ -117,7 +121,7 @@ const HospitalRegionPage = () => {
                                 <>
                                     <p><strong>거리:</strong> {h.distance} km</p>
                                     <p><strong>차량 예상 시간:</strong> 약 {h.drivingTime}분</p>
-                                    <p><h5>예상 시간은 시속 70km 기준입니다.</h5></p>
+                                    <p><h5>예상 시간은 평균 시속 40km 기준입니다.</h5></p>
                                 </>
                             )}
                         </div>

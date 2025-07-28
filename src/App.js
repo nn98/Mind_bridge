@@ -37,6 +37,8 @@ import { buttonLabels } from "./constants/buttonLabels";
 import { formLinks } from "./constants/formLinks";
 
 const App = () => {
+  const navigate = useNavigate();
+  const { isSignedIn, user } = useUser();
   const [setSelectedBoard] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
@@ -52,6 +54,7 @@ const App = () => {
   const [mapVisible, setMapVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
   const [faqVisible, setFaqVisible] = useState(false);
+  const [customUser, setCustomUser] = useState(null); //게시판 로그인 정보
 
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
 
@@ -72,10 +75,7 @@ const App = () => {
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const infoRef = useRef(null);
-  const navigate = useNavigate();
-  const { isSignedIn, user } = useUser();
 
-  const [customUser, setCustomUser] = useState(null); //게시판 로그인 정보
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
