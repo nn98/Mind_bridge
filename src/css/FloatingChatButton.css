@@ -62,8 +62,8 @@
 
 .close-btn {
     position: fixed;
-    top: 91vh;
-    right: 140px;
+    bottom: 15px;
+    right: 135px;
     color: black;
     background: white;
     border: 2px solid #acacac;
