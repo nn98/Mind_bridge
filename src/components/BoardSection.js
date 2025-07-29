@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const BoardSection = ({ user, isSignedIn }) => {
-  const [selectedBoard, setSelectedBoard] = useState('general');
-  const [visibility, setVisibility] = useState('공개');
+  const [selectedBoard, setSelectedBoard] = useState("general");
+  const [visibility, setVisibility] = useState("공개");
   const [showForm, setShowForm] = useState(false);
-  const [content, setContent] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOrder, setSortOrder] = useState('newest');
+  const [content, setContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [posts, setPosts] = useState([]);
 
   // 게시글 불러오기
@@ -17,19 +17,21 @@ const BoardSection = ({ user, isSignedIn }) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/posts', {
+      const res = await axios.get("http://localhost:8080/api/posts", {
         withCredentials: true, // 인증 쿠키 포함
       });
       setPosts(res.data);
     } catch (error) {
-      console.error('게시글 불러오기 실패:', error);
+      console.error("게시글 불러오기 실패:", error);
     }
   };
 
   // 게시글 작성
   const handleSubmit = async () => {
-    if (!isSignedIn) {
-      alert('로그인 후 작성해주세요.');
+    if (!isSignedIn || !user) {
+      alert("로그인 후 작성해주세요.");
+      console.log("user:", user);
+      console.log("isSignedIn:", isSignedIn);
       return;
     }
 
@@ -38,24 +40,23 @@ const BoardSection = ({ user, isSignedIn }) => {
     const newPost = {
       content,
       visibility,
-      userId: user.id,
-      userName: user.fullName || user.username || '익명',
+      userId: user.email,
+      userName: user.fullName || user.username || "익명",
     };
-
 
     try {
       const res = await axios.post(
-        'http://localhost:8080/api/posts',
+        "http://localhost:8080/api/posts",
         newPost,
         { withCredentials: true } // 인증 쿠키 포함
       );
-      console.log('게시글 작성 성공:', res.data);
-      setContent('');
-      setVisibility('공개');
+      console.log("게시글 작성 성공:", res.data);
+      setContent("");
+      setVisibility("공개");
       setShowForm(false);
       fetchPosts(); // 작성 후 다시 불러오기
     } catch (error) {
-      console.error('게시글 작성 실패:', error);
+      console.error("게시글 작성 실패:", error);
     }
   };
 
@@ -67,20 +68,24 @@ const BoardSection = ({ user, isSignedIn }) => {
       });
       fetchPosts(); // 삭제 후 다시 불러오기
     } catch (error) {
-      console.error('게시글 삭제 실패:', error);
+      console.error("게시글 삭제 실패:", error);
     }
   };
 
   // 필터링 및 정렬
   const filteredPosts = posts.filter((post) => {
     const matchBoard =
-      selectedBoard === 'general' ? post.visibility === '공개' : post.visibility === '비공개';
-    const matchSearch = post.content.toLowerCase().includes(searchQuery.toLowerCase());
+      selectedBoard === "general"
+        ? post.visibility === "공개"
+        : post.visibility === "비공개";
+    const matchSearch = post.content
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchBoard && matchSearch;
   });
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
-    return sortOrder === 'newest' ? b.id - a.id : a.id - b.id;
+    return sortOrder === "newest" ? b.id - a.id : a.id - b.id;
   });
 
   return (
@@ -92,11 +97,17 @@ const BoardSection = ({ user, isSignedIn }) => {
 
       <div className="board-controls">
         <div className="left-controls">
-          <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
+          <select
+            value={selectedBoard}
+            onChange={(e) => setSelectedBoard(e.target.value)}
+          >
             <option value="general">일반 게시판</option>
             <option value="admin">관리자 게시판</option>
           </select>
-          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
             <option value="newest">최신순</option>
             <option value="oldest">오래된순</option>
           </select>
@@ -120,7 +131,7 @@ const BoardSection = ({ user, isSignedIn }) => {
             onChange={(e) => setContent(e.target.value)}
           />
           <div>
-            {['공개', '비공개'].map((label) => (
+            {["공개", "비공개"].map((label) => (
               <label key={label}>
                 <input
                   type="radio"
@@ -143,7 +154,8 @@ const BoardSection = ({ user, isSignedIn }) => {
             <div key={post.id} className="post-card">
               <p>{post.content}</p>
               <span>
-                {post.createdAt || post.date} ・ {post.visibility} ・ 작성자: {post.userName}
+                {post.createdAt || post.date} ・ {post.visibility} ・ 작성자:{" "}
+                {post.userName}
               </span>
               {isSignedIn && user?.id === post.userId && (
                 <button onClick={() => handleDelete(post.id)}>삭제</button>

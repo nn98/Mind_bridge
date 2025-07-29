@@ -1,15 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { sectionLabels } from "../constants/sectionLabels";
-import { useUser, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
 
 const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn, isLoaded } = useUser(); // 직접 로그인 상태 체크
 
-  console.log("Header - isSignedIn:", isSignedIn);
-  console.log("Header - isLoaded:", isLoaded);
+  const { isSignedIn } = useUser(); // Clerk 로그인 상태
+
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false); // localStorage 토큰 기반 상태
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsCustomLoggedIn(!!token);
+  }, [location]);
 
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {
@@ -26,9 +31,6 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const handleScrollToServices = () =>
     scrollOrNavigate(servicesRef, "services");
   const handleScrollToInfo = () => scrollOrNavigate(infoRef, "info");
-
-  // Clerk 상태가 로딩 중이면 아무것도 안 보여주거나 로딩 UI를 넣을 수 있음
-  if (!isLoaded) return null;
 
   return (
     <header className="header">
@@ -86,12 +88,20 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
         </div>
 
         <div className="nav-right">
-          {isSignedIn ? (
-            <UserButton />
+          {isSignedIn || isCustomLoggedIn ? (
+            <>
+              <UserButton />
+              <button
+                onClick={() => navigate("/logout")}
+                className="custom-blue-btn"
+              >
+                로그아웃
+              </button>
+            </>
           ) : (
             <button
-              className="custom-blue-btn"
               onClick={() => navigate("/login")}
+              className="custom-blue-btn"
             >
               로그인
             </button>

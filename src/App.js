@@ -1,67 +1,81 @@
-// src/App.jsx
-import { useState, useRef } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useEffect, useState, useRef } from "react";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 
-import './css/App.css';
-import './css/board.css';
-import './css/chat.css';
-import './css/feature.css';
-import './css/header.css';
-import './css/hero.css';
-import './css/login.css';
-import './css/map.css';
-import './css/small_translate.css';
-import './css/FloatingChatButton.css';
-import './css/selfTest.css';
-import './css/result.css';
-import './css/banner.css';
-import './css/HospitalRegionPage.css';
+import "./css/App.css";
+import "./css/board.css";
+import "./css/chat.css";
+import "./css/feature.css";
+import "./css/header.css";
+import "./css/hero.css";
+import "./css/login.css";
+import "./css/map.css";
+import "./css/small_translate.css";
+import "./css/FloatingChatButton.css";
+import "./css/selfTest.css";
+import "./css/result.css";
+import "./css/banner.css";
+import "./css/HospitalRegionPage.css";
 
-import Map from './components/Map.js';
-import Header from './components/Header';
-import Picture from './components/Picture.js';
-import SelfTest from './components/SelfTest';
-import BoardSection from './components/BoardSection';
-import ChatModal from './components/ChatModal';
-import Footer from './components/Footer';
-import AboutSection from './components/AboutSection';
-import AuthSection from './components/AuthSection';
-import FloatingSidebar from './components/FloatingSidebar';
+import Map from "./components/Map.js";
+import Header from "./components/Header";
+import Picture from "./components/Picture.js";
+import SelfTest from "./components/SelfTest";
+import BoardSection from "./components/BoardSection";
+import ChatModal from "./components/ChatModal";
+import Footer from "./components/Footer";
+import AboutSection from "./components/AboutSection";
+import AuthSection from "./components/AuthSection";
+import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
-import HospitalRegionPage from './components/HospitalRegionPage.js';
-import EmotionAnalysisPage from './components/EmotionAnalysisPage';
+import HospitalRegionPage from "./components/HospitalRegionPage.js";
+import EmotionAnalysisPage from "./components/EmotionAnalysisPage.js";
 
-import { sectionLabels } from './constants/sectionLabels';
-import { formInputs } from './constants/formInputs';
-import { buttonLabels } from './constants/buttonLabels';
-import { formLinks } from './constants/formLinks';
+import { sectionLabels } from "./constants/sectionLabels";
+import { formInputs } from "./constants/formInputs";
+import { buttonLabels } from "./constants/buttonLabels";
+import { formLinks } from "./constants/formLinks";
 
 const App = () => {
-  const [setSelectedBoard] = useState('');
+  const navigate = useNavigate();
+  const { isSignedIn, user } = useUser();
+  const [setSelectedBoard] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [subMenuVisible, setSubMenuVisible] = useState(null);
-  const [signupState, setSignupState] = useState('');
+  const [signupState, setSignupState] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [tab, setTab] = useState('chat');
-  const [chatInput] = useState('');
-  const [resultText, setResultText] = useState('');
-  const [testType, setTestType] = useState('우울증');
-  const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
+  const [tab, setTab] = useState("chat");
+  const [chatInput] = useState("");
+  const [resultText, setResultText] = useState("");
+  const [testType, setTestType] = useState("우울증");
+  const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(""));
   const [mapVisible, setMapVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
   const [faqVisible, setFaqVisible] = useState(false);
+  const [customUser, setCustomUser] = useState(null); //게시판 로그인 정보
+
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) setIsCustomLoggedIn(true);
+    else setIsCustomLoggedIn(false);
+  }, []);
+
+  useEffect(() => {
+    console.log("✅ isSignedIn:", isSignedIn);
+    console.log("✅ isCustomLoggedIn:", isCustomLoggedIn);
+    console.log("✅ Clerk user:", user);
+    console.log("✅ Custom user:", customUser);
+  }, [isSignedIn, isCustomLoggedIn, user, customUser]);
 
   const introRef = useRef(null);
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const infoRef = useRef(null);
-  const navigate = useNavigate();
-  const { isSignedIn, user } = useUser();
 
-  
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
@@ -79,32 +93,32 @@ const App = () => {
   };
 
   const handleBoardSelect = (value) => {
-    if (value === 'adminBoard' && !isAdmin) {
-      alert('관리자만 접근 가능합니다.');
+    if (value === "adminBoard" && !isAdmin) {
+      alert("관리자만 접근 가능합니다.");
       return;
     }
     setSelectedBoard(value);
-    navigate('/board');
+    navigate("/board");
   };
 
   const showSection = (section) => {
     const routes = {
-      about: '/',
-      faq: '/faq',
-      self: '/self',
-      board: '/board',
-      img: '/img',
-      signup: '/signup',
-      login: '/login',
-      map: '/map',
-      region: '/hospital-region',
-      chat: 'popup-map',
+      about: "/",
+      faq: "/faq",
+      self: "/self",
+      board: "/board",
+      img: "/img",
+      signup: "/signup",
+      login: "/login",
+      map: "/map",
+      region: "/hospital-region",
+      chat: "popup-map",
     };
 
-    if (section === 'chat') {
+    if (section === "chat") {
       setMapVisible(true);
     } else {
-      navigate(routes[section] || '/');
+      navigate(routes[section] || "/");
     }
   };
 
@@ -123,6 +137,8 @@ const App = () => {
         showSection={showSection}
         navigate={navigate}
         setScrollTarget={setScrollTarget}
+        isCustomLoggedIn={isCustomLoggedIn}
+        setIsCustomLoggedIn={setIsCustomLoggedIn}
       />
 
       <FloatingSidebar
@@ -137,18 +153,24 @@ const App = () => {
       {mapVisible && (
         <div
           style={{
-            position: 'fixed',
-            top: '150px',
-            right: '150px',
+            position: "fixed",
+            top: "150px",
+            right: "150px",
             zIndex: 1000,
-            background: 'white',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            borderRadius: '12px',
-            padding: '10px',
+            background: "white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            borderRadius: "12px",
+            padding: "10px",
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: '0 auto' }}>내 주변 병원 지도</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <h2 style={{ margin: "0 auto" }}>내 주변 병원 지도</h2>
           </div>
           <Map />
         </div>
@@ -167,7 +189,19 @@ const App = () => {
         />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
-        <Route path="/board" element={<BoardSection user={user} isSignedIn={isSignedIn} />} />
+        <Route
+          path="/board"
+          element={
+            isSignedIn || isCustomLoggedIn ? (
+              <BoardSection
+                user={isSignedIn ? user : customUser}
+                isSignedIn={isSignedIn || isCustomLoggedIn}
+              />
+            ) : (
+              <Navigate to="/board" />
+            )
+          }
+        />
         <Route path="/img" element={<Picture />} />
         <Route
           path="/self"
@@ -188,27 +222,37 @@ const App = () => {
             />
           }
         />
+
         <Route path="/emotion-analysis" element={<EmotionAnalysisPage />} />
 
-        {/* 로그인 상태에 따른 접근 제어 */}
         <Route
           path="/login"
           element={
             isSignedIn ? (
-              <Navigate to="/board" />
+              <Navigate to="/" />
             ) : (
               <AuthSection
                 type="login"
+                setIsCustomLoggedIn={setIsCustomLoggedIn} //로그인 상태
+                setCustomUser={setCustomUser} // 게시판 로그인 상태
                 sectionLabels={sectionLabels}
                 formInputs={formInputs}
                 buttonLabels={buttonLabels}
                 formLinks={formLinks}
                 signupState={signupState}
-                setSignupState={setSignupState}
               />
             )
           }
         />
+        <Route
+          path="/logout"
+          element={
+            <AuthSection
+              type="logout" // logout 타입 추가
+            />
+          }
+        />
+
         <Route
           path="/signup"
           element={
@@ -217,12 +261,12 @@ const App = () => {
             ) : (
               <AuthSection
                 type="signup"
+                setSignupState={setSignupState}
                 sectionLabels={sectionLabels}
                 formInputs={formInputs}
                 buttonLabels={buttonLabels}
                 formLinks={formLinks}
                 signupState={signupState}
-                setSignupState={setSignupState}
               />
             )
           }
