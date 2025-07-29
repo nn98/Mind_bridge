@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, Link } from "react-router-dom";
 import {
   Button,
   TextField,
@@ -126,8 +126,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/users/check-email`,
-        { email: formData.email },
-        { withCredentials: true }
+        { email: formData.email }
       );
       if (response.data.isAvailable) {
         setEmailCheck({
@@ -228,6 +227,16 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
       case "login":
         return (
           <Box className="form-section">
+            <Link
+              to="/"
+              style={{ display: "inline-block", width: "50px", height: "auto" }}
+            >
+              <img
+                src="/img/로고2.png"
+                alt="Mind Bridge 로고"
+                className="logo2"
+              />
+            </Link>
             <Typography variant="h4" component="h1" gutterBottom>
               로그인
             </Typography>

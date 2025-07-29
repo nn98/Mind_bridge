@@ -28,7 +28,7 @@
 .form-section {
   padding: 2.5rem;
   background: #ffffff;
-  margin: 3rem auto;
+  margin: 13rem auto;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
   max-width: 400px;
@@ -42,9 +42,9 @@
   align-items: flex-start;
   gap: 2rem;
   max-width: 900px;
-  margin: 3rem auto;
+  margin: 6rem auto;
   padding: 3rem;
-  background: #f5f5fa;
+  background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
@@ -134,8 +134,17 @@
   background: #ffffff;
   padding: 3rem;
   border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgb(197, 197, 197);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.05);
   width: 340px;
   min-width: 350px;
   margin-top: 15vh;
+}
+
+.logo2{
+  width: 200px;
+  background-color: gray;
+  border-radius: 15px;
+  margin-inline: -150px;
+  margin-bottom: 15px;
 }

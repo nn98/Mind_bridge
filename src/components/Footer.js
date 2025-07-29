@@ -1,6 +1,6 @@
 import '../css/header.css';
 
-const Footer = () => {
+const Footer = ({ setIsOpen }) => {
   return (
     <footer className="footer">
       <div className="footer-grid">
@@ -12,7 +12,7 @@ const Footer = () => {
         <div className="footer-column">
           <h4>서비스</h4>
           <ul>
-            <li>AI 상담</li>
+            <li onClick={() => setIsOpen(true)} style={{ cursor: 'pointer' }}>AI 상담</li>
             <li>감정 분석</li>
             <li>이미지 테라피</li>
             <li>맞춤형 조언</li>
