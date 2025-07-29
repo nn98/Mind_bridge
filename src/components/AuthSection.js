@@ -126,7 +126,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/users/check-email`,
-        { email: formData.email }
+        { email: formData.email },
+        { withCredentials: true }
       );
       if (response.data.isAvailable) {
         setEmailCheck({
