@@ -1,8 +1,7 @@
+// src/App.jsx
 import { useState, useRef } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-
-
 
 import './css/App.css';
 import './css/board.css';
@@ -31,7 +30,7 @@ import AuthSection from './components/AuthSection';
 import FloatingSidebar from './components/FloatingSidebar';
 import Faq from "./components/Faq";
 import HospitalRegionPage from './components/HospitalRegionPage.js';
-import EmotionAnalysisPage from './components/EmotionAnalysisPage.js';
+import EmotionAnalysisPage from './components/EmotionAnalysisPage';
 
 import { sectionLabels } from './constants/sectionLabels';
 import { formInputs } from './constants/formInputs';
@@ -47,7 +46,7 @@ const App = () => {
   const [signupState, setSignupState] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState('chat');
-  const [chatInput ] = useState('');
+  const [chatInput] = useState('');
   const [resultText, setResultText] = useState('');
   const [testType, setTestType] = useState('우울증');
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(''));
@@ -61,6 +60,8 @@ const App = () => {
   const infoRef = useRef(null);
   const navigate = useNavigate();
   const { isSignedIn, user } = useUser();
+
+  
 
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
@@ -154,40 +155,83 @@ const App = () => {
       )}
 
       <Routes>
-        <Route path="/" element={
-          <AboutSection
-            refs={{ introRef, locationRef, servicesRef, infoRef }}
-            scrollTarget={scrollTarget}
-            setScrollTarget={setScrollTarget}
-          />
-        } />
+        <Route
+          path="/"
+          element={
+            <AboutSection
+              refs={{ introRef, locationRef, servicesRef, infoRef }}
+              scrollTarget={scrollTarget}
+              setScrollTarget={setScrollTarget}
+            />
+          }
+        />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
         <Route path="/board" element={<BoardSection user={user} isSignedIn={isSignedIn} />} />
         <Route path="/img" element={<Picture />} />
-        <Route path="/self" element={
-          <SelfTest
-            testType={testType}
-            setTestType={setTestType}
-            selfAnswers={selfAnswers}
-            handleSelfAnswer={(i, v) => {
-              const newAnswers = [...selfAnswers];
-              newAnswers[i] = v;
-              setSelfAnswers(newAnswers);
-            }}
-            handleSelfSubmit={(r) => setResultText(r)}
-            resultText={resultText}
-            setSelfAnswers={setSelfAnswers}
-            setResultText={setResultText}
-          />
-        } />
-
+        <Route
+          path="/self"
+          element={
+            <SelfTest
+              testType={testType}
+              setTestType={setTestType}
+              selfAnswers={selfAnswers}
+              handleSelfAnswer={(i, v) => {
+                const newAnswers = [...selfAnswers];
+                newAnswers[i] = v;
+                setSelfAnswers(newAnswers);
+              }}
+              handleSelfSubmit={(r) => setResultText(r)}
+              resultText={resultText}
+              setSelfAnswers={setSelfAnswers}
+              setResultText={setResultText}
+            />
+          }
+        />
         <Route path="/emotion-analysis" element={<EmotionAnalysisPage />} />
 
-        <Route path="/login" element={
-          isSignedIn ? <Navigate to="/board" /> : (
+        {/* 로그인 상태에 따른 접근 제어 */}
+        <Route
+          path="/login"
+          element={
+            isSignedIn ? (
+              <Navigate to="/board" />
+            ) : (
+              <AuthSection
+                type="login"
+                sectionLabels={sectionLabels}
+                formInputs={formInputs}
+                buttonLabels={buttonLabels}
+                formLinks={formLinks}
+                signupState={signupState}
+                setSignupState={setSignupState}
+              />
+            )
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            isSignedIn ? (
+              <Navigate to="/board" />
+            ) : (
+              <AuthSection
+                type="signup"
+                sectionLabels={sectionLabels}
+                formInputs={formInputs}
+                buttonLabels={buttonLabels}
+                formLinks={formLinks}
+                signupState={signupState}
+                setSignupState={setSignupState}
+              />
+            )
+          }
+        />
+        <Route
+          path="/find-id"
+          element={
             <AuthSection
-              type="login"
+              type="find-id"
               sectionLabels={sectionLabels}
               formInputs={formInputs}
               buttonLabels={buttonLabels}
@@ -195,12 +239,13 @@ const App = () => {
               signupState={signupState}
               setSignupState={setSignupState}
             />
-          )
-        } />
-        <Route path="/signup" element={
-          isSignedIn ? <Navigate to="/board" /> : (
+          }
+        />
+        <Route
+          path="/find-password"
+          element={
             <AuthSection
-              type="signup"
+              type="find-password"
               sectionLabels={sectionLabels}
               formInputs={formInputs}
               buttonLabels={buttonLabels}
@@ -208,30 +253,8 @@ const App = () => {
               signupState={signupState}
               setSignupState={setSignupState}
             />
-          )
-        } />
-        <Route path="/find-id" element={
-          <AuthSection
-            type="find-id"
-            sectionLabels={sectionLabels}
-            formInputs={formInputs}
-            buttonLabels={buttonLabels}
-            formLinks={formLinks}
-            signupState={signupState}
-            setSignupState={setSignupState}
-          />
-        } />
-        <Route path="/find-password" element={
-          <AuthSection
-            type="find-password"
-            sectionLabels={sectionLabels}
-            formInputs={formInputs}
-            buttonLabels={buttonLabels}
-            formLinks={formLinks}
-            signupState={signupState}
-            setSignupState={setSignupState}
-          />
-        } />
+          }
+        />
       </Routes>
 
       <ChatModal
