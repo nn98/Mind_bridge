@@ -1,10 +1,12 @@
 /* src/css/auth.css */
 
 /* 공통 버튼 스타일 */
-.auth-button,
+.auth-button{
+  background-color: white;
+}
 .login-button,
 .social-button {
-  background-color: #a18cd1;
+  background-color: #a18cd1 !important;
   color: white;
   border: none;
   padding: 0.6rem 1.5rem;
@@ -19,7 +21,7 @@
 .auth-button:hover,
 .login-button:hover,
 .social-button:hover {
-  background-color: #8c75bd;
+  background-color: #805dd1 !important;
 }
 
 /* 메인 로그인 폼 */

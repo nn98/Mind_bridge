@@ -24,8 +24,6 @@ const Footer = () => {
           <ul>
             <li>소개</li>
             <li>팀</li>
-            <li>채용</li>
-            <li>블로그</li>
           </ul>
         </div>
 
@@ -34,7 +32,6 @@ const Footer = () => {
           <ul>
             <li>이용약관</li>
             <li>개인정보처리방침</li>
-            <li>쿠키 정책</li>
           </ul>
         </div>
       </div>

@@ -21,7 +21,7 @@ import "../css/login.css";
 
 const BACKEND_URL = "http://localhost:8080";
 
-const AuthSection = ({ type, setIsCustomLoggedIn , setCustomUser}) => {
+const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -324,7 +324,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn , setCustomUser}) => {
                   variant="outlined"
                   onClick={handleCheckEmail}
                   disabled={emailCheck.isChecking}
-                  sx={{ mt: "9px", height: "40px", flexShrink: 0 }}
+                  sx={{
+                    mt: "9px",
+                    height: "55px",
+                    flexShrink: 0,
+                    color: "#ffffff",
+                    backgroundColor: "#a18cd1",
+                    border: "none",
+                  }}
                 >
                   {emailCheck.isChecking ? (
                     <CircularProgress size={24} />
@@ -353,6 +360,16 @@ const AuthSection = ({ type, setIsCustomLoggedIn , setCustomUser}) => {
                 value={formData.password}
                 onChange={handleChange}
                 error={!!errors.password}
+                sx={{
+                  // TextField root 배경색 지정
+                  "& .MuiInputBase-root": {
+                    backgroundColor: "#ffffffff", // 예시: 입력란 배경색
+                  },
+                  // helperText 배경은 투명하게
+                  "& .MuiFormHelperText-root": {
+                    backgroundColor: "transparent",
+                  },
+                }}
                 helperText={
                   errors.password ||
                   "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
@@ -370,6 +387,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn , setCustomUser}) => {
                 onChange={handleChange}
                 error={!!errors.passwordConfirm}
                 helperText={errors.passwordConfirm}
+                sx={{ backgroundColor: "#ffffffff" }}
               />
               <Button
                 className="login-button"
