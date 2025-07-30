@@ -22,7 +22,7 @@ const Toast = ({ message, show }) => (
   </div>
 );
 
-function App() {
+function Picture() {
   const [userInput, setUserInput] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [gallery, setGallery] = useState([]);
@@ -223,4 +223,4 @@ function App() {
   );
 }
 
-export default App;
+export default Picture;
