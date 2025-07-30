@@ -23,9 +23,9 @@ import "./css/result.css";
 import "./css/banner.css";
 import "./css/HospitalRegionPage.css";
 
-import Map from "./components/Map.js";
+import Map from "./components/Map";
 import Header from "./components/Header";
-import Picture from "./components/Picture.js";
+import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
 import BoardSection from "./components/BoardSection";
 import ChatModal from "./components/ChatModal";
@@ -34,8 +34,8 @@ import AboutSection from "./components/AboutSection";
 import AuthSection from "./components/AuthSection";
 import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
-import HospitalRegionPage from "./components/HospitalRegionPage.js";
-import EmotionAnalysisPage from "./components/EmotionAnalysisPage.js";
+import HospitalRegionPage from "./components/HospitalRegionPage";
+import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
 
 import { sectionLabels } from "./constants/sectionLabels";
 import { formInputs } from "./constants/formInputs";
@@ -45,97 +45,61 @@ import { formLinks } from "./constants/formLinks";
 const App = () => {
   const navigate = useNavigate();
   const { isSignedIn, user } = useUser();
-  const [setSelectedBoard] = useState("");
+  const [customUser, setCustomUser] = useState(null);
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [isAdmin] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [subMenuVisible, setSubMenuVisible] = useState(null);
   const [signupState, setSignupState] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState("chat");
-  const [chatInput] = useState("");
   const [resultText, setResultText] = useState("");
   const [testType, setTestType] = useState("우울증");
   const [selfAnswers, setSelfAnswers] = useState(Array(20).fill(""));
   const [mapVisible, setMapVisible] = useState(false);
-  const [scrollTarget, setScrollTarget] = useState(null);
   const [faqVisible, setFaqVisible] = useState(false);
-  const [customUser, setCustomUser] = useState(null); //게시판 로그인 정보
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
+  const [scrollTarget, setScrollTarget] = useState(null);
 
-  // 로그인/회원가입/아이디찾기/비밀번호찾기 외부 클릭 상태 추가
   const [isOutsideClicked, setIsOutsideClicked] = useState(false);
   const loginRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) setIsCustomLoggedIn(true);
-    else setIsCustomLoggedIn(false);
+    setIsCustomLoggedIn(!!token);
   }, []);
-
-  useEffect(() => {
-    console.log("✅ isSignedIn:", isSignedIn);
-    console.log("✅ isCustomLoggedIn:", isCustomLoggedIn);
-    console.log("✅ Clerk user:", user);
-    console.log("✅ Custom user:", customUser);
-  }, [isSignedIn, isCustomLoggedIn, user, customUser]);
-
-  // 외부 클릭 감지
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        loginRef.current &&
-        !loginRef.current.contains(event.target) &&
-        (location.pathname === "/login" ||
-          location.pathname === "/signup" ||
-          location.pathname === "/find-id" ||
-          location.pathname === "/find-password")
-      ) {
-        setIsOutsideClicked(true);
-      } else if (
-        location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password"
-      ) {
-        setIsOutsideClicked(false); // 다른 페이지로 이동 시 초기화
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [location]);
 
   const introRef = useRef(null);
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const infoRef = useRef(null);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        loginRef.current &&
+        !loginRef.current.contains(event.target) &&
+        ["/login", "/signup", "/find-id", "/find-password"].includes(
+          location.pathname
+        )
+      ) {
+        setIsOutsideClicked(true);
+      } else {
+        setIsOutsideClicked(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [location]);
+
   const handleMouseEnter = (menu) => setHoveredMenu(menu);
   const handleMouseLeaveAll = (e) => {
-    try {
-      const from = e.currentTarget;
-      const to = e.relatedTarget;
-      if (!from.contains(to)) {
-        setHoveredMenu(null);
-        setSubMenuVisible(null);
-      }
-    } catch {
+    const from = e.currentTarget;
+    const to = e.relatedTarget;
+    if (!from.contains(to)) {
       setHoveredMenu(null);
       setSubMenuVisible(null);
     }
-  };
-
-  const handleBoardSelect = (value) => {
-    if (value === "adminBoard" && !isAdmin) {
-      alert("관리자만 접근 가능합니다.");
-      return;
-    }
-    setSelectedBoard(value);
-    navigate("/board");
   };
 
   const showSection = (section) => {
@@ -151,61 +115,90 @@ const App = () => {
       region: "/hospital-region",
       chat: "popup-map",
     };
-
     if (section === "chat") {
       setMapVisible(true);
+    } else if (section === "board") {
+      if (!isSignedIn && !isCustomLoggedIn) {
+        alert("로그인 후 이용 가능합니다.");
+        navigate("/login"); // 확인 후 자동 이동
+        return;
+      }
+      navigate(routes[section] || "/");
     } else {
       navigate(routes[section] || "/");
     }
   };
 
+  const sharedProps = {
+    hoveredMenu,
+    handleMouseEnter,
+    handleMouseLeaveAll,
+    setSubMenuVisible,
+    subMenuVisible,
+    introRef,
+    servicesRef,
+    locationRef,
+    showSection,
+    navigate,
+    setScrollTarget,
+    isCustomLoggedIn,
+    setIsCustomLoggedIn,
+  };
+
+  const authSectionWrapper = (type, extraProps = {}) => (
+    <div
+      ref={loginRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "#f5f5f5",
+        zIndex: 1000,
+      }}
+    >
+      {(!isOutsideClicked || location.pathname !== `/${type}`) && (
+        <AuthSection
+          type={type}
+          sectionLabels={sectionLabels}
+          formInputs={formInputs}
+          buttonLabels={buttonLabels}
+          formLinks={formLinks}
+          signupState={signupState}
+          setSignupState={setSignupState}
+          {...extraProps}
+        />
+      )}
+    </div>
+  );
+
   return (
     <>
-      {location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password" && (
-          <Header
-            hoveredMenu={hoveredMenu}
-            handleMouseEnter={handleMouseEnter}
-            handleMouseLeaveAll={handleMouseLeaveAll}
-            setSubMenuVisible={setSubMenuVisible}
-            subMenuVisible={subMenuVisible}
-            handleBoardSelect={handleBoardSelect}
-            introRef={introRef}
-            servicesRef={servicesRef}
-            locationRef={locationRef}
-            showSection={showSection}
-            navigate={navigate}
-            setScrollTarget={setScrollTarget}
-            isCustomLoggedIn={isCustomLoggedIn}
-            setIsCustomLoggedIn={setIsCustomLoggedIn}
-          />
-        )}
+      {!["/login", "/signup", "/find-id", "/find-password"].includes(
+        location.pathname
+      ) && <Header {...sharedProps} />}
 
-      {location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password" && (
-          <FloatingSidebar
-            mapVisible={mapVisible}
-            setMapVisible={setMapVisible}
-            faqVisible={faqVisible}
-            setFaqVisible={setFaqVisible}
-          />
-        )}
+      {!["/login", "/signup", "/find-id", "/find-password"].includes(
+        location.pathname
+      ) && (
+        <FloatingSidebar
+          mapVisible={mapVisible}
+          setMapVisible={setMapVisible}
+          faqVisible={faqVisible}
+          setFaqVisible={setFaqVisible}
+        />
+      )}
 
-      {location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password" &&
-        faqVisible && <Faq />}
+      {faqVisible &&
+        !["/login", "/signup", "/find-id", "/find-password"].includes(
+          location.pathname
+        ) && <Faq />}
 
-      {location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password" &&
-        mapVisible && (
+      {mapVisible &&
+        !["/login", "/signup", "/find-id", "/find-password"].includes(
+          location.pathname
+        ) && (
           <div
             style={{
               position: "fixed",
@@ -218,15 +211,7 @@ const App = () => {
               padding: "10px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <h2 style={{ margin: "0 auto" }}>내 주변 병원 지도</h2>
-            </div>
+            <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
             <Map />
           </div>
         )}
@@ -253,7 +238,7 @@ const App = () => {
                 isSignedIn={isSignedIn || isCustomLoggedIn}
               />
             ) : (
-              <Navigate to="/board" />
+              <Navigate to="/login" />
             )
           }
         />
@@ -284,32 +269,11 @@ const App = () => {
             isSignedIn ? (
               <Navigate to="/" />
             ) : (
-              <div
-                ref={loginRef}
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  background: "#f5f5f5",
-                  zIndex: 1000,
-                }}
-              >
-                {(!isOutsideClicked || location.pathname !== "/login") && (
-                  <AuthSection
-                    type="login"
-                    setIsCustomLoggedIn={setIsCustomLoggedIn}
-                    setCustomUser={setCustomUser}
-                    sectionLabels={sectionLabels}
-                    formInputs={formInputs}
-                    buttonLabels={buttonLabels}
-                    formLinks={formLinks}
-                    signupState={signupState}
-                    onLoginSuccess={() => setIsOutsideClicked(false)}
-                  />
-                )}
-              </div>
+              authSectionWrapper("login", {
+                setIsCustomLoggedIn,
+                setCustomUser,
+                onLoginSuccess: () => setIsOutsideClicked(false),
+              })
             )
           }
         />
@@ -317,97 +281,13 @@ const App = () => {
         <Route
           path="/signup"
           element={
-            isSignedIn ? (
-              <Navigate to="/board" />
-            ) : (
-              <div
-                ref={loginRef}
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  background: "#f5f5f5",
-                  zIndex: 1000,
-                }}
-              >
-                {(!isOutsideClicked || location.pathname !== "/signup") && (
-                  <AuthSection
-                    type="signup"
-                    setSignupState={setSignupState}
-                    sectionLabels={sectionLabels}
-                    formInputs={formInputs}
-                    buttonLabels={buttonLabels}
-                    formLinks={formLinks}
-                    signupState={signupState}
-                    onSignupSuccess={() => setIsOutsideClicked(false)}
-                  />
-                )}
-              </div>
-            )
+            isSignedIn ? <Navigate to="/board" /> : authSectionWrapper("signup")
           }
         />
-        <Route
-          path="/find-id"
-          element={
-            <div
-              ref={loginRef}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: "#f5f5f5",
-                zIndex: 1000,
-              }}
-            >
-              {(!isOutsideClicked || location.pathname !== "/find-id") && (
-                <AuthSection
-                  type="find-id"
-                  sectionLabels={sectionLabels}
-                  formInputs={formInputs}
-                  buttonLabels={buttonLabels}
-                  formLinks={formLinks}
-                  signupState={signupState}
-                  setSignupState={setSignupState}
-                  onFindIdSuccess={() => setIsOutsideClicked(false)}
-                />
-              )}
-            </div>
-          }
-        />
+        <Route path="/find-id" element={authSectionWrapper("find-id")} />
         <Route
           path="/find-password"
-          element={
-            <div
-              ref={loginRef}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: "#f5f5f5",
-                zIndex: 1000,
-              }}
-            >
-              {(!isOutsideClicked ||
-                location.pathname !== "/find-password") && (
-                <AuthSection
-                  type="find-password"
-                  sectionLabels={sectionLabels}
-                  formInputs={formInputs}
-                  buttonLabels={buttonLabels}
-                  formLinks={formLinks}
-                  signupState={signupState}
-                  setSignupState={setSignupState}
-                  onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                />
-              )}
-            </div>
-          }
+          element={authSectionWrapper("find-password")}
         />
       </Routes>
 
@@ -418,16 +298,12 @@ const App = () => {
         setTab={setTab}
         selected={selectedChat}
         setSelectedChat={setSelectedChat}
-        chatInput={chatInput}
         resultText={resultText}
       />
 
-      {location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password" && (
-          <Footer setIsOpen={setIsOpen} isOpen={isOpen} />
-        )}
+      {!["/login", "/signup", "/find-id", "/find-password"].includes(
+        location.pathname
+      ) && <Footer setIsOpen={setIsOpen} isOpen={isOpen} />}
     </>
   );
 };

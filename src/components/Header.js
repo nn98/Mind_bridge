@@ -8,7 +8,6 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const location = useLocation();
 
   const { isSignedIn } = useUser(); // Clerk 로그인 상태
-
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false); // localStorage 토큰 기반 상태
 
   useEffect(() => {
@@ -32,12 +31,25 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
     scrollOrNavigate(servicesRef, "services");
   const handleScrollToInfo = () => scrollOrNavigate(infoRef, "info");
 
+  // 게시판 클릭 시 처리
+  const handleBoardClick = () => {
+    if (!isSignedIn && !isCustomLoggedIn) {
+      alert("로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
+    navigate("/board");
+  };
+
   return (
     <header className="header">
       <div id="google_translate_element" className="translate"></div>
       <nav className="nav">
         <div className="nav-left">
-          <Link to="/" style={{ display: 'inline-block', width: '50px', height: 'auto' }}>
+          <Link
+            to="/"
+            style={{ display: "inline-block", width: "50px", height: "auto" }}
+          >
             <img src="/img/로고2.png" alt="Mind Bridge 로고" className="logo" />
           </Link>
         </div>
@@ -77,10 +89,7 @@ const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
             <div
               className="nav-link"
               style={{ cursor: "pointer" }}
-              onClick={() =>
-                (window.location.href =
-                  "https://mind-bridge-zeta.vercel.app/board")
-              }
+              onClick={handleBoardClick} // 수정: handleBoardClick으로 변경
             >
               {sectionLabels["board"]}
             </div>
