@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { sectionLabels } from "../constants/sectionLabels";
-import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 
 const Header = ({ introRef, servicesRef, infoRef, setScrollTarget }) => {
   const navigate = useNavigate();
