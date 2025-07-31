@@ -1,5 +1,3 @@
-import React from 'react';
-
 const EmailSection = ({ chatHistory, selectedChat, setSelectedChat, handleRead, handleSendEmail }) => {
   return (
     <section className="board-section">

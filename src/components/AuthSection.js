@@ -160,25 +160,34 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         const token = response.data.token;
         const user = response.data.user;
 
+
+
         localStorage.setItem("token", token);
 
-        console.log("저장된 token:", localStorage.getItem("token"));
-        //console.log('Received token:', token);  // 토큰 출력
 
-        if (setIsCustomLoggedIn) {
-          setIsCustomLoggedIn(true);
-        }
+        console.log("로그인 상태 확인, user:", user);
+        //console.log("저장된 token:", localStorage.getItem("token"));
+
+        console.log("서버 응답 전체:", response.data);
+        console.log("token:", response.data.token);
+        console.log("user 객체:", response.data.user);
+
+
 
         if (setCustomUser && user) {
           setCustomUser({
-            email: user.email,
-            fullName: user.name,
             id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            nickname: user.nickname,
           });
         }
 
+        if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
+        if (setCustomUser && user) setCustomUser(user);
+
         alert("로그인 성공!");
-        navigate("/"); // 로그인 성공 후 메인 페이지로 이동
+        //navigate("/"); // 로그인 성공 후 메인 페이지로 이동
       } else if (type === "signup") {
         // 회원가입 전 최종 유효성 검사
         if (

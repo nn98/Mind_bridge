@@ -28,10 +28,13 @@ const BoardSection = ({ user, isSignedIn }) => {
 
   // 게시글 작성
   const handleSubmit = async () => {
-    if (!isSignedIn || !user) {
+    if (!isSignedIn) {
       alert("로그인 후 작성해주세요.");
-      console.log("user:", user);
-      console.log("isSignedIn:", isSignedIn);
+      return;
+    }
+
+    if (!user) {
+      alert("사용자 정보가 아직 로딩 중입니다. 잠시만 기다려주세요.");
       return;
     }
 
@@ -41,7 +44,7 @@ const BoardSection = ({ user, isSignedIn }) => {
       content,
       visibility,
       userId: user.email,
-      userName: user.fullName || user.username || "익명",
+      userName: user.fullName || user.nickname || "익명",
     };
 
     try {
