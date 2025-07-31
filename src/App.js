@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import {Routes,Route,useNavigate,Navigate,useLocation,} from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
+import axios from "axios";
 
 import "./css/App.css";
 import "./css/board.css";
@@ -41,11 +42,12 @@ const App = () => {
   const location = useLocation();
   const { isSignedIn, user } = useUser();
 
+  // 중앙에서 로그인 상태 관리
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
-  const sharedProps = { isCustomLoggedIn, customUser };
 
-  const [setSelectedBoard] = useState("");
+  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인 
+
   const [selectedChat, setSelectedChat] = useState(null);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [subMenuVisible, setSubMenuVisible] = useState(null);
@@ -66,11 +68,30 @@ const App = () => {
   const locationRef = useRef(null);
   const infoRef = useRef(null);
 
+  // 커스텀 로그인 상태 및 사용자 정보 초기 로딩
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsCustomLoggedIn(!!token);
+    if (token) {
+      setIsCustomLoggedIn(true);
+      axios
+        .get("http://localhost:8080/api/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setCustomUser(res.data);
+        })
+        .catch((err) => {
+          console.error("유저 정보 불러오기 실패:", err);
+          setCustomUser(null);
+          setIsCustomLoggedIn(false);
+        });
+    } else {
+      setIsCustomLoggedIn(false);
+      setCustomUser(null);
+    }
   }, []);
 
+  // 로그인 상태 변화 로그 출력 (디버깅용)
   useEffect(() => {
     console.log("✅ isSignedIn:", isSignedIn);
     console.log("✅ isCustomLoggedIn:", isCustomLoggedIn);
@@ -78,12 +99,17 @@ const App = () => {
     console.log("✅ Custom user:", customUser);
   }, [isSignedIn, isCustomLoggedIn, user, customUser]);
 
+  // 커스텀 로그인 성공 시 홈으로 이동
   useEffect(() => {
     if (isCustomLoggedIn && customUser) {
-      navigate("/");
+      // 현재 경로가 로그인 페이지일 때만 홈으로 이동
+      if (["/login", "/signup"].includes(location.pathname)) {
+        navigate("/");
+      }
     }
-  }, [isCustomLoggedIn, customUser, navigate]);
+  }, [isCustomLoggedIn, customUser, navigate, location.pathname]);
 
+  // 로그인/회원가입 모달 외부 클릭 감지
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -102,16 +128,6 @@ const App = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location]);
 
-  const handleMouseEnter = (menu) => setHoveredMenu(menu);
-  const handleMouseLeaveAll = (e) => {
-    const from = e.currentTarget;
-    const to = e.relatedTarget;
-    if (!from.contains(to)) {
-      setHoveredMenu(null);
-      setSubMenuVisible(null);
-    }
-  };
-
   const showSection = (section) => {
     const routes = {
       about: "/",
@@ -127,65 +143,84 @@ const App = () => {
     };
     if (section === "chat") {
       setMapVisible(true);
-    } else if (section === "board") {
-      if (!isSignedIn && !isCustomLoggedIn) {
-        alert("로그인 후 이용 가능합니다.");
-        navigate("/login");
-        return;
-      }
-      navigate(routes[section] || "/");
     } else {
       navigate(routes[section] || "/");
     }
   };
 
-  const authSectionWrapper = (type, extraProps = {}) => {
-    return (
-      <div
-        ref={loginRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: "#f5f5f5",
-          zIndex: 1000,
-        }}
-      >
-        {!isOutsideClicked && (
-          <AuthSection
-            type={type}
-            sectionLabels={sectionLabels}
-            formInputs={formInputs}
-            buttonLabels={buttonLabels}
-            formLinks={formLinks}
-            signupState={signupState}
-            setSignupState={setSignupState}
-            onLoginSuccess={() => setIsOutsideClicked(false)}
-            {...extraProps}
-          />
-        )}
-      </div>
-    );
+  // 로그인 상태에 따라 게시판 접근 제어
+  const BoardRouteElement = () => {
+    if (isCustomLoggedIn && customUser === null) {
+      return <div>사용자 정보 불러오는 중...</div>;
+    }
+
+    if (isSignedIn && user) {
+      return <BoardSection user={user} isSignedIn={true} />;
+    }
+
+    if (isCustomLoggedIn && customUser) {
+      return <BoardSection user={customUser} isSignedIn={true} />;
+    }
+
+    return <Navigate to="/login" />;
   };
+
+  // 로그인/회원가입 등 AuthSection 모달 래퍼
+  const authSectionWrapper = (type, extraProps = {}) => (
+    <div
+      ref={loginRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "#f5f5f5",
+        zIndex: 1000,
+      }}
+    >
+      {!isOutsideClicked && (
+        <AuthSection
+          type={type}
+          sectionLabels={sectionLabels}
+          formInputs={formInputs}
+          buttonLabels={buttonLabels}
+          formLinks={formLinks}
+          signupState={signupState}
+          setSignupState={setSignupState}
+          onLoginSuccess={() => setIsOutsideClicked(false)}
+          {...extraProps}
+        />
+      )}
+    </div>
+  );
 
   return (
     <>
       {!["/login", "/signup", "/find-id", "/find-password"].includes(
         location.pathname
-      ) && <Header {...sharedProps} />}
+      ) && (
+          <Header
+            introRef={introRef}
+            servicesRef={servicesRef}
+            infoRef={infoRef}
+            setScrollTarget={setScrollTarget}
+            isCustomLoggedIn={isCustomLoggedIn}
+            setIsCustomLoggedIn={setIsCustomLoggedIn}
+            setCustomUser={setCustomUser}
+          />
+        )}
 
       {!["/login", "/signup", "/find-id", "/find-password"].includes(
         location.pathname
       ) && (
-        <FloatingSidebar
-          mapVisible={mapVisible}
-          setMapVisible={setMapVisible}
-          faqVisible={faqVisible}
-          setFaqVisible={setFaqVisible}
-        />
-      )}
+          <FloatingSidebar
+            mapVisible={mapVisible}
+            setMapVisible={setMapVisible}
+            faqVisible={faqVisible}
+            setFaqVisible={setFaqVisible}
+          />
+        )}
 
       {faqVisible &&
         !["/login", "/signup", "/find-id", "/find-password"].includes(
@@ -226,19 +261,7 @@ const App = () => {
         />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
-        <Route
-          path="/board"
-          element={
-            isSignedIn || isCustomLoggedIn ? (
-              <BoardSection
-                user={isSignedIn ? user : customUser}
-                isSignedIn={isSignedIn || isCustomLoggedIn}
-              />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        <Route path="/board" element={<BoardRouteElement />} />
         <Route path="/img" element={<Picture />} />
         <Route
           path="/self"
@@ -298,17 +321,17 @@ const App = () => {
             >
               {(!isOutsideClicked ||
                 location.pathname !== "/find-password") && (
-                <AuthSection
-                  type="find-password"
-                  sectionLabels={sectionLabels}
-                  formInputs={formInputs}
-                  buttonLabels={buttonLabels}
-                  formLinks={formLinks}
-                  signupState={signupState}
-                  setSignupState={setSignupState}
-                  onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                />
-              )}
+                  <AuthSection
+                    type="find-password"
+                    sectionLabels={sectionLabels}
+                    formInputs={formInputs}
+                    buttonLabels={buttonLabels}
+                    formLinks={formLinks}
+                    signupState={signupState}
+                    setSignupState={setSignupState}
+                    onFindPasswordSuccess={() => setIsOutsideClicked(false)}
+                  />
+                )}
             </div>
           }
         />
