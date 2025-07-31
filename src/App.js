@@ -44,7 +44,7 @@ import { formLinks } from "./constants/formLinks";
 
 const App = () => {
   const navigate = useNavigate();
-  const { isSignedIn, user } = useUser();
+  const {isSignedIn, user } = useUser();
   const [setSelectedBoard] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [isAdmin] = useState(false);
@@ -68,6 +68,7 @@ const App = () => {
   const loginRef = useRef(null);
   const location = useLocation();
 
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) setIsCustomLoggedIn(true);
@@ -80,6 +81,12 @@ const App = () => {
     console.log("✅ Clerk user:", user);
     console.log("✅ Custom user:", customUser);
   }, [isSignedIn, isCustomLoggedIn, user, customUser]);
+
+  useEffect(() => {
+    if (isCustomLoggedIn && customUser) {
+      navigate("/");
+    }
+  }, [isCustomLoggedIn, customUser, navigate]);
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -158,6 +165,11 @@ const App = () => {
       navigate(routes[section] || "/");
     }
   };
+
+  console.log("BoardSection user prop (App.js):", isSignedIn ? user : customUser);
+  console.log("isSignedIn:", isSignedIn);
+  console.log("Clerk user (useUser):", user);  // Clerk 유저
+  console.log("customUser:", customUser);
 
   return (
     <>
@@ -395,17 +407,17 @@ const App = () => {
             >
               {(!isOutsideClicked ||
                 location.pathname !== "/find-password") && (
-                <AuthSection
-                  type="find-password"
-                  sectionLabels={sectionLabels}
-                  formInputs={formInputs}
-                  buttonLabels={buttonLabels}
-                  formLinks={formLinks}
-                  signupState={signupState}
-                  setSignupState={setSignupState}
-                  onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                />
-              )}
+                  <AuthSection
+                    type="find-password"
+                    sectionLabels={sectionLabels}
+                    formInputs={formInputs}
+                    buttonLabels={buttonLabels}
+                    formLinks={formLinks}
+                    signupState={signupState}
+                    setSignupState={setSignupState}
+                    onFindPasswordSuccess={() => setIsOutsideClicked(false)}
+                  />
+                )}
             </div>
           }
         />
