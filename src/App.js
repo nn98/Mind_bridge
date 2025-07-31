@@ -44,7 +44,13 @@ import { formLinks } from "./constants/formLinks";
 
 const App = () => {
   const navigate = useNavigate();
-  const {isSignedIn, user } = useUser();
+  const location = useLocation();
+  const { isSignedIn, user } = useUser();
+
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
+  const [customUser, setCustomUser] = useState(null);
+  const sharedProps = { isCustomLoggedIn, customUser };
+
   const [setSelectedBoard] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [hoveredMenu, setHoveredMenu] = useState(null);
@@ -58,12 +64,14 @@ const App = () => {
   const [mapVisible, setMapVisible] = useState(false);
   const [faqVisible, setFaqVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
-
   const [isOutsideClicked, setIsOutsideClicked] = useState(false);
-  const loginRef = useRef(null);
-  const location = useLocation();
 
-  
+  const loginRef = useRef(null);
+  const introRef = useRef(null);
+  const servicesRef = useRef(null);
+  const locationRef = useRef(null);
+  const infoRef = useRef(null);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsCustomLoggedIn(!!token);
@@ -81,39 +89,6 @@ const App = () => {
       navigate("/");
     }
   }, [isCustomLoggedIn, customUser, navigate]);
-
-  // 외부 클릭 감지
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        loginRef.current &&
-        !loginRef.current.contains(event.target) &&
-        (location.pathname === "/login" ||
-          location.pathname === "/signup" ||
-          location.pathname === "/find-id" ||
-          location.pathname === "/find-password")
-      ) {
-        setIsOutsideClicked(true);
-      } else if (
-        location.pathname !== "/login" &&
-        location.pathname !== "/signup" &&
-        location.pathname !== "/find-id" &&
-        location.pathname !== "/find-password"
-      ) {
-        setIsOutsideClicked(false); // 다른 페이지로 이동 시 초기화
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [location]);
-
-  const introRef = useRef(null);
-  const servicesRef = useRef(null);
-  const locationRef = useRef(null);
-  const infoRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -161,7 +136,7 @@ const App = () => {
     } else if (section === "board") {
       if (!isSignedIn && !isCustomLoggedIn) {
         alert("로그인 후 이용 가능합니다.");
-        navigate("/login"); // 확인 후 자동 이동
+        navigate("/login");
         return;
       }
       navigate(routes[section] || "/");
@@ -170,10 +145,36 @@ const App = () => {
     }
   };
 
-  console.log("BoardSection user prop (App.js):", isSignedIn ? user : customUser);
-  console.log("isSignedIn:", isSignedIn);
-  console.log("Clerk user (useUser):", user);  // Clerk 유저
-  console.log("customUser:", customUser);
+  const authSectionWrapper = (type, extraProps = {}) => {
+    return (
+      <div
+        ref={loginRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "#f5f5f5",
+          zIndex: 1000,
+        }}
+      >
+        {!isOutsideClicked && (
+          <AuthSection
+            type={type}
+            sectionLabels={sectionLabels}
+            formInputs={formInputs}
+            buttonLabels={buttonLabels}
+            formLinks={formLinks}
+            signupState={signupState}
+            setSignupState={setSignupState}
+            onLoginSuccess={() => setIsOutsideClicked(false)}
+            {...extraProps}
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -274,7 +275,6 @@ const App = () => {
               authSectionWrapper("login", {
                 setIsCustomLoggedIn,
                 setCustomUser,
-                onLoginSuccess: () => setIsOutsideClicked(false),
               })
             )
           }
@@ -304,17 +304,17 @@ const App = () => {
             >
               {(!isOutsideClicked ||
                 location.pathname !== "/find-password") && (
-                  <AuthSection
-                    type="find-password"
-                    sectionLabels={sectionLabels}
-                    formInputs={formInputs}
-                    buttonLabels={buttonLabels}
-                    formLinks={formLinks}
-                    signupState={signupState}
-                    setSignupState={setSignupState}
-                    onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                  />
-                )}
+                <AuthSection
+                  type="find-password"
+                  sectionLabels={sectionLabels}
+                  formInputs={formInputs}
+                  buttonLabels={buttonLabels}
+                  formLinks={formLinks}
+                  signupState={signupState}
+                  setSignupState={setSignupState}
+                  onFindPasswordSuccess={() => setIsOutsideClicked(false)}
+                />
+              )}
             </div>
           }
         />
