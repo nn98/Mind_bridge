@@ -250,8 +250,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
                 to="/"
                 style={{
                   display: "inline-block",
-                  width: "50px",
-                  height: "auto",
+                  width: "40px",
+                  height: "80px",
                 }}
               >
                 <img

@@ -15,7 +15,6 @@ const Footer = ({ setIsOpen }) => {
             <li onClick={() => setIsOpen(true)} style={{ cursor: 'pointer' }}>AI 상담</li>
             <li>감정 분석</li>
             <li>이미지 테라피</li>
-            <li>맞춤형 조언</li>
           </ul>
         </div>
 
