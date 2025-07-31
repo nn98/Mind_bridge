@@ -235,178 +235,52 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "login":
         return (
-          <Box className="form-section">
-            <Link
-              to="/"
-              style={{ display: "inline-block", width: "50px", height: "auto" }}
-            >
-              <img
-                src="/img/로고2.png"
-                alt="Mind Bridge 로고"
-                className="logo2"
-              />
-            </Link>
-            <Typography variant="h4" component="h1" gutterBottom>
-              로그인
-            </Typography>
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="이메일"
-              name="email"
-              margin="normal"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="비밀번호"
-              name="password"
-              type="password"
-              margin="normal"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            <Button
-              className="login-button"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 2, mb: 1 }}
-              onClick={handleSubmit}
-            >
-              로그인
-            </Button>
-            <Box className="social-buttons">
-              <SignInButton mode="modal">
-                <Button className="social-button" variant="contained">
-                  소셜 로그인
-                </Button>
-              </SignInButton>
-            </Box>
-            <Box className="form-links">
-              <RouterLink to="/signup" className="form-link">
-                회원가입
-              </RouterLink>
-              <RouterLink to="/find-id" className="form-link">
-                아이디 찾기
-              </RouterLink>
-              <RouterLink to="/find-password" className="form-link">
-                비밀번호 찾기
-              </RouterLink>
-            </Box>
-          </Box>
-        );
-
-      case "signup":
-        return (
-          <Box component="form" noValidate className="form-section-flex">
-            <Box className="form-left">
-              <Typography variant="h5" component="h2" gutterBottom>
-                회원가입
+          /* 배율 조정시 컨텐츠 중앙정렬*/
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5", // 배경색 선택사항
+            }}
+          >
+            <Box className="form-section">
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "50px",
+                  height: "auto",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
+              </Link>
+              <Typography variant="h4" component="h1" gutterBottom>
+                로그인
               </Typography>
               <TextField
                 className="input-wrapper"
-                margin="normal"
-                required
                 fullWidth
-                label="닉네임"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                error={!!errors.nickname}
-                helperText={errors.nickname}
-              />
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                <TextField
-                  className="input-wrapper"
-                  margin="dense"
-                  required
-                  fullWidth
-                  label="이메일 (아이디)"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={
-                    !!errors.email ||
-                    (emailCheck.message && !emailCheck.isAvailable)
-                  }
-                  helperText={errors.email || emailCheck.message}
-                  sx={{
-                    "& .MuiFormHelperText-root": {
-                      color: emailCheck.isAvailable ? "green" : undefined,
-                    },
-                  }}
-                />
-                <Button
-                  className="auth-button"
-                  variant="outlined"
-                  onClick={handleCheckEmail}
-                  disabled={emailCheck.isChecking}
-                  sx={{
-                    mt: "9px",
-                    height: "55px",
-                    flexShrink: 0,
-                    color: "#ffffff",
-                    backgroundColor: "#a18cd1",
-                    border: "none",
-                  }}
-                >
-                  {emailCheck.isChecking ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "중복확인"
-                  )}
-                </Button>
-              </Box>
-              <TextField
-                className="input-wrapper"
+                label="이메일"
+                name="email"
                 margin="normal"
-                fullWidth
-                label="전화번호"
-                name="phoneNumber"
-                value={formData.phoneNumber}
+                value={formData.email}
                 onChange={handleChange}
               />
               <TextField
                 className="input-wrapper"
-                margin="normal"
-                required
                 fullWidth
                 label="비밀번호"
                 name="password"
                 type="password"
+                margin="normal"
                 value={formData.password}
                 onChange={handleChange}
-                error={!!errors.password}
-                sx={{
-                  // TextField root 배경색 지정
-                  "& .MuiInputBase-root": {
-                    backgroundColor: "#ffffffff", // 예시: 입력란 배경색
-                  },
-                  // helperText 배경은 투명하게
-                  "& .MuiFormHelperText-root": {
-                    backgroundColor: "transparent",
-                  },
-                }}
-                helperText={
-                  errors.password ||
-                  "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
-                }
-              />
-              <TextField
-                className="input-wrapper"
-                margin="normal"
-                required
-                fullWidth
-                label="비밀번호 확인"
-                name="passwordConfirm"
-                type="password"
-                value={formData.passwordConfirm}
-                onChange={handleChange}
-                error={!!errors.passwordConfirm}
-                helperText={errors.passwordConfirm}
-                sx={{ backgroundColor: "#ffffffff" }}
               />
               <Button
                 className="login-button"
@@ -415,154 +289,369 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
                 sx={{ mt: 2, mb: 1 }}
                 onClick={handleSubmit}
               >
-                가입하기
+                로그인
               </Button>
               <Box className="social-buttons">
-                <SignUpButton mode="modal">
+                <SignInButton mode="modal">
                   <Button className="social-button" variant="contained">
-                    소셜 회원가입
+                    소셜 로그인
                   </Button>
-                </SignUpButton>
+                </SignInButton>
               </Box>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">
-                  이미 계정이 있으신가요? 로그인
+                <RouterLink to="/signup" className="form-link">
+                  회원가입
+                </RouterLink>
+                <RouterLink to="/find-id" className="form-link">
+                  아이디 찾기
+                </RouterLink>
+                <RouterLink to="/find-password" className="form-link">
+                  비밀번호 찾기
                 </RouterLink>
               </Box>
             </Box>
-            <Box className="form-right-legend">
-              <FormControl
-                component="fieldset"
-                margin="normal"
-                error={!!errors.mentalState}
-              >
-                <FormLabel component="legend">
-                  내가 생각하는 나의 현재 상태
-                </FormLabel>
-                <RadioGroup
-                  row
-                  name="mentalState"
-                  value={formData.mentalState}
-                  onChange={handleChange}
-                  className="radio-list"
+          </Box>
+        );
+
+      case "signup":
+        return (
+          /* 배율 조정시 컨텐츠 중앙정렬*/
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5", // 배경색 선택사항
+            }}
+          >
+            <Box component="form" noValidate className="form-section-flex">
+              <Box className="form-left">
+                <Link
+                  to="/"
+                  style={{
+                    display: "flex",
+                    height: "auto",
+                  }}
                 >
-                  {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map(
-                    (state) => (
-                      <FormControlLabel
-                        key={state}
-                        value={state}
-                        control={
-                          <Radio
-                            sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
-                          />
-                        }
-                        label={state}
-                      />
-                    )
-                  )}
-                </RadioGroup>
-                {errors.mentalState && (
-                  <FormHelperText>{errors.mentalState}</FormHelperText>
-                )}
-              </FormControl>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="termsAgreed"
-                    checked={formData.termsAgreed}
-                    onChange={handleChange}
-                    sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                  <img
+                    src="/img/로고1.png"
+                    alt="Mind Bridge 로고"
+                    className="logo-sign-up"
                   />
-                }
-                label="서비스 이용약관에 동의합니다."
-              />
-              {errors.termsAgreed && (
-                <FormHelperText error sx={{ ml: "14px" }}>
-                  {errors.termsAgreed}
-                </FormHelperText>
-              )}
+                </Link>
+                <Typography variant="h5" component="h2" gutterBottom>
+                  회원가입
+                </Typography>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="닉네임"
+                  name="nickname"
+                  value={formData.nickname}
+                  onChange={handleChange}
+                  error={!!errors.nickname}
+                  helperText={errors.nickname}
+                />
+                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                  <TextField
+                    className="input-wrapper"
+                    margin="dense"
+                    required
+                    fullWidth
+                    label="이메일 (아이디)"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={
+                      !!errors.email ||
+                      (emailCheck.message && !emailCheck.isAvailable)
+                    }
+                    helperText={errors.email || emailCheck.message}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        color: emailCheck.isAvailable ? "green" : undefined,
+                      },
+                    }}
+                  />
+                  <Button
+                    className="auth-button"
+                    variant="outlined"
+                    onClick={handleCheckEmail}
+                    disabled={emailCheck.isChecking}
+                    sx={{
+                      mt: "8px",
+                      height: "55px",
+                      flexShrink: 0,
+                      color: "#ffffff",
+                      backgroundColor: "#a18cd1",
+                      border: "none",
+                    }}
+                  >
+                    {emailCheck.isChecking ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "중복확인"
+                    )}
+                  </Button>
+                </Box>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  fullWidth
+                  label="전화번호"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  error={!!errors.password}
+                  sx={{
+                    // TextField root 배경색 지정
+                    "& .MuiInputBase-root": {
+                      backgroundColor: "#ffffffff", // 예시: 입력란 배경색
+                    },
+                    // helperText 배경은 투명하게
+                    "& .MuiFormHelperText-root": {
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                  helperText={
+                    errors.password ||
+                    "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
+                  }
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호 확인"
+                  name="passwordConfirm"
+                  type="password"
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
+                  error={!!errors.passwordConfirm}
+                  helperText={errors.passwordConfirm}
+                  sx={{ backgroundColor: "#ffffffff" }}
+                />
+                <Button
+                  className="login-button"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 2, mb: 1 }}
+                  onClick={handleSubmit}
+                >
+                  가입하기
+                </Button>
+                <Box className="social-buttons">
+                  <SignUpButton mode="modal">
+                    <Button className="social-button" variant="contained">
+                      소셜 회원가입
+                    </Button>
+                  </SignUpButton>
+                </Box>
+                <Box className="form-links">
+                  <RouterLink to="/login" className="form-link">
+                    이미 계정이 있으신가요? 로그인
+                  </RouterLink>
+                </Box>
+              </Box>
+              <Box className="form-right-legend">
+                <FormControl
+                  component="fieldset"
+                  margin="normal"
+                  error={!!errors.mentalState}
+                >
+                  <FormLabel component="legend">
+                    내가 생각하는 나의 현재 상태
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    name="mentalState"
+                    value={formData.mentalState}
+                    onChange={handleChange}
+                    className="radio-list"
+                  >
+                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map(
+                      (state) => (
+                        <FormControlLabel
+                          key={state}
+                          value={state}
+                          control={
+                            <Radio
+                              sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                            />
+                          }
+                          label={state}
+                        />
+                      )
+                    )}
+                  </RadioGroup>
+                  {errors.mentalState && (
+                    <FormHelperText>{errors.mentalState}</FormHelperText>
+                  )}
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="termsAgreed"
+                      checked={formData.termsAgreed}
+                      onChange={handleChange}
+                      sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                    />
+                  }
+                  label="서비스 이용약관에 동의합니다."
+                />
+                {errors.termsAgreed && (
+                  <FormHelperText error sx={{ ml: "14px" }}>
+                    {errors.termsAgreed}
+                  </FormHelperText>
+                )}
+              </Box>
             </Box>
           </Box>
         );
 
       case "find-id":
         return (
-          <Box className="form-section">
-            <Typography variant="h4" component="h1" gutterBottom>
-              아이디 찾기
-            </Typography>
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="전화번호"
-              name="phoneNumber"
-              margin="normal"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-            />
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="이메일"
-              name="email"
-              margin="normal"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <Button
-              className="login-button"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 2, mb: 1 }}
-              onClick={handleSubmit}
-            >
-              아이디 찾기
-            </Button>
-            <Box className="form-links">
-              <RouterLink to="/login" className="form-link">
-                로그인으로 돌아가기
-              </RouterLink>
+          /* 배율 조정시 컨텐츠 중앙정렬*/
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5", // 배경색 선택사항
+            }}
+          >
+            <Box className="form-section">
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "50px",
+                  height: "auto",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
+              </Link>
+              <Typography variant="h4" component="h1" gutterBottom>
+                아이디 찾기
+              </Typography>
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="전화번호"
+                name="phoneNumber"
+                margin="normal"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="이메일"
+                name="email"
+                margin="normal"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <Button
+                className="login-button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2, mb: 1 }}
+                onClick={handleSubmit}
+              >
+                아이디 찾기
+              </Button>
+              <Box className="form-links">
+                <RouterLink to="/login" className="form-link">
+                  로그인으로 돌아가기
+                </RouterLink>
+              </Box>
             </Box>
           </Box>
         );
 
       case "find-password":
         return (
-          <Box className="form-section">
-            <Typography variant="h4" component="h1" gutterBottom>
-              비밀번호 찾기
-            </Typography>
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="이메일"
-              name="email"
-              margin="normal"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <TextField
-              className="input-wrapper"
-              fullWidth
-              label="전화번호"
-              name="phoneNumber"
-              margin="normal"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-            />
-            <Button
-              className="login-button"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 2, mb: 1 }}
-              onClick={handleSubmit}
-            >
-              임시 비밀번호 발급
-            </Button>
-            <Box className="form-links">
-              <RouterLink to="/login" className="form-link">
-                로그인으로 돌아가기
-              </RouterLink>
+          /* 배율 조정시 컨텐츠 중앙정렬*/
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5", // 배경색 선택사항
+            }}
+          >
+            <Box className="form-section">
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "50px",
+                  height: "auto",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
+              </Link>
+              <Typography variant="h4" component="h1" gutterBottom>
+                비밀번호 찾기
+              </Typography>
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="이메일"
+                name="email"
+                margin="normal"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="전화번호"
+                name="phoneNumber"
+                margin="normal"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+              <Button
+                className="login-button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2, mb: 1 }}
+                onClick={handleSubmit}
+              >
+                임시 비밀번호 발급
+              </Button>
+              <Box className="form-links">
+                <RouterLink to="/login" className="form-link">
+                  로그인으로 돌아가기
+                </RouterLink>
+              </Box>
             </Box>
           </Box>
         );

@@ -1,9 +1,11 @@
 /* src/css/auth.css */
 
 /* 공통 버튼 스타일 */
-.auth-button{
+.auth-button {
   background-color: white;
+  
 }
+
 .login-button,
 .social-button {
   background-color: #a18cd1 !important;
@@ -28,10 +30,10 @@
 .form-section {
   padding: 2.5rem;
   background: #ffffff;
-  margin: 13rem auto;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
   max-width: 400px;
+  width: 100%;
   text-align: center;
 }
 
@@ -138,13 +140,19 @@
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.05);
   width: 340px;
   min-width: 350px;
-  margin-top: 15vh;
+  margin-top: 150px;
 }
 
-.logo2{
+.logo-login {
   width: 200px;
-  background-color: gray;
-  border-radius: 15px;
   margin-inline: -150px;
   margin-bottom: 15px;
+}
+
+.logo-sign-up {
+  position: fixed;
+  width: 200px;
+  margin-left: 530px;
+  margin-top: 10px;
+  /* 인라인 스타일과 일치 */
 }
