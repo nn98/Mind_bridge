@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
-const BoardSection = ({ user, isSignedIn }) => {
+const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   const [selectedBoard, setSelectedBoard] = useState("general");
   const [visibility, setVisibility] = useState("공개");
   const [showForm, setShowForm] = useState(false);
@@ -9,6 +10,7 @@ const BoardSection = ({ user, isSignedIn }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
   const [posts, setPosts] = useState([]);
+  const { getToken } = useAuth();
 
   // 게시글 불러오기
   useEffect(() => {
@@ -28,18 +30,32 @@ const BoardSection = ({ user, isSignedIn }) => {
 
   // 게시글 작성
   const handleSubmit = async () => {
-    if (!isSignedIn) {
+
+
+    let token;
+
+    try {
+      // Clerk 사용자 토큰 우선 시도
+      token = await getToken();
+      console.log("Clerk 토큰:", await getToken());
+    } catch (e) {
+      console.warn("Clerk 토큰 가져오기 실패:", e);
+    }
+
+    // 커스텀 로그인 fallback
+    if (!token) {
+      token = localStorage.getItem("token");
+    }
+
+    if (!token) {
       alert("로그인 후 작성해주세요.");
+      console.log("커스텀 토큰:", token); 
       return;
     }
 
-    if (!user) {
-      alert("사용자 정보가 아직 로딩 중입니다. 잠시만 기다려주세요.");
-      return;
-    }
+    if (!content.trim()) return; //내용이 비어있으면 제출 x 
 
-    if (!content.trim()) return;
-
+    //여기가 인증 요청하는 곳 
     const newPost = {
       content,
       visibility,
@@ -51,13 +67,21 @@ const BoardSection = ({ user, isSignedIn }) => {
       const res = await axios.post(
         "http://localhost:8080/api/posts",
         newPost,
-        { withCredentials: true } // 인증 쿠키 포함
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        } // 인증 쿠키 포함
       );
+
+
       console.log("게시글 작성 성공:", res.data);
       setContent("");
       setVisibility("공개");
       setShowForm(false);
       fetchPosts(); // 작성 후 다시 불러오기
+
     } catch (error) {
       console.error("게시글 작성 실패:", error);
     }
