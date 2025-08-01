@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Chat from './Chat';
 import { useUser, useAuth, useClerk } from '@clerk/clerk-react';
 import axios from 'axios';
@@ -58,7 +58,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
 
-  const [userInfo, setUserInfo] = useState({ name: '', email: '', phone: '', mentalState: '', nickname: '', counselingGoal: '' });
+  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phone: '', mentalState: '', nickname: '', counselingGoal: '' });
   const [editedInfo, setEditedInfo] = useState({ ...userInfo });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,11 +103,6 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
           const dbUser = response.data;
 
           const fullUserInfo = {
-            name: dbUser.username
-              || (isSignedIn
-                ? user?.fullName || user?.firstName
-                : customUser?.fullName || customUser?.nickname || customUser?.email?.split("@")[0])
-              || "사용자",
 
             nickname: dbUser.nickname
               || (isCustomLoggedIn ? customUser?.nickname : '')
@@ -116,6 +111,10 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             email: dbUser.email
               || (isSignedIn ? user?.emailAddresses?.[0]?.emailAddress : customUser?.email)
               || '',
+
+            age: dbUser.age || '',
+
+            gender: dbUser.gender || '',
 
             phone: dbUser.phoneNumber
               || (isCustomLoggedIn ? customUser?.phoneNumber || '연락처 미등록' : '정보 없음'),
@@ -136,12 +135,14 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
           console.error("백엔드에서 사용자 정보 조회에 실패했습니다:", error);
 
           const fallbackInfo = {
-            name: isSignedIn
-              ? user?.fullName || user?.firstName || '사용자'
-              : customUser?.fullName || customUser?.nickname || customUser?.email?.split('@')[0] || '사용자',
             email: isSignedIn
               ? user?.emailAddresses?.[0]?.emailAddress
               : customUser?.email || '',
+
+            age: isCustomLoggedIn ? customUser?.age || '' : '',
+
+            gender: isCustomLoggedIn ? customUser?.gender || '' : '',
+
             phone: isCustomLoggedIn
               ? customUser?.phoneNumber || '연락처 미등록'
               : '정보 없음',
@@ -166,7 +167,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
         fetchUserData();
       }
     }
-  }, [isLoaded, isSignedIn, user, isCustomLoggedIn, getToken, customUser]);
+  }, [isLoaded, isSignedIn, user, isCustomLoggedIn, getToken, customUser, userId]);
 
 
   const handleEdit = () => setIsEditing(true);
@@ -190,7 +191,6 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     try {
       const payload = {
-        username: editedInfo.name,
         nickname: editedInfo.nickname,
         phoneNumber: editedInfo.phone,
         mentalState: editedInfo.mentalState,
@@ -251,19 +251,17 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       <div className="profile-section">
         <h3>회원 정보</h3>
         <div className="profile-field"><span>닉네임</span>{isEditing ? <input type="text" name="nickname" value={editedInfo.nickname} placeholder="앱에서 사용할 별칭" onChange={handleChange} /> : <p>{userInfo.nickname || '─'}</p>}</div>
-        <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
-        <div className="profile-field"><span>연락처</span>{isEditing ? <input type="text" name="phone" value={editedInfo.phone} onChange={handleChange} /> : <p>{userInfo.phone}</p>}</div>
-        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
+        <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age}</p></div>
+        <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender}</p></div>
+        <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
         <div className="profile-field full-width"><span>상담 목표</span>{isEditing ? <textarea name="counselingGoal" value={editedInfo.counselingGoal} placeholder="상담을 통해 이루고 싶은 목표를 작성해주세요." onChange={handleChange} rows="3"></textarea> : <p className="pre-wrap">{userInfo.counselingGoal || '─'}</p>}</div>
         <div className="profile-actions">{isEditing ? (<><button className="chat-button" onClick={handleSave}>저장</button><button className="chat-button cancel" onClick={handleCancel}>취소</button></>) : (<button className="chat-button" onClick={handleEdit}>수정</button>)}</div>
       </div>
 
-      {/* 상담 이력 섹션 */}
       <div className="profile-section">
         <SessionHistory userId={userId} getToken={getToken} />
       </div>
 
-      {/* 계정 관리 섹션 */}
       <div className="profile-section">
         <h4>계정 관리</h4>
         <div className="account-actions">

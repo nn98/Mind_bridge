@@ -30,7 +30,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
   // 게시글 작성
   const handleSubmit = async () => {
-    
+
     let token;
 
     try {
@@ -48,7 +48,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
     if (!token) {
       alert("로그인 후 작성해주세요.");
-      console.log("커스텀 토큰:", token); 
+      console.log("커스텀 토큰:", token);
       return;
     }
 
@@ -184,8 +184,8 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
                 {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
               </span>
               <span>
-               작성자:{" "}
-              {post.userName}
+                작성자:{""}
+                {post.userNickname}
               </span>
             </div>
           ))
