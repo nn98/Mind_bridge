@@ -182,11 +182,11 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
               <button>x</button>
               <p>{post.content}</p>
               <span>
-                {post.createdAt || post.date.split("T")[0]}
+                {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
               </span>
               <span>
-                | {post.visibility} | 작성자:{" "}
-                {post.userName}
+               작성자:{" "}
+              {post.userName}
               </span>
             </div>
           ))
