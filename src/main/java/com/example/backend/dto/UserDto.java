@@ -9,6 +9,7 @@ public class UserDto {
     private String email;
     private String fullName;
     private String nickname;
+    private String phoneNumber;
     private String gender;      // Gender → gender (소문자)
     private Integer age;        // String → Integer 변경
     private String role;
@@ -20,6 +21,7 @@ public class UserDto {
         this.fullName = user.getFullName();
         this.nickname = user.getNickname();
         this.gender = user.getGender();
+        this.phoneNumber = user.getPhoneNumber();
         this.age = user.getAge();
         this.role = user.getRole();
         this.mentalState = user.getMentalState();
