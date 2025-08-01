@@ -1,4 +1,11 @@
 import { useEffect, useState, useRef } from "react";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Routes, Route, useNavigate, Navigate, useLocation, } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
@@ -47,7 +54,7 @@ const App = () => {
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
 
-  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인 
+  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [hoveredMenu, setHoveredMenu] = useState(null);
