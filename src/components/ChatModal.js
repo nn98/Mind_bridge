@@ -65,10 +65,14 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
   const userId = isSignedIn ? user?.id : customUser?.id; //안전하게 정보를 받기 위한 userId
 
+  console.log('UserProfile userId:', userId);
+
   useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
+    if (isLoaded && (isSignedIn || isCustomLoggedIn)) {
       const fetchUserData = async () => {
         setIsLoading(true);
+        console.log("isCustomLoggedIn:", isCustomLoggedIn);
+        console.log("customUser:", customUser);
         try {
           let token;
 
@@ -83,8 +87,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             setIsLoading(false);
             return;
           }
-
-          const userId = isSignedIn ? user.id : customUser?.id;
+          //console.log('userId:', userId);
 
           if (!userId) {
             setIsLoading(false);
@@ -94,32 +97,76 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
           const response = await axios.get(`${BACKEND_URL}/api/users/details/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          console.log("백엔드 사용자 데이터:", response.data);
+          console.log("isCustomLoggedIn", isCustomLoggedIn);
+
           const dbUser = response.data;
 
           const fullUserInfo = {
-            name: dbUser.username || user.fullName || user.firstName || '사용자',
-            nickname: dbUser.nickname || '',
-            email: dbUser.email || user.emailAddresses[0]?.emailAddress,
-            phone: dbUser.tel || '연락처를 등록해주세요.',
-            mentalState: dbUser.mentalState || '',
-            counselingGoal: dbUser.counselingGoal || '',
+            name: dbUser.username
+              || (isSignedIn
+                ? user?.fullName || user?.firstName
+                : customUser?.fullName || customUser?.nickname || customUser?.email?.split("@")[0])
+              || "사용자",
+
+            nickname: dbUser.nickname
+              || (isCustomLoggedIn ? customUser?.nickname : '')
+              || '',
+
+            email: dbUser.email
+              || (isSignedIn ? user?.emailAddresses?.[0]?.emailAddress : customUser?.email)
+              || '',
+
+            phone: dbUser.phoneNumber
+              || (isCustomLoggedIn ? customUser?.phoneNumber || '연락처 미등록' : '정보 없음'),
+
+            mentalState: dbUser.mentalState
+              || (isCustomLoggedIn ? customUser?.mentalState || '선택되지 않음' : ''),
+
+            counselingGoal: dbUser.counselingGoal
+              || (isCustomLoggedIn ? customUser?.counselingGoal || '' : ''),
           };
+
+
           setUserInfo(fullUserInfo);
           setEditedInfo(fullUserInfo);
+
         } catch (error) {
+
           console.error("백엔드에서 사용자 정보 조회에 실패했습니다:", error);
-          const fallbackInfo = { name: user.fullName || user.firstName || '사용자', email: user.emailAddresses[0]?.emailAddress, phone: '정보 없음', mentalState: '', nickname: '', counselingGoal: '' };
+
+          const fallbackInfo = {
+            name: isSignedIn
+              ? user?.fullName || user?.firstName || '사용자'
+              : customUser?.fullName || customUser?.nickname || customUser?.email?.split('@')[0] || '사용자',
+            email: isSignedIn
+              ? user?.emailAddresses?.[0]?.emailAddress
+              : customUser?.email || '',
+            phone: isCustomLoggedIn
+              ? customUser?.phoneNumber || '연락처 미등록'
+              : '정보 없음',
+            mentalState: isCustomLoggedIn
+              ? customUser?.mentalState || '선택되지 않음'
+              : '',
+            nickname: isCustomLoggedIn
+              ? customUser?.nickname || ''
+              : '',
+            counselingGoal: isCustomLoggedIn
+              ? customUser?.counselingGoal || ''
+              : '',
+          };
+
           setUserInfo(fallbackInfo);
           setEditedInfo(fallbackInfo);
         } finally {
           setIsLoading(false);
         }
       };
-      fetchUserData();
-    } else if (isLoaded && !isSignedIn) {
-      setIsLoading(false);
+      if (isLoaded || isCustomLoggedIn) {
+        fetchUserData();
+      }
     }
-  }, [isLoaded, isSignedIn, user, getToken]);
+  }, [isLoaded, isSignedIn, user, isCustomLoggedIn, getToken, customUser]);
 
 
   const handleEdit = () => setIsEditing(true);
@@ -145,11 +192,12 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       const payload = {
         username: editedInfo.name,
         nickname: editedInfo.nickname,
-        tel: editedInfo.phone,
+        phoneNumber: editedInfo.phone,
         mentalState: editedInfo.mentalState,
         counselingGoal: editedInfo.counselingGoal,
       };
       await axios.put(`${BACKEND_URL}/api/users/update/${user.id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+
       setUserInfo(editedInfo);
       setIsEditing(false);
       alert('회원 정보가 저장되었습니다.');
