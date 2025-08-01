@@ -179,14 +179,12 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
+              <button>x</button>
               <p>{post.content}</p>
               <span>
                 {post.createdAt || post.date} ・ {post.visibility} ・ 작성자:{" "}
                 {post.userName}
               </span>
-              {isSignedIn && user?.id === post.userId && (
-                <button onClick={() => handleDelete(post.id)}>삭제</button>
-              )}
             </div>
           ))
         ) : (
