@@ -6,7 +6,6 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { Routes, Route, useNavigate, Navigate, useLocation, } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
