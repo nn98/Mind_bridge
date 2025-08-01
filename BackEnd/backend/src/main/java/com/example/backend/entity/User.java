@@ -1,30 +1,38 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
-
+  
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String clerkId; // Clerk 소셜 로그인 고유 ID (nullable)
-
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = true)  // 일반 회원만 비밀번호 있음
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String username;
+    private String gender;
+
+    @Column(nullable = false)
+    private String age;
+
+
+    private String fullName;
+    private String nickname;
+    private String phoneNumber;
+    private String mentalState;
+
+    private String role;  // 예: USER, ADMIN
 }
