@@ -269,13 +269,6 @@ const Footer = ({ setIsOpen }) => {
           </div>
 
           <div className="footer-column">
-            <h4>회사</h4>
-            <ul>
-              <li>소개</li>
-            </ul>
-          </div>
-
-          <div className="footer-column">
             <h4>법적 정보</h4>
             <ul>
               <li onClick={() => setIsTermsOpen(true)} style={{ cursor: 'pointer' }}>이용약관</li>
