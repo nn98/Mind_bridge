@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import {Routes,Route,useNavigate,Navigate,useLocation,} from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation, } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
@@ -31,6 +31,7 @@ import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
+
 
 import { sectionLabels } from "./constants/sectionLabels";
 import { formInputs } from "./constants/formInputs";
@@ -297,6 +298,7 @@ const App = () => {
           }
         />
         <Route path="/logout" element={<AuthSection type="logout" />} />
+
         <Route
           path="/signup"
           element={
@@ -345,6 +347,8 @@ const App = () => {
         selected={selectedChat}
         setSelectedChat={setSelectedChat}
         resultText={resultText}
+        customUser={customUser}
+        isCustomLoggedIn={isCustomLoggedIn}
       />
 
       {!["/login", "/signup", "/find-id", "/find-password"].includes(

@@ -30,8 +30,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
   // 게시글 작성
   const handleSubmit = async () => {
-
-
+    
     let token;
 
     try {

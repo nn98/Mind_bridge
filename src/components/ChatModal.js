@@ -8,6 +8,8 @@ const BACKEND_URL = 'http://121.78.183.18:8080';
 const MENTAL_STATES = ['우울증', '불안장애', 'ADHD', '게임중독', '반항장애'];
 
 
+
+
 const SessionHistory = ({ userId, getToken }) => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +53,7 @@ const SessionHistory = ({ userId, getToken }) => {
   );
 };
 
-const UserProfile = () => {
+const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
@@ -61,14 +63,39 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const userId = isSignedIn ? user?.id : customUser?.id; //안전하게 정보를 받기 위한 userId
+
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
       const fetchUserData = async () => {
         setIsLoading(true);
         try {
-          const token = await getToken();
-          const response = await axios.get(`${BACKEND_URL}/api/users/details/${user.id}`, { headers: { Authorization: `Bearer ${token}` } });
+          let token;
+
+          if (isSignedIn) {
+            // Clerk 로그인 상태면 Clerk 토큰 사용
+            token = await getToken();
+          } else if (isCustomLoggedIn) {
+            // 커스텀 로그인 상태면 로컬스토리지 토큰 사용
+            token = localStorage.getItem("token");
+          } else {
+            // 로그인 안 된 상태면 토큰 없음
+            setIsLoading(false);
+            return;
+          }
+
+          const userId = isSignedIn ? user.id : customUser?.id;
+
+          if (!userId) {
+            setIsLoading(false);
+            return;
+          }
+
+          const response = await axios.get(`${BACKEND_URL}/api/users/details/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           const dbUser = response.data;
+
           const fullUserInfo = {
             name: dbUser.username || user.fullName || user.firstName || '사용자',
             nickname: dbUser.nickname || '',
@@ -99,9 +126,22 @@ const UserProfile = () => {
   const handleCancel = () => { setIsEditing(false); setEditedInfo(userInfo); };
 
   const handleSave = async () => {
-    if (!user) return;
+
+    //커스텀부분
+    const currentUserId = isSignedIn ? user.id : customUser?.id;
+    if (!currentUserId) return;
+    let token;
+    //clerk부분
+    if (isSignedIn) {
+      token = await getToken();
+    } else if (isCustomLoggedIn) {
+      token = localStorage.getItem("token");
+    } else {
+      alert("로그인 상태가 아닙니다.");
+      return;
+    }
+
     try {
-      const token = await getToken();
       const payload = {
         username: editedInfo.name,
         nickname: editedInfo.nickname,
@@ -120,11 +160,25 @@ const UserProfile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user) return;
+
+
+    //커스텀부분
+    const currentUserId = isSignedIn ? user.id : customUser?.id;
+    if (!currentUserId) return;
+    let token;
+    //clerk부분
+    if (isSignedIn) {
+      token = await getToken();
+    } else if (isCustomLoggedIn) {
+      token = localStorage.getItem("token");
+    } else {
+      alert("로그인 상태가 아닙니다.");
+      return;
+    }
+
     const isConfirmed = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 모든 정보가 영구적으로 삭제되며, 복구할 수 없습니다.');
     if (isConfirmed) {
       try {
-        const token = await getToken();
         await axios.delete(`${BACKEND_URL}/api/users/delete/${user.id}`, { headers: { Authorization: `Bearer ${token}` } });
         alert('회원 탈퇴가 완료되었습니다.');
         await signOut();
@@ -141,7 +195,8 @@ const UserProfile = () => {
   };
 
   if (isLoading) return <div className="tab-content"><p>로딩 중...</p></div>;
-  if (!isSignedIn) return <div className="tab-content"><p>로그인 후 이용해주세요.</p></div>;
+  if (!isSignedIn && !isCustomLoggedIn) return <div className="tab-content"><p>로그인 후 이용해주세요.</p></div>;
+
 
   return (
     <div className="tab-content user-profile">
@@ -159,7 +214,7 @@ const UserProfile = () => {
 
       {/* 상담 이력 섹션 */}
       <div className="profile-section">
-        <SessionHistory userId={user.id} getToken={getToken} />
+        <SessionHistory userId={userId} getToken={getToken} />
       </div>
 
       {/* 계정 관리 섹션 */}
@@ -175,7 +230,7 @@ const UserProfile = () => {
 };
 
 
-const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat }) => {
+const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat, customUser, isCustomLoggedIn }) => {
   const chatHistory = [
     { summary: "최근 상담 요약 1" },
   ];
@@ -208,9 +263,10 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
           </div>
         );
       case 'profile':
-        return <UserProfile />;
+        return <UserProfile customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />;
       default:
         return null;
+
     }
   };
 
@@ -222,7 +278,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
     );
 
   return (
-      <><button onClick={() => setIsOpen(false)} className="close-btn">✖</button><div>
+    <><button onClick={() => setIsOpen(false)} className="close-btn">✖</button><div>
       <div className="modal-container">
         <div className="modal-tabs">
           <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
