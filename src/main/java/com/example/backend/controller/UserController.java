@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import java.util.Map;
 
+import com.example.backend.dto.UserRegisterRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.UserDto;
-import com.example.backend.dto.UserRegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 
