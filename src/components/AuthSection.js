@@ -212,6 +212,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           setCustomUser({
             id: user.id,
             email: user.email,
+            phoneNumber: user.phoneNumber,
             fullName: user.fullName,
             nickname: user.nickname,
           });

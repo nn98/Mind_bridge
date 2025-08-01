@@ -58,7 +58,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
 
-  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phone: '', mentalState: '', nickname: '', counselingGoal: '' });
+  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '' });
   const [editedInfo, setEditedInfo] = useState({ ...userInfo });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,8 +116,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
             gender: dbUser.gender || '',
 
-            phone: dbUser.phoneNumber
-              || (isCustomLoggedIn ? customUser?.phoneNumber || '연락처 미등록' : '정보 없음'),
+            phoneNumber: dbUser.phoneNumber || '',
 
             mentalState: dbUser.mentalState
               || (isCustomLoggedIn ? customUser?.mentalState || '선택되지 않음' : ''),
@@ -143,9 +142,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
             gender: isCustomLoggedIn ? customUser?.gender || '' : '',
 
-            phone: isCustomLoggedIn
-              ? customUser?.phoneNumber || '연락처 미등록'
-              : '정보 없음',
+            phoneNumber: isCustomLoggedIn ? customUser?.phoneNumber || '' : '',
+
             mentalState: isCustomLoggedIn
               ? customUser?.mentalState || '선택되지 않음'
               : '',
@@ -192,7 +190,6 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     try {
       const payload = {
         nickname: editedInfo.nickname,
-        phoneNumber: editedInfo.phone,
         mentalState: editedInfo.mentalState,
         counselingGoal: editedInfo.counselingGoal,
       };
@@ -253,6 +250,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
         <div className="profile-field"><span>닉네임</span>{isEditing ? <input type="text" name="nickname" value={editedInfo.nickname} placeholder="앱에서 사용할 별칭" onChange={handleChange} /> : <p>{userInfo.nickname || '─'}</p>}</div>
         <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age}</p></div>
         <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender}</p></div>
+        <div className="profile-field"><span>전화번호</span><p style={{ color: '#777' }}>{userInfo.phoneNumber}</p></div>
         <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
         <div className="profile-field full-width"><span>상담 목표</span>{isEditing ? <textarea name="counselingGoal" value={editedInfo.counselingGoal} placeholder="상담을 통해 이루고 싶은 목표를 작성해주세요." onChange={handleChange} rows="3"></textarea> : <p className="pre-wrap">{userInfo.counselingGoal || '─'}</p>}</div>
         <div className="profile-actions">{isEditing ? (<><button className="chat-button" onClick={handleSave}>저장</button><button className="chat-button cancel" onClick={handleCancel}>취소</button></>) : (<button className="chat-button" onClick={handleEdit}>수정</button>)}</div>
