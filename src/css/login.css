@@ -156,3 +156,79 @@
   margin-top: 10px;
   /* 인라인 스타일과 일치 */
 }
+
+/* 모달 뒷 배경 */
+.modal-backdrop-2 {
+  position: fixed; /* 화면 전체를 덮도록 고정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 반투명 검은색 배경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* 다른 요소들보다 위에 표시 */
+}
+
+/* 모달 내용이 들어가는 흰색 박스 */
+.modal-content-2 {
+  background-color: white;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh; /* 화면 높이의 85%를 넘지 않도록 설정 */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column; /* 내용을 세로로 정렬 */
+  color: #333;
+}
+
+/* 모달 닫기 버튼 (X) */
+.modal-close-btn-2 {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  color: #333;
+}
+
+/* 모달 제목 (이용약관, 개인정보처리방침 등) */
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+  font-weight: 600;
+}
+
+/* 스크롤이 적용될 텍스트 영역 */
+.terms-text-content-2 {
+  flex-grow: 1; /* 제목과 버튼을 제외한 나머지 공간을 모두 차지 */
+  overflow-y: auto; /* 내용이 길어지면 수직 스크롤 자동 생성 */
+  padding-right: 15px; /* 스크롤바와 텍스트 간격 */
+  line-height: 1.7;
+}
+
+.terms-text-content h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.terms-text-content p {
+  margin-bottom: 1em;
+  font-size: 0.95em;
+}

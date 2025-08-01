@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { sectionLabels } from "../constants/sectionLabels";
 import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
@@ -16,9 +15,8 @@ const Header = ({
   const location = useLocation();
   const { isSignedIn } = useUser();
   const { signOut } = useClerk();
-  const clerk = useClerk();
 
-  const isLoggedIn = isSignedIn || isCustomLoggedIn;  // Clerk 로그인 또는 커스텀 로그인 중 하나라도 true면 로그인 상태로 간주
+  const isLoggedIn = isSignedIn || isCustomLoggedIn;
 
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {

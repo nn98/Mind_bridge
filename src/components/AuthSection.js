@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link as RouterLink, useNavigate, Link } from "react-router-dom";
+// import ReactDOM from 'react-dom'; // ReactDOM 임포트 제거
 import {
   Button,
   TextField,
@@ -21,6 +22,33 @@ import "../css/login.css";
 
 const BACKEND_URL = "http://localhost:8080";
 
+// ### 변경된 부분: ReactDOM.createPortal을 사용하지 않는 Modal 컴포넌트 ###
+const TermsModal = ({ content, onClose, onConfirm }) => {
+  // Portal을 사용하지 않고 JSX를 바로 반환합니다.
+  return (
+    <div className="modal-backdrop-2" onClick={onClose}>
+      <div className="modal-content-2" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="modal-close-btn-2">&times;</button>
+        <h2>서비스 이용약관</h2>
+        <div className="terms-text-content-2">
+          {content.split('\n').map((line, index) => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('제')) {
+              return <h4 key={index} style={{ marginTop: '1.5em' }}>{trimmedLine}</h4>;
+            }
+            return <p key={index}>{line}</p>;
+          })}
+        </div>
+        {/* '확인 및 동의' 버튼은 onConfirm(동의하며 닫기)을 호출 */}
+        <Button onClick={onConfirm} variant="contained" sx={{ mt: 2, backgroundColor: "#a18cd1" }}>
+          확인 및 동의
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+
 const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -38,9 +66,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     message: "",
   });
 
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [termsViewed, setTermsViewed] = useState(false);
+
   const { user } = useUser();
   const navigate = useNavigate();
   const logoutExecuted = useRef(false);
+
+  // (나머지 로직은 이전과 완전히 동일합니다)
 
   useEffect(() => {
     if (user) {
@@ -65,7 +98,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
-      logoutExecuted.current = true; // 한 번만 실행
+      logoutExecuted.current = true;
       localStorage.removeItem("token");
       if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
       alert("로그아웃 되었습니다!");
@@ -160,19 +193,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         const token = response.data.token;
         const user = response.data.user;
 
-
-
         localStorage.setItem("token", token);
-
-
-        console.log("로그인 상태 확인, user:", user);
-        //console.log("저장된 token:", localStorage.getItem("token"));
-
-        console.log("서버 응답 전체:", response.data);
-        console.log("token:", response.data.token);
-        console.log("user 객체:", response.data.user);
-
-
 
         if (setCustomUser && user) {
           setCustomUser({
@@ -187,15 +208,20 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         if (setCustomUser && user) setCustomUser(user);
 
         alert("로그인 성공!");
-        //navigate("/"); // 로그인 성공 후 메인 페이지로 이동
+        navigate("/");
       } else if (type === "signup") {
-        // 회원가입 전 최종 유효성 검사
         if (
           Object.keys(errors).length > 0 ||
           !emailCheck.isAvailable ||
           !formData.termsAgreed
         ) {
-          alert("입력 정보를 다시 확인해주세요.");
+          let alertMessage = "입력 정보를 다시 확인해주세요.";
+          if (!emailCheck.isAvailable) {
+            alertMessage = "이메일 중복 확인을 완료해주세요.";
+          } else if (!formData.termsAgreed) {
+            alertMessage = "서비스 이용약관에 동의해야 합니다.";
+          }
+          alert(alertMessage);
           return;
         }
         await axios.post(`${BACKEND_URL}/api/users/register`, {
@@ -206,7 +232,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           mentalState: formData.mentalState,
         });
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
-        navigate("/login"); // 회원가입 성공 후 로그인 페이지로 이동
+        navigate("/login");
       } else if (type === "find-id") {
         await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
@@ -224,6 +250,49 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     }
   };
 
+  const handleOpenTermsModal = () => setIsTermsModalOpen(true);
+  const handleCloseTermsModal = () => {
+    setIsTermsModalOpen(false);
+    setTermsViewed(true);
+  };
+
+  const handleModalConfirm = () => {
+    setIsTermsModalOpen(false);
+    setTermsViewed(true); // 체크박스 활성화
+    setFormData((prev) => ({ ...prev, termsAgreed: true })); // 동의 체크
+  };
+
+  const termsContent = `
+제1조 (목적)
+본 약관은 마인드브릿지(이하 '회사')가 제공하는 AI 테라피 솔루션 관련 제반 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+
+제2조 (정의)
+본 약관에서 사용하는 용어의 정의는 다음과 같습니다.
+1. '서비스'라 함은 회사가 제공하는 AI 상담, 감정 분석, 이미지 테라피 등 모든 서비스를 의미합니다.
+2. '회원'이라 함은 회사의 서비스에 접속하여 본 약관에 따라 회사와 이용계약을 체결하고 회사가 제공하는 서비스를 이용하는 고객을 말합니다.
+3. 'AI 상담'이라 함은 인공지능 기술을 활용하여 사용자의 심리적 상태를 분석하고 조언을 제공하는 비대면 상담 서비스를 의미합니다.
+
+제3조 (약관의 게시와 개정)
+1. 회사는 본 약관의 내용을 회원이 쉽게 알 수 있도록 서비스 초기 화면에 게시합니다.
+2. 회사는 '약관의 규제에 관한 법률', '정보통신망 이용촉진 및 정보보호 등에 관한 법률(이하 '정보통신망법')' 등 관련법을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.
+3. 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행약관과 함께 제1항의 방식에 따라 그 개정약관의 적용일자 7일 전부터 적용일자 전일까지 공지합니다.
+
+제4조 (서비스의 제공 및 변경)
+1. 회사는 다음과 같은 업무를 수행합니다.
+   - AI 기반 심리 상담 및 분석 서비스
+   - 심리 치유를 위한 이미지 테라피 콘텐츠 제공
+   - 기타 회사가 정하는 관련 업무
+2. 본 서비스는 의료 행위가 아니며, 진단이나 처방을 제공하지 않습니다. 심각한 정신 건강 문제가 의심될 경우, 반드시 전문 의료기관과 상담하시기 바랍니다.
+
+제5조 (회원의 의무)
+1. 회원은 다음 행위를 하여서는 안 됩니다.
+   - 신청 또는 변경 시 허위 내용의 등록
+   - 타인의 정보 도용
+   - 서비스의 정상적인 운영을 방해하는 행위
+   - 법령 또는 공서양속에 위배되는 행위
+2. 회원은 본 약관에서 규정하는 사항과 서비스 이용안내 또는 주의사항 등 회사가 공지하는 사항을 준수하여야 합니다.
+`;
+
   const renderForm = () => {
     switch (type) {
       case "logout":
@@ -235,79 +304,24 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "login":
         return (
-          /* 배율 조정시 컨텐츠 중앙정렬*/
-          <Box
-            sx={{
-              height: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#f5f5f5", // 배경색 선택사항
-            }}
-          >
+          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
             <Box className="form-section">
-              <Link
-                to="/"
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "80px",
-                }}
-              >
-                <img
-                  src="/img/로고1.png"
-                  alt="Mind Bridge 로고"
-                  className="logo-login"
-                />
+              <Link to="/" style={{ display: "inline-block", width: "40px", height: "80px" }}>
+                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>
-                로그인
-              </Typography>
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="이메일"
-                name="email"
-                margin="normal"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="비밀번호"
-                name="password"
-                type="password"
-                margin="normal"
-                value={formData.password}
-                onChange={handleChange}
-              />
-              <Button
-                className="login-button"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 2, mb: 1 }}
-                onClick={handleSubmit}
-              >
-                로그인
-              </Button>
+              <Typography variant="h4" component="h1" gutterBottom>로그인</Typography>
+              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
+              <TextField className="input-wrapper" fullWidth label="비밀번호" name="password" type="password" margin="normal" value={formData.password} onChange={handleChange} />
+              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>로그인</Button>
               <Box className="social-buttons">
                 <SignInButton mode="modal">
-                  <Button className="social-button" variant="contained">
-                    소셜 로그인
-                  </Button>
+                  <Button className="social-button" variant="contained">소셜 로그인</Button>
                 </SignInButton>
               </Box>
               <Box className="form-links">
-                <RouterLink to="/signup" className="form-link">
-                  회원가입
-                </RouterLink>
-                <RouterLink to="/find-id" className="form-link">
-                  아이디 찾기
-                </RouterLink>
-                <RouterLink to="/find-password" className="form-link">
-                  비밀번호 찾기
-                </RouterLink>
+                <RouterLink to="/signup" className="form-link">회원가입</RouterLink>
+                <RouterLink to="/find-id" className="form-link">아이디 찾기</RouterLink>
+                <RouterLink to="/find-password" className="form-link">비밀번호 찾기</RouterLink>
               </Box>
             </Box>
           </Box>
@@ -315,210 +329,73 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "signup":
         return (
-          /* 배율 조정시 컨텐츠 중앙정렬*/
-          <Box
-            sx={{
-              height: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#f5f5f5", // 배경색 선택사항
-            }}
-          >
+          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
             <Box component="form" noValidate className="form-section-flex">
               <Box className="form-left">
-                <Link
-                  to="/"
-                  style={{
-                    display: "flex",
-                    height: "auto",
-                  }}
-                >
-                  <img
-                    src="/img/로고1.png"
-                    alt="Mind Bridge 로고"
-                    className="logo-sign-up"
-                  />
+                <Link to="/" style={{ display: "flex", height: "auto" }}>
+                  <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-sign-up" />
                 </Link>
-                <Typography variant="h5" component="h2" gutterBottom>
-                  회원가입
-                </Typography>
-                <TextField
-                  className="input-wrapper"
-                  margin="normal"
-                  required
-                  fullWidth
-                  label="닉네임"
-                  name="nickname"
-                  value={formData.nickname}
-                  onChange={handleChange}
-                  error={!!errors.nickname}
-                  helperText={errors.nickname}
-                />
+                <Typography variant="h5" component="h2" gutterBottom>회원가입</Typography>
+                <TextField className="input-wrapper" margin="normal" required fullWidth label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname} />
                 <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                  <TextField
-                    className="input-wrapper"
-                    margin="dense"
-                    required
-                    fullWidth
-                    label="이메일 (아이디)"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    error={
-                      !!errors.email ||
-                      (emailCheck.message && !emailCheck.isAvailable)
-                    }
-                    helperText={errors.email || emailCheck.message}
-                    sx={{
-                      "& .MuiFormHelperText-root": {
-                        color: emailCheck.isAvailable ? "green" : undefined,
-                      },
-                    }}
-                  />
-                  <Button
-                    className="auth-button"
-                    variant="outlined"
-                    onClick={handleCheckEmail}
-                    disabled={emailCheck.isChecking}
-                    sx={{
-                      mt: "8px",
-                      height: "55px",
-                      flexShrink: 0,
-                      color: "#ffffff",
-                      backgroundColor: "#a18cd1",
-                      border: "none",
-                    }}
-                  >
-                    {emailCheck.isChecking ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      "중복확인"
-                    )}
+                  <TextField className="input-wrapper" margin="dense" required fullWidth label="이메일 (아이디)" name="email" value={formData.email} onChange={handleChange} error={!!errors.email || (emailCheck.message && !emailCheck.isAvailable)} helperText={errors.email || emailCheck.message} sx={{ "& .MuiFormHelperText-root": { color: emailCheck.isAvailable ? "green" : undefined } }} />
+                  <Button className="auth-button" variant="outlined" onClick={handleCheckEmail} disabled={emailCheck.isChecking} sx={{ mt: "8px", height: "55px", flexShrink: 0, color: "#ffffff", backgroundColor: "#a18cd1", border: "none" }}>
+                    {emailCheck.isChecking ? <CircularProgress size={24} /> : "중복확인"}
                   </Button>
                 </Box>
-                <TextField
-                  className="input-wrapper"
-                  margin="normal"
-                  fullWidth
-                  label="전화번호"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                />
-                <TextField
-                  className="input-wrapper"
-                  margin="normal"
-                  required
-                  fullWidth
-                  label="비밀번호"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={!!errors.password}
-                  sx={{
-                    // TextField root 배경색 지정
-                    "& .MuiInputBase-root": {
-                      backgroundColor: "#ffffffff", // 예시: 입력란 배경색
-                    },
-                    // helperText 배경은 투명하게
-                    "& .MuiFormHelperText-root": {
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                  helperText={
-                    errors.password ||
-                    "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
-                  }
-                />
-                <TextField
-                  className="input-wrapper"
-                  margin="normal"
-                  required
-                  fullWidth
-                  label="비밀번호 확인"
-                  name="passwordConfirm"
-                  type="password"
-                  value={formData.passwordConfirm}
-                  onChange={handleChange}
-                  error={!!errors.passwordConfirm}
-                  helperText={errors.passwordConfirm}
-                  sx={{ backgroundColor: "#ffffffff" }}
-                />
-                <Button
-                  className="login-button"
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 2, mb: 1 }}
-                  onClick={handleSubmit}
-                >
-                  가입하기
-                </Button>
+                <TextField className="input-wrapper" margin="normal" fullWidth label="전화번호" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
+                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} sx={{ "& .MuiInputBase-root": { backgroundColor: "#ffffffff" }, "& .MuiFormHelperText-root": { backgroundColor: "transparent" } }} helperText={errors.password || "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."} />
+                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호 확인" name="passwordConfirm" type="password" value={formData.passwordConfirm} onChange={handleChange} error={!!errors.passwordConfirm} helperText={errors.passwordConfirm} sx={{ backgroundColor: "#ffffffff" }} />
+                <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>가입하기</Button>
                 <Box className="social-buttons">
                   <SignUpButton mode="modal">
-                    <Button className="social-button" variant="contained">
-                      소셜 회원가입
-                    </Button>
+                    <Button className="social-button" variant="contained">소셜 회원가입</Button>
                   </SignUpButton>
                 </Box>
                 <Box className="form-links">
-                  <RouterLink to="/login" className="form-link">
-                    이미 계정이 있으신가요? 로그인
-                  </RouterLink>
+                  <RouterLink to="/login" className="form-link">이미 계정이 있으신가요? 로그인</RouterLink>
                 </Box>
               </Box>
               <Box className="form-right-legend">
-                <FormControl
-                  component="fieldset"
-                  margin="normal"
-                  error={!!errors.mentalState}
-                >
-                  <FormLabel component="legend">
-                    내가 생각하는 나의 현재 상태
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    name="mentalState"
-                    value={formData.mentalState}
-                    onChange={handleChange}
-                    className="radio-list"
-                  >
-                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map(
-                      (state) => (
-                        <FormControlLabel
-                          key={state}
-                          value={state}
-                          control={
-                            <Radio
-                              sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
-                            />
-                          }
-                          label={state}
-                        />
-                      )
-                    )}
+                <FormControl component="fieldset" margin="normal" error={!!errors.mentalState}>
+                  <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
+                  <RadioGroup row name="mentalState" value={formData.mentalState} onChange={handleChange} className="radio-list">
+                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (
+                      <FormControlLabel key={state} value={state} control={<Radio sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />} label={state} />
+                    ))}
                   </RadioGroup>
-                  {errors.mentalState && (
-                    <FormHelperText>{errors.mentalState}</FormHelperText>
-                  )}
+                  {errors.mentalState && <FormHelperText>{errors.mentalState}</FormHelperText>}
                 </FormControl>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="termsAgreed"
-                      checked={formData.termsAgreed}
-                      onChange={handleChange}
-                      sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
-                    />
-                  }
-                  label="서비스 이용약관에 동의합니다."
-                />
-                {errors.termsAgreed && (
-                  <FormHelperText error sx={{ ml: "14px" }}>
-                    {errors.termsAgreed}
-                  </FormHelperText>
-                )}
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="termsAgreed"
+                        checked={formData.termsAgreed}
+                        onChange={handleChange}
+                        disabled={!termsViewed}
+                        sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                      />
+                    }
+                    label={
+                      <Typography component="span" sx={{ fontSize: '0.9rem' }}>
+                        <Button
+                          variant="text"
+                          onClick={handleOpenTermsModal}
+                          sx={{ p: 0, color: "#a18cd1", textDecoration: 'underline' }}
+                        >
+                          서비스 이용약관
+                        </Button>
+                        에 동의합니다.
+                      </Typography>
+                    }
+                  />
+                  {!termsViewed && (
+                    <FormHelperText sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}>
+                      이용약관을 클릭하여 확인 후 동의해주세요.
+                    </FormHelperText>
+                  )}
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -526,65 +403,17 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "find-id":
         return (
-          /* 배율 조정시 컨텐츠 중앙정렬*/
-          <Box
-            sx={{
-              height: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#f5f5f5", // 배경색 선택사항
-            }}
-          >
+          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
             <Box className="form-section">
-              <Link
-                to="/"
-                style={{
-                  display: "inline-block",
-                  width: "50px",
-                  height: "auto",
-                }}
-              >
-                <img
-                  src="/img/로고1.png"
-                  alt="Mind Bridge 로고"
-                  className="logo-login"
-                />
+              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
+                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>
-                아이디 찾기
-              </Typography>
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="전화번호"
-                name="phoneNumber"
-                margin="normal"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-              />
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="이메일"
-                name="email"
-                margin="normal"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <Button
-                className="login-button"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 2, mb: 1 }}
-                onClick={handleSubmit}
-              >
-                아이디 찾기
-              </Button>
+              <Typography variant="h4" component="h1" gutterBottom>아이디 찾기</Typography>
+              <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
+              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
+              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>아이디 찾기</Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">
-                  로그인으로 돌아가기
-                </RouterLink>
+                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
               </Box>
             </Box>
           </Box>
@@ -592,76 +421,38 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "find-password":
         return (
-          /* 배율 조정시 컨텐츠 중앙정렬*/
-          <Box
-            sx={{
-              height: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#f5f5f5", // 배경색 선택사항
-            }}
-          >
+          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
             <Box className="form-section">
-              <Link
-                to="/"
-                style={{
-                  display: "inline-block",
-                  width: "50px",
-                  height: "auto",
-                }}
-              >
-                <img
-                  src="/img/로고1.png"
-                  alt="Mind Bridge 로고"
-                  className="logo-login"
-                />
+              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
+                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>
-                비밀번호 찾기
-              </Typography>
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="이메일"
-                name="email"
-                margin="normal"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <TextField
-                className="input-wrapper"
-                fullWidth
-                label="전화번호"
-                name="phoneNumber"
-                margin="normal"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-              />
-              <Button
-                className="login-button"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 2, mb: 1 }}
-                onClick={handleSubmit}
-              >
-                임시 비밀번호 발급
-              </Button>
+              <Typography variant="h4" component="h1" gutterBottom>비밀번호 찾기</Typography>
+              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
+              <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
+              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>임시 비밀번호 발급</Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">
-                  로그인으로 돌아가기
-                </RouterLink>
+                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
               </Box>
             </Box>
           </Box>
         );
-
       default:
         return null;
     }
   };
 
-  return <section>{renderForm()}</section>;
+  return (
+    <section>
+      {renderForm()}
+      {isTermsModalOpen && (
+        <TermsModal
+          content={termsContent}
+          onClose={handleCloseTermsModal}
+          onConfirm={handleModalConfirm}
+        />
+      )}
+    </section>
+  );
 };
 
 export default AuthSection;
