@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -182,8 +182,11 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
               <button>x</button>
               <p>{post.content}</p>
               <span>
-                {post.createdAt || post.date} ・ {post.visibility} ・ 작성자:{" "}
-                {post.userName}
+                {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
+              </span>
+              <span>
+               작성자:{" "}
+              {post.userName}
               </span>
             </div>
           ))
