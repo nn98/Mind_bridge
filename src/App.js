@@ -52,7 +52,7 @@ const App = () => {
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
 
-  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인 
+  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [hoveredMenu, setHoveredMenu] = useState(null);
@@ -206,27 +206,27 @@ const App = () => {
       {!["/login", "/signup", "/find-id", "/find-password"].includes(
         location.pathname
       ) && (
-          <Header
-            introRef={introRef}
-            servicesRef={servicesRef}
-            infoRef={infoRef}
-            setScrollTarget={setScrollTarget}
-            isCustomLoggedIn={isCustomLoggedIn}
-            setIsCustomLoggedIn={setIsCustomLoggedIn}
-            setCustomUser={setCustomUser}
-          />
-        )}
+        <Header
+          introRef={introRef}
+          servicesRef={servicesRef}
+          infoRef={infoRef}
+          setScrollTarget={setScrollTarget}
+          isCustomLoggedIn={isCustomLoggedIn}
+          setIsCustomLoggedIn={setIsCustomLoggedIn}
+          setCustomUser={setCustomUser}
+        />
+      )}
 
       {!["/login", "/signup", "/find-id", "/find-password"].includes(
         location.pathname
       ) && (
-          <FloatingSidebar
-            mapVisible={mapVisible}
-            setMapVisible={setMapVisible}
-            faqVisible={faqVisible}
-            setFaqVisible={setFaqVisible}
-          />
-        )}
+        <FloatingSidebar
+          mapVisible={mapVisible}
+          setMapVisible={setMapVisible}
+          faqVisible={faqVisible}
+          setFaqVisible={setFaqVisible}
+        />
+      )}
 
       {faqVisible &&
         !["/login", "/signup", "/find-id", "/find-password"].includes(
@@ -327,17 +327,17 @@ const App = () => {
             >
               {(!isOutsideClicked ||
                 location.pathname !== "/find-password") && (
-                  <AuthSection
-                    type="find-password"
-                    sectionLabels={sectionLabels}
-                    formInputs={formInputs}
-                    buttonLabels={buttonLabels}
-                    formLinks={formLinks}
-                    signupState={signupState}
-                    setSignupState={setSignupState}
-                    onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                  />
-                )}
+                <AuthSection
+                  type="find-password"
+                  sectionLabels={sectionLabels}
+                  formInputs={formInputs}
+                  buttonLabels={buttonLabels}
+                  formLinks={formLinks}
+                  signupState={signupState}
+                  setSignupState={setSignupState}
+                  onFindPasswordSuccess={() => setIsOutsideClicked(false)}
+                />
+              )}
             </div>
           }
         />
