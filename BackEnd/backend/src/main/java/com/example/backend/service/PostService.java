@@ -15,15 +15,20 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
-    public List<Post> findAll() {
+    // 게시글 전체 조회
+    public List<Post> getAllPosts() {
         return postRepository.findAll();
     }
 
-    public Post save(Post post) {
+    // 게시글 작성
+    public Post createPost(Post post) {
         return postRepository.save(post);
     }
 
-    public void deleteById(Long id) {
-        postRepository.deleteById(id);
+    // 게시글 삭제 (id로)
+    public void deletePost(Long postId) {
+        postRepository.deleteById(postId);
     }
+
+    // 게시글 조회 등 필요에 따라 확장 가능
 }
