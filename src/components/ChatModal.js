@@ -248,10 +248,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
   return (
     <div className="tab-content user-profile">
-      {/* 정보 수정 섹션 */}
       <div className="profile-section">
         <h3>회원 정보</h3>
-        <div className="profile-field"><span>이름</span>{isEditing ? <input type="text" name="name" value={editedInfo.name} onChange={handleChange} /> : <p>{userInfo.name}</p>}</div>
         <div className="profile-field"><span>닉네임</span>{isEditing ? <input type="text" name="nickname" value={editedInfo.nickname} placeholder="앱에서 사용할 별칭" onChange={handleChange} /> : <p>{userInfo.nickname || '─'}</p>}</div>
         <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
         <div className="profile-field"><span>연락처</span>{isEditing ? <input type="text" name="phone" value={editedInfo.phone} onChange={handleChange} /> : <p>{userInfo.phone}</p>}</div>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link as RouterLink, useNavigate, Link } from "react-router-dom";
-// import ReactDOM from 'react-dom'; // ReactDOM 임포트 제거
 import {
   Button,
   TextField,
@@ -15,6 +14,8 @@ import {
   Typography,
   CircularProgress,
   FormHelperText,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { SignInButton, SignUpButton, useUser } from "@clerk/clerk-react";
 
@@ -22,32 +23,38 @@ import "../css/login.css";
 
 const BACKEND_URL = "http://localhost:8080";
 
-// ### 변경된 부분: ReactDOM.createPortal을 사용하지 않는 Modal 컴포넌트 ###
 const TermsModal = ({ content, onClose, onConfirm }) => {
-  // Portal을 사용하지 않고 JSX를 바로 반환합니다.
   return (
     <div className="modal-backdrop-2" onClick={onClose}>
       <div className="modal-content-2" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="modal-close-btn-2">&times;</button>
+        <button onClick={onClose} className="modal-close-btn-2">
+          &times;
+        </button>
         <h2>서비스 이용약관</h2>
         <div className="terms-text-content-2">
-          {content.split('\n').map((line, index) => {
+          {content.split("\n").map((line, index) => {
             const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('제')) {
-              return <h4 key={index} style={{ marginTop: '1.5em' }}>{trimmedLine}</h4>;
+            if (trimmedLine.startsWith("제")) {
+              return (
+                <h4 key={index} style={{ marginTop: "1.5em" }}>
+                  {trimmedLine}
+                </h4>
+              );
             }
             return <p key={index}>{line}</p>;
           })}
         </div>
-        {/* '확인 및 동의' 버튼은 onConfirm(동의하며 닫기)을 호출 */}
-        <Button onClick={onConfirm} variant="contained" sx={{ mt: 2, backgroundColor: "#a18cd1" }}>
+        <Button
+          onClick={onConfirm}
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#a18cd1" }}
+        >
           확인 및 동의
         </Button>
       </div>
     </div>
   );
 };
-
 
 const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const [formData, setFormData] = useState({
@@ -58,6 +65,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     passwordConfirm: "",
     mentalState: "",
     termsAgreed: false,
+    age: "",
+    gender: "",
   });
   const [errors, setErrors] = useState({});
   const [emailCheck, setEmailCheck] = useState({
@@ -72,8 +81,6 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const { user } = useUser();
   const navigate = useNavigate();
   const logoutExecuted = useRef(false);
-
-  // (나머지 로직은 이전과 완전히 동일합니다)
 
   useEffect(() => {
     if (user) {
@@ -118,6 +125,12 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     });
     if (name === "email") {
       setEmailCheck({ isChecking: false, isAvailable: false, message: "" });
+    }
+  };
+
+  const handleGenderChange = (event, newGender) => {
+    if (newGender !== null) {
+      setFormData((prev) => ({ ...prev, gender: newGender }));
     }
   };
 
@@ -230,6 +243,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           nickname: formData.nickname,
           phoneNumber: formData.phoneNumber,
           mentalState: formData.mentalState,
+          age: formData.age,
+          gender: formData.gender,
         });
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
@@ -258,8 +273,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
   const handleModalConfirm = () => {
     setIsTermsModalOpen(false);
-    setTermsViewed(true); // 체크박스 활성화
-    setFormData((prev) => ({ ...prev, termsAgreed: true })); // 동의 체크
+    setTermsViewed(true);
+    setFormData((prev) => ({ ...prev, termsAgreed: true }));
   };
 
   const termsContent = `
@@ -329,42 +344,209 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
       case "signup":
         return (
-          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <Box component="form" noValidate className="form-section-flex">
               <Box className="form-left">
                 <Link to="/" style={{ display: "flex", height: "auto" }}>
-                  <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-sign-up" />
+                  <img
+                    src="/img/로고1.png"
+                    alt="Mind Bridge 로고"
+                    className="logo-sign-up"
+                  />
                 </Link>
-                <Typography variant="h5" component="h2" gutterBottom>회원가입</Typography>
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  회원가입
+                </Typography>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="닉네임"
+                  name="nickname"
+                  value={formData.nickname}
+                  onChange={handleChange}
+                  error={!!errors.nickname}
+                  helperText={errors.nickname}
+                />
+
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <TextField
+                    className="input-wrapper"
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="나이"
+                    name="age"
+                    type="number"
+                    value={formData.age}
+                    onChange={handleChange}
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
+
                 <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                  <TextField className="input-wrapper" margin="dense" required fullWidth label="이메일 (아이디)" name="email" value={formData.email} onChange={handleChange} error={!!errors.email || (emailCheck.message && !emailCheck.isAvailable)} helperText={errors.email || emailCheck.message} sx={{ "& .MuiFormHelperText-root": { color: emailCheck.isAvailable ? "green" : undefined } }} />
-                  <Button className="auth-button" variant="outlined" onClick={handleCheckEmail} disabled={emailCheck.isChecking} sx={{ mt: "8px", height: "55px", flexShrink: 0, color: "#ffffff", backgroundColor: "#a18cd1", border: "none" }}>
-                    {emailCheck.isChecking ? <CircularProgress size={24} /> : "중복확인"}
+                  <TextField
+                    className="input-wrapper"
+                    margin="dense"
+                    required
+                    fullWidth
+                    label="이메일 (아이디)"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={
+                      !!errors.email ||
+                      (emailCheck.message && !emailCheck.isAvailable)
+                    }
+                    helperText={errors.email || emailCheck.message}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        color: emailCheck.isAvailable ? "green" : undefined,
+                      },
+                    }}
+                  />
+                  <Button
+                    className="auth-button"
+                    variant="outlined"
+                    onClick={handleCheckEmail}
+                    disabled={emailCheck.isChecking}
+                    sx={{
+                      mt: "8px",
+                      height: "55px",
+                      flexShrink: 0,
+                      color: "#ffffff",
+                      backgroundColor: "#a18cd1",
+                      border: "none",
+                    }}
+                  >
+                    {emailCheck.isChecking ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "중복확인"
+                    )}
                   </Button>
                 </Box>
-                <TextField className="input-wrapper" margin="normal" fullWidth label="전화번호" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} sx={{ "& .MuiInputBase-root": { backgroundColor: "#ffffffff" }, "& .MuiFormHelperText-root": { backgroundColor: "transparent" } }} helperText={errors.password || "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."} />
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호 확인" name="passwordConfirm" type="password" value={formData.passwordConfirm} onChange={handleChange} error={!!errors.passwordConfirm} helperText={errors.passwordConfirm} sx={{ backgroundColor: "#ffffffff" }} />
-                <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>가입하기</Button>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  fullWidth
+                  label="전화번호"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  error={!!errors.password}
+                  sx={{
+                    "& .MuiInputBase-root": { backgroundColor: "#ffffffff" },
+                    "& .MuiFormHelperText-root": {
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                  helperText={
+                    errors.password ||
+                    "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
+                  }
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호 확인"
+                  name="passwordConfirm"
+                  type="password"
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
+                  error={!!errors.passwordConfirm}
+                  helperText={errors.passwordConfirm}
+                  sx={{ backgroundColor: "#ffffffff" }}
+                />
+
+                <FormControl component="fieldset" margin="normal" sx={{ flex: 2 }}>
+                  <FormLabel component="legend" sx={{ mb: 1, fontSize: '0.8rem' }}>성별</FormLabel>
+                  <ToggleButtonGroup
+                    value={formData.gender}
+                    exclusive
+                    onChange={handleGenderChange}
+                    aria-label="gender selection"
+                    fullWidth
+                  >
+                    <ToggleButton value="male" aria-label="male">
+                      남성
+                    </ToggleButton>
+                    <ToggleButton value="female" aria-label="female">
+                      여성
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </FormControl>
+
+                <Button
+                  className="login-button"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 2, mb: 1 }}
+                  onClick={handleSubmit}
+                >
+                  가입하기
+                </Button>
                 <Box className="social-buttons">
                   <SignUpButton mode="modal">
-                    <Button className="social-button" variant="contained">소셜 회원가입</Button>
+                    <Button className="social-button" variant="contained">
+                      소셜 회원가입
+                    </Button>
                   </SignUpButton>
                 </Box>
                 <Box className="form-links">
-                  <RouterLink to="/login" className="form-link">이미 계정이 있으신가요? 로그인</RouterLink>
+                  <RouterLink to="/login" className="form-link">
+                    이미 계정이 있으신가요? 로그인
+                  </RouterLink>
                 </Box>
               </Box>
               <Box className="form-right-legend">
-                <FormControl component="fieldset" margin="normal" error={!!errors.mentalState}>
-                  <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
-                  <RadioGroup row name="mentalState" value={formData.mentalState} onChange={handleChange} className="radio-list">
-                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (
-                      <FormControlLabel key={state} value={state} control={<Radio sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />} label={state} />
+                <FormControl
+                  component="fieldset"
+                  margin="normal"
+                  error={!!errors.mentalState}
+                >
+                  <FormLabel component="legend">
+                    내가 생각하는 나의 현재 상태
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    name="mentalState"
+                    value={formData.mentalState}
+                    onChange={handleChange}
+                    className="radio-list"
+                  >
+                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애",].map((state) => (
+                      <FormControlLabel key={state} value={state} control={
+                        <Radio sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />}
+                        label={state}
+                      />
                     ))}
                   </RadioGroup>
-                  {errors.mentalState && <FormHelperText>{errors.mentalState}</FormHelperText>}
+                  {errors.mentalState && (
+                    <FormHelperText>{errors.mentalState}</FormHelperText>
+                  )}
                 </FormControl>
                 <Box>
                   <FormControlLabel
@@ -378,12 +560,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
                       />
                     }
                     label={
-                      <Typography component="span" sx={{ fontSize: '0.9rem' }}>
-                        <Button
-                          variant="text"
-                          onClick={handleOpenTermsModal}
-                          sx={{ p: 0, color: "#a18cd1", textDecoration: 'underline' }}
-                        >
+                      <Typography component="span" sx={{ fontSize: "0.9rem" }}>
+                        <Button variant="text" onClick={handleOpenTermsModal} sx={{ p: 0, color: "#a18cd1", textDecoration: "underline", }}>
                           서비스 이용약관
                         </Button>
                         에 동의합니다.
@@ -391,7 +569,9 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
                     }
                   />
                   {!termsViewed && (
-                    <FormHelperText sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}>
+                    <FormHelperText
+                      sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}
+                    >
                       이용약관을 클릭하여 확인 후 동의해주세요.
                     </FormHelperText>
                   )}
