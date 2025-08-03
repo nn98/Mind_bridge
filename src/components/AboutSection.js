@@ -82,9 +82,10 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
 
   const services = [
     {
-      icon: '📧',
-      title: '웹 메일 호스팅',
-      description: '유관 기관 연결 및 번역을 지원하는 웹 메일 호스팅으로 도움을 요청하고 받을 수 있습니다.',
+      icon: '📖',
+      title: '자료실',
+      description: '사용자의 현재 상태에 대한 모르는 부분을 볼 수 있는 자료실 입니다.',
+      path: '/library'
     },
     {
       icon: '🤖',

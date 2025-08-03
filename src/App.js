@@ -37,6 +37,7 @@ import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
+import ResourceLibrary from './components/ResourceLibrary';
 
 
 import { sectionLabels } from "./constants/sectionLabels";
@@ -147,6 +148,7 @@ const App = () => {
       map: "/map",
       region: "/hospital-region",
       chat: "popup-map",
+      library: "library",
     };
     if (section === "chat") {
       setMapVisible(true);
@@ -266,6 +268,7 @@ const App = () => {
             />
           }
         />
+        <Route path="/library" element={<ResourceLibrary />} />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
         <Route path="/board" element={<BoardRouteElement />} />

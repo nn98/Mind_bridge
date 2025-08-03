@@ -1,0 +1,137 @@
+.resource-library-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: 'Pretendard', sans-serif;
+    color: #333;
+}
+
+.library-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: #4a4a4a;
+}
+
+.library-layout {
+    display: flex;
+    gap: 40px;
+}
+
+.library-sidebar {
+    flex: 0 0 200px;
+}
+
+.library-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: sticky;
+    top: 40px;
+}
+
+.sidebar-button {
+    width: 100%;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: black;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-button:hover {
+    background-color: #a18cd1;
+    border-color: #ccc;
+}
+
+.sidebar-button.active {
+    background-color: #a18cd1;
+    color: white;
+    border-color: #a18cd1;
+}
+
+.library-content {
+    flex: 1;
+    /* 남은 공간을 모두 차지 */
+}
+
+.library-content h2 {
+    font-size: 2rem;
+    margin-top: 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #a18cd1;
+    margin-bottom: 30px;
+}
+
+.content-section {
+    margin-bottom: 40px;
+}
+
+.content-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #a18cd1;
+}
+
+.content-section p {
+    font-size: 1rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.recommendations-section {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 2px solid #eee;
+}
+
+.recommendations-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #4a4a4a;
+}
+
+.recommendations-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.recommendation-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-left: 5px solid #a18cd1;
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s;
+}
+
+.recommendation-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-card .rec-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.recommendation-card .rec-author {
+    font-style: italic;
+    color: #777;
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+
+.recommendation-card .rec-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
