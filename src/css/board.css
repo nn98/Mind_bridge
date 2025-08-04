@@ -43,7 +43,7 @@
 
 select,
 input[type="text"] {
-  padding: 16.5px 14px;
+  padding: 17.5px;
   font-size: 15px;
   border-radius: 8px;
   background-color: #fff;
@@ -159,8 +159,6 @@ button:hover {
 /* 삭제 버튼 */
 .post-card button {
   position: absolute;
-  top: 5px;
-  right: 10px;
   background: none;
   border: none;
   color: #aaa;
@@ -169,8 +167,18 @@ button:hover {
   transition: color 0.2s ease;
 }
 
+.post-delete{
+  top: 5px;
+  right: 5px;
+}
+
+.post-edit{
+  bottom: 5px;
+  right: 5px;
+}
+
 .post-card button:hover {
-  color: #ff4f4f;
+  color: #805dd1;
 }
 
 /* 글이 없을 때 */
