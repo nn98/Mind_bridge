@@ -82,14 +82,11 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     }
 
     try {
-      const token = localStorage.getItem("token"); //토큰 가져오기
-
-      await axios.delete(`http://localhost:8080/api/posts/${id}`, { 
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await axios.delete(`http://localhost:8080/api/posts/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
-      fetchPosts(); // 리콜
+      fetchPosts();
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
       alert("게시글 삭제에 실패했습니다. 본인의 글이 맞는지 확인해주세요.");
@@ -223,17 +220,36 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
       <div className="post-list">
         {sortedPosts.length > 0 ? (
-          sortedPosts.map((post) => (   //filter 넣어서 해볼까? 
+          sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
-              <button>x</button>
-              <p>{post.content}</p>
-              <span>
-                {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
-              </span>
-              <span>
-                작성자:{""}
-                {post.userNickname}
-              </span>
+              {editingPostId === post.id ? (
+                <div className="edit-form">
+                  <textarea
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                  />
+                  <div className="edit-buttons">
+                    <button onClick={() => handleUpdateSubmit(post.id)}>저장</button>
+                    <button onClick={handleCancelEdit}>취소</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {currentUserName === post.userNickname && (
+                    <div className="post-actions">
+                      <button onClick={() => handleEditStart(post)}>수정</button>
+                      <button onClick={() => handleDelete(post.id)}>x</button>
+                    </div>
+                  )}
+                  <p>{post.content}</p>
+                  <div className="post-meta">
+                    <span>
+                      {(post.createdAt || post.date || "").split("T")[0]} | {post.visibility}
+                    </span>
+                    <span>작성자: {post.userNickname || "익명"}</span>
+                  </div>
+                </>
+              )}
             </div>
           ))
         ) : (
