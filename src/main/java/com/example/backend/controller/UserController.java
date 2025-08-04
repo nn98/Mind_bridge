@@ -79,4 +79,40 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //https:localhost:8080/api/users/update
+    //https://localhost:8080/api/users/update/15
+    @PostMapping("/update")
+    public ResponseEntity<?> update(@RequestBody Map<String, String> updateRequest) {
+        try {
+            String email = updateRequest.get("email");
+
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+            UserDto userDto = new UserDto(user);
+
+            return ResponseEntity.ok(Map.of(
+                    "user", userDto
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(@RequestBody Map<String, String> deleteRequest) {
+        try {
+            String email = deleteRequest.get("email");
+
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+            UserDto userDto = new UserDto(user);
+
+            return ResponseEntity.ok(Map.of(
+                    "user", userDto
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
+        }
+    }
 }
