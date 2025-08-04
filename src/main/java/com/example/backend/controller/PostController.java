@@ -40,6 +40,9 @@ public class PostController {
     //생성
     @PostMapping
     public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest postRequest, Authentication authentication) {
+
+        System.out.println("createPost 호출됨 - postRequest: " + postRequest);
+
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
@@ -60,15 +63,17 @@ public class PostController {
         post.setVisibility(postRequest.getVisibility());
         post.setUserEmail(userEmail);                    // 이메일 설정
         post.setUserNickname(user.getNickname());        // 닉네임 설정
+        post.setUser(user);
         post.setCreatedAt(java.time.LocalDateTime.now());
 
         Post savedPost = postRepository.save(post);
         return ResponseEntity.ok(savedPost);
     }
 
-    //조회    
+    //조회
     @GetMapping("/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id) {
+        System.out.println("getPost 요청 id: " + id);
         Optional<Post> postOpt = postRepository.findById(id);
 
         if (postOpt.isEmpty()) {
@@ -80,7 +85,7 @@ public class PostController {
 
     //수정
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePost(@PathVariable Long id,
+    public ResponseEntity<?> updatePost(@PathVariable("id") Long id,
                                         @Valid @RequestBody PostRequest postRequest,
                                         Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
