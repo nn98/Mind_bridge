@@ -1,20 +1,27 @@
 package com.example.backend.controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.backend.dto.PostRequest;
 import com.example.backend.entity.Post;
 import com.example.backend.entity.User;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -30,6 +37,7 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    //생성
     @PostMapping
     public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest postRequest, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -58,6 +66,7 @@ public class PostController {
         return ResponseEntity.ok(savedPost);
     }
 
+    //조회    
     @GetMapping("/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id) {
         Optional<Post> postOpt = postRepository.findById(id);
@@ -69,6 +78,7 @@ public class PostController {
         return ResponseEntity.ok(postOpt.get());
     }
 
+    //수정
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePost(@PathVariable Long id,
                                         @Valid @RequestBody PostRequest postRequest,
@@ -98,7 +108,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<?> deletePost(@PathVariable("id") Long id, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
