@@ -236,9 +236,9 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
               ) : (
                 <>
                   {currentUserName === post.userNickname && (
-                    <div className="post-actions">
-                      <button onClick={() => handleEditStart(post)}>수정</button>
-                      <button onClick={() => handleDelete(post.id)}>x</button>
+                    <div>
+                      <button className="post-edit" onClick={() => handleEditStart(post)}>수정</button>
+                      <button className="post-delete" onClick={() => handleDelete(post.id)}>x</button>
                     </div>
                   )}
                   <p>{post.content}</p>

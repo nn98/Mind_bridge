@@ -331,7 +331,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
               <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>로그인</Button>
               <Box className="social-buttons">
                 <SignInButton mode="modal">
-                  <Button className="social-button" variant="contained">소셜 로그인</Button>
+                  <Button className="social-button" variant="contained" sx={{ mb: 1 }}>소셜 로그인</Button>
                 </SignInButton>
               </Box>
               <Box className="form-links">
