@@ -54,11 +54,7 @@ const App = () => {
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
 
-  const sharedProps = { isCustomLoggedIn, customUser }; //로그인 상태 확인
-
   const [selectedChat, setSelectedChat] = useState(null);
-  const [hoveredMenu, setHoveredMenu] = useState(null);
-  const [subMenuVisible, setSubMenuVisible] = useState(null);
   const [signupState, setSignupState] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState("chat");
