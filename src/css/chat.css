@@ -72,20 +72,22 @@
 
 .input-fixed {
   justify-content: flex-start;
-  width: 80%;
+  width: 100%;
   height: 60px;
   overflow-y: auto;
   resize: none;
   font-size: 16px;
   padding: 15px;
+  padding-right: 70px;
   line-height: 1.5;
   border-radius: 8px;
   border: 1px solid #ccc;
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
+  scrollbar-width: none;
 }
 
-/* 채팅종료 */
+/* 채팅종료 버튼 */
 .chat-button {
   display: block;
   width: 200px;
@@ -102,16 +104,17 @@
 /* 전송 버튼 */
 .chat-button1 {
   display: flex;
-  width: 50px;
+  width: 60px;
   height: 50px;
   background-color: #a18cd1;
   color: white;
   border: none;
-  border-radius: 50px;
   cursor: pointer;
   justify-content: center;
   align-items: center;
   margin: 5px 0 0 10px;
   font-size: 23px;
+  position: absolute;
+  right: 25px;
   padding-bottom: 17px;
 }
