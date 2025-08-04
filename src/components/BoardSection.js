@@ -3,16 +3,18 @@ import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 
 const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
+  const [posts, setPosts] = useState([]);
   const [selectedBoard, setSelectedBoard] = useState("general");
   const [visibility, setVisibility] = useState("공개");
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
-  const [posts, setPosts] = useState([]);
   const { getToken } = useAuth();
 
-  // 게시글 불러오기
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editingContent, setEditingContent] = useState("");
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -20,7 +22,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   const fetchPosts = async () => {
     try {
       const res = await axios.get("http://localhost:8080/api/posts", {
-        withCredentials: true, // 인증 쿠키 포함
+        withCredentials: true,
       });
       setPosts(res.data);
     } catch (error) {
@@ -28,33 +30,27 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     }
   };
 
-  // 게시글 작성
-  const handleSubmit = async () => {
-
-    let token;
-
+  const getAuthToken = async () => {
     try {
-      // Clerk 사용자 토큰 우선 시도
-      token = await getToken();
-      console.log("Clerk 토큰:", await getToken());
+      const clerkToken = await getToken();
+      if (clerkToken) return clerkToken;
     } catch (e) {
-      console.warn("Clerk 토큰 가져오기 실패:", e);
+      console.warn("Clerk 토큰 가져오기 실패, 커스텀 토큰으로 대체합니다.", e);
     }
+    return localStorage.getItem("token");
+  };
 
-    // 커스텀 로그인 fallback
-    if (!token) {
-      token = localStorage.getItem("token");
-    }
-
+  const handleSubmit = async () => {
+    const token = await getAuthToken();
     if (!token) {
       alert("로그인 후 작성해주세요.");
-      console.log("커스텀 토큰:", token);
+      return;
+    }
+    if (!content.trim()) {
+      alert("내용을 입력해주세요.");
       return;
     }
 
-    if (!content.trim()) return; //내용이 비어있으면 제출 x 
-
-    //여기가 인증 요청하는 곳 
     const newPost = {
       content,
       visibility,
@@ -63,42 +59,84 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     };
 
     try {
-      const res = await axios.post(
-        "http://localhost:8080/api/posts",
-        newPost,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        } // 인증 쿠키 포함
-      );
-
-
-      console.log("게시글 작성 성공:", res.data);
+      await axios.post("http://localhost:8080/api/posts", newPost, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
       setContent("");
       setVisibility("공개");
       setShowForm(false);
-      fetchPosts(); // 작성 후 다시 불러오기
-
+      fetchPosts();
     } catch (error) {
       console.error("게시글 작성 실패:", error);
     }
   };
 
-  // 게시글 삭제
   const handleDelete = async (id) => {
+    if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+
+    const token = await getAuthToken();
+    if (!token) {
+      alert("삭제 권한이 없습니다.");
+      return;
+    }
+
     try {
       await axios.delete(`http://localhost:8080/api/posts/${id}`, {
-        withCredentials: true, // 인증 쿠키 포함
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
-      fetchPosts(); // 삭제 후 다시 불러오기
+      fetchPosts();
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
+      alert("게시글 삭제에 실패했습니다. 본인의 글이 맞는지 확인해주세요.");
     }
   };
 
-  // 필터링 및 정렬
+  const handleEditStart = (post) => {
+    const currentUserName = user.fullName || user.nickname;
+    if (post.userName === currentUserName) {
+      setEditingPostId(post.id);
+      setEditingContent(post.content);
+    } else {
+      alert("본인이 작성한 글만 수정할 수 있습니다.");
+    }
+  };
+
+  const handleUpdateSubmit = async (id) => {
+    const token = await getAuthToken();
+    if (!token) {
+      alert("로그인 정보가 유효하지 않습니다.");
+      return;
+    }
+    if (!editingContent.trim()) {
+      alert("내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `http://localhost:8080/api/posts/${id}`,
+        { content: editingContent },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+      setEditingPostId(null);
+      setEditingContent("");
+      fetchPosts();
+    } catch (error) {
+      console.error("게시글 수정 실패:", error);
+      alert("게시글 수정에 실패했습니다.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPostId(null);
+    setEditingContent("");
+  };
+
   const filteredPosts = posts.filter((post) => {
     const matchBoard =
       selectedBoard === "general"
@@ -111,8 +149,12 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   });
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
-    return sortOrder === "newest" ? b.id - a.id : a.id - b.id;
+    const dateA = new Date(a.createdAt || 0);
+    const dateB = new Date(b.createdAt || 0);
+    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
   });
+
+  const currentUserName = user?.fullName || user?.nickname;
 
   return (
     <section className="board-section">
@@ -145,7 +187,9 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button onClick={() => setShowForm(true)}>작성하기</button>
+          {(isSignedIn || isCustomLoggedIn) && (
+            <button onClick={() => setShowForm(true)}>작성하기</button>
+          )}
         </div>
       </div>
 
@@ -178,15 +222,34 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
-              <button>x</button>
-              <p>{post.content}</p>
-              <span>
-                {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
-              </span>
-              <span>
-                작성자:{""}
-                {post.userNickname}
-              </span>
+              {editingPostId === post.id ? (
+                <div className="edit-form">
+                  <textarea
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                  />
+                  <div className="edit-buttons">
+                    <button onClick={() => handleUpdateSubmit(post.id)}>저장</button>
+                    <button onClick={handleCancelEdit}>취소</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {currentUserName === post.userNickname && (
+                    <div className="post-actions">
+                      <button onClick={() => handleEditStart(post)}>수정</button>
+                      <button onClick={() => handleDelete(post.id)}>x</button>
+                    </div>
+                  )}
+                  <p>{post.content}</p>
+                  <div className="post-meta">
+                    <span>
+                      {(post.createdAt || post.date || "").split("T")[0]} | {post.visibility}
+                    </span>
+                    <span>작성자: {post.userNickname || "익명"}</span>
+                  </div>
+                </>
+              )}
             </div>
           ))
         ) : (

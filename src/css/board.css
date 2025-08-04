@@ -37,26 +37,27 @@
 .left-controls,
 .right-controls {
   display: flex;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 select,
 input[type="text"] {
-  padding: 16.5px 14px;
+  padding: 10px 14px;
   font-size: 15px;
   border-radius: 8px;
+  border: 1px solid #ddd;
   background-color: #fff;
   transition: border-color 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  height: 45px; /* 버튼과 높이 맞춤 */
 }
 
-/* 로그인 input 클릭 시 테두리 색 */
-.input-wrapper .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: #805dd1 !important;
-}
-.input-wrapper .MuiInputLabel-root.Mui-focused {
-  color: #805dd1 !important;
+select:focus,
+input[type="text"]:focus {
+  outline: none;
+  border-color: #a18cd1;
 }
 
 /* 공통 버튼 */
@@ -70,20 +71,26 @@ button {
   font-size: 14px;
   transition: background-color 0.2s ease;
   color: white;
+  height: 45px; /* 컨트롤 영역 요소들과 높이 맞춤 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover {
   background-color: #805dd1;
-  color: white;
 }
 
 /* 작성 폼 */
 .write-form {
   background: #f8f9fc;
-  padding: 20px;
+  padding: 24px;
   border-radius: 12px;
   margin-bottom: 32px;
   border: 1px solid #e3e7ed;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .write-form textarea {
@@ -95,28 +102,29 @@ button:hover {
   border-radius: 8px;
   resize: vertical;
   font-family: inherit;
-  margin-bottom: 16px;
   line-height: 1.5;
+}
+
+.write-form textarea:focus {
+  outline: none;
+  border-color: #a18cd1;
 }
 
 .write-form label {
   margin-right: 20px;
   font-size: 14px;
   color: #444;
+  cursor: pointer;
 }
 
 .write-form input[type="radio"] {
   margin-right: 6px;
+  vertical-align: middle;
 }
 
 .write-form button {
-  background-color: #a18cd1;
-  color: white;
-}
-
-.write-form button:hover {
-  background-color: #805dd1;
-  color: white;
+  align-self: flex-end; /* 버튼을 오른쪽으로 정렬 */
+  width: 120px;
 }
 
 /* 게시글 리스트 */
@@ -134,6 +142,9 @@ button:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .post-card:hover {
@@ -144,37 +155,111 @@ button:hover {
 .post-card p {
   font-size: 15px;
   color: #2e2e2e;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   line-height: 1.6;
   word-break: break-word;
+  flex-grow: 1; /* 내용이 카드 높이를 채우도록 함 */
 }
 
-.post-card span {
-  display: block;
+.post-meta {
   font-size: 13px;
   color: #888;
   margin-top: 8px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
 }
 
-/* 삭제 버튼 */
-.post-card button {
+/* --- 신규/수정된 CSS --- */
+
+/* 수정/삭제 버튼 컨테이너 */
+.post-actions {
   position: absolute;
-  top: 5px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 23px;
-  cursor: pointer;
-  transition: color 0.2s ease;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
 }
 
-.post-card button:hover {
+.post-actions button {
+  background: #f1f1f1;
+  color: #555;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  height: auto;
+  border-radius: 6px;
+}
+
+.post-actions button:hover {
+  background: #e0e0e0;
+}
+
+/* 삭제 'x' 버튼 특별 스타일 */
+.post-actions button:last-child {
+  background: none;
+  color: #aaa;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.post-actions button:last-child:hover {
   color: #ff4f4f;
+  background: none;
+}
+
+/* 게시글 수정 폼 */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-form textarea {
+  width: 100%;
+  height: 100px;
+  padding: 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.edit-form textarea:focus {
+  outline: none;
+  border-color: #a18cd1;
+}
+
+/* 수정 폼 내부 버튼 (저장/취소) */
+.edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-buttons button {
+  font-size: 13px;
+  padding: 6px 14px;
+  height: auto;
+}
+
+/* 취소 버튼 스타일 */
+.edit-buttons button:last-child {
+  background-color: #ccc;
+  color: #333;
+}
+
+.edit-buttons button:last-child:hover {
+  background-color: #bbb;
 }
 
 /* 글이 없을 때 */
-.post-list p {
+.post-list > p {
   grid-column: 1 / -1;
   text-align: center;
   color: #aaa;
