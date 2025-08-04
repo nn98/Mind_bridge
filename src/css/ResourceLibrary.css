@@ -1,12 +1,13 @@
 .resource-library-container {
     max-width: 1000px;
-    margin: 40px auto;
+    margin-left: 380px;
     padding: 20px;
     font-family: 'Pretendard', sans-serif;
     color: #333;
 }
 
 .library-title {
+    margin-left: 235px;
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 40px;
