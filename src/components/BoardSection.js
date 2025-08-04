@@ -89,10 +89,14 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   // 게시글 삭제
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/posts/${id}`, {
-        withCredentials: true, // 인증 쿠키 포함
+      const token = localStorage.getItem("token"); //토큰 가져오기
+
+      await axios.delete(`http://localhost:8080/api/posts/${id}`, { 
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      fetchPosts(); // 삭제 후 다시 불러오기
+      fetchPosts(); // 리콜
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
     }
@@ -176,9 +180,9 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
       <div className="post-list">
         {sortedPosts.length > 0 ? (
-          sortedPosts.map((post) => (
+          sortedPosts.map((post) => (   //filter 넣어서 해볼까? 
             <div key={post.id} className="post-card">
-              <button>x</button>
+              <button onClick={() => handleDelete(post.id)}>삭제</button>
               <p>{post.content}</p>
               <span>
                 {(post.createdAt || post.date).split("T")[0]} | {post.visibility} |
