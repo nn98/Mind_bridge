@@ -251,8 +251,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
         <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age}</p></div>
         <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender}</p></div>
         <div className="profile-field"><span>전화번호</span><p style={{ color: '#777' }}>{userInfo.phoneNumber}</p></div>
-        <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
-        <div className="profile-field full-width"><span>상담 목표</span>{isEditing ? <textarea name="counselingGoal" value={editedInfo.counselingGoal} placeholder="상담을 통해 이루고 싶은 목표를 작성해주세요." onChange={handleChange} rows="3"></textarea> : <p className="pre-wrap">{userInfo.counselingGoal || '─'}</p>}</div>
+        <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
+        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
         <div className="profile-actions">{isEditing ? (<><button className="chat-button" onClick={handleSave}>저장</button><button className="chat-button cancel" onClick={handleCancel}>취소</button></>) : (<button className="chat-button" onClick={handleEdit}>수정</button>)}</div>
       </div>
 
@@ -270,7 +270,6 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     </div>
   );
 };
-
 
 const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedChat, customUser, isCustomLoggedIn }) => {
   const chatHistory = [

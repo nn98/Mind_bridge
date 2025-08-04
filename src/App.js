@@ -268,7 +268,15 @@ const App = () => {
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
         <Route path="/board" element={<BoardRouteElement />} />
-        <Route path="/img" element={<Picture />} />
+        <Route
+          path="/img"
+          element={
+            <Picture
+              customUser={customUser}
+              isCustomLoggedIn={isCustomLoggedIn}
+            />
+          }
+        />
         <Route
           path="/self"
           element={
