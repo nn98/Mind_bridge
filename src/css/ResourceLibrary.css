@@ -16,6 +16,7 @@
 .library-layout {
     display: flex;
     gap: 40px;
+    justify-content: left;
 }
 
 .library-sidebar {
