@@ -55,7 +55,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
       content,
       visibility,
       userId: user.email,
-      userName: user.fullName || user.nickname || "익명",
+      userNickname: user.fullName || user.nickname || "익명", //수정부분을 위한 username > userNickname 으로 변경 
     };
 
     try {
@@ -94,8 +94,13 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const handleEditStart = (post) => {
+
     const currentUserName = user.fullName || user.nickname;
-    if (post.userName === currentUserName) {
+
+    console.log("Current User Name:", currentUserName);
+    console.log("Post User Name:", post.userNickname);
+    
+    if (post.userNickname === currentUserName) {
       setEditingPostId(post.id);
       setEditingContent(post.content);
     } else {
