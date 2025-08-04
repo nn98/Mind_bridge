@@ -85,7 +85,7 @@
   font-family: 'Noto Sans KR', sans-serif;
 }
 
-
+/* 채팅종료 */
 .chat-button {
   display: block;
   width: 200px;
@@ -99,10 +99,11 @@
   text-align: center;
 }
 
+/* 전송 버튼 */
 .chat-button1 {
   display: flex;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   background-color: #a18cd1;
   color: white;
   border: none;
@@ -110,7 +111,7 @@
   cursor: pointer;
   justify-content: center;
   align-items: center;
-  margin-left: 10px;
-  font-size: 30px;
+  margin: 5px 0 0 10px;
+  font-size: 23px;
   padding-bottom: 17px;
 }
