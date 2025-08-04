@@ -40,6 +40,12 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     return localStorage.getItem("token");
   };
 
+  const visibilityMap = {
+    공개: "public",
+    비공개: "private",
+    친구만: "friends",
+  };
+
   const handleSubmit = async () => {
     const token = await getAuthToken();
     if (!token) {
@@ -51,18 +57,21 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
       return;
     }
 
+    const visibilityValue = visibilityMap[visibility] || "public";
+
     const newPost = {
       content,
-      visibility,
-      userId: user.email,
+      visibility: visibilityValue,
+      userEmail: user.email,  // 필드명 수정
       userNickname: user.fullName || user.nickname || "익명", //수정부분을 위한 username > userNickname 으로 변경 
     };
 
     try {
-      await axios.post("http://localhost:8080/api/posts", newPost, {
+      const response = await axios.post("http://localhost:8080/api/posts", newPost, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
+      console.log("게시글 생성 응답:", response.data);
       setContent("");
       setVisibility("공개");
       setShowForm(false);
@@ -119,10 +128,36 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
       return;
     }
 
+    const post = posts.find((p) => p.id === id);
+    if (!post) {
+      alert("수정할 게시글을 찾을 수 없습니다.");
+      return;
+    }
+
+    const visibilityMap = {
+      공개: "public",
+      비공개: "private",
+      친구만: "friends",
+    };
+
+    const visibilityValue = visibilityMap[post.visibility] || "public";
+
+    console.log("PUT 요청 보낼 데이터:", {
+      content: editingContent,
+      visibility: visibilityValue,
+      userEmail: post.userEmail,
+      userNickname: post.userNickname,
+    });
+
     try {
       await axios.put(
         `http://localhost:8080/api/posts/${id}`,
-        { content: editingContent },
+        {
+          content: editingContent,
+          visibility: visibilityValue,
+          userEmail: post.userEmail,
+          userNickname: post.userNickname,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -133,6 +168,9 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
       fetchPosts();
     } catch (error) {
       console.error("게시글 수정 실패:", error);
+      if (error.response) {
+        console.error("서버 응답 메시지:", error.response.data);
+      }
       alert("게시글 수정에 실패했습니다.");
     }
   };
@@ -143,13 +181,16 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const filteredPosts = posts.filter((post) => {
+
     const matchBoard =
       selectedBoard === "general"
-        ? post.visibility === "공개"
-        : post.visibility === "비공개";
+        ? post.visibility === "public"
+        : post.visibility === "private";
+
     const matchSearch = post.content
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
+
     return matchBoard && matchSearch;
   });
 
