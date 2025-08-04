@@ -99,7 +99,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
 
     console.log("Current User Name:", currentUserName);
     console.log("Post User Name:", post.userNickname);
-    
+
     if (post.userNickname === currentUserName) {
       setEditingPostId(post.id);
       setEditingContent(post.content);
@@ -228,14 +228,14 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
           sortedPosts.map((post) => (
             <div key={post.id} className="post-card">
               {editingPostId === post.id ? (
-                <div className="edit-form">
-                  <textarea
+                <div>
+                  <textarea className="edit-form"
                     value={editingContent}
                     onChange={(e) => setEditingContent(e.target.value)}
                   />
-                  <div className="edit-buttons">
-                    <button onClick={() => handleUpdateSubmit(post.id)}>저장</button>
-                    <button onClick={handleCancelEdit}>취소</button>
+                  <div>
+                    <button className="post-edit1" onClick={() => handleUpdateSubmit(post.id)}>저장</button>
+                    <button className="post-delete1" onClick={handleCancelEdit}>취소</button>
                   </div>
                 </div>
               ) : (

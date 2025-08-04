@@ -55,6 +55,7 @@ input[type="text"] {
 .input-wrapper .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: #805dd1 !important;
 }
+
 .input-wrapper .MuiInputLabel-root.Mui-focused {
   color: #805dd1 !important;
 }
@@ -167,12 +168,12 @@ button:hover {
   transition: color 0.2s ease;
 }
 
-.post-delete{
+.post-delete {
   top: 5px;
   right: 5px;
 }
 
-.post-edit{
+.post-edit {
   bottom: 5px;
   right: 5px;
 }
@@ -188,4 +189,21 @@ button:hover {
   color: #aaa;
   font-size: 16px;
   padding: 40px 0;
+}
+
+.post-edit1 {
+  bottom: 5px;
+  right: 55px;
+}
+
+.post-delete1 {
+  bottom: 5px;
+  right: 5px;
+}
+
+.edit-form {
+  width: 100%;
+  height: 134px;
+  resize: none;
+  box-sizing: border-box;
 }
