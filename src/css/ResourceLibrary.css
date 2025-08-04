@@ -38,8 +38,8 @@
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #f9f9f9;
-    color: black;
+    background-color: #a18cd1;
+    color: white;
     text-align: left;
     font-size: 1rem;
     font-weight: 600;
@@ -48,14 +48,14 @@
 }
 
 .sidebar-button:hover {
-    background-color: #a18cd1;
+    background-color: #805dd1;
     border-color: #ccc;
 }
 
 .sidebar-button.active {
-    background-color: #a18cd1;
+    background-color: #805dd1;
     color: white;
-    border-color: #a18cd1;
+    border-color: #805dd1;
 }
 
 .library-content {
@@ -78,7 +78,7 @@
 .content-section h3 {
     font-size: 1.5rem;
     margin-bottom: 15px;
-    color: #a18cd1;
+    color: black;
 }
 
 .content-section p {
@@ -106,16 +106,17 @@
 }
 
 .recommendation-card {
-    background-color: #f9f9f9;
+    background-color: #f8faff;
     border: 1px solid #ddd;
     border-left: 5px solid #a18cd1;
     border-radius: 8px;
     padding: 20px;
-    transition: box-shadow 0.2s;
+    transition: transform 0.3s ease;
 }
 
 .recommendation-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 1px 10px #a18cd1
 }
 
 .recommendation-card .rec-title {
