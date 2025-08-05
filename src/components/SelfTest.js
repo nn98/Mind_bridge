@@ -1,4 +1,3 @@
-import React from 'react';
 import { testQuestions, getDetailedResult } from '../constants/selfTestData';
 
 const scoreMap = {

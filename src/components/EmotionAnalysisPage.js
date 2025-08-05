@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import '../css/EmotionAnalysisPage.css';
+
 const apiKey = process.env.REACT_APP_KEY;
 const apiAddress = process.env.REACT_APP_CHAT_ADDRESS;
 
-// 각 감정별 키워드 (기존 메시지 활용)
 const emotionMessages = {
   happiness: [
     "행복한 순간을 마음껏 즐기세요! 그 기쁨이 오래도록 함께하길 바라요.",
@@ -51,71 +51,41 @@ const emotionNames = {
   calmness: '평온',
 };
 
-const EmotionAnalysisPage = () => {
+const EmotionAnalysisPage = ({ isOpen, onClose }) => {
   const [text, setText] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAnalyze = async () => {
-
     setIsLoading(true);
     setResult(null);
-
     try {
       const prompt = `
 다음 문장을 감정별로 비율(%)로 분석해줘.
 감정 카테고리: 행복, 슬픔, 분노, 불안, 평온
 문장: "${text}"
-
 결과는 JSON 형식으로 응답해줘. 예:
-{
-  "happiness": 40,
-  "sadness": 20,
-  "anger": 10,
-  "anxiety": 10,
-  "calmness": 20
-}
-`;
+{ "happiness": 40, "sadness": 20, "anger": 10, "anxiety": 10, "calmness": 20 }`;
 
       const response = await fetch(`${apiAddress}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({
           model: 'gpt-4',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.5,
         }),
       });
-
       const data = await response.json();
-
-      if (!data.choices || data.choices.length === 0) {
-        throw new Error('OpenAI 응답이 없습니다.');
-      }
-
+      if (!data.choices || data.choices.length === 0) throw new Error('OpenAI 응답 없음');
       const content = data.choices[0].message.content;
-
-      // JSON 추출 (간단 정규식)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('JSON 파싱 실패');
-
       const percentages = JSON.parse(jsonMatch[0]);
-
-      const dominantEmotion = Object.keys(percentages).reduce((a, b) =>
-        percentages[a] > percentages[b] ? a : b
-      );
-
+      const dominantEmotion = Object.keys(percentages).reduce((a, b) => percentages[a] > percentages[b] ? a : b);
       const messages = emotionMessages[dominantEmotion] || emotionMessages.default;
       const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-
-      setResult({
-        percentages,
-        dominantEmotion,
-        message: randomMessage,
-      });
+      setResult({ percentages, dominantEmotion, message: randomMessage });
     } catch (error) {
       console.error('OpenAI 호출/분석 오류:', error);
       alert('감정 분석 중 오류가 발생했습니다.');
@@ -124,67 +94,68 @@ const EmotionAnalysisPage = () => {
     }
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
+  const handleClose = () => {
+    setText('');
+    setResult(null);
+    onClose();
+  }
+
+
   return (
-    <div className="emotion-analysis-page">
-      <div className="analysis-card">
-        <h1 className="analysis-title">마음 상태 분석기</h1>
-        <p className="analysis-subtitle">
-          오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.
-        </p>
-
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="analysis-textarea"
-          placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
-        />
-
-        <button
-          onClick={handleAnalyze}
-          disabled={isLoading || !text.trim()}
-          className="analysis-button"
-        >
-          {isLoading ? <span className="loading-indicator">분석 중</span> : '마음 분석하기'}
-        </button>
-
-        {isLoading && (
-          <div className="loading-spinner-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-
-        {result && (
-          <div className="results-section">
-            <h2 className="results-title">분석 결과</h2>
-
-            {result.percentages && (
-              <div className="progress-bars-container">
-                {Object.entries(result.percentages)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([emotion, value]) => (
+    <div className="emotion-modal-backdrop" onClick={handleClose}>
+      <div className="emotion-modal-content" onClick={(e) => e.stopPropagation()}>
+        <button onClick={handleClose} className="emotion-modal-close-btn">&times;</button>
+        <div className="analysis-card">
+          <h1 className="analysis-title">마음 상태 분석기</h1>
+          <p className="analysis-subtitle">
+            오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.
+          </p>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="analysis-textarea"
+            placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
+          />
+          <button
+            onClick={handleAnalyze}
+            disabled={isLoading || !text.trim()}
+            className="analysis-button"
+          >
+            {isLoading ? <span>분석 중...</span> : '마음 분석하기'}
+          </button>
+          {isLoading && (
+            <div className="loading-spinner-container"><div className="loading-spinner"></div></div>
+          )}
+          {result && (
+            <div className="results-section">
+              <h2 className="results-title">분석 결과</h2>
+              {result.percentages && (
+                <div className="progress-bars-container">
+                  {Object.entries(result.percentages).sort(([, a], [, b]) => b - a).map(([emotion, value]) => (
                     <div key={emotion}>
                       <div className="progress-bar-label">
                         <span className="progress-bar-emotion-name">{emotionNames[emotion]}</span>
                         <span className="progress-bar-percentage">{value.toFixed(1)}%</span>
                       </div>
                       <div className="progress-bar-track">
-                        <div
-                          className={`progress-bar-fill ${emotion}`}
-                          style={{ width: `${value}%` }}
-                        >
+                        <div className={`progress-bar-fill ${emotion}`} style={{ width: `${value}%` }}>
                           {value > 10 && <span>{value.toFixed(1)}%</span>}
                         </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              <div className={`result-message-box ${result.dominantEmotion}`}>
+                <p className="result-message-text">{result.message}</p>
               </div>
-            )}
-
-            <div className={`result-message-box ${result.dominantEmotion}`}>
-              <p className="result-message-text">{result.message}</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -45,8 +45,6 @@ import { formInputs } from "./constants/formInputs";
 import { buttonLabels } from "./constants/buttonLabels";
 import { formLinks } from "./constants/formLinks";
 
-// ... 생략된 import 부분 동일 ...
-
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,6 +64,9 @@ const App = () => {
   const [faqVisible, setFaqVisible] = useState(false);
   const [scrollTarget, setScrollTarget] = useState(null);
   const [isOutsideClicked, setIsOutsideClicked] = useState(false);
+
+  // 감정 분석 모달을 위한 상태
+  const [isEmotionModalOpen, setIsEmotionModalOpen] = useState(false);
 
   const loginRef = useRef(null);
   const introRef = useRef(null);
@@ -231,6 +232,12 @@ const App = () => {
         </div>
       )}
 
+      {/* 수정된 EmotionAnalysisPage 컴포넌트를 여기에 렌더링합니다. */}
+      <EmotionAnalysisPage
+        isOpen={isEmotionModalOpen}
+        onClose={() => setIsEmotionModalOpen(false)}
+      />
+
       <Routes>
         <Route
           path="/admin"
@@ -249,13 +256,15 @@ const App = () => {
               refs={{ introRef, locationRef, servicesRef, infoRef }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
+              // ▼▼▼ AboutSection으로 모달 제어 함수를 전달합니다 ▼▼▼
+              setIsEmotionModalOpen={setIsEmotionModalOpen}
             />
           }
         />
         <Route path="/library" element={<ResourceLibrary />} />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
-        <Route path="/board"  element={<BoardRouteElement />} />
+        <Route path="/board" element={<BoardRouteElement />} />
         <Route
           path="/img"
           element={
@@ -284,7 +293,7 @@ const App = () => {
             />
           }
         />
-        <Route path="/emotion-analysis" element={<EmotionAnalysisPage />} />
+        {/* /emotion-analysis 라우트는 더 이상 필요 없으므로 삭제합니다. */}
         <Route
           path="/login"
           element={
@@ -326,7 +335,8 @@ const App = () => {
         isCustomLoggedIn={isCustomLoggedIn}
       />
 
-      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} />}
+      {/* Footer에 모달을 열 함수를 전달합니다. */}
+      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />}
     </>
   );
 };
