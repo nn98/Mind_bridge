@@ -82,28 +82,22 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
 
   const services = [
     {
-      icon: '📖',
-      title: '자료실',
-      description: '사용자의 현재 상태에 대한 모르는 부분을 볼 수 있는 자료실 입니다.',
-      path: '/library'
-    },
-    {
       icon: '🤖',
       title: 'AI 감성 요약 · 분석 · 채팅',
       description: '사용자 인터렉티브 기반으로 감정을 분석하고 요약하여 자신의 감정 상태를 객관적으로 이해할 수 있도록 도와드립니다.',
       path: '/emotion-analysis'
     },
     {
-      icon: '🏥',
-      title: '병원 목록',
-      description: '전국 심리상담센터 위치를 목록을 통해 알 수 있습니다.',
-      path: '/hospital-region',
-    },
-    {
       icon: '🖼️',
       title: 'AI 이미지 생성',
       description: '사용자가 작성한 감정과 상태를 분석하여 시각화하는 AI 이미지를 생성합니다.',
       path: '/img',
+    },
+    {
+      icon: '🏥',
+      title: '병원 목록',
+      description: '전국 심리상담센터 위치를 목록을 통해 알 수 있습니다.',
+      path: '/hospital-region',
     },
     {
       icon: '📝',
@@ -116,6 +110,12 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
       title: '자가진단',
       description: '자신의 상태를 간단한 자가진단을 통해 유추해 볼 수 있습니다.',
       path: '/self',
+    },
+    {
+      icon: '📖',
+      title: '자료실',
+      description: '사용자의 현재 상태에 대한 모르는 부분을 볼 수 있는 자료실 입니다.',
+      path: '/library'
     },
   ];
 
