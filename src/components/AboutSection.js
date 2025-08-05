@@ -101,8 +101,8 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget }) => {
     },
     {
       icon: '🖼️',
-      title: 'AI 이미지 생성',
-      description: '사용자가 작성한 감정과 상태를 분석하여 시각화하는 AI 이미지를 생성합니다.',
+      title: '이미지 테라피',
+      description: '사용자가 작성한 감정상태 및 상담내용 바탕으로 이미지 생성 및 관리자 메일에 전송을 가능하게 합니다.',
       path: '/img',
     },
     {

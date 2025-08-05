@@ -10,6 +10,7 @@ const Header = ({
   isCustomLoggedIn,
   setIsCustomLoggedIn,
   setCustomUser,
+  customUser,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,10 +31,10 @@ const Header = ({
   };
 
   const handleScrollToIntro = () => scrollOrNavigate(introRef, "intro");
-  const handleScrollToServices = () => scrollOrNavigate(servicesRef, "services");
+  const handleScrollToServices = () =>
+    scrollOrNavigate(servicesRef, "services");
   const handleScrollToInfo = () => scrollOrNavigate(infoRef, "info");
   const handleBoardClick = () => navigate("/board"); // 로그인 여부는 App에서 판단
-
 
   //로그아웃
   const handleLogout = async () => {
@@ -46,9 +47,8 @@ const Header = ({
 
     alert("로그아웃하였습니다.");
 
-    navigate("/")
+    navigate("/");
     // 로그아웃 후 메인 페이지 이동
-
   };
 
   return (
@@ -107,12 +107,26 @@ const Header = ({
           {isLoggedIn ? (
             <>
               <UserButton />
-              <button onClick={handleLogout} className="custom-blue-btn">
+
+              {customUser?.role === "ADMIN" && (
+                <button
+                  onClick={() => navigate("/admin")}
+                  className="custom-blue-btn ml-4"
+                  style={{ minWidth: "120px" }}
+                >
+                  관리자 페이지
+                </button>
+              )}
+
+              <button onClick={handleLogout} className="custom-blue-btn ml-4">
                 로그아웃
               </button>
             </>
           ) : (
-            <button onClick={() => navigate("/login")} className="custom-blue-btn">
+            <button
+              onClick={() => navigate("/login")}
+              className="custom-blue-btn"
+            >
               로그인
             </button>
           )}

@@ -37,20 +37,21 @@ import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
-import ResourceLibrary from './components/ResourceLibrary';
-
+import ResourceLibrary from "./components/ResourceLibrary";
+import AdminPage from "./components/AdminPage";
 
 import { sectionLabels } from "./constants/sectionLabels";
 import { formInputs } from "./constants/formInputs";
 import { buttonLabels } from "./constants/buttonLabels";
 import { formLinks } from "./constants/formLinks";
 
+// ... 생략된 import 부분 동일 ...
+
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isSignedIn, user } = useUser();
 
-  // 중앙에서 로그인 상태 관리
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
 
@@ -72,7 +73,14 @@ const App = () => {
   const locationRef = useRef(null);
   const infoRef = useRef(null);
 
-  // 커스텀 로그인 상태 및 사용자 정보 초기 로딩
+  const isAuthPageOrAdmin = [
+    "/login",
+    "/signup",
+    "/find-id",
+    "/find-password",
+    "/admin",
+  ].includes(location.pathname);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -81,11 +89,8 @@ const App = () => {
         .get("http://localhost:8080/api/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => {
-          setCustomUser(res.data);
-        })
-        .catch((err) => {
-          console.error("유저 정보 불러오기 실패:", err);
+        .then((res) => setCustomUser(res.data))
+        .catch(() => {
           setCustomUser(null);
           setIsCustomLoggedIn(false);
         });
@@ -95,25 +100,16 @@ const App = () => {
     }
   }, []);
 
-  // 로그인 상태 변화 로그 출력 (디버깅용)
   useEffect(() => {
-    console.log("✅ isSignedIn:", isSignedIn);
-    console.log("✅ isCustomLoggedIn:", isCustomLoggedIn);
-    console.log("✅ Clerk user:", user);
-    console.log("✅ Custom user:", customUser);
-  }, [isSignedIn, isCustomLoggedIn, user, customUser]);
-
-  // 커스텀 로그인 성공 시 홈으로 이동
-  useEffect(() => {
-    if (isCustomLoggedIn && customUser) {
-      // 현재 경로가 로그인 페이지일 때만 홈으로 이동
-      if (["/login", "/signup"].includes(location.pathname)) {
-        navigate("/");
-      }
+    if (
+      isCustomLoggedIn &&
+      customUser &&
+      ["/login", "/signup"].includes(location.pathname)
+    ) {
+      navigate("/");
     }
   }, [isCustomLoggedIn, customUser, navigate, location.pathname]);
 
-  // 로그인/회원가입 모달 외부 클릭 감지
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -153,24 +149,16 @@ const App = () => {
     }
   };
 
-  // 로그인 상태에 따라 게시판 접근 제어
   const BoardRouteElement = () => {
-    if (isCustomLoggedIn && customUser === null) {
+    if (isCustomLoggedIn && customUser === null)
       return <div>사용자 정보 불러오는 중...</div>;
-    }
-
-    if (isSignedIn && user) {
+    if (isSignedIn && user)
       return <BoardSection user={user} isSignedIn={true} />;
-    }
-
-    if (isCustomLoggedIn && customUser) {
+    if (isCustomLoggedIn && customUser)
       return <BoardSection user={customUser} isSignedIn={true} />;
-    }
-
     return <Navigate to="/login" />;
   };
 
-  // 로그인/회원가입 등 AuthSection 모달 래퍼
   const authSectionWrapper = (type, extraProps = {}) => (
     <div
       ref={loginRef}
@@ -202,9 +190,8 @@ const App = () => {
 
   return (
     <>
-      {!["/login", "/signup", "/find-id", "/find-password"].includes(
-        location.pathname
-      ) && (
+      {!isAuthPageOrAdmin && (
+        <>
           <Header
             introRef={introRef}
             servicesRef={servicesRef}
@@ -213,47 +200,48 @@ const App = () => {
             isCustomLoggedIn={isCustomLoggedIn}
             setIsCustomLoggedIn={setIsCustomLoggedIn}
             setCustomUser={setCustomUser}
+            customUser={customUser}
           />
-        )}
-
-      {!["/login", "/signup", "/find-id", "/find-password"].includes(
-        location.pathname
-      ) && (
           <FloatingSidebar
             mapVisible={mapVisible}
             setMapVisible={setMapVisible}
             faqVisible={faqVisible}
             setFaqVisible={setFaqVisible}
           />
-        )}
+        </>
+      )}
 
-      {faqVisible &&
-        !["/login", "/signup", "/find-id", "/find-password"].includes(
-          location.pathname
-        ) && <Faq />}
+      {faqVisible && !isAuthPageOrAdmin && <Faq />}
 
-      {mapVisible &&
-        !["/login", "/signup", "/find-id", "/find-password"].includes(
-          location.pathname
-        ) && (
-          <div
-            style={{
-              position: "fixed",
-              top: "150px",
-              right: "150px",
-              zIndex: 1000,
-              background: "white",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-              borderRadius: "12px",
-              padding: "10px",
-            }}
-          >
-            <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
-            <Map />
-          </div>
-        )}
+      {mapVisible && !isAuthPageOrAdmin && (
+        <div
+          style={{
+            position: "fixed",
+            top: "150px",
+            right: "150px",
+            zIndex: 1000,
+            background: "white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            borderRadius: "12px",
+            padding: "10px",
+          }}
+        >
+          <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
+          <Map />
+        </div>
+      )}
 
       <Routes>
+        <Route
+          path="/admin"
+          element={
+            isCustomLoggedIn && customUser?.role === "ADMIN" ? (
+              <AdminPage currentUser={customUser} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
         <Route
           path="/"
           element={
@@ -311,7 +299,6 @@ const App = () => {
           }
         />
         <Route path="/logout" element={<AuthSection type="logout" />} />
-
         <Route
           path="/signup"
           element={
@@ -321,34 +308,9 @@ const App = () => {
         <Route path="/find-id" element={authSectionWrapper("find-id")} />
         <Route
           path="/find-password"
-          element={
-            <div
-              ref={loginRef}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: "#f5f5f5",
-                zIndex: 1000,
-              }}
-            >
-              {(!isOutsideClicked ||
-                location.pathname !== "/find-password") && (
-                  <AuthSection
-                    type="find-password"
-                    sectionLabels={sectionLabels}
-                    formInputs={formInputs}
-                    buttonLabels={buttonLabels}
-                    formLinks={formLinks}
-                    signupState={signupState}
-                    setSignupState={setSignupState}
-                    onFindPasswordSuccess={() => setIsOutsideClicked(false)}
-                  />
-                )}
-            </div>
-          }
+          element={authSectionWrapper("find-password", {
+            onFindPasswordSuccess: () => setIsOutsideClicked(false),
+          })}
         />
       </Routes>
 
@@ -364,9 +326,7 @@ const App = () => {
         isCustomLoggedIn={isCustomLoggedIn}
       />
 
-      {!["/login", "/signup", "/find-id", "/find-password"].includes(
-        location.pathname
-      ) && <Footer setIsOpen={setIsOpen} isOpen={isOpen} />}
+      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} />}
     </>
   );
 };
