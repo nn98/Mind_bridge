@@ -20,7 +20,7 @@ const fieldKeys = [
   "이전상담경험",
 ];
 
-const Chat = () => {
+const Chat = ({ setIsOpen }) => {
   const [step, setStep] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatHistory, setChatHistory] = useState([
@@ -35,6 +35,7 @@ const Chat = () => {
     이전상담경험: "",
   });
   const [isTyping, setIsTyping] = useState(false);
+  const [isChatEnded, setIsChatEnded] = useState(false);
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -196,6 +197,18 @@ const Chat = () => {
     }
   };
 
+  const handleEndChat = () => {
+    setChatHistory((prev) => [
+      ...prev,
+      { sender: "ai", message: "상담이 종료되었습니다. 이용해 주셔서 감사합니다." },
+    ]);
+    setIsChatEnded(true);
+
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 1500);
+  };
+
   return (
     <div className="tab-content">
       <h3>AI 상담 챗봇</h3>
@@ -226,18 +239,23 @@ const Chat = () => {
               handleSubmit();
             }
           }}
-          readOnly={isTyping}
+          readOnly={isTyping || isChatEnded}
         />
         <button
           className="chat-button1"
           onClick={handleSubmit}
-          disabled={isTyping}
+          disabled={isTyping || isChatEnded}
         >
           📩
         </button>
       </div>
 
-      <button className="chat-button">채팅 종료</button>
+      <button
+        className="chat-button"
+        onClick={handleEndChat}
+        disabled={isTyping || isChatEnded}
+      >
+        상담 종료</button>
     </div>
   );
 };
