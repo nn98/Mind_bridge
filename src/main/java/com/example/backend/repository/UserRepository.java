@@ -1,10 +1,11 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.example.backend.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -12,4 +13,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);  // 추가
+    
 }
