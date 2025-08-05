@@ -58,7 +58,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
 
-  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '' });
+  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '',password:'' });
   const [editedInfo, setEditedInfo] = useState({ ...userInfo });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -259,6 +259,52 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       }
     }
   };
+
+  const handlePassChage = async () => {
+    
+  const currentUserId = isSignedIn ? user.id : customUser?.id;
+  if (!currentUserId) return;
+
+  let token;
+  if (isSignedIn) {
+    token = await getToken();
+  } else if (isCustomLoggedIn) {
+    token = localStorage.getItem("token");
+  } else {
+    alert("로그인 상태가 아닙니다.");
+    return;
+  }
+
+  const email = (user && user.email) || (customUser && customUser.email);
+  if (!email) {
+    alert("이메일 정보가 없습니다.");
+    return;
+  }
+
+  if (!editedInfo.password) {
+    alert("변경할 비밀번호를 입력하세요.");
+    return;
+  }
+
+  try {
+    const payload = {
+      email,
+      password: editedInfo.password 
+    };
+
+    console.log("Token:", token);
+
+    await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    alert('비밀번호가 성공적으로 변경되었습니다.');
+    setEditedInfo({ ...editedInfo, password: '' }); // 입력 초기화
+  } catch (error) {
+    console.error("비밀번호 변경 실패:", error);
+    alert("비밀번호 변경 중 오류가 발생했습니다.");
+  }
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
