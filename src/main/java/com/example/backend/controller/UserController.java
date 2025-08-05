@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,12 +19,13 @@ import com.example.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegisterRequest req) {
@@ -125,6 +127,31 @@ public class UserController {
             ));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/change")
+    public ResponseEntity<?> change(@RequestBody Map<String, String> changeRequest) {
+        try {
+            String email = changeRequest.get("email");
+            String newPassword = changeRequest.get("password"); // 프론트에서 전달된 새 비밀번호
+
+            if (newPassword == null || newPassword.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "새 비밀번호가 비어 있습니다."));
+            }
+
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+
+            // 비밀번호 암호화 후 저장
+            user.setPassword(passwordEncoder.encode(newPassword)); // <- 여기에 암호화된 비밀번호 저장
+            userService.save(user);
+
+            UserDto userDto = new UserDto(user);
+
+            return ResponseEntity.ok(Map.of("user", userDto));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", e.getMessage()));
         }
     }
 }
