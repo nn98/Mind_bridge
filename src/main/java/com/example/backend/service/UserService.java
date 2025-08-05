@@ -1,18 +1,19 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.UserRegisterRequest;
-import com.example.backend.entity.User;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.example.backend.dto.UserRegisterRequest;
+import com.example.backend.entity.User;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.security.JwtUtil;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -69,14 +70,26 @@ public class UserService {
         return userRepository.findByNickname(nickname);
     }
 
+    //쳇모델에서 변경
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    //쳇모델 삭제
+    @Transactional
+    public void deleteUser(User user) {
+        System.out.println("Deleting user: " + user.getEmail());
+        userRepository.delete(user);
+    }
+
     // 사용자 정보 업데이트
     public User updateUser(String email, UserRegisterRequest req) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 닉네임 변경 시 중복 확인
-        if (!user.getNickname().equals(req.getNickname()) &&
-                userRepository.existsByNickname(req.getNickname())) {
+        if (!user.getNickname().equals(req.getNickname())
+                && userRepository.existsByNickname(req.getNickname())) {
             throw new RuntimeException("이미 사용중인 닉네임입니다.");
         }
 

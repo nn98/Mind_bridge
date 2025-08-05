@@ -2,16 +2,17 @@ package com.example.backend.controller;
 
 import java.util.Map;
 
-import com.example.backend.dto.UserRegisterRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.UserDto;
+import com.example.backend.dto.UserRegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 
@@ -81,13 +82,23 @@ public class UserController {
 
     //https:localhost:8080/api/users/update
     //https://localhost:8080/api/users/update/15
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody Map<String, String> updateRequest) {
         try {
+
             String email = updateRequest.get("email");
+            System.out.println("email 값은:" + email);
+
+            String nickname = updateRequest.get("nickname");
+            String mentalState = updateRequest.get("mentalState");
 
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+
+            user.setNickname(nickname);
+            user.setMentalState(mentalState);
+            userService.save(user);
+
             UserDto userDto = new UserDto(user);
 
             return ResponseEntity.ok(Map.of(
@@ -98,7 +109,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody Map<String, String> deleteRequest) {
         try {
@@ -107,6 +117,8 @@ public class UserController {
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
             UserDto userDto = new UserDto(user);
+
+            userService.deleteUser(user);
 
             return ResponseEntity.ok(Map.of(
                     "user", userDto
