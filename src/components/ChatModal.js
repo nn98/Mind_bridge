@@ -4,7 +4,7 @@ import { useUser, useAuth, useClerk } from '@clerk/clerk-react';
 import axios from 'axios';
 
 
-const BACKEND_URL = 'http://121.78.183.18:8080';
+const BACKEND_URL = "http://localhost:8080";
 const MENTAL_STATES = ['우울증', '불안장애', 'ADHD', '게임중독', '반항장애'];
 
 
@@ -58,7 +58,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
 
-  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '' });
+  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '',password:'' });
   const [editedInfo, setEditedInfo] = useState({ ...userInfo });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -187,13 +187,26 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       return;
     }
 
+    const email = (user && user.email) || (customUser && customUser.email);
+
+    if (!email) {
+      alert("이메일 정보가 없습니다. 다시 로그인 해주세요.");
+      return;
+    }
+
+    
     try {
       const payload = {
+        email,
         nickname: editedInfo.nickname,
         mentalState: editedInfo.mentalState,
         counselingGoal: editedInfo.counselingGoal,
       };
-      await axios.put(`${BACKEND_URL}/api/users/update/${user.id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+
+      console.log(token)
+
+      await axios.put(
+        `${BACKEND_URL}/api/users/update`, payload, { headers: { Authorization: `Bearer ${token}` } });
 
       setUserInfo(editedInfo);
       setIsEditing(false);
@@ -206,9 +219,9 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
   const handleDeleteAccount = async () => {
 
-
     //커스텀부분
     const currentUserId = isSignedIn ? user.id : customUser?.id;
+
     if (!currentUserId) return;
     let token;
     //clerk부분
@@ -221,18 +234,77 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       return;
     }
 
+    const email = (user && user.email) || (customUser && customUser.email);
+
+    if (!email) {
+      alert("이메일 정보가 없습니다. 다시 로그인 해주세요.");
+      return;
+    }
+    const payload = {
+        email
+      };
+
     const isConfirmed = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 모든 정보가 영구적으로 삭제되며, 복구할 수 없습니다.');
+    
+
     if (isConfirmed) {
       try {
-        await axios.delete(`${BACKEND_URL}/api/users/delete/${user.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(`${BACKEND_URL}/api/users/delete`, payload, { headers: { Authorization: `Bearer ${token}` } });
         alert('회원 탈퇴가 완료되었습니다.');
         await signOut();
+        window.location.reload();
       } catch (error) {
         console.error("회원 탈퇴 처리 중 오류 발생:", error);
         alert("회원 탈퇴 중 오류가 발생했습니다.");
       }
     }
   };
+
+  const handlePassChage = async () => {
+    
+  const currentUserId = isSignedIn ? user.id : customUser?.id;
+  if (!currentUserId) return;
+
+  let token;
+  if (isSignedIn) {
+    token = await getToken();
+  } else if (isCustomLoggedIn) {
+    token = localStorage.getItem("token");
+  } else {
+    alert("로그인 상태가 아닙니다.");
+    return;
+  }
+
+  const email = (user && user.email) || (customUser && customUser.email);
+  if (!email) {
+    alert("이메일 정보가 없습니다.");
+    return;
+  }
+
+  if (!editedInfo.password) {
+    alert("변경할 비밀번호를 입력하세요.");
+    return;
+  }
+
+  try {
+    const payload = {
+      email,
+      password: editedInfo.password 
+    };
+
+    console.log("Token:", token);
+
+    await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    alert('비밀번호가 성공적으로 변경되었습니다.');
+    setEditedInfo({ ...editedInfo, password: '' }); // 입력 초기화
+  } catch (error) {
+    console.error("비밀번호 변경 실패:", error);
+    alert("비밀번호 변경 중 오류가 발생했습니다.");
+  }
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
