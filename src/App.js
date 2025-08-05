@@ -255,7 +255,7 @@ const App = () => {
         <Route path="/library" element={<ResourceLibrary />} />
         <Route path="/map" element={<Map />} />
         <Route path="/hospital-region" element={<HospitalRegionPage />} />
-        <Route path="/board" element={<BoardRouteElement />} />
+        <Route path="/board"  element={<BoardRouteElement />} />
         <Route
           path="/img"
           element={
