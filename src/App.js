@@ -243,7 +243,6 @@ const App = () => {
         </div>
       )}
 
-      {/* 수정된 EmotionAnalysisPage 컴포넌트를 여기에 렌더링합니다. */}
       <EmotionAnalysisPage
         isOpen={isEmotionModalOpen}
         onClose={() => setIsEmotionModalOpen(false)}
@@ -267,7 +266,7 @@ const App = () => {
               refs={{ introRef, locationRef, servicesRef, infoRef }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
-              // ▼▼▼ AboutSection으로 모달 제어 함수를 전달합니다 ▼▼▼
+
               setIsEmotionModalOpen={setIsEmotionModalOpen}
             />
           }
@@ -304,7 +303,6 @@ const App = () => {
             />
           }
         />
-        {/* /emotion-analysis 라우트는 더 이상 필요 없으므로 삭제합니다. */}
         <Route
           path="/login"
           element={
@@ -334,14 +332,7 @@ const App = () => {
         />
       </Routes>
 
-      {/* Footer에 모달을 열 함수를 전달합니다. */}
-      {!isAuthPageOrAdmin && (
-        <Footer
-          setIsOpen={setIsOpen}
-          isOpen={isOpen}
-          setIsEmotionModalOpen={setIsEmotionModalOpen}
-        />
-      )}
+      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />}
     </>
   );
 };

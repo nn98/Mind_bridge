@@ -263,11 +263,8 @@
 
 .emotion-modal-content {
     position: relative;
-    background: rgb(207, 205, 205);
     padding: 40px;
     /* 내부 여백을 조금 더 주었습니다. */
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     max-width: 750px;
     /* 최대 너비를 550px에서 750px로 늘렸습니다. */
     width: 90%;
@@ -276,10 +273,10 @@
     animation: slideUp 0.4s ease-out;
 }
 
-.emotion-modal-close-btn {
+#emotion-modal-close-btn {
     position: absolute;
-    top: 10px;
-    right: 13px;
+    top: 50px;
+    right: 55px;
     background: none;
     border: none;
     font-size: 2.5rem;
@@ -290,7 +287,7 @@
     transition: color 0.2s, transform 0.2s;
 }
 
-.emotion-modal-close-btn:hover {
+#emotion-modal-close-btn:hover {
     color: #333;
     transform: scale(1.1);
 }

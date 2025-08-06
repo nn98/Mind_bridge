@@ -56,6 +56,51 @@ const TermsModal = ({ content, onClose, onConfirm }) => {
   );
 };
 
+const TempPasswordModal = ({ password, onClose }) => {
+  return (
+    <div className="modal-backdrop-3">
+      <div className="modal-content-3" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="modal-close-btn-3">
+          &times;
+        </button>
+        <h2>임시 비밀번호 발급</h2>
+        <p>아래의 임시 비밀번호로 로그인 후, 비밀번호를 변경해주세요.</p>
+        <div className="temp-password-box">{password}</div>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#a18cd1" }}
+        >
+          확인
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const IdFoundModal = ({ email, onClose }) => {
+  return (
+    <div className="modal-backdrop-3">
+      <div className="modal-content-3" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="modal-close-btn-3">
+          &times;
+        </button>
+        <h2>아이디 찾기 결과</h2>
+        <p>회원님의 정보와 일치하는 아이디입니다.</p>
+        <div className="temp-password-box">{email}</div>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#a18cd1" }}
+        >
+          로그인하기
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+
 const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -77,6 +122,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [termsViewed, setTermsViewed] = useState(false);
+
+  const [tempPassword, setTempPassword] = useState("");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  const [foundId, setFoundId] = useState("");
+  const [isIdModalOpen, setIsIdModalOpen] = useState(false);
+
 
   const { user } = useUser();
   const navigate = useNavigate();
@@ -250,15 +302,29 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
       } else if (type === "find-id") {
-        await axios.post(`${BACKEND_URL}/api/users/find-id`, {
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
+          phoneNumber: formData.phoneNumber,
+          nickname: formData.nickname,
+        });
+
+        if (response.data.email) {
+          setFoundId(response.data.email);
+          setIsIdModalOpen(true);
+        } else {
+          alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
+        }
+
+      } else if (type === "find-password") {
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
+          email: formData.email,
           phoneNumber: formData.phoneNumber,
         });
-        alert("입력하신 번호로 가입된 이메일 정보를 전송했습니다.");
-      } else if (type === "find-password") {
-        await axios.post(`${BACKEND_URL}/api/users/find-password`, {
-          email: formData.email,
-        });
-        alert("입력하신 이메일로 임시 비밀번호를 발급했습니다.");
+        if (response.data.tempPassword) {
+          setTempPassword(response.data.tempPassword);
+          setIsPasswordModalOpen(true);
+        } else {
+          alert("임시 비밀번호 발급에 실패했습니다.");
+        }
       }
     } catch (err) {
       console.error(`${type} error:`, err);
@@ -591,7 +657,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
               </Link>
               <Typography variant="h4" component="h1" gutterBottom>아이디 찾기</Typography>
               <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
-              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
+              <TextField className="input-wrapper" fullWidth label="닉네임" name="nickname" margin="normal" value={formData.nickname} onChange={handleChange} />
               <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>아이디 찾기</Button>
               <Box className="form-links">
                 <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
@@ -630,6 +696,21 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           content={termsContent}
           onClose={handleCloseTermsModal}
           onConfirm={handleModalConfirm}
+        />
+      )}
+      {isPasswordModalOpen && (
+        <TempPasswordModal
+          password={tempPassword}
+          onClose={() => setIsPasswordModalOpen(false)}
+        />
+      )}
+      {isIdModalOpen && (
+        <IdFoundModal
+          email={foundId}
+          onClose={() => {
+            setIsIdModalOpen(false);
+            navigate("/login");
+          }}
         />
       )}
     </section>
