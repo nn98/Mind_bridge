@@ -23,6 +23,7 @@ import "../css/login.css";
 
 const BACKEND_URL = "http://localhost:8080";
 
+// 약관 모달 (기존과 동일)
 const TermsModal = ({ content, onClose, onConfirm }) => {
   return (
     <div className="modal-backdrop-2" onClick={onClose}>
@@ -56,6 +57,7 @@ const TermsModal = ({ content, onClose, onConfirm }) => {
   );
 };
 
+// 임시 비밀번호 모달 (기존과 동일)
 const TempPasswordModal = ({ password, onClose }) => {
   return (
     <div className="modal-backdrop-3">
@@ -72,6 +74,29 @@ const TempPasswordModal = ({ password, onClose }) => {
           sx={{ mt: 2, backgroundColor: "#a18cd1" }}
         >
           확인
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// 아이디 찾기 결과 표시를 위한 새로운 모달 컴포넌트
+const IdFoundModal = ({ email, onClose }) => {
+  return (
+    <div className="modal-backdrop-3">
+      <div className="modal-content-3" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="modal-close-btn-3">
+          &times;
+        </button>
+        <h2>아이디 찾기 결과</h2>
+        <p>회원님의 정보와 일치하는 아이디입니다.</p>
+        <div className="temp-password-box">{email}</div>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#a18cd1" }}
+        >
+          로그인하기
         </Button>
       </div>
     </div>
@@ -103,6 +128,10 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
   const [tempPassword, setTempPassword] = useState("");
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  // 아이디 찾기 결과 및 모달 상태 추가
+  const [foundId, setFoundId] = useState("");
+  const [isIdModalOpen, setIsIdModalOpen] = useState(false);
 
 
   const { user } = useUser();
@@ -277,10 +306,21 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
       } else if (type === "find-id") {
-        await axios.post(`${BACKEND_URL}/api/users/find-id`, {
+        // 아이디 찾기 로직 수정
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
+          // 아이디 찾기 폼에 이메일 필드도 있으나, 보통 전화번호로 찾으므로 전화번호만 보냅니다.
+          // 백엔드 로직에 따라 필요한 데이터를 추가로 보낼 수 있습니다.
         });
-        alert("입력하신 번호로 가입된 이메일 정보를 전송했습니다.");
+
+        // 백엔드에서 email 정보를 응답으로 보낸다고 가정
+        if (response.data.email) {
+          setFoundId(response.data.email);
+          setIsIdModalOpen(true);
+        } else {
+          alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
+        }
+
       } else if (type === "find-password") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
@@ -665,11 +705,19 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           onConfirm={handleModalConfirm}
         />
       )}
-
       {isPasswordModalOpen && (
         <TempPasswordModal
           password={tempPassword}
           onClose={() => setIsPasswordModalOpen(false)}
+        />
+      )}
+      {isIdModalOpen && (
+        <IdFoundModal
+          email={foundId}
+          onClose={() => {
+            setIsIdModalOpen(false);
+            navigate("/login");
+          }}
         />
       )}
     </section>
