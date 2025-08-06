@@ -23,6 +23,7 @@ const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
     }, 3000);
   };
 
+  //비밀번호 조건
   const handleSubmit = () => {
 
     if (!password || !confirmPassword) {
@@ -218,6 +219,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const handleEdit = () => setIsEditing(true);
   const handleCancel = () => { setIsEditing(false); setEditedInfo(userInfo); };
 
+  //정보변경 = 닉네임 나의 상태
   const handleSave = async () => {
     let token;
     if (isSignedIn) token = await getToken();
@@ -247,6 +249,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     }
   };
 
+  //회원탈퇴
   const handleDeleteAccount = async () => {
     let token;
     if (isSignedIn) token = await getToken();
@@ -274,6 +277,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     }
   };
 
+  //비밀번호 변경
   const handlePassChange = async (password) => {
     let token;
     if (isSignedIn) token = await getToken();
@@ -284,7 +288,7 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     try {
       const payload = { email: userInfo.email, password };
-      await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+      await axios.put(`${BACKEND_URL}/api/users/change`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert('비밀번호가 성공적으로 변경되었습니다.');
