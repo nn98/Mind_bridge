@@ -152,4 +152,11 @@ public class UserService {
                 + "\n\n로그인 후 반드시 비밀번호를 변경해 주세요.");
         mailSender.send(message);
     }
+
+    //아이디 찾기
+    public String findUserIdByPhoneAndNickname(String phoneNumber, String nickname) {
+        Optional<User> optionalUser = userRepository.findByPhoneNumberAndNickname(phoneNumber, nickname);
+        return optionalUser.map(User::getEmail).orElse(null); // 이메일을 아이디로 사용한다고 가정
+    }
+
 }
