@@ -108,8 +108,8 @@ const EmotionAnalysisPage = ({ isOpen, onClose }) => {
   return (
     <div className="emotion-modal-backdrop" onClick={handleClose}>
       <div className="emotion-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button onClick={handleClose} className="emotion-modal-close-btn">&times;</button>
         <div className="analysis-card">
+        <button onClick={handleClose} id="emotion-modal-close-btn">&times;</button>
           <h1 className="analysis-title">마음 상태 분석기</h1>
           <p className="analysis-subtitle">
             오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.

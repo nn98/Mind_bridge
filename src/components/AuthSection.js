@@ -56,6 +56,29 @@ const TermsModal = ({ content, onClose, onConfirm }) => {
   );
 };
 
+const TempPasswordModal = ({ password, onClose }) => {
+  return (
+    <div className="modal-backdrop-3">
+      <div className="modal-content-3" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="modal-close-btn-3">
+          &times;
+        </button>
+        <h2>임시 비밀번호 발급</h2>
+        <p>아래의 임시 비밀번호로 로그인 후, 비밀번호를 변경해주세요.</p>
+        <div className="temp-password-box">{password}</div>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{ mt: 2, backgroundColor: "#a18cd1" }}
+        >
+          확인
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+
 const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -77,6 +100,10 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
 
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [termsViewed, setTermsViewed] = useState(false);
+
+  const [tempPassword, setTempPassword] = useState("");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
 
   const { user } = useUser();
   const navigate = useNavigate();
@@ -255,10 +282,16 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         });
         alert("입력하신 번호로 가입된 이메일 정보를 전송했습니다.");
       } else if (type === "find-password") {
-        await axios.post(`${BACKEND_URL}/api/users/find-password`, {
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
+          phoneNumber: formData.phoneNumber,
         });
-        alert("입력하신 이메일로 임시 비밀번호를 발급했습니다.");
+        if (response.data.tempPassword) {
+          setTempPassword(response.data.tempPassword);
+          setIsPasswordModalOpen(true);
+        } else {
+          alert("임시 비밀번호 발급에 실패했습니다.");
+        }
       }
     } catch (err) {
       console.error(`${type} error:`, err);
@@ -630,6 +663,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
           content={termsContent}
           onClose={handleCloseTermsModal}
           onConfirm={handleModalConfirm}
+        />
+      )}
+
+      {isPasswordModalOpen && (
+        <TempPasswordModal
+          password={tempPassword}
+          onClose={() => setIsPasswordModalOpen(false)}
         />
       )}
     </section>
