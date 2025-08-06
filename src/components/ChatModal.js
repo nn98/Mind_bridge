@@ -293,6 +293,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
       });
       alert('비밀번호가 성공적으로 변경되었습니다.');
       setIsPasswordModalOpen(false);
+      await signOut();
+      window.location.reload();
     } catch (error) {
       console.error("비밀번호 변경 실패:", error);
       alert("비밀번호 변경 중 오류가 발생했습니다.");
