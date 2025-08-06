@@ -304,6 +304,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
       } else if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
+          nickname: formData.nickname,
         });
 
         if (response.data.email) {
@@ -656,7 +657,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
               </Link>
               <Typography variant="h4" component="h1" gutterBottom>아이디 찾기</Typography>
               <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
-              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
+              <TextField className="input-wrapper" fullWidth label="닉네임" name="nickname" margin="normal" value={formData.nickname} onChange={handleChange} />
               <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>아이디 찾기</Button>
               <Box className="form-links">
                 <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
