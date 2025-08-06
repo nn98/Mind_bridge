@@ -1,3 +1,5 @@
+/* ======== 기존 채팅 UI 관련 CSS ======== */
+
 .chat-box {
   border: 1px solid #ccc;
   padding: 1rem;
@@ -43,7 +45,6 @@
   border-bottom-left-radius: 4px;
   margin-right: auto;
 }
-
 
 .bubble.typing::after {
   content: ' ▓ ▓ ▓';
@@ -118,4 +119,179 @@
   position: absolute;
   right: 25px;
   padding-bottom: 17px;
+}
+
+
+/* ======== 새로 추가된 CSS (모달, 토스트 등) ======== */
+
+/* 모달 뒷배경 오버레이 */
+.pwd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+/* 비밀번호 변경 모달 컨테이너 */
+.pwd-change-container {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  z-index: 1051;
+}
+
+.pwd-change-container h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* 모달 내부 입력 필드 그룹 */
+.pwd-input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.pwd-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.pwd-input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.pwd-input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* 모달 하단 버튼 영역 */
+.pwd-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+/* 모달 전용 버튼 (기존 .chat-button과 충돌 방지) */
+.modal-action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #8a63d2;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.modal-action-button:hover {
+  background-color: #7048c4;
+}
+
+/* 모달 '취소' 버튼 스타일 */
+.modal-action-button.cancel {
+  background-color: #6c757d;
+}
+
+.modal-action-button.cancel:hover {
+  background-color: #5a6268;
+}
+
+/* 토스트 메시지 */
+.validation-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e74c3c;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  z-index: 1100;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  animation: toastFadeInOut 3s ease-in-out forwards;
+}
+
+@keyframes toastFadeInOut {
+  0% {
+    opacity: 0;
+    bottom: 0;
+  }
+
+  10% {
+    opacity: 1;
+    bottom: 30px;
+  }
+
+  90% {
+    opacity: 1;
+    bottom: 30px;
+  }
+
+  100% {
+    opacity: 0;
+    bottom: 0;
+  }
+}
+
+/* 회원정보 탭 내의 추가 스타일 */
+.profile-section {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1.5rem;
+}
+
+.profile-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.profile-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.profile-field span {
+  font-weight: bold;
+  width: 100px;
+}
+
+.account-button {
+  padding: 8px 15px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.account-button.danger {
+  color: #dc3545;
+  border-color: #dc3545;
 }

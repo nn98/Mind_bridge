@@ -5,7 +5,6 @@ import '../css/ServiceGrid.css';
 import { Link } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 
-// ▼▼▼ App.js로부터 setIsEmotionModalOpen prop을 받도록 추가합니다. ▼▼▼
 const AboutSection = ({ refs, scrollTarget, setScrollTarget, setIsEmotionModalOpen }) => {
   const { introRef, locationRef, servicesRef, infoRef } = refs;
 
@@ -27,8 +26,6 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget, setIsEmotionModalOp
   }, [scrollTarget, refs, setScrollTarget]);
 
   useEffect(() => {
-    // Google Charts 로딩 및 그리기 로직 (기존과 동일)
-    // 스크립트가 중복으로 추가되는 것을 방지하기 위해 id로 확인
     if (!document.getElementById('google-charts-loader')) {
       const script = document.createElement('script');
       script.id = 'google-charts-loader';
@@ -159,14 +156,11 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget, setIsEmotionModalOp
               <div className="icon">{service.icon}</div>
               <h3>{service.title}</h3>
               <p>{service.description}</p>
-              {/* ▼▼▼ path 값에 따라 조건부 렌더링 ▼▼▼ */}
               {service.path === '/emotion-analysis' ? (
-                // '감성 분석' 카드일 경우, span 태그에 onClick 이벤트 부여
                 <Link className="learn-more modal-link" onClick={() => setIsEmotionModalOpen(true)}>
                   바로 시작하기 &gt;
                 </Link>
               ) : (
-                // 나머지 카드는 기존과 동일하게 Link 컴포넌트 사용
                 service.path && (
                   <Link to={service.path} className="learn-more">
                     페이지로 이동 &gt;

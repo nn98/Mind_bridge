@@ -3,12 +3,103 @@ import Chat from './Chat';
 import { useUser, useAuth, useClerk } from '@clerk/clerk-react';
 import axios from 'axios';
 
-
 const BACKEND_URL = "http://localhost:8080";
 const MENTAL_STATES = ['우울증', '불안장애', 'ADHD', '게임중독', '반항장애'];
 
+const Toast = ({ message, show }) => {
+  if (!show) return null;
+  return <div className="validation-toast">{message}</div>;
+};
+
+const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [toast, setToast] = useState({ show: false, message: '' });
+
+  const showToast = (message) => {
+    setToast({ show: true, message });
+    setTimeout(() => {
+      setToast({ show: false, message: '' });
+    }, 3000);
+  };
+
+  const handleSubmit = () => {
+
+    if (!password || !confirmPassword) {
+      showToast('비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showToast('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
 
 
+    if (password.length < 8 || password.length > 16) {
+      showToast('비밀번호는 8~16자 사이로 입력해주세요.');
+      return;
+    }
+    if (!hasLowerCase) {
+      showToast('비밀번호에 영문 소문자를 1개 이상 포함해야 합니다.');
+      return;
+    }
+    if (!hasUpperCase) {
+      showToast('비밀번호에 영문 대문자를 1개 이상 포함해야 합니다.');
+      return;
+    }
+    if (!hasNumber) {
+      showToast('비밀번호에 숫자를 1개 이상 포함해야 합니다.');
+      return;
+    }
+    if (!hasSpecialChar) {
+      showToast('비밀번호에 특수문자를 1개 이상 포함해야 합니다.');
+      return;
+    }
+
+    onPasswordChange(password);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="pwd-modal-overlay">
+      <div className="pwd-change-container">
+        <h3>비밀번호 변경</h3>
+        <div className="pwd-input-group">
+          <label htmlFor="password">새 비밀번호</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="8~16자, 영문 대/소, 숫자, 특수문자 조합"
+          />
+        </div>
+        <div className="pwd-input-group">
+          <label htmlFor="confirmPassword">비밀번호 확인</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="새 비밀번호를 다시 입력하세요"
+          />
+        </div>
+        <div className="pwd-modal-actions">
+          <button className="modal-action-button" onClick={handleSubmit}>변경</button>
+          <button className="modal-action-button cancel" onClick={onClose}>취소</button>
+        </div>
+      </div>
+      <Toast message={toast.message} show={toast.show} />
+    </div>
+  );
+};
 
 const SessionHistory = ({ userId, getToken }) => {
   const [history, setHistory] = useState([]);
@@ -17,17 +108,24 @@ const SessionHistory = ({ userId, getToken }) => {
   useEffect(() => {
     if (!userId) return;
 
-    // 실제 상담 이력을 가져오는 API 여기에서 호출 부탁드립니다
     const fetchHistory = async () => {
+      try {
+        const token = await getToken();
+        setTimeout(() => {
+          setHistory([
+            { id: 1, date: '2025-07-25', summary: '첫 상담: 현재 느끼는 불안감에 대해 이야기함.' },
+            { id: 2, date: '2025-07-18', summary: '대인관계 스트레스 관련 상담 진행.' },
+          ]);
+          setIsLoading(false);
+        }, 1000);
+
+      } catch (error) {
+        console.error("상담 이력 조회에 실패했습니다:", error);
+        setIsLoading(false);
+      }
     };
 
-    setTimeout(() => {
-      setHistory([
-        { id: 1, date: '2025-07-25', summary: '첫 상담: 현재 느끼는 불안감에 대해 이야기함.' },
-        { id: 2, date: '2025-07-18', summary: '대인관계 스트레스 관련 상담 진행.' },
-      ]);
-      setIsLoading(false);
-    }, 1000);
+    fetchHistory();
   }, [userId, getToken]);
 
   if (isLoading) {
@@ -56,115 +154,64 @@ const SessionHistory = ({ userId, getToken }) => {
 const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
-  const { signOut, openUserProfile } = useClerk();
+  const { signOut } = useClerk();
 
-  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '',password:'' });
+  const [userInfo, setUserInfo] = useState({ age: '', gender: '', email: '', phoneNumber: '', mentalState: '', nickname: '', counselingGoal: '' });
   const [editedInfo, setEditedInfo] = useState({ ...userInfo });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const userId = isSignedIn ? user?.id : customUser?.id; //안전하게 정보를 받기 위한 userId
-
-  console.log('UserProfile userId:', userId);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const userId = isSignedIn ? user?.id : customUser?.id;
 
   useEffect(() => {
-    if (isLoaded && (isSignedIn || isCustomLoggedIn)) {
-      const fetchUserData = async () => {
-        setIsLoading(true);
-        console.log("isCustomLoggedIn:", isCustomLoggedIn);
-        console.log("customUser:", customUser);
-        try {
-          let token;
+    const fetchUserData = async () => {
+      if (!(isLoaded && (isSignedIn || isCustomLoggedIn))) return;
+      setIsLoading(true);
 
-          if (isSignedIn) {
-            // Clerk 로그인 상태면 Clerk 토큰 사용
-            token = await getToken();
-          } else if (isCustomLoggedIn) {
-            // 커스텀 로그인 상태면 로컬스토리지 토큰 사용
-            token = localStorage.getItem("token");
-          } else {
-            // 로그인 안 된 상태면 토큰 없음
-            setIsLoading(false);
-            return;
-          }
-          //console.log('userId:', userId);
+      try {
+        let token;
+        if (isSignedIn) token = await getToken();
+        else if (isCustomLoggedIn) token = localStorage.getItem("token");
+        else { setIsLoading(false); return; }
 
-          if (!userId) {
-            setIsLoading(false);
-            return;
-          }
+        if (!userId) { setIsLoading(false); return; }
 
-          const response = await axios.get(`${BACKEND_URL}/api/users/details/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          console.log("백엔드 사용자 데이터:", response.data);
-          console.log("isCustomLoggedIn", isCustomLoggedIn);
+        const response = await axios.get(`${BACKEND_URL}/api/users/details/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const dbUser = response.data;
 
-          const dbUser = response.data;
+        const fullUserInfo = {
+          nickname: dbUser.nickname || (isCustomLoggedIn ? customUser?.nickname : '') || '',
+          email: dbUser.email || (isSignedIn ? user?.emailAddresses?.[0]?.emailAddress : customUser?.email) || '',
+          age: dbUser.age || '',
+          gender: dbUser.gender || '',
+          phoneNumber: dbUser.phoneNumber || '',
+          mentalState: dbUser.mentalState || (isCustomLoggedIn ? customUser?.mentalState || '선택되지 않음' : ''),
+          counselingGoal: dbUser.counselingGoal || (isCustomLoggedIn ? customUser?.counselingGoal || '' : ''),
+        };
 
-          const fullUserInfo = {
-
-            nickname: dbUser.nickname
-              || (isCustomLoggedIn ? customUser?.nickname : '')
-              || '',
-
-            email: dbUser.email
-              || (isSignedIn ? user?.emailAddresses?.[0]?.emailAddress : customUser?.email)
-              || '',
-
-            age: dbUser.age || '',
-
-            gender: dbUser.gender || '',
-
-            phoneNumber: dbUser.phoneNumber || '',
-
-            mentalState: dbUser.mentalState
-              || (isCustomLoggedIn ? customUser?.mentalState || '선택되지 않음' : ''),
-
-            counselingGoal: dbUser.counselingGoal
-              || (isCustomLoggedIn ? customUser?.counselingGoal || '' : ''),
-          };
-
-
-          setUserInfo(fullUserInfo);
-          setEditedInfo(fullUserInfo);
-
-        } catch (error) {
-
-          console.error("백엔드에서 사용자 정보 조회에 실패했습니다:", error);
-
-          const fallbackInfo = {
-            email: isSignedIn
-              ? user?.emailAddresses?.[0]?.emailAddress
-              : customUser?.email || '',
-
-            age: isCustomLoggedIn ? customUser?.age || '' : '',
-
-            gender: isCustomLoggedIn ? customUser?.gender || '' : '',
-
-            phoneNumber: isCustomLoggedIn ? customUser?.phoneNumber || '' : '',
-
-            mentalState: isCustomLoggedIn
-              ? customUser?.mentalState || '선택되지 않음'
-              : '',
-            nickname: isCustomLoggedIn
-              ? customUser?.nickname || ''
-              : '',
-            counselingGoal: isCustomLoggedIn
-              ? customUser?.counselingGoal || ''
-              : '',
-          };
-
-          setUserInfo(fallbackInfo);
-          setEditedInfo(fallbackInfo);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      if (isLoaded || isCustomLoggedIn) {
-        fetchUserData();
+        setUserInfo(fullUserInfo);
+        setEditedInfo(fullUserInfo);
+      } catch (error) {
+        console.error("백엔드에서 사용자 정보 조회에 실패했습니다:", error);
+        const fallbackInfo = {
+          email: isSignedIn ? user?.emailAddresses?.[0]?.emailAddress : customUser?.email || '',
+          age: isCustomLoggedIn ? customUser?.age || '' : '',
+          gender: isCustomLoggedIn ? customUser?.gender || '' : '',
+          phoneNumber: isCustomLoggedIn ? customUser?.phoneNumber || '' : '',
+          mentalState: isCustomLoggedIn ? customUser?.mentalState || '선택되지 않음' : '',
+          nickname: isCustomLoggedIn ? customUser?.nickname || '' : '',
+          counselingGoal: isCustomLoggedIn ? customUser?.counselingGoal || '' : '',
+        };
+        setUserInfo(fallbackInfo);
+        setEditedInfo(fallbackInfo);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    fetchUserData();
   }, [isLoaded, isSignedIn, user, isCustomLoggedIn, getToken, customUser, userId]);
 
 
@@ -172,42 +219,25 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   const handleCancel = () => { setIsEditing(false); setEditedInfo(userInfo); };
 
   const handleSave = async () => {
-
-    //커스텀부분
-    const currentUserId = isSignedIn ? user.id : customUser?.id;
-    if (!currentUserId) return;
     let token;
-    //clerk부분
-    if (isSignedIn) {
-      token = await getToken();
-    } else if (isCustomLoggedIn) {
-      token = localStorage.getItem("token");
-    } else {
-      alert("로그인 상태가 아닙니다.");
-      return;
-    }
+    if (isSignedIn) token = await getToken();
+    else if (isCustomLoggedIn) token = localStorage.getItem("token");
+    else { alert("로그인 상태가 아닙니다."); return; }
 
-    const email = (user && user.email) || (customUser && customUser.email);
-
-    if (!email) {
+    if (!userInfo.email) {
       alert("이메일 정보가 없습니다. 다시 로그인 해주세요.");
       return;
     }
 
-    
     try {
       const payload = {
-        email,
+        email: userInfo.email,
         nickname: editedInfo.nickname,
         mentalState: editedInfo.mentalState,
         counselingGoal: editedInfo.counselingGoal,
       };
 
-      console.log(token)
-
-      await axios.put(
-        `${BACKEND_URL}/api/users/update`, payload, { headers: { Authorization: `Bearer ${token}` } });
-
+      await axios.put(`${BACKEND_URL}/api/users/update`, payload, { headers: { Authorization: `Bearer ${token}` } });
       setUserInfo(editedInfo);
       setIsEditing(false);
       alert('회원 정보가 저장되었습니다.');
@@ -218,37 +248,21 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   };
 
   const handleDeleteAccount = async () => {
-
-    //커스텀부분
-    const currentUserId = isSignedIn ? user.id : customUser?.id;
-
-    if (!currentUserId) return;
     let token;
-    //clerk부분
-    if (isSignedIn) {
-      token = await getToken();
-    } else if (isCustomLoggedIn) {
-      token = localStorage.getItem("token");
-    } else {
-      alert("로그인 상태가 아닙니다.");
-      return;
-    }
+    if (isSignedIn) token = await getToken();
+    else if (isCustomLoggedIn) token = localStorage.getItem("token");
+    else { alert("로그인 상태가 아닙니다."); return; }
 
-    const email = (user && user.email) || (customUser && customUser.email);
-
-    if (!email) {
+    if (!userInfo.email) {
       alert("이메일 정보가 없습니다. 다시 로그인 해주세요.");
       return;
     }
-    const payload = {
-        email
-      };
 
     const isConfirmed = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 모든 정보가 영구적으로 삭제되며, 복구할 수 없습니다.');
-    
 
     if (isConfirmed) {
       try {
+        const payload = { email: userInfo.email };
         await axios.post(`${BACKEND_URL}/api/users/delete`, payload, { headers: { Authorization: `Bearer ${token}` } });
         alert('회원 탈퇴가 완료되었습니다.');
         await signOut();
@@ -260,51 +274,26 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     }
   };
 
-  const handlePassChage = async () => {
-    
-  const currentUserId = isSignedIn ? user.id : customUser?.id;
-  if (!currentUserId) return;
+  const handlePassChange = async (password) => {
+    let token;
+    if (isSignedIn) token = await getToken();
+    else if (isCustomLoggedIn) token = localStorage.getItem("token");
+    else { alert("로그인 상태가 아닙니다."); return; }
 
-  let token;
-  if (isSignedIn) {
-    token = await getToken();
-  } else if (isCustomLoggedIn) {
-    token = localStorage.getItem("token");
-  } else {
-    alert("로그인 상태가 아닙니다.");
-    return;
-  }
+    if (!userInfo.email) { alert("이메일 정보가 없습니다."); return; }
 
-  const email = (user && user.email) || (customUser && customUser.email);
-  if (!email) {
-    alert("이메일 정보가 없습니다.");
-    return;
-  }
-
-  if (!editedInfo.password) {
-    alert("변경할 비밀번호를 입력하세요.");
-    return;
-  }
-
-  try {
-    const payload = {
-      email,
-      password: editedInfo.password 
-    };
-
-    console.log("Token:", token);
-
-    await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    alert('비밀번호가 성공적으로 변경되었습니다.');
-    setEditedInfo({ ...editedInfo, password: '' }); // 입력 초기화
-  } catch (error) {
-    console.error("비밀번호 변경 실패:", error);
-    alert("비밀번호 변경 중 오류가 발생했습니다.");
-  }
-};
+    try {
+      const payload = { email: userInfo.email, password };
+      await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('비밀번호가 성공적으로 변경되었습니다.');
+      setIsPasswordModalOpen(false);
+    } catch (error) {
+      console.error("비밀번호 변경 실패:", error);
+      alert("비밀번호 변경 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -314,32 +303,38 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
   if (isLoading) return <div className="tab-content"><p>로딩 중...</p></div>;
   if (!isSignedIn && !isCustomLoggedIn) return <div className="tab-content"><p>로그인 후 이용해주세요.</p></div>;
 
-
   return (
-    <div className="tab-content user-profile">
-      <div className="profile-section">
-        <h3>회원 정보</h3>
-        <div className="profile-field"><span>닉네임</span>{isEditing ? <input type="text" name="nickname" value={editedInfo.nickname} placeholder="앱에서 사용할 별칭" onChange={handleChange} /> : <p>{userInfo.nickname || '─'}</p>}</div>
-        <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age}</p></div>
-        <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender}</p></div>
-        <div className="profile-field"><span>전화번호</span><p style={{ color: '#777' }}>{userInfo.phoneNumber}</p></div>
-        <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
-        <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
-        <div className="profile-actions">{isEditing ? (<><button className="chat-button" onClick={handleSave}>저장</button><button className="chat-button cancel" onClick={handleCancel}>취소</button></>) : (<button className="chat-button" onClick={handleEdit}>수정</button>)}</div>
-      </div>
+    <>
+      <div className="tab-content user-profile">
+        <div className="profile-section">
+          <h3>회원 정보</h3>
+          <div className="profile-field"><span>닉네임</span>{isEditing ? <input type="text" name="nickname" value={editedInfo.nickname} placeholder="앱에서 사용할 별칭" onChange={handleChange} /> : <p>{userInfo.nickname || '─'}</p>}</div>
+          <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age || '─'}</p></div>
+          <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender || '─'}</p></div>
+          <div className="profile-field"><span>전화번호</span><p style={{ color: '#777' }}>{userInfo.phoneNumber || '─'}</p></div>
+          <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
+          <div className="profile-field"><span>나의 상태</span>{isEditing ? <select name="mentalState" value={editedInfo.mentalState} onChange={handleChange}><option value="">선택해주세요</option>{MENTAL_STATES.map(state => (<option key={state} value={state}>{state}</option>))}</select> : <p>{userInfo.mentalState || '선택되지 않음'}</p>}</div>
+          <div className="profile-actions">{isEditing ? (<><button className="chat-button" onClick={handleSave}>저장</button><button className="chat-button cancel" onClick={handleCancel}>취소</button></>) : (<button className="chat-button" onClick={handleEdit}>수정</button>)}</div>
+        </div>
 
-      <div className="profile-section">
-        <SessionHistory userId={userId} getToken={getToken} />
-      </div>
+        <div className="profile-section">
+          <SessionHistory userId={userId} getToken={getToken} />
+        </div>
 
-      <div className="profile-section">
-        <h4>계정 관리</h4>
-        <div className="account-actions">
-          <button className="account-button" onClick={() => openUserProfile()}>비밀번호 변경</button>
-          <button className="account-button danger" onClick={handleDeleteAccount}>회원 탈퇴</button>
+        <div className="profile-section">
+          <h4>계정 관리</h4>
+          <div className="account-actions">
+            <button className="account-button" onClick={() => setIsPasswordModalOpen(true)}>비밀번호 변경</button>
+            <button className="account-button danger" onClick={handleDeleteAccount}>회원 탈퇴</button>
+          </div>
         </div>
       </div>
-    </div>
+      <PasswordChangeModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onPasswordChange={handlePassChange}
+      />
+    </>
   );
 };
 
@@ -379,19 +374,20 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
         return <UserProfile customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />;
       default:
         return null;
-
     }
   };
 
-  if (!isOpen)
+  if (!isOpen) {
     return (
       <div className="floating-button" onClick={() => setIsOpen(true)}>
         <img src="/img/채팅상담.png" alt="채팅 아이콘" style={{ width: '100px', height: '100px' }} />
       </div>
     );
+  }
 
   return (
-    <><button onClick={() => setIsOpen(false)} className="close-btn">✖</button><div>
+    <>
+      <button onClick={() => setIsOpen(false)} className="close-btn">✖</button>
       <div className="modal-container">
         <div className="modal-tabs">
           <button onClick={() => setTab('chat')} className={tab === 'chat' ? 'active' : ''}>AI 상담</button>
@@ -400,7 +396,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
         </div>
         <div className="modal-body">{renderContent()}</div>
       </div>
-    </div></>
+    </>
   );
 };
 
