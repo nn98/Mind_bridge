@@ -23,7 +23,7 @@
     color: #333;
     background-color: #ffffff;
     border-radius: 12px;
-
+    display: flex;
 }
 
 .admin-header h1 {
@@ -53,13 +53,15 @@
 }
 
 .section-container {
-    width: 50%;
+    width: 48%;
     height: 60vh;
     margin: 5px 5px 5px 0px;
     padding: 20px;
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    flex-wrap: wrap;
+    flex-direction: row;
 }
 
 .admin-section-title {
@@ -127,4 +129,52 @@
     outline: none;
     box-shadow: 0 0 5px #4c00ff;
     transition: border-color 0.3s ease;
+}
+
+/* 달력 */
+.react-calendar {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 100%;
+    font-family: 'Pretendard', sans-serif;
+    text-align: center;
+
+}
+
+.react-calendar__tile {
+    padding: 10px 6px;
+    border-radius: 6px;
+    background: #f9f3ff;
+    color: #000000;
+}
+
+.react-calendar__tile--now {
+    background: #bda1ff;
+    border-radius: 6px;
+}
+
+.react-calendar__tile--active {
+    background: #de71ff;
+    color: rgb(255, 255, 255);
+}
+
+.react-calendar__tile--neighboringMonth {
+    color: #bbb !important;
+    opacity: 0.5;
+}
+
+/* 일요일 빨간색 */
+.react-calendar__month-view__days__day--weekend:nth-child(7n+1) {
+    color: red;
+}
+
+/* 토요일 파란색 */
+.react-calendar__month-view__days__day--weekend:nth-child(7n) {
+    color: blue;
+}
+
+.neighboring-month{
+    opacity: 0.3;
 }
