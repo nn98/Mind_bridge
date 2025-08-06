@@ -1,7 +1,9 @@
 package com.example.backend.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.ResetPasswordRequest;//비번찾기-초기화
 import com.example.backend.dto.UserDto;
 import com.example.backend.dto.UserRegisterRequest;
 import com.example.backend.entity.User;
@@ -152,6 +155,21 @@ public class UserController {
             return ResponseEntity.ok(Map.of("user", userDto));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    //아이디찾기
+    //비번찾기-초기화
+    @PostMapping("/find-password")
+    public ResponseEntity<?> sendTempPassword(@RequestBody ResetPasswordRequest request) {
+        String tempPassword = userService.resetPasswordByEmail(request.getEmail());
+
+        if (tempPassword != null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("tempPassword", tempPassword); // 프론트에서 받을 키
+            return ResponseEntity.ok(response); // JSON: { "tempPassword": "임시비번" }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("해당 이메일로 등록된 계정이 없습니다.");
         }
     }
 }
