@@ -209,6 +209,17 @@ const App = () => {
             faqVisible={faqVisible}
             setFaqVisible={setFaqVisible}
           />
+          <ChatModal
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            tab={tab}
+            setTab={setTab}
+            selected={selectedChat}
+            setSelectedChat={setSelectedChat}
+            resultText={resultText}
+            customUser={customUser}
+            isCustomLoggedIn={isCustomLoggedIn}
+          />
         </>
       )}
 
@@ -323,20 +334,14 @@ const App = () => {
         />
       </Routes>
 
-      <ChatModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        tab={tab}
-        setTab={setTab}
-        selected={selectedChat}
-        setSelectedChat={setSelectedChat}
-        resultText={resultText}
-        customUser={customUser}
-        isCustomLoggedIn={isCustomLoggedIn}
-      />
-
       {/* Footer에 모달을 열 함수를 전달합니다. */}
-      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />}
+      {!isAuthPageOrAdmin && (
+        <Footer
+          setIsOpen={setIsOpen}
+          isOpen={isOpen}
+          setIsEmotionModalOpen={setIsEmotionModalOpen}
+        />
+      )}
     </>
   );
 };

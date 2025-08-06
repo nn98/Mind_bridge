@@ -10,12 +10,24 @@ body,
 }
 
 /* 로고 이미지 */
-.logo {
-  width: 150px;
-  height: auto;
-  margin: 0px 0px -5px 200px;
-  position: relative;
+.logo-link {
+    position: relative;
+    display: inline-block;
+    top: 3px;
+    left: 40px;
+    line-height: 0;
+    font-size: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
 }
+
+.logo {
+    width: 150px;
+    z-index: 1001;
+}
+
 
 /* 번역 버튼 위치 */
 .translate {
@@ -468,6 +480,4 @@ body,
   text-align: justify;
 }
 
-.custom-blue-btn1{
-  
-}
+.custom-blue-btn1 {}

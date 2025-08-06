@@ -56,10 +56,7 @@ const Header = ({
       <div id="google_translate_element" className="translate"></div>
       <nav className="nav">
         <div className="nav-left">
-          <Link
-            to="/"
-            style={{ display: "inline-block", width: "50px", height: "auto" }}
-          >
+          <Link to="/" className="logo-link">
             <img src="/img/로고2.png" alt="Mind Bridge 로고" className="logo" />
           </Link>
         </div>
