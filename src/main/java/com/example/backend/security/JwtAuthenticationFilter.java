@@ -28,12 +28,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
+    // 🔽 인증을 제외할 URL 목록
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/api/users/find-id" //아이디 찾기
+
+    );
+
     @Override
     protected void doFilterInternal(
-        @Nonnull HttpServletRequest request, 
-        @Nonnull HttpServletResponse response, 
-        @Nonnull FilterChain filterChain)
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain)
             throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+        if (//path.equals("/api/users/login")
+                //|| path.equals("/api/users/register")
+                //|| path.equals("/api/users/check-email")
+                path.equals("/api/users/find-id")
+                || path.equals("/api/users/find-password")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader = request.getHeader("Authorization");
         log.debug("Authorization Header: {}", authHeader);

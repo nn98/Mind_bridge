@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.FindIdRequest;
 import com.example.backend.dto.ResetPasswordRequest;//비번찾기-초기화
 import com.example.backend.dto.UserDto;
 import com.example.backend.dto.UserRegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -159,6 +162,22 @@ public class UserController {
     }
 
     //아이디찾기
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findUserId(@RequestBody @Valid FindIdRequest request) {
+      
+
+        String email = userService.findUserIdByPhoneAndNickname(
+                request.getPhoneNumber(), request.getNickname()
+        );
+
+        if (email != null) {
+            return ResponseEntity.ok(Collections.singletonMap("email", email));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("일치하는 회원 정보를 찾을 수 없습니다.");
+        }
+    }
+
     //비번찾기-초기화
     @PostMapping("/find-password")
     public ResponseEntity<?> sendTempPassword(@RequestBody ResetPasswordRequest request) {
