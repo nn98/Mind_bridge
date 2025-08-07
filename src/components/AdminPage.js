@@ -1,19 +1,23 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css"; // react-calendar 기본 스타일 import
-
+import {
+  LocalizationProvider,
+  DateCalendar,
+  PickersDay,
+} from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "dayjs/locale/ko";
 import "../css/Admin.css";
 
 export default function AdminPage({ currentUser }) {
   const [value, setValue] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       console.log("입력된 값:", value);
-      setValue(""); // 입력창 비우기
+      setValue("");
     }
   };
 
@@ -24,7 +28,11 @@ export default function AdminPage({ currentUser }) {
   return (
     <div className="admin">
       <Link to="/" className="admin-logo-link">
-        <img src="/img/로고1.png" alt="Mind Bridge 로고" className="admin-logo" />
+        <img
+          src="/img/로고1.png"
+          alt="Mind Bridge 로고"
+          className="admin-logo"
+        />
       </Link>
       <header className="admin-header">
         <h1>🧑‍💼 관리자 대시보드 👩‍💼</h1>
@@ -57,7 +65,10 @@ export default function AdminPage({ currentUser }) {
               </thead>
               <tbody>
                 <tr>
-                  <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>
+                  <td
+                    colSpan="3"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
                     유저 정보가 없습니다.
                   </td>
                 </tr>
@@ -66,26 +77,35 @@ export default function AdminPage({ currentUser }) {
           </div>
           <div className="section-container">
             <h2 className="admin-section-title">📅 캘린더</h2>
-            <Calendar
-              locale="ko-KR" // 한국어 로케일
-              calendarType="gregory" // 명시적으로 그레고리력 설정
-              firstDayOfWeek={0} // 일요일 시작
-              showNeighboringMonth={true} // 이전/다음 달 날짜 보이기
-              value={date} // 선택된 날짜 상태 연결
-              onChange={(newDate) => {
-                console.log("선택된 날짜:", newDate); // 디버깅용 로그
-                setDate(newDate);
-              }}
-              tileClassName={({ date, view }) => {
-                const currentMonth = new Date().getMonth(); // 현재 월 동적 설정
-                if (view === "month") {
-                  if (date.getMonth() !== currentMonth) {
-                    return "neighboring-month"; // 이전/다음 달 날짜 클래스
-                  }
-                }
-                return null;
-              }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+              <DateCalendar
+                value={date}
+                onChange={(newDate) => {
+                  console.log("선택된 날짜:", newDate.format("YYYY-MM-DD"));
+                  setDate(newDate);
+                }}
+                showDaysOutsideCurrentMonth
+                renderDay={(date, selectedDates, pickersDayProps) => {
+                  const day = date.day(); // 0(일) ~ 6(토)
+                  let color = "#000000"; // 기본 색상
+                  if (day === 0) color = "red"; // 일요일
+                  else if (day === 6) color = "blue"; // 토요일
+                  return <PickersDay {...pickersDayProps} style={{ color }} />;
+                }}
+                sx={{
+                  width: "50%",
+                  height: "100%",
+                  "& .MuiPickersDay-root": {
+                    fontSize: "1rem",
+                    width: "45px",
+                    height: "45px",
+                  },
+                  "& .MuiPickersSlideTransition-root": {
+                    minHeight: "500px",
+                  },
+                }}
+              />
+            </LocalizationProvider>
           </div>
         </div>
       </header>
