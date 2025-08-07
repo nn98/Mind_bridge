@@ -20,7 +20,7 @@ const fieldKeys = [
   "이전상담경험",
 ];
 
-const Chat = ({ setIsOpen }) => {
+const Chat = ({ setIsOpen ,customUser }) => {
   const [step, setStep] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatHistory, setChatHistory] = useState([
@@ -37,6 +37,37 @@ const Chat = ({ setIsOpen }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
   const chatEndRef = useRef(null);
+
+  //////////customUser
+  useEffect(() => {
+    if (!customUser) return;
+
+    console.log("✅ Chat 컴포넌트 customUser:", customUser);
+
+    const prefill = {
+      이름: customUser.fullName || customUser.nickname || "",
+      성별: customUser.gender || "",
+      나이: customUser.age || "",
+      상태: customUser.mentalState || customUser.status || "",
+    };
+
+    let filledCount = 0;
+    fieldKeys.forEach((key) => {
+      if (prefill[key]) filledCount++;
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      ...prefill,
+    }));
+
+    setStep(filledCount);
+    setChatHistory([
+      { sender: "ai", message: questionOrder[filledCount] },
+    ]);
+  }, [customUser]); // ✅ props가 바뀔 때마다 다시 실행됨
+
+  //////////
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });

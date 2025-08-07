@@ -42,11 +42,11 @@ import { formLinks } from "./constants/formLinks";
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useUser(); //clerk로그인 
   const [appToast, setAppToast] = useState({ show: false, message: "" });
 
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
-  const [customUser, setCustomUser] = useState(null);
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);//커스텀로그인 여부
+  const [customUser, setCustomUser] = useState(null);//커스텀로그인 정보
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
@@ -82,24 +82,37 @@ const App = () => {
     "/admin",
   ].includes(location.pathname);
 
+  //창을 새로고침하면 정보를 갱신함
   useEffect(() => {
+    fetchCustomUser();
+  }, []);
+
+  
+
+  //사용자 정보 갱신 
+  const fetchCustomUser = () => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsCustomLoggedIn(true);
       axios
         .get("http://localhost:8080/api/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => setCustomUser(res.data))
+        .then((res) => {
+          setCustomUser(res.data);
+          setIsCustomLoggedIn(true);
+          localStorage.setItem("customUser", JSON.stringify(res.data));
+        })
         .catch(() => {
           setCustomUser(null);
           setIsCustomLoggedIn(false);
+          localStorage.removeItem("customUser");
         });
     } else {
       setIsCustomLoggedIn(false);
       setCustomUser(null);
+      localStorage.removeItem("customUser");
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (location.state?.message) {

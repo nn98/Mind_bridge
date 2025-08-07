@@ -355,7 +355,7 @@ const ChatModal = ({ isOpen, setIsOpen, tab, setTab, selectedChat, setSelectedCh
   const renderContent = () => {
     switch (tab) {
       case 'chat':
-        return <Chat setIsOpen={setIsOpen} />;
+        return <Chat setIsOpen={setIsOpen} customUser={customUser} />;
       case 'summary':
         return (
           <div className="tab-content">
