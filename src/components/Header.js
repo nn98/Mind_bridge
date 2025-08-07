@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { sectionLabels } from "../constants/sectionLabels";
 import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
+import { toast } from 'react-toastify';
 
 const Header = ({
   introRef,
@@ -45,10 +46,7 @@ const Header = ({
     setIsCustomLoggedIn(false);
     setCustomUser(null);
 
-    alert("로그아웃하였습니다.");
-
-    navigate("/");
-    // 로그아웃 후 메인 페이지 이동
+    navigate("/", { state: { message: "로그아웃 되었습니다!" } });
   };
 
   return (

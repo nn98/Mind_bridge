@@ -1,11 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  Routes,
-  Route,
-  useNavigate,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
@@ -49,6 +43,7 @@ const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isSignedIn, user } = useUser();
+  const [appToast, setAppToast] = useState({ show: false, message: "" });
 
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
   const [customUser, setCustomUser] = useState(null);
@@ -73,6 +68,11 @@ const App = () => {
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const infoRef = useRef(null);
+
+  const Toast = ({ message, show }) => {
+    if (!show) return null;
+    return <div className="app-toast">{message}</div>;
+  };
 
   const isAuthPageOrAdmin = [
     "/login",
@@ -100,6 +100,17 @@ const App = () => {
       setCustomUser(null);
     }
   }, []);
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setAppToast({ show: true, message: location.state.message });
+      setTimeout(() => {
+        setAppToast({ show: false, message: "" });
+      }, 3000);
+      // 메시지를 본 후에는 history에서 제거하여 새로고침 시 다시 뜨지 않게 합니다.
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     if (
@@ -220,6 +231,7 @@ const App = () => {
             customUser={customUser}
             isCustomLoggedIn={isCustomLoggedIn}
           />
+          <Toast message={appToast.message} show={appToast.show} />
         </>
       )}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { toast } from 'react-toastify';
 import axios from "axios";
 import { Link as RouterLink, useNavigate, Link } from "react-router-dom";
 import {
@@ -160,8 +161,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
       logoutExecuted.current = true;
       localStorage.removeItem("token");
       if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
-      alert("로그아웃 되었습니다!");
-      navigate("/");
+      navigate("/", { state: { message: "로그아웃 되었습니다!" } });
     }
   }, [type, navigate, setIsCustomLoggedIn]);
 
@@ -273,7 +273,6 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (setCustomUser && user) setCustomUser(user);
 
-        alert("로그인 성공!");
         navigate("/");
       } else if (type === "signup") {
         if (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 const apiKey = process.env.REACT_APP_KEY;
 const apiAddress = process.env.REACT_APP_CHAT_ADDRESS;
 

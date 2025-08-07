@@ -276,3 +276,28 @@
   background-color: #8972b4 !important;
   /* 살짝 더 진한 색상으로 변경 */
 }
+
+.app-toast {
+  position: fixed;
+  left: 50%;
+  top: 36px;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: toast-slide-down 0.4s ease-out;
+}
+
+@keyframes toast-slide-down {
+  from {
+    top: -500px; /* 화면 위쪽 바깥에서 시작 */
+    opacity: 0;
+  }
+  to {
+    top: 30px; /* 최종 위치 */
+    opacity: 1;
+  }
+}
