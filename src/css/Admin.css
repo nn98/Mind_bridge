@@ -1,3 +1,4 @@
+/* 관리자 대시보드 공통 레이아웃 */
 .admin-header {
     display: flex;
     flex-direction: column;
@@ -21,6 +22,10 @@
     background-color: #ffffff;
     border-radius: 12px;
     display: flex;
+    /* flex-direction: column 제거 */
+    flex-direction: column;
+    /* 세로로 배치 유지하려면 필요, 아래 설명 참고 */
+    gap: 20px;
 }
 
 .admin-header h1 {
@@ -50,16 +55,35 @@
 }
 
 .section-container {
-    width: 60%;
-    height: 75vh;
-    margin: 5px 5px 5px 0px;
+    width: 50%;
+    height: 1000px;
+    margin: 0;
     padding: 20px;
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     justify-content: center;
     align-items: center;
-    overflow: auto;
+    overflow: hidden;
+}
+
+.section-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.section-wraaper {
+    width: 100%;
+    height: 94%;
+    margin: 5px 5px 5px 0px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
 .admin-section-title {
@@ -70,7 +94,7 @@
 
 .admin-table {
     width: 100%;
-    height: 88%;
+    height: 94%;
     border-collapse: collapse;
     background-color: white;
     border-radius: 8px;
@@ -128,72 +152,94 @@
     transition: border-color 0.3s ease;
 }
 
-/* MUI DateCalendar 스타일 */
+/* 📅 MUI DateCalendar 커스텀 스타일 */
 .MuiDateCalendar-root {
     border: none;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    width: 100%;
-    height: 100%;
-    min-width: 450px;
-    min-height: 60%;
+    width: 450px !important;
+    max-height: 430px !important;
     font-family: 'Pretendard', sans-serif;
     text-align: center;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
+    margin-left: 1px !important;
 }
 
+.css-1n1xn3x-MuiPickersSlideTransition-root-MuiDayCalendar-slideTransition {
+    overflow: hidden !important;
+}
+
+/* 날짜 셀 */
 .MuiPickersDay-root {
     padding: 8px 6px;
-    border-radius: 6px;
-    background: #f9f3ff;
+    border-radius: 6px !important;
+    background: #e6ceff !important;
     color: #000000;
     min-width: 50px;
     min-height: 50px;
 }
 
-/* 요일별 색상 적용 */
-.MuiDayCalendar-weekDayLabel{
+/* 요일 라벨 */
+.MuiDayCalendar-weekDayLabel {
     font-size: 1.2rem !important;
     margin: 0 9px !important;
 }
-.MuiPickersDay-root:nth-child(7n+1) {
-    /* 일요일 (7의 배수 + 1) */
-    color: red;
-}
 
-.MuiPickersDay-root:nth-child(7n) {
-    /* 토요일 (7의 배수) */
-    color: blue;
-}
-
+/* 요일 라벨 색상 */
 .MuiDayCalendar-weekDayLabel:nth-child(1) {
-    /* 일요일 */
     color: red;
-    font-size: 1.2rem;
-    /* 폰트 크기 증가 */
 }
 
 .MuiDayCalendar-weekDayLabel:nth-child(7) {
-    /* 토요일 */
     color: blue;
-    font-size: 1.2rem;
-    /* 폰트 크기 증가 */
 }
 
+.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(1) {
+    color: red;
+}
+
+.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(7) {
+    color: blue;
+}
+
+/* 저번달, 이번달 요일 숫자 색상 */
+.MuiPickersDay-dayOutsideMonth:nth-child(1) {
+    color: red;
+    opacity: 0.5;
+}
+
+.MuiPickersDay-dayOutsideMonth:nth-child(7) {
+    color: blue;
+    opacity: 0.5;
+}
+
+
+/* 오늘 날짜 */
 .MuiPickersDay-today {
     background: #bda1ff !important;
     border-radius: 6px;
 }
 
+/* 선택된 날짜 */
 .MuiPickersDay-root.Mui-selected {
-    background: #de71ff !important;
+    background: #edb3ff !important;
     color: #ffffff !important;
 }
 
-.MuiPickersDay-root.Mui-disabled {
+/* 다른 달 날짜 흐림 처리 */
+.MuiPickersDay-root.Mui-disabled,
+.MuiPickersDay-root.MuiPickersDay-outsideCurrentMonth {
     color: #bbb !important;
-    opacity: 0.5;
+    opacity: 0.5 !important;
+}
+
+.MuiPickersDay-root.holiday {
+    color: red !important;
+    font-weight: bold !important;
+}
+.MuiPickersDay-root{
+    background-color: #4c00ff;
 }

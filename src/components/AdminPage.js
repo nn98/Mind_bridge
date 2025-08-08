@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   LocalizationProvider,
   DateCalendar,
@@ -7,24 +7,59 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/ko";
+import dayjs from "dayjs";
+import Holidays from "date-holidays";
+import { styled } from "@mui/material/styles";
 import "../css/Admin.css";
+
+// ▒▒ Holiday/요일 강조하는 PickersDay 래퍼 ▒▒
+const HolidayPickersDay = styled(PickersDay, {
+  shouldForwardProp: (prop) =>
+    prop !== "isHolidayKR" && prop !== "isSunday" && prop !== "isSaturday",
+})(({ isHolidayKR, isSunday, isSaturday }) => ({
+  color: isHolidayKR || isSunday ? "red" : isSaturday ? "blue" : undefined,
+  fontWeight: isHolidayKR ? "bold" : undefined,
+}));
 
 export default function AdminPage({ currentUser }) {
   const [value, setValue] = useState("");
   const [date, setDate] = useState(null);
 
+  // 엔터 입력 시 핸들러
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      // 여기서 검색 혹은 기타 동작 구현 가능
       console.log("입력된 값:", value);
       setValue("");
     }
   };
 
+  // ▒▒ 국내 공휴일 Map 미리 계산 ▒▒
+  const holidayMap = useMemo(() => {
+    const hd = new Holidays("KR");
+    const currentYear = new Date().getFullYear();
+    const holidays = hd.getHolidays(currentYear);
+    const map = new Map();
+    holidays.forEach((h) => {
+      const formattedDate = dayjs(h.date).format("YYYY-MM-DD");
+      map.set(formattedDate, h.name);
+    });
+    return map;
+  }, []);
+
+  // 해당 날짜에 공휴일이 있으면 이름 반환
+  const getHolidayName = (dateObj) => {
+    const dateStr = dayjs(dateObj).format("YYYY-MM-DD");
+    return holidayMap.get(dateStr);
+  };
+
+  // ▒▒ 관리자 권한 없는 경우 ▒▒
   if (!currentUser || currentUser.role !== "ADMIN") {
     return <div className="admin-no-access">접근 권한이 없습니다.</div>;
   }
 
+  // ▒▒ 전체 관리자 페이지 렌더 ▒▒
   return (
     <div className="admin">
       <Link to="/" className="admin-logo-link">
@@ -34,6 +69,7 @@ export default function AdminPage({ currentUser }) {
           className="admin-logo"
         />
       </Link>
+
       <header className="admin-header">
         <h1>🧑‍💼 관리자 대시보드 👩‍💼</h1>
         <input
@@ -53,59 +89,115 @@ export default function AdminPage({ currentUser }) {
         </div>
 
         <div className="admin-container">
-          <div className="section-container">
-            <h2 className="admin-section-title">👤 유저 정보</h2>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>닉네임</th>
-                  <th>이메일</th>
-                  <th>전화번호</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    colSpan="3"
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    유저 정보가 없습니다.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          {/* ▶ 상단 행 ◀ */}
+          <div className="section-row">
+            {/* 유저정보 */}
+            <div className="section-container">
+              <h2 className="admin-section-title">👤 유저 정보</h2>
+              <table className="admin-table admin-user">
+                <thead>
+                  <tr>
+                    <th>닉네임</th>
+                    <th>이메일</th>
+                    <th>전화번호</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan="3"
+                      style={{ textAlign: "center", padding: "20px" }}
+                    >
+                      유저 정보가 없습니다.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* 캘린더 */}
+            <div className="section-container">
+              <h2 className="admin-section-title">📅 캘린더</h2>
+              <div className="section-wraaper">
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="ko"
+                >
+                  <DateCalendar
+                    value={date}
+                    onChange={(newDate) => {
+                      setDate(newDate);
+                      console.log("선택된 날짜:", newDate.format("YYYY-MM-DD"));
+                    }}
+                    showDaysOutsideCurrentMonth
+                    renderDay={(date, selectedDates, pickersDayProps) => {
+                      const d = date; // JS dayjs 객체
+                      const jsDate = d.toDate();
+                      const holidayName = getHolidayName(jsDate);
+                      const isHolidayKR = !!holidayName;
+                      const day = d.day(); // 0: 일, 6: 토
+                      const isSunday = day === 0;
+                      const isSaturday = day === 6;
+
+                      // 이번달 외부 날짜 흐림처리
+                      if (pickersDayProps.outsideCurrentMonth) {
+                        return (
+                          <PickersDay
+                            {...pickersDayProps}
+                            sx={{ color: "#bbb", opacity: 0.5 }}
+                          />
+                        );
+                      }
+
+                      // ▒▒ 공휴일/주말 색상 강조 처리 ▒▒
+                      return (
+                        <HolidayPickersDay
+                          {...pickersDayProps}
+                          isHolidayKR={isHolidayKR}
+                          isSunday={isSunday}
+                          isSaturday={isSaturday}
+                          title={holidayName || undefined}
+                        />
+                      );
+                    }}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      "& .MuiPickersDay-root": {
+                        fontSize: "1rem",
+                        width: "45px",
+                        height: "45px",
+                      },
+                      "& .MuiPickersSlideTransition-root": {
+                        minHeight: "300px",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </div>
+            </div>
           </div>
-          <div className="section-container">
-            <h2 className="admin-section-title">📅 캘린더</h2>
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
-              <DateCalendar
-                value={date}
-                onChange={(newDate) => {
-                  console.log("선택된 날짜:", newDate.format("YYYY-MM-DD"));
-                  setDate(newDate);
-                }}
-                showDaysOutsideCurrentMonth
-                renderDay={(date, selectedDates, pickersDayProps) => {
-                  const day = date.day(); // 0(일) ~ 6(토)
-                  let color = "#000000"; // 기본 색상
-                  if (day === 0) color = "red"; // 일요일
-                  else if (day === 6) color = "blue"; // 토요일
-                  return <PickersDay {...pickersDayProps} style={{ color }} />;
-                }}
-                sx={{
-                  width: "50%",
-                  height: "100%",
-                  "& .MuiPickersDay-root": {
-                    fontSize: "1rem",
-                    width: "45px",
-                    height: "45px",
-                  },
-                  "& .MuiPickersSlideTransition-root": {
-                    minHeight: "500px",
-                  },
-                }}
-              />
-            </LocalizationProvider>
+
+          {/* ▶ 하단 행 ◀ */}
+          <div className="section-row">
+            {/* 감정상태 */}
+            <div className="section-container">
+              <h2 className="admin-section-title">📊 감정 상태</h2>
+              <table className="admin-table admin-user">
+                <thead>
+                  <tr>{/* 감정상태 헤더 */}</tr>
+                </thead>
+                <tbody>
+                  <tr>{/* 감정상태 내용 */}</tr>
+                </tbody>
+              </table>
+            </div>
+            {/* 게시글 */}
+            <div className="section-container">
+              <h2 className="admin-section-title">📋 게시글</h2>
+              <table className="admin-table admin-user">
+                {/* 사용자가 작성한 게시물 */}
+              </table>
+            </div>
           </div>
         </div>
       </header>

@@ -17,6 +17,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.10.0",
     "clerk": "^0.8.3",
+    "date-holidays": "^3.25.0",
     "dayjs": "^1.11.13",
     "emailjs-com": "^3.2.0",
     "mui": "^0.0.1",
