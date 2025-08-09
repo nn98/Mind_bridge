@@ -1,32 +1,7 @@
-/* src/css/auth.css */
+/* src/css/login.css */
 
-/* 공통 버튼 스타일 */
-.auth-button {
-  background-color: white;
+/* --- 폼 및 레이아웃 --- */
 
-}
-
-.login-button,
-.social-button {
-  background-color: #a18cd1 !important;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 3px 6px rgba(161, 140, 209, 0.25);
-}
-
-.auth-button:hover,
-.login-button:hover,
-.social-button:hover {
-  background-color: #805dd1 !important;
-}
-
-/* 메인 로그인 폼 */
 .form-section {
   padding: 2.5rem;
   background: #ffffff;
@@ -37,7 +12,6 @@
   text-align: center;
 }
 
-/* 폼 좌우 배치 */
 .form-section-flex {
   display: flex;
   justify-content: space-between;
@@ -49,87 +23,6 @@
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-}
-
-/* 사이드 오른쪽 패널 */
-.form-right {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-  width: 340px;
-  min-width: 300px;
-  margin-bottom: 50px;
-}
-
-/* 입력 필드 */
-.input {
-  padding: 0.6rem;
-  margin: 0.5rem 0;
-  width: 100%;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s;
-}
-
-.input:focus {
-  border-color: #a18cd1;
-  outline: none;
-}
-
-/* 하단 링크 */
-.form-links {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-}
-
-.form-link {
-  color: #a18cd1;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.form-link:hover {
-  text-decoration: underline;
-}
-
-/* 라디오 리스트 */
-.radio-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 1rem;
-  text-align: left;
-}
-
-.radio-list li {
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
-}
-
-.radio-list input[type="radio"] {
-  margin-right: 0.5rem;
-}
-
-/* 소셜 버튼 */
-.social-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  align-items: center;
-}
-
-.social-button {
-  width: 100%;
-  padding: 0.6rem 1rem;
-  font-size: 0.95rem;
-  font-weight: bold;
-  border-radius: 8px;
 }
 
 .form-right-legend {
@@ -154,27 +47,134 @@
   width: 200px;
   margin-left: 530px;
   margin-top: 10px;
-  /* 인라인 스타일과 일치 */
 }
 
-/* 모달 뒷 배경 */
+/* --- 버튼 스타일 --- */
+
+/* 일반 로그인/인증 버튼 (보라색) */
+.login-button,
+.auth-button {
+  background-color: #a18cd1 !important;
+  color: white !important;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(161, 140, 209, 0.25);
+}
+
+.login-button:hover,
+.auth-button:hover {
+  background-color: #805dd1 !important;
+}
+
+/* 모든 소셜 버튼 공통 스타일 (색상 제외) */
+.social-button {
+  width: 100%;
+  padding: 10px 1rem !important;
+  font-size: 0.95rem !important;
+  font-weight: bold !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  /* 텍스트가 모두 대문자로 바뀌는 것 방지 */
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 카카오 로그인 버튼 (색상) */
+.kakao-login-button {
+  background-color: #FEE500 !important;
+  color: #191919 !important;
+  border: none !important;
+}
+
+.kakao-login-button:hover {
+  background-color: #F8E000 !important;
+}
+
+/* 구글 로그인 버튼 (색상) */
+.google-login-button {
+  background-color: #FFFFFF !important;
+  color: #3C4043 !important;
+  border: 1px solid #DADCE0 !important;
+}
+
+.google-login-button:hover {
+  background-color: #F8F9FA !important;
+  border-color: #C6C6C6 !important;
+}
+
+/* --- 소셜 로그인 UI --- */
+
+.social-buttons {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.social-login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #757575;
+  font-size: 0.875rem;
+  margin: 16px 0;
+}
+
+.divider-line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.divider-text {
+  margin: 0 16px;
+}
+
+.button-container1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- 기타 UI 요소 --- */
+
+.form-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.form-link {
+  color: #a18cd1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.form-link:hover {
+  text-decoration: underline;
+}
+
+/* 모달 및 토스트 메시지 스타일 */
 .modal-backdrop-2 {
   position: fixed;
-  /* 화면 전체를 덮도록 고정 */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
-  /* 반투명 검은색 배경 */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  /* 다른 요소들보다 위에 표시 */
 }
 
-/* 모달 내용이 들어가는 흰색 박스 */
 .modal-content-2 {
   background-color: white;
   padding: 2rem 2.5rem;
@@ -182,16 +182,13 @@
   width: 90%;
   max-width: 600px;
   max-height: 85vh;
-  /* 화면 높이의 85%를 넘지 않도록 설정 */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   position: relative;
   display: flex;
   flex-direction: column;
-  /* 내용을 세로로 정렬 */
   color: #333;
 }
 
-/* 모달 닫기 버튼 (X) */
 .modal-close-btn-2 {
   position: absolute;
   top: 15px;
@@ -205,99 +202,35 @@
   line-height: 1;
 }
 
-.modal-close-btn:hover {
-  color: #333;
-}
-
-/* 모달 제목 (이용약관, 개인정보처리방침 등) */
-.modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  color: #333;
-  font-weight: 600;
-}
-
-/* 스크롤이 적용될 텍스트 영역 */
 .terms-text-content-2 {
   flex-grow: 1;
-  /* 제목과 버튼을 제외한 나머지 공간을 모두 차지 */
   overflow-y: auto;
-  /* 내용이 길어지면 수직 스크롤 자동 생성 */
   padding-right: 15px;
-  /* 스크롤바와 텍스트 간격 */
   line-height: 1.7;
-}
-
-.terms-text-content h4 {
-  margin-top: 1.5em;
-  margin-bottom: 0.8em;
-  font-size: 1.1em;
-  font-weight: bold;
-}
-
-.terms-text-content p {
-  margin-bottom: 1em;
-  font-size: 0.95em;
-}
-
-/* 성별 선택 버튼 (기본 상태) */
-.MuiToggleButton-root {
-  border: 1px solid #d3cce3 !important;
-  /* 연한 보라색 테두리 */
-  color: #a18cd1 !important;
-  /* 기본 글자색을 테마 색상으로 */
-  background-color: #ffffff !important;
-  /* 기본 배경은 흰색 */
-  flex-grow: 1;
-  /* '남성', '여성' 버튼이 동일한 너비를 갖도록 설정 */
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out !important;
-  /* 부드러운 전환 효과 */
-}
-
-/* 성별 선택 버튼 위에 마우스를 올렸을 때 */
-.MuiToggleButton-root:hover {
-  background-color: #f5f3f7 !important;
-  /* 아주 연한 보라색 배경 */
-}
-
-/* 성별 버튼이 '선택'되었을 때의 스타일 */
-.MuiToggleButton-root.Mui-selected {
-  background-color: #a18cd1 !important;
-  /* 메인 테마 색상으로 배경 변경 */
-  color: white !important;
-  /* 선택 시 글자는 흰색으로 */
-  border-color: #a18cd1 !important;
-  /* 테두리 색상도 통일 */
-}
-
-/* 선택된 버튼 위에 마우스를 올렸을 때 */
-.MuiToggleButton-root.Mui-selected:hover {
-  background-color: #8972b4 !important;
-  /* 살짝 더 진한 색상으로 변경 */
 }
 
 .app-toast {
   position: fixed;
   left: 50%;
-  top: 36px;
+  bottom: 36px;
   transform: translateX(-50%);
   background-color: #333;
   color: white;
   padding: 12px 20px;
   border-radius: 8px;
   z-index: 2000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: toast-slide-down 0.4s ease-out;
 }
 
 @keyframes toast-slide-down {
   from {
-    top: -500px; /* 화면 위쪽 바깥에서 시작 */
+    bottom: -50px;
     opacity: 0;
   }
+
   to {
-    top: 30px; /* 최종 위치 */
+    bottom: 36px;
     opacity: 1;
   }
 }

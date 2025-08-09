@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
 
-const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
+const BoardSection = ({ user }) => {
   const [posts, setPosts] = useState([]);
   const [selectedBoard, setSelectedBoard] = useState("general");
   const [visibility, setVisibility] = useState("공개");
@@ -10,7 +9,6 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   const [content, setContent] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
-  const { getToken } = useAuth();
 
   const [editingPostId, setEditingPostId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
@@ -30,13 +28,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     }
   };
 
-  const getAuthToken = async () => {
-    try {
-      const clerkToken = await getToken();
-      if (clerkToken) return clerkToken;
-    } catch (e) {
-      console.warn("Clerk 토큰 가져오기 실패, 커스텀 토큰으로 대체합니다.", e);
-    }
+  const getAuthToken = () => {
     return localStorage.getItem("token");
   };
 
@@ -47,7 +39,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const handleSubmit = async () => {
-    const token = await getAuthToken();
+    const token = getAuthToken();
     if (!token) {
       alert("로그인 후 작성해주세요.");
       return;
@@ -62,8 +54,8 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     const newPost = {
       content,
       visibility: visibilityValue,
-      userEmail: user.email,  // 필드명 수정
-      userNickname: user.fullName || user.nickname || "익명", //수정부분을 위한 username > userNickname 으로 변경 
+      userEmail: user.email,
+      userNickname: user.nickname || "익명",
     };
 
     try {
@@ -84,7 +76,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   const handleDelete = async (id) => {
     if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
 
-    const token = await getAuthToken();
+    const token = getAuthToken();
     if (!token) {
       alert("삭제 권한이 없습니다.");
       return;
@@ -103,13 +95,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const handleEditStart = (post) => {
-
-    const currentUserName = user.fullName || user.nickname;
-
-    console.log("Current User Name:", currentUserName);
-    console.log("Post User Name:", post.userNickname);
-
-    if (post.userNickname === currentUserName) {
+    if (post.userNickname === user.nickname) {
       setEditingPostId(post.id);
       setEditingContent(post.content);
     } else {
@@ -118,7 +104,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const handleUpdateSubmit = async (id) => {
-    const token = await getAuthToken();
+    const token = getAuthToken();
     if (!token) {
       alert("로그인 정보가 유효하지 않습니다.");
       return;
@@ -134,20 +120,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
       return;
     }
 
-    const visibilityMap = {
-      공개: "public",
-      비공개: "private",
-      친구만: "friends",
-    };
-
     const visibilityValue = visibilityMap[post.visibility] || "public";
-
-    console.log("PUT 요청 보낼 데이터:", {
-      content: editingContent,
-      visibility: visibilityValue,
-      userEmail: post.userEmail,
-      userNickname: post.userNickname,
-    });
 
     try {
       await axios.put(
@@ -181,16 +154,13 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
   };
 
   const filteredPosts = posts.filter((post) => {
-
     const matchBoard =
       selectedBoard === "general"
         ? post.visibility === "public"
         : post.visibility === "private";
-
     const matchSearch = post.content
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-
     return matchBoard && matchSearch;
   });
 
@@ -199,8 +169,6 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
     const dateB = new Date(b.createdAt || 0);
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
   });
-
-  const currentUserName = user?.fullName || user?.nickname;
 
   return (
     <section className="board-section">
@@ -233,7 +201,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {(isSignedIn || isCustomLoggedIn) && (
+          {user && (
             <button onClick={() => setShowForm(true)}>작성하기</button>
           )}
         </div>
@@ -281,7 +249,7 @@ const BoardSection = ({ user, isSignedIn, isCustomLoggedIn }) => {
                 </div>
               ) : (
                 <>
-                  {currentUserName === post.userNickname && (
+                  {user?.nickname === post.userNickname && (
                     <div>
                       <button className="post-edit" onClick={() => handleEditStart(post)}>수정</button>
                       <button className="post-delete" onClick={() => handleDelete(post.id)}>x</button>

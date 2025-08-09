@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import emailjs from 'emailjs-com';
-import { useUser } from '@clerk/clerk-react';
 import '../css/Picture.css';
 
 const Toast = ({ message, show }) => (
@@ -10,7 +9,6 @@ const Toast = ({ message, show }) => (
 );
 
 function EmailComposer({ customUser, isCustomLoggedIn }) {
-  const { isLoaded, isSignedIn, user } = useUser();
   const form = useRef();
   const editorRef = useRef(null);
 
@@ -26,30 +24,28 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoaded && !isCustomLoggedIn) {
+    if (isCustomLoggedIn && !customUser) {
       setIsLoading(true);
       setUserInfo({ name: '사용자', email: '정보 로딩 중...' });
       return;
     }
 
-    setIsLoading(false);
-    let userName = '';
-    let userEmail = '';
-
-    if (isSignedIn && user) {
-      userName = user.fullName || '';
-      userEmail = user.primaryEmailAddress?.emailAddress || '';
-    } else if (isCustomLoggedIn && customUser) {
-      userName = customUser.nickname || '';
-      userEmail = customUser.email || '';
+    // 로그인 완료 상태
+    if (isCustomLoggedIn && customUser) {
+      setUserInfo({
+        name: customUser.nickname || '사용자',
+        email: customUser.email || '이메일 정보 없음'
+      });
     }
+    else {
+      setUserInfo({
+        name: '사용자',
+        email: '로그인이 필요합니다.'
+      });
+    }
+    setIsLoading(false);
 
-    setUserInfo({
-      name: userName || '사용자',
-      email: userEmail || '로그인이 필요합니다.'
-    });
-
-  }, [isLoaded, isSignedIn, user, customUser, isCustomLoggedIn]);
+  }, [customUser, isCustomLoggedIn]);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== message) {
@@ -101,6 +97,7 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
 
     const apiKey = process.env.REACT_APP_KEY;
     const apiAddress = process.env.REACT_APP_PICTURE_ADDRESS || 'https://api.openai.com/v1/images/generations';
+
     const promptTemplate = `
   쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 $Picture 일러스트입니다.
 

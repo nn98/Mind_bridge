@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@clerk/clerk-react": "^5.37.0",
     "@clerk/localizations": "^3.18.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
 import "./css/App.css";
@@ -34,19 +33,15 @@ import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/AdminPage";
 
-import { sectionLabels } from "./constants/sectionLabels";
-import { formInputs } from "./constants/formInputs";
-import { buttonLabels } from "./constants/buttonLabels";
-import { formLinks } from "./constants/formLinks";
 
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn, user } = useUser(); //clerk로그인 
+
   const [appToast, setAppToast] = useState({ show: false, message: "" });
 
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);//커스텀로그인 여부
-  const [customUser, setCustomUser] = useState(null);//커스텀로그인 정보
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [customUser, setCustomUser] = useState(null);
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
@@ -60,7 +55,6 @@ const App = () => {
   const [scrollTarget, setScrollTarget] = useState(null);
   const [isOutsideClicked, setIsOutsideClicked] = useState(false);
 
-  // 감정 분석 모달을 위한 상태
   const [isEmotionModalOpen, setIsEmotionModalOpen] = useState(false);
 
   const loginRef = useRef(null);
@@ -82,35 +76,29 @@ const App = () => {
     "/admin",
   ].includes(location.pathname);
 
-  //창을 새로고침하면 정보를 갱신함
   useEffect(() => {
     fetchCustomUser();
   }, []);
 
-  
-
-  //사용자 정보 갱신 
   const fetchCustomUser = () => {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:8080/api/me", {
+        .get("http://localhost:8080/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
           setCustomUser(res.data);
           setIsCustomLoggedIn(true);
-          localStorage.setItem("customUser", JSON.stringify(res.data));
         })
         .catch(() => {
+          localStorage.removeItem("token");
           setCustomUser(null);
           setIsCustomLoggedIn(false);
-          localStorage.removeItem("customUser");
         });
     } else {
       setIsCustomLoggedIn(false);
       setCustomUser(null);
-      localStorage.removeItem("customUser");
     }
   };
 
@@ -120,7 +108,6 @@ const App = () => {
       setTimeout(() => {
         setAppToast({ show: false, message: "" });
       }, 3000);
-      // 메시지를 본 후에는 history에서 제거하여 새로고침 시 다시 뜨지 않게 합니다.
       navigate(location.pathname, { replace: true });
     }
   }, [location, navigate]);
@@ -153,60 +140,30 @@ const App = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location]);
 
-  const showSection = (section) => {
-    const routes = {
-      about: "/",
-      faq: "/faq",
-      self: "/self",
-      board: "/board",
-      img: "/img",
-      signup: "/signup",
-      login: "/login",
-      map: "/map",
-      region: "/hospital-region",
-      chat: "popup-map",
-      library: "library",
-    };
-    if (section === "chat") {
-      setMapVisible(true);
-    } else {
-      navigate(routes[section] || "/");
-    }
-  };
-
   const BoardRouteElement = () => {
-    if (isCustomLoggedIn && customUser === null)
+    if (isCustomLoggedIn && customUser === null) {
       return <div>사용자 정보 불러오는 중...</div>;
-    if (isSignedIn && user)
-      return <BoardSection user={user} isSignedIn={true} />;
-    if (isCustomLoggedIn && customUser)
-      return <BoardSection user={customUser} isSignedIn={true} />;
-    return <Navigate to="/login" />;
+    }
+    if (isCustomLoggedIn && customUser) {
+      return <BoardSection user={customUser} />;
+    }
+    return <Navigate to="/login" state={{ message: "로그인이 필요한 서비스입니다." }} />;
   };
 
   const authSectionWrapper = (type, extraProps = {}) => (
     <div
       ref={loginRef}
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        background: "#f5f5f5",
-        zIndex: 1000,
+        position: "fixed", top: 0, left: 0, width: "100%",
+        height: "100%", background: "#f5f5f5", zIndex: 1000,
       }}
     >
       {!isOutsideClicked && (
         <AuthSection
           type={type}
-          sectionLabels={sectionLabels}
-          formInputs={formInputs}
-          buttonLabels={buttonLabels}
-          formLinks={formLinks}
           signupState={signupState}
           setSignupState={setSignupState}
-          onLoginSuccess={() => setIsOutsideClicked(false)}
+          onLoginSuccess={fetchCustomUser}
           {...extraProps}
         />
       )}
@@ -223,8 +180,6 @@ const App = () => {
             infoRef={infoRef}
             setScrollTarget={setScrollTarget}
             isCustomLoggedIn={isCustomLoggedIn}
-            setIsCustomLoggedIn={setIsCustomLoggedIn}
-            setCustomUser={setCustomUser}
             customUser={customUser}
           />
           <FloatingSidebar
@@ -238,7 +193,7 @@ const App = () => {
             setIsOpen={setIsOpen}
             tab={tab}
             setTab={setTab}
-            selected={selectedChat}
+            selectedChat={selectedChat}
             setSelectedChat={setSelectedChat}
             resultText={resultText}
             customUser={customUser}
@@ -251,18 +206,11 @@ const App = () => {
       {faqVisible && !isAuthPageOrAdmin && <Faq />}
 
       {mapVisible && !isAuthPageOrAdmin && (
-        <div
-          style={{
-            position: "fixed",
-            top: "150px",
-            right: "150px",
-            zIndex: 1000,
-            background: "white",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-            borderRadius: "12px",
-            padding: "10px",
-          }}
-        >
+        <div style={{
+          position: "fixed", top: "150px", right: "150px", zIndex: 1000,
+          background: "white", boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+          borderRadius: "12px", padding: "10px",
+        }}>
           <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
           <Map />
         </div>
@@ -291,7 +239,6 @@ const App = () => {
               refs={{ introRef, locationRef, servicesRef, infoRef }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
-
               setIsEmotionModalOpen={setIsEmotionModalOpen}
             />
           }
@@ -330,23 +277,24 @@ const App = () => {
         />
         <Route
           path="/login"
+          element={authSectionWrapper("login", {
+            setIsCustomLoggedIn,
+            setCustomUser,
+          })}
+        />
+        <Route
+          path="/logout"
           element={
-            isSignedIn ? (
-              <Navigate to="/" />
-            ) : (
-              authSectionWrapper("login", {
-                setIsCustomLoggedIn,
-                setCustomUser,
-              })
-            )
+            <AuthSection
+              type="logout"
+              setIsCustomLoggedIn={setIsCustomLoggedIn}
+              setCustomUser={setCustomUser}
+            />
           }
         />
-        <Route path="/logout" element={<AuthSection type="logout" />} />
         <Route
           path="/signup"
-          element={
-            isSignedIn ? <Navigate to="/board" /> : authSectionWrapper("signup")
-          }
+          element={authSectionWrapper("signup")}
         />
         <Route path="/find-id" element={authSectionWrapper("find-id")} />
         <Route

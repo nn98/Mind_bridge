@@ -1,7 +1,4 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { sectionLabels } from "../constants/sectionLabels";
-import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
-import { toast } from 'react-toastify';
 
 const Header = ({
   introRef,
@@ -9,16 +6,12 @@ const Header = ({
   infoRef,
   setScrollTarget,
   isCustomLoggedIn,
-  setIsCustomLoggedIn,
-  setCustomUser,
   customUser,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn } = useUser();
-  const { signOut } = useClerk();
 
-  const isLoggedIn = isSignedIn || isCustomLoggedIn;
+  const isLoggedIn = isCustomLoggedIn;
 
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {
@@ -32,21 +25,12 @@ const Header = ({
   };
 
   const handleScrollToIntro = () => scrollOrNavigate(introRef, "intro");
-  const handleScrollToServices = () =>
-    scrollOrNavigate(servicesRef, "services");
+  const handleScrollToServices = () => scrollOrNavigate(servicesRef, "services");
   const handleScrollToInfo = () => scrollOrNavigate(infoRef, "info");
-  const handleBoardClick = () => navigate("/board"); // 로그인 여부는 App에서 판단
+  const handleBoardClick = () => navigate("/board");
 
-  //로그아웃
-  const handleLogout = async () => {
-    // Clerk 로그아웃
-    signOut();
-    // 커스텀 로그인 토큰 삭제 및 상태 초기화
-    localStorage.removeItem("token");
-    setIsCustomLoggedIn(false);
-    setCustomUser(null);
-
-    navigate("/", { state: { message: "로그아웃 되었습니다!" } });
+  const handleLogout = () => {
+    navigate("/logout");
   };
 
   return (
@@ -61,39 +45,23 @@ const Header = ({
 
         <div className="nav-center">
           <div className="nav-item-wrapper">
-            <div
-              className="nav-link"
-              style={{ cursor: "pointer" }}
-              onClick={handleScrollToIntro}
-            >
-              {sectionLabels["about"]}
+            <div className="nav-link" style={{ cursor: "pointer" }} onClick={handleScrollToIntro}>
+              소개
             </div>
           </div>
           <div className="nav-item-wrapper">
-            <div
-              className="nav-link"
-              style={{ cursor: "pointer" }}
-              onClick={handleScrollToServices}
-            >
-              {sectionLabels["services"]}
+            <div className="nav-link" style={{ cursor: "pointer" }} onClick={handleScrollToServices}>
+              서비스
             </div>
           </div>
           <div className="nav-item-wrapper">
-            <div
-              className="nav-link"
-              style={{ cursor: "pointer" }}
-              onClick={handleScrollToInfo}
-            >
-              {sectionLabels["info"]}
+            <div className="nav-link" style={{ cursor: "pointer" }} onClick={handleScrollToInfo}>
+              정보
             </div>
           </div>
           <div className="nav-item-wrapper">
-            <div
-              className="nav-link"
-              style={{ cursor: "pointer" }}
-              onClick={handleBoardClick}
-            >
-              {sectionLabels["board"]}
+            <div className="nav-link" style={{ cursor: "pointer" }} onClick={handleBoardClick}>
+              게시판
             </div>
           </div>
         </div>
@@ -101,7 +69,9 @@ const Header = ({
         <div className="nav-right">
           {isLoggedIn ? (
             <>
-              <UserButton />
+              <span className="user-welcome-text">
+                {customUser?.nickname || '사용자'}님 환영합니다!
+              </span>
 
               {customUser?.role === "ADMIN" && (
                 <button
