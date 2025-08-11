@@ -24,7 +24,7 @@ import SelfTest from "./components/SelfTest";
 import BoardSection from "./components/BoardSection";
 import ChatModal from "./components/ChatModal";
 import Footer from "./components/Footer";
-import AboutSection from './components/about/AboutSection';
+import AboutSection from './components/about/AboutSection/AboutSectionMain';
 import AuthSection from "./components/AuthSection";
 import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";

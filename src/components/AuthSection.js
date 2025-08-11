@@ -333,11 +333,11 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     }
     console.log(`KAKAO_REDIRECT_URI${ KAKAO_REDIRECT_URI }`);
     window.Kakao.Auth.authorize({
-      redirectUri: KAKAO_REDIRECT_URI,
-      // scope: 'account_email,profile_nickname',  // 필수 권한 명시
+      redirectUri:KAKAO_REDIRECT_URI,
+      scope: 'account_email,profile_nickname',  // 필수 권한 명시
     });
-    // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=kakao`;
-    // window.location.href = authUrl;
+    const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
+    //window.location.href = authUrl;
   };
 
   const handleGoogleLogin = () => {

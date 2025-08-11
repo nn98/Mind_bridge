@@ -1,5 +1,4 @@
 import '../../../css/AboutSection.css';
-import BannerSlider from '../../BannerSlider';
 import AboutCards from './AboutCards';
 import ServicesGrid from './ServicesGrid';
 import HowItWorks from './HowItWorks';
@@ -7,6 +6,7 @@ import ContactForm from './ContactForm';
 import ContactInfo from './ContactInfo';
 import MonthlyLineChart from '../charts/MonthlyLineChart';
 import useSmoothScroll from '../hooks/useSmoothScroll';
+import HeroBanner from '../../banner/HeroBanner/HeroBanner';
 
 const AboutSection = ({ refs, scrollTarget, setScrollTarget, setIsEmotionModalOpen }) => {
   const { introRef, servicesRef, infoRef } = refs;
@@ -23,7 +23,7 @@ const AboutSection = ({ refs, scrollTarget, setScrollTarget, setIsEmotionModalOp
 
   return (
     <>
-      <BannerSlider />
+      <HeroBanner />
       <section ref={introRef} className="section about-section">
         <h1 className="about-title">회사 소개</h1>
         <AboutCards />
