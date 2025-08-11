@@ -20,6 +20,8 @@ import {
 
 import "../css/login.css";
 
+const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
+const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
 const BACKEND_URL = "http://localhost:8080";
 
 const TermsModal = ({ content, onClose, onConfirm }) => {
@@ -127,6 +129,25 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
   const navigate = useNavigate();
   const logoutExecuted = useRef(false);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init(KAKAO_REST_API_KEY);  // .env에 보관된 키 사용 권장
+        console.log('Kakao SDK initialized:', window.Kakao.isInitialized());
+      }
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   useEffect(() => {
     const processSocialLogin = async (provider, code) => {
@@ -306,14 +327,17 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   };
 
   const handleKakaoLogin = () => {
-    const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
-    const REDIRECT_URI = "http://localhost:3000/login/wait";
     if (!KAKAO_REST_API_KEY) {
       alert("카카오 로그인 설정이 올바르지 않습니다.");
       return;
     }
-    const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=kakao`;
-    window.location.href = authUrl;
+    console.log(`KAKAO_REDIRECT_URI${ KAKAO_REDIRECT_URI }`);
+    window.Kakao.Auth.authorize({
+      redirectUri: KAKAO_REDIRECT_URI,
+      // scope: 'account_email,profile_nickname',  // 필수 권한 명시
+    });
+    // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=kakao`;
+    // window.location.href = authUrl;
   };
 
   const handleGoogleLogin = () => {
