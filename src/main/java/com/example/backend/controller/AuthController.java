@@ -45,4 +45,20 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
     }
+
+    @PostMapping("/api/auth/login/kakao")
+    public ResponseEntity<?> kakaoLogin(@RequestBody LoginRequest loginRequest) {
+
+        try {
+            // 인증 성공 시 JWT 토큰 생성
+            String token = jwtUtil.generateToken(loginRequest.getEmail());
+
+            // 토큰을 포함한 응답 리턴
+            return ResponseEntity.ok(new LoginResponse(token));
+
+        } catch (AuthenticationException ex) {
+            // 인증 실패 시 401 응답
+            return ResponseEntity.status(401).body("Invalid email or password");
+        }
+    }
 }
