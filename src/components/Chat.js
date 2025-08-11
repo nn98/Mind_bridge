@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 const apiKey = process.env.REACT_APP_KEY;
 const apiAddress = process.env.REACT_APP_CHAT_ADDRESS;
+//ㅊㄱ
+const BACKEND_URL = "http://localhost:8080";
 
 const questionOrder = [
   "이름을 입력해주세요.",
@@ -20,7 +22,7 @@ const fieldKeys = [
   "이전상담경험",
 ];
 
-const Chat = ({ setIsOpen ,customUser }) => {
+const Chat = ({ setIsOpen, customUser }) => {
   const [step, setStep] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatHistory, setChatHistory] = useState([
@@ -228,7 +230,37 @@ const Chat = ({ setIsOpen ,customUser }) => {
     }
   };
 
-  const handleEndChat = () => {
+  const handleEndChat = async () => {
+    try {
+      const token = localStorage.getItem("token");  // 토큰 꺼내기
+
+      if (!token) { //없으면 백 
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/counselling/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,  // 여기 추가
+        },
+        body: JSON.stringify({
+          email: customUser?.email || "", // 이메일 필요
+          userCounsellingSummation: form.상태 || "",
+          userCounsellingEmotion: form.상담받고싶은내용 || "",
+          counselorSummation: "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("DB 저장 실패");
+      }
+      console.log("✅ DB 저장 완료");
+    } catch (err) {
+      console.error("❌ DB 저장 중 오류:", err);
+    }
+
     setChatHistory((prev) => [
       ...prev,
       { sender: "ai", message: "상담이 종료되었습니다. 이용해 주셔서 감사합니다." },
