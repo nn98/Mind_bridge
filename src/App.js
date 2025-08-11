@@ -32,6 +32,7 @@ import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/AdminPage";
+import KakaoWaitPage from './components/KakaoWaitPage'
 
 
 const App = () => {
@@ -282,6 +283,7 @@ const App = () => {
             setCustomUser,
           })}
         />
+        <Route path="/login/wait" element={<KakaoWaitPage />} />
         <Route
           path="/logout"
           element={

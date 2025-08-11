@@ -21,7 +21,7 @@ import {
 import "../css/login.css";
 
 const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
-const REDIRECT_URI = "http://localhost:3000/login";
+const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
 const BACKEND_URL = "http://localhost:8080";
 
 const TermsModal = ({ content, onClose, onConfirm }) => {
@@ -331,8 +331,10 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
       alert("카카오 로그인 설정이 올바르지 않습니다.");
       return;
     }
+    console.log(`KAKAO_REDIRECT_URI${ KAKAO_REDIRECT_URI }`);
     window.Kakao.Auth.authorize({
-      redirectUri: REDIRECT_URI
+      redirectUri: KAKAO_REDIRECT_URI,
+      // scope: 'account_email,profile_nickname',  // 필수 권한 명시
     });
     // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=kakao`;
     // window.location.href = authUrl;
