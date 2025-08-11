@@ -1,13 +1,24 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.LoginRequest;
+import com.example.backend.dto.LoginResponse;
 import com.example.backend.security.JwtUtil;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +28,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+
+        try {
+            // 이메일, 비밀번호 기반 인증 시도
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword())
+            );
+
+            // 인증 성공 시 JWT 토큰 생성
+            String token = jwtUtil.generateToken(loginRequest.getEmail());
+
+            // 토큰을 포함한 응답 리턴
+            return ResponseEntity.ok(new LoginResponse(token));
+
+        } catch (AuthenticationException ex) {
+            // 인증 실패 시 401 응답
+            return ResponseEntity.status(401).body("Invalid email or password");
+        }
+    }
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${kakao.rest.api.key}")
