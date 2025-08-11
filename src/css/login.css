@@ -87,6 +87,7 @@
 
 /* 카카오 로그인 버튼 (색상) */
 .kakao-login-button {
+  /*background-image: url("../../public/img/kakao_login_medium_wide.png");*/
   background-color: #FEE500 !important;
   color: #191919 !important;
   border: none !important;
