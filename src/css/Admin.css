@@ -1,237 +1,233 @@
 /* 관리자 대시보드 공통 레이아웃 */
 .admin-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .admin-no-access {
-    text-align: center;
-    margin-top: 100px;
-    font-size: 1.5rem;
-    color: #ff4d4f;
-    font-weight: bold;
+  text-align: center;
+  margin-top: 100px;
+  font-size: 1.5rem;
+  color: #ff4d4f;
+  font-weight: bold;
 }
 
 .admin-container {
-    width: 100%;
-    height: 150vh;
-    margin: 5px auto;
-    padding: 20px;
-    color: #333;
-    background-color: #ffffff;
-    border-radius: 12px;
-    display: flex;
-    /* flex-direction: column 제거 */
-    flex-direction: column;
-    /* 세로로 배치 유지하려면 필요, 아래 설명 참고 */
-    gap: 20px;
+  width: 100%;
+  height: 1100px;
+  margin: 5px auto;
+  padding: 20px;
+  color: #333;
+  background-color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column; /* 세로 배치 */
+  gap: 20px;
 }
 
 .admin-header h1 {
-    font-size: 2rem;
-    margin-bottom: 30px;
-    color: #a18cd1;
-    text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #a18cd1;
+  text-align: center;
 }
 
 .admin-stats {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
 }
 
 .admin-card {
-    flex: 1;
-    min-width: 150px;
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    font-size: 1rem;
-    text-align: center;
-    font-weight: 500;
+  flex: 1;
+  min-width: 150px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 500;
 }
 
+/* 보라-핑크 박스 */
 .section-container {
-    width: 50%;
-    height: 1000px;
-    margin: 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  width: 50%;
+  height: 520px;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* 내부에서 스크롤 처리 */
 }
 
 .section-row {
-    display: flex;
-    gap: 20px;
-    width: 100%;
+  display: flex;
+  gap: 20px;
+  width: 100%;
 }
 
+/* 오타여도 기존 클래스 유지 */
 .section-wraaper {
-    width: 100%;
-    height: 94%;
-    margin: 5px 5px 5px 0px;
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  width: 100%;
+  height: 94%;
+  margin: 5px 5px 5px 0px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 .admin-section-title {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #ffffff;
 }
 
-.admin-table {
-    width: 100%;
-    height: 94%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
+/* ✅ 테이블 스크롤 전용 박스 */
+.table-scroll {
+  max-height: 420px;      /* 원하는 높이로 조절 */
+  overflow-y: auto;       /* 세로 스크롤 */
+  overflow-x: auto;       /* 가로 스크롤 필요시 */
+  background: #fff;
+  border-radius: 8px;
 }
+
+/* 테이블 기본 */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;    /* 컬럼 너비 안정화 */
+  background-color: white;
+  border-radius: 8px;
+}
+
+/* ❌ (중요) table 자체엔 고정 height/overflow 주지 않음 */
+/* 기존 css의 .admin-table { height: 500px; overflow: auto; } 제거됨 */
 
 .admin-user th,
 .admin-user td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+  padding: 5px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
-.admin-user th {
-    background-color: #f0f2f5;
-    font-weight: 600;
+/* ✅ 헤더 고정 */
+.table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f0f2f5;
+  font-weight: 600;
 }
 
 .admin-user tr:hover {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 .admin-logo-link {
-    position: relative;
-    display: inline-block;
-    width: 200px;
-    top: 10px;
-    left: 40px;
-    line-height: 0;
-    font-size: 0;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    background: none;
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  top: 10px;
+  left: 40px;
+  line-height: 0;
+  font-size: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
 }
 
 .admin-logo {
-    width: 200px;
-    z-index: 1001;
+  width: 200px;
+  z-index: 1001;
 }
 
 .admin-header input {
-    width: 500px;
-    padding: 10px 50px 10px 15px;
-    font-size: 16px;
-    margin-bottom: 15px;
-    border-radius: 30px;
-    border: 1px solid #a18cd1;
+  width: 500px;
+  padding: 10px 50px 10px 15px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  border-radius: 30px;
+  border: 1px solid #a18cd1;
 }
 
 .admin-header input:focus {
-    border-color: #4c00ff;
-    outline: none;
-    box-shadow: 0 0 5px #4c00ff;
-    transition: border-color 0.3s ease;
+  border-color: #4c00ff;
+  outline: none;
+  box-shadow: 0 0 5px #4c00ff;
+  transition: border-color 0.3s ease;
 }
 
 /* 📅 MUI DateCalendar 커스텀 스타일 */
 .MuiDateCalendar-root {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 450px !important;
-    max-height: 450px !important;
-    font-family: 'Pretendard', sans-serif;
-    text-align: center;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    margin-left: 1px !important;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  width: 450px !important;
+  max-height: 450px !important;
+  font-family: 'Pretendard', sans-serif;
+  text-align: center;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  margin-left: 1px !important;
 }
 
 .css-1n1xn3x-MuiPickersSlideTransition-root-MuiDayCalendar-slideTransition {
-    overflow: hidden !important;
+  overflow: hidden !important;
 }
 
 /* 날짜 셀 */
 .MuiPickersDay-root {
-    padding: 8px 6px;
-    border-radius: 6px !important;
-    background: #f5ecff !important;
-    color: #000000;
-    min-width: 50px;
-    min-height: 45px;
+  padding: 8px 6px;
+  border-radius: 6px !important;
+  background: #f5ecff !important;
+  color: #000000;
+  min-width: 50px;
+  min-height: 45px;
 }
 
 /* 요일 라벨 */
 .MuiDayCalendar-weekDayLabel {
-    font-size: 1.2rem !important;
-    margin: 0 9px !important;
+  font-size: 1.2rem !important;
+  margin: 0 9px !important;
 }
 
 /* 요일 라벨 색상 */
-.MuiDayCalendar-weekDayLabel:nth-child(1) {
-    color: red;
-}
-
-.MuiDayCalendar-weekDayLabel:nth-child(7) {
-    color: blue;
-}
-
-.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(1) {
-    color: red;
-}
-
-.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(7) {
-    color: blue;
-}
+.MuiDayCalendar-weekDayLabel:nth-child(1) { color: red; }
+.MuiDayCalendar-weekDayLabel:nth-child(7) { color: blue; }
+.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(1) { color: red; }
+.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(7) { color: blue; }
 
 /* 저번달, 이번달 요일 숫자 색상 */
-.MuiPickersDay-dayOutsideMonth:nth-child(1) {
-    color: red;
-    opacity: 0.4;
-}
-
-.MuiPickersDay-dayOutsideMonth:nth-child(7) {
-    color: blue;
-    opacity: 0.4;
-}
-
-.MuiPickersDay-dayOutsideMonth{
-    opacity: 0.4;
-}
+.MuiPickersDay-dayOutsideMonth:nth-child(1) { color: red; opacity: 0.4; }
+.MuiPickersDay-dayOutsideMonth:nth-child(7) { color: blue; opacity: 0.4; }
+.MuiPickersDay-dayOutsideMonth { opacity: 0.4; }
 
 /* 오늘 날짜 */
 .MuiPickersDay-today {
-    background: #bda1ff !important;
-    border-radius: 6px;
+  background: #bda1ff !important;
+  border-radius: 6px;
 }
 
 /* 선택된 날짜 */
 .MuiPickersDay-root.Mui-selected {
-    background: #e591ff !important;
-    color: #ffffff !important;
+  background: #e591ff !important;
+  color: #ffffff !important;
 }
 
-.MuiPickersDay-root{
-    background-color: #4c00ff;
+/* 의도된 기본색? (필요 없으면 삭제 가능) */
+.MuiPickersDay-root {
+  background-color: #4c00ff;
 }
