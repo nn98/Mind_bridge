@@ -3,7 +3,6 @@ import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-
 import axios from "axios";
 
 import "./css/App.css";
-import "./css/board.css";
 import "./css/chat.css";
 import "./css/feature.css";
 import "./css/header.css";
@@ -21,17 +20,17 @@ import Map from "./components/Map";
 import Header from "./components/Header";
 import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
-import BoardSection from "./components/BoardSection";
-import ChatModal from "./components/ChatModal";
+import ChatModal from './components/chat-modal/ChatModal';
 import Footer from "./components/Footer";
 import AboutSection from './components/about/AboutSection/AboutSectionMain';
+import { BoardSection } from './components/board/BoardSectionmain';
 import AuthSection from "./components/AuthSection";
 import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
-import AdminPage from "./components/AdminPage";
+import AdminPage from './components/admin/AdminPage';
 import KakaoWaitPage from './components/KakaoWaitPage'
 
 
