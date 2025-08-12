@@ -1,4 +1,3 @@
-// src/components/admin/components/PostsPanel.js
 import React, { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -55,9 +54,35 @@ function getSortValue(row, sortKey) {
     }
 }
 
+function getVisibilityInfo(row) {
+    const visKey = pick(row, ["visibility", "isPublic", "public"]);
+    const v = visKey ? row[visKey] : undefined;
+    let isPublic = false;
+    if (typeof v === "string") isPublic = v.toLowerCase() === "public";
+    else if (typeof v === "boolean") isPublic = v;
+    return { isPublic, label: isPublic ? "공개" : "비공개" };
+}
+
+function isAdminAuthor(row) {
+    const candidates = [];
+    if (row.user) {
+        candidates.push(row.user.role, row.user.roles, row.user.authorities);
+    }
+    candidates.push(row.authorRole, row.role, row.roles, row.authorities);
+    for (const c of candidates) {
+        if (!c) continue;
+        if (Array.isArray(c)) {
+            if (c.some(x => typeof x === "string" && (x.includes("ADMIN") || x.includes("ROLE_ADMIN")))) return true;
+        } else if (typeof c === "string") {
+            if (c.includes("ADMIN")) return true;
+        }
+    }
+    return false;
+}
+
 const PostsPanel = () => {
     const [posts, setPosts] = useState([]);
-    const [page, setPage] = useState(0); // 0-based
+    const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
@@ -66,12 +91,11 @@ const PostsPanel = () => {
     const [search, setSearch] = useState("");
 
     const [sortKey, setSortKey] = useState("createdAt");
-    const [sortDir, setSortDir] = useState("desc"); // 'asc' | 'desc'
+    const [sortDir, setSortDir] = useState("desc");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // 펼쳐진 행 (한 개만)
     const [openRowId, setOpenRowId] = useState(null);
 
     const sortParam = `${sortKey},${sortDir}`;
@@ -114,8 +138,8 @@ const PostsPanel = () => {
         try {
             const token = localStorage.getItem("token");
             await deletePostById(token, postId);
-            setOpenRowId((prev) => (prev === postId ? null : prev));
-            fetch();
+            setOpenRowId((prev) => (prev === postId ? null : prev)); // 펼침 닫기
+            fetch(); // 재조회
         } catch (e) {
             console.error(e);
             alert(
@@ -148,7 +172,7 @@ const PostsPanel = () => {
                 let comp = 0;
                 if (typeof av === "number" && typeof bv === "number") comp = av - bv;
                 else comp = String(av).localeCompare(String(bv), "ko", { numeric: true });
-                if (comp === 0) comp = a.idx - b.idx; // 안정 정렬
+                if (comp === 0) comp = a.idx - b.idx;
                 return sortDir === "asc" ? comp : -comp;
             })
             .map(({ row }) => row);
@@ -158,7 +182,7 @@ const PostsPanel = () => {
         if (!displayRows || displayRows.length === 0) {
             return (
                 <tr>
-                    <td colSpan="5" className="empty">게시글이 없습니다.</td>
+                    <td colSpan="6" className="empty">게시글이 없습니다.</td>
                 </tr>
             );
         }
@@ -189,10 +213,12 @@ const PostsPanel = () => {
             const createdRaw = p[createdKey];
             const createdStr =
                 createdRaw && dayjs(createdRaw).isValid()
-                    ? dayjs(createdRaw).format("YYYY-MM-DD")  // ⬅ 날짜만
+                    ? dayjs(createdRaw).format("YYYY-MM-DD")
                     : "─";
 
             const content = p.content ?? "";
+            const { isPublic, label: visLabel } = getVisibilityInfo(p);
+            const admin = isAdminAuthor(p);
 
             return (
                 <React.Fragment key={id ?? `${nick}-${createdStr}`}>
@@ -202,7 +228,21 @@ const PostsPanel = () => {
                         <td>
                             <span className="ellipsis-email" title={email}>{email}</span>
                         </td>
+
+                        <td className="nowrap">
+                            <span className={`badge ${isPublic ? "badge-public" : "badge-private"}`}>
+                                {visLabel}
+                            </span>
+                            {admin && (
+                                <>
+                                    {" "}
+                                    <span className="badge badge-admin">(관리자)</span>
+                                </>
+                            )}
+                        </td>
+
                         <td className="nowrap">{createdStr}</td>
+
                         <td>
                             {id ? (
                                 <>
@@ -226,7 +266,7 @@ const PostsPanel = () => {
 
                     {openRowId === id && (
                         <tr className="detail-row">
-                            <td colSpan="5">
+                            <td colSpan="6">
                                 <div className="post-content">
                                     {content ? content : <em>내용이 없습니다.</em>}
                                 </div>
@@ -242,7 +282,6 @@ const PostsPanel = () => {
         <div className="section-container posts-panel">
             <h2 className="admin-section-title">📋 게시글</h2>
 
-            {/* 상단 도구줄 */}
             <div className="toolbar">
                 <form onSubmit={onSearchSubmit} className="toolbar-form">
                     <input
@@ -288,15 +327,14 @@ const PostsPanel = () => {
                 </div>
             </div>
 
-            {/* 스크롤 가능한 테이블 래퍼 */}
             <div className="table-scroll">
                 <table className="admin-table posts-table">
-                    {/* 열 너비 지정: 이메일은 가변, 작성일/액션은 고정폭 */}
                     <colgroup>
                         <col style={{ width: 80 }} />
                         <col style={{ width: 160 }} />
-                        <col />                   {/* 이메일 */}
+                        <col />
                         <col style={{ width: 140 }} />
+                        <col style={{ width: 120 }} />
                         <col style={{ width: 120 }} />
                     </colgroup>
 
@@ -305,15 +343,16 @@ const PostsPanel = () => {
                             <th onClick={() => handleHeaderSort("id")} role="button">ID{sortIndicator("id")}</th>
                             <th onClick={() => handleHeaderSort("nickname")} role="button">작성자{sortIndicator("nickname")}</th>
                             <th onClick={() => handleHeaderSort("email")} role="button">이메일{sortIndicator("email")}</th>
+                            <th>유형</th>
                             <th onClick={() => handleHeaderSort("createdAt")} role="button">작성일{sortIndicator("createdAt")}</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="5" className="loading">불러오는 중…</td></tr>
+                            <tr><td colSpan="6" className="loading">불러오는 중…</td></tr>
                         ) : error ? (
-                            <tr><td colSpan="5" className="error">{error}</td></tr>
+                            <tr><td colSpan="6" className="error">{error}</td></tr>
                         ) : (
                             renderRows()
                         )}
@@ -321,7 +360,6 @@ const PostsPanel = () => {
                 </table>
             </div>
 
-            {/* 페이지네이션 */}
             <div className="pagination">
                 <div className="total">총 {totalElements}건</div>
                 <div className="pager">
