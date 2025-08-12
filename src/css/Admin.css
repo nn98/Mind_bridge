@@ -216,7 +216,7 @@
     opacity: 0.4;
 }
 
-.MuiPickersDay-dayOutsideMonth{
+.MuiPickersDay-dayOutsideMonth {
     opacity: 0.4;
 }
 
@@ -232,6 +232,238 @@
     color: #ffffff !important;
 }
 
-.MuiPickersDay-root{
+.MuiPickersDay-root {
     background-color: #4c00ff;
+}
+
+/* ===========================
+   PostsPanel 전용 스타일
+   (.posts-panel 범위로 한정)
+=========================== */
+
+/* 툴바 */
+.posts-panel .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.posts-panel .toolbar-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.posts-panel .toolbar-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.posts-panel .input,
+.posts-panel .select,
+.posts-panel .btn {
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--mb-border, #e3e5e8);
+    background: var(--mb-bg, #fff);
+    color: var(--mb-fg, #111);
+}
+
+.posts-panel .input {
+    padding: 0 10px;
+    min-width: 240px;
+    outline: none;
+}
+
+.posts-panel .input:focus {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+}
+
+.posts-panel .select {
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.posts-panel .btn {
+    padding: 0 12px;
+    border: 1px solid transparent;
+    background: #4f8cff;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.posts-panel .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 스크롤 가능한 테이블 래퍼 */
+.posts-panel .table-scroll {
+    max-height: 520px;
+    /* 필요시 높이 조절 */
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+/* 테이블 기본 */
+.posts-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* 말줄임/너비 고정에 필요 */
+    background: var(--mb-card, #fff);
+    color: var(--mb-fg, #111);
+    border: 1px solid var(--mb-border, #e3e5e8);
+    border-radius: 12px;
+    overflow: hidden;
+    /* radius 적용 */
+}
+
+.posts-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--mb-head, #f7f8fa);
+    color: var(--mb-head-fg, #333);
+    font-weight: 700;
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--mb-border, #e3e5e8);
+    z-index: 1;
+    user-select: none;
+}
+
+.posts-table thead th[role="button"] {
+    cursor: pointer;
+}
+
+.posts-table tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--mb-row-border, #eef0f3);
+    vertical-align: middle;
+}
+
+.posts-table tbody tr:hover {
+    background: var(--mb-hover, #f5f7ff);
+}
+
+/* 말줄임/줄바꿈 제어 */
+.posts-table .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.posts-table .ellipsis-email {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* 긴 이메일 겹침 방지: 말줄임 */
+}
+
+.posts-table .nowrap {
+    white-space: nowrap;
+}
+
+/* 작성일 등 줄바꿈 금지 */
+
+/* 링크/버튼 */
+.posts-table .btn-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #356df3;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.posts-table .btn-link:hover {
+    text-decoration: underline;
+}
+
+.posts-table .btn-danger {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #e36a6a;
+    background: #ffefef;
+    color: #bd2d2d;
+    cursor: pointer;
+}
+
+.posts-table .btn-danger:hover {
+    background: #ffe3e3;
+}
+
+/* 상태 셀 */
+.posts-table .loading,
+.posts-table .error,
+.posts-table .empty {
+    text-align: center;
+    padding: 20px;
+}
+
+/* 펼침(보기) 행 */
+.posts-panel .detail-row .post-content {
+    white-space: pre-wrap;
+    /* 개행 유지 */
+    line-height: 1.6;
+    padding: 12px 14px;
+}
+
+/* 페이지네이션 */
+.posts-panel .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.posts-panel .pager {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.posts-panel .page-indicator {
+    min-width: 90px;
+    text-align: center;
+}
+
+/* 다크모드 변수 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --mb-bg: #1b1b1f;
+        --mb-fg: #e8e8ea;
+        --mb-card: #202127;
+        --mb-head: #2a2c33;
+        --mb-head-fg: #e8e8ea;
+        --mb-border: #363844;
+        --mb-row-border: #2e3040;
+        --mb-hover: #23283a;
+    }
+}
+
+/* 반응형: 좁은 화면에서 이메일/작성일 점진적 축소 (옵션) */
+@media (max-width: 880px) {
+    .posts-table colgroup col:nth-child(3) {
+        width: 200px !important;
+    }
+
+    /* 이메일 */
+}
+
+@media (max-width: 720px) {
+    .posts-table colgroup col:nth-child(3) {
+        width: 150px !important;
+    }
+
+    .posts-table colgroup col:nth-child(4) {
+        width: 150px !important;
+    }
 }

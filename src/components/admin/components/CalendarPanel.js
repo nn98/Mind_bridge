@@ -1,5 +1,3 @@
-// src/components/admin/components/CalendarPanel.js
-import React from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
