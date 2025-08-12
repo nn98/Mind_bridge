@@ -99,8 +99,12 @@ public class PostController {
 
         Post post = postOpt.get();
 
-        // 작성자 확인 (이메일로 비교)
-        if (!post.getUserEmail().equals(authentication.getName())) {
+        //관리자 권한 확인부분
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        // 작성자 확인 (이메일로 비교 or 관리자면 패스)
+        if (!isAdmin &&!post.getUserEmail().equals(authentication.getName())) {
             return ResponseEntity.status(403).body("수정 권한이 없습니다");
         }
 
