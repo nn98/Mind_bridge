@@ -13,5 +13,12 @@ public class AdminStatsDTO {
     private long totalPosts;
     private List<UserDto> users;
     
+    @Data
+    @AllArgsConstructor
+    public static class UserDto {
+        private String nickname;
+        private String email;
+        private String phoneNumber;
+    }
 }
 
