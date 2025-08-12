@@ -159,7 +159,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
     width: 450px !important;
-    max-height: 430px !important;
+    max-height: 450px !important;
     font-family: 'Pretendard', sans-serif;
     text-align: center;
     background-color: #ffffff;
@@ -176,10 +176,10 @@
 .MuiPickersDay-root {
     padding: 8px 6px;
     border-radius: 6px !important;
-    background: #e6ceff !important;
+    background: #f5ecff !important;
     color: #000000;
     min-width: 50px;
-    min-height: 50px;
+    min-height: 45px;
 }
 
 /* 요일 라벨 */
@@ -208,14 +208,17 @@
 /* 저번달, 이번달 요일 숫자 색상 */
 .MuiPickersDay-dayOutsideMonth:nth-child(1) {
     color: red;
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
 .MuiPickersDay-dayOutsideMonth:nth-child(7) {
     color: blue;
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
+.MuiPickersDay-dayOutsideMonth{
+    opacity: 0.4;
+}
 
 /* 오늘 날짜 */
 .MuiPickersDay-today {
@@ -225,21 +228,10 @@
 
 /* 선택된 날짜 */
 .MuiPickersDay-root.Mui-selected {
-    background: #edb3ff !important;
+    background: #e591ff !important;
     color: #ffffff !important;
 }
 
-/* 다른 달 날짜 흐림 처리 */
-.MuiPickersDay-root.Mui-disabled,
-.MuiPickersDay-root.MuiPickersDay-outsideCurrentMonth {
-    color: #bbb !important;
-    opacity: 0.5 !important;
-}
-
-.MuiPickersDay-root.holiday {
-    color: red !important;
-    font-weight: bold !important;
-}
 .MuiPickersDay-root{
     background-color: #4c00ff;
 }
