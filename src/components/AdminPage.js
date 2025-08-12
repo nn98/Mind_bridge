@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   LocalizationProvider,
   DateCalendar,
@@ -11,6 +11,11 @@ import dayjs from "dayjs";
 import Holidays from "date-holidays";
 import { styled } from "@mui/material/styles";
 import "../css/Admin.css";
+
+import axios from "axios";
+
+//총 유저 수 / 토탈 게시글 / 유저 정보 배열
+
 
 // ▒▒ Holiday/요일 강조하는 PickersDay 래퍼 ▒▒
 const HolidayPickersDay = styled(PickersDay, {
@@ -24,6 +29,33 @@ const HolidayPickersDay = styled(PickersDay, {
 export default function AdminPage({ currentUser }) {
   const [value, setValue] = useState("");
   const [date, setDate] = useState(null);
+
+  //총 유저 / 총 게시글 / 유저 정보 배열
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPosts: 0,
+    users: [],
+  });
+
+  //stats 의존성 배열 
+  useEffect(() => {
+    fetchStats();
+  }, [stats]);
+
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("token"); // 토큰 
+      const res = await axios.get("http://localhost:8080/api/admin/stats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setStats(res.data);
+    } catch (error) {
+      console.error("관리자 통계 불러오기 실패:", error);
+    }
+  };
 
   // 엔터 입력 시 핸들러
   const handleKeyDown = (e) => {
@@ -81,10 +113,10 @@ export default function AdminPage({ currentUser }) {
         />
         <div className="admin-stats">
           <div className="admin-card">
-            총 유저 수: <strong>0</strong>
+            총 유저 수: <strong>{stats.totalUsers}</strong>
           </div>
           <div className="admin-card">
-            총 게시글 수: <strong>0</strong>
+            총 게시글 수: <strong>{stats.totalPosts}</strong>
           </div>
         </div>
 
@@ -103,14 +135,21 @@ export default function AdminPage({ currentUser }) {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td
-                      colSpan="3"
-                      style={{ textAlign: "center", padding: "20px" }}
-                    >
-                      유저 정보가 없습니다.
-                    </td>
-                  </tr>
+                  {stats.users.length > 0 ? (
+                    stats.users.map((user, idx) => (
+                      <tr key={idx}>
+                        <td>{user.nickname}</td> 
+                        <td>{user.email}</td>
+                        <td>{user.phoneNumber}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>
+                        유저 정보가 없습니다.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -204,3 +243,4 @@ export default function AdminPage({ currentUser }) {
     </div>
   );
 }
+
