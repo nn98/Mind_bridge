@@ -37,7 +37,7 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    //생성
+    // 생성
     @PostMapping
     public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest postRequest, Authentication authentication) {
 
@@ -61,8 +61,8 @@ public class PostController {
         Post post = new Post();
         post.setContent(postRequest.getContent());
         post.setVisibility(postRequest.getVisibility());
-        post.setUserEmail(userEmail);                    // 이메일 설정
-        post.setUserNickname(user.getNickname());        // 닉네임 설정
+        post.setUserEmail(userEmail); // 이메일 설정
+        post.setUserNickname(user.getNickname()); // 닉네임 설정
         post.setUser(user);
         post.setCreatedAt(java.time.LocalDateTime.now());
 
@@ -70,7 +70,7 @@ public class PostController {
         return ResponseEntity.ok(savedPost);
     }
 
-    //조회
+    // 조회
     @GetMapping("/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id) {
         System.out.println("getPost 요청 id: " + id);
@@ -83,11 +83,11 @@ public class PostController {
         return ResponseEntity.ok(postOpt.get());
     }
 
-    //수정
+    // 수정
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePost(@PathVariable("id") Long id,
-                                        @Valid @RequestBody PostRequest postRequest,
-                                        Authentication authentication) {
+            @Valid @RequestBody PostRequest postRequest,
+            Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
@@ -99,12 +99,12 @@ public class PostController {
 
         Post post = postOpt.get();
 
-        //관리자 권한 확인부분
+        // 관리자 권한 확인부분
         boolean isAdmin = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
         // 작성자 확인 (이메일로 비교 or 관리자면 패스)
-        if (!isAdmin &&!post.getUserEmail().equals(authentication.getName())) {
+        if (!isAdmin && !post.getUserEmail().equals(authentication.getName())) {
             return ResponseEntity.status(403).body("수정 권한이 없습니다");
         }
 
@@ -127,10 +127,13 @@ public class PostController {
             return ResponseEntity.notFound().build();
         }
 
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
         Post post = postOpt.get();
 
         // 작성자 확인 (이메일로 비교)
-        if (!post.getUserEmail().equals(authentication.getName())) {
+        if (!isAdmin && post.getUserEmail().equals(authentication.getName())) {
             return ResponseEntity.status(403).body("삭제 권한이 없습니다");
         }
 
