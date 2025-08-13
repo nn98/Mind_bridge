@@ -56,7 +56,7 @@ const Header = ({
           </div>
           <div className="nav-item-wrapper">
             <div className="nav-link" style={{ cursor: "pointer" }} onClick={handleScrollToInfo}>
-              정보
+              문의하기
             </div>
           </div>
           <div className="nav-item-wrapper">
@@ -69,10 +69,6 @@ const Header = ({
         <div className="nav-right">
           {isLoggedIn ? (
             <>
-              <span className="user-welcome-text">
-                {customUser?.nickname || '사용자'}님 환영합니다!
-              </span>
-
               {customUser?.role === "ADMIN" && (
                 <button
                   onClick={() => navigate("/admin")}

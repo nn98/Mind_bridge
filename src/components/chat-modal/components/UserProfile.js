@@ -1,9 +1,10 @@
-// src/components/chat-modal/components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import SessionHistory from './SessionHistory';
 import { BACKEND_URL, MENTAL_STATES } from '../constants';
 import PasswordChangeModal from './PasswordChangeModal';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     const [userInfo, setUserInfo] = useState({
@@ -69,8 +70,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     const handleSave = async () => {
         const token = localStorage.getItem("token");
-        if (!token) { alert("로그인 상태가 아닙니다."); return; }
-        if (!userInfo.email) { alert("이메일 정보가 없습니다. 다시 로그인 해주세요."); return; }
+        if (!token) { toast.error("로그인 상태가 아닙니다."); return; }
+        if (!userInfo.email) { toast.error("이메일 정보가 없습니다. 다시 로그인 해주세요."); return; }
         try {
             const payload = {
                 email: userInfo.email,
@@ -83,10 +84,10 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             });
             setUserInfo(editedInfo);
             setIsEditing(false);
-            alert('회원 정보가 저장되었습니다.');
+            toast.success('회원 정보가 저장되었습니다.');
         } catch (error) {
             console.error("정보 업데이트 실패:", error);
-            alert("정보 저장 중 오류가 발생했습니다.");
+            toast.error("정보 저장 중 오류가 발생했습니다.");
         }
     };
 
@@ -95,40 +96,80 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
         window.location.href = "/login";
     };
 
-    const handleDeleteAccount = async () => {
+    const handleDeleteAccount = () => {
         const token = localStorage.getItem("token");
-        if (!token) { alert("로그인 상태가 아닙니다."); return; }
-        if (!userInfo.email) { alert("이메일 정보가 없습니다. 다시 로그인 해주세요."); return; }
-        const isConfirmed = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 모든 정보가 영구적으로 삭제되며, 복구할 수 없습니다.');
-        if (isConfirmed) {
-            try {
-                const payload = { email: userInfo.email };
-                await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                alert('회원 탈퇴가 완료되었습니다.');
-                handleLogout();
-            } catch (error) {
-                console.error("회원 탈퇴 처리 중 오류 발생:", error);
-                alert("회원 탈퇴 중 오류가 발생했습니다.");
-            }
-        }
+        if (!token) { toast.error("로그인 상태가 아닙니다."); return; }
+        if (!userInfo.email) { toast.error("이메일 정보가 없습니다. 다시 로그인 해주세요."); return; }
+
+        const toastId = toast.info(
+            <div>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                    정말로 회원 탈퇴를 진행하시겠습니까?
+                </div>
+                <div style={{ color: '#b00', marginBottom: 10 }}>
+                    모든 정보가 영구적으로 삭제되며 복구할 수 없습니다.
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const payload = { email: userInfo.email };
+                                await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
+                                    headers: { Authorization: `Bearer ${token}` }
+                                });
+                                toast.dismiss(toastId);
+                                toast.success('회원 탈퇴가 완료되었습니다.');
+                                handleLogout();
+                            } catch (error) {
+                                console.error("회원 탈퇴 처리 중 오류 발생:", error);
+                                toast.dismiss(toastId);
+                                toast.error("회원 탈퇴 중 오류가 발생했습니다.");
+                            }
+                        }}
+                        style={{
+                            background: "#d9534f",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            borderRadius: 6
+                        }}
+                    >
+                        탈퇴
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        style={{
+                            background: "#e0e0e0",
+                            color: "#000",
+                            border: "none",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            borderRadius: 6
+                        }}
+                    >
+                        취소
+                    </button>
+                </div>
+            </div>,
+            { autoClose: false, closeOnClick: false, draggable: false, position: "top-center" }
+        );
     };
 
     const handlePassChange = async (password) => {
         const token = localStorage.getItem("token");
-        if (!token) { alert("로그인 상태가 아닙니다."); return; }
-        if (!userInfo.email) { alert("이메일 정보가 없습니다."); return; }
+        if (!token) { toast.error("로그인 상태가 아닙니다."); return; }
+        if (!userInfo.email) { toast.error("이메일 정보가 없습니다."); return; }
         try {
             const payload = { email: userInfo.email, password };
             await axios.put(`${BACKEND_URL}/api/users/change`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.');
+            toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
             handleLogout();
         } catch (error) {
             console.error("비밀번호 변경 실패:", error);
-            alert("비밀번호 변경 중 오류가 발생했습니다.");
+            toast.error("비밀번호 변경 중 오류가 발생했습니다.");
         }
     };
 
@@ -209,6 +250,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                 onClose={() => setIsPasswordModalOpen(false)}
                 onPasswordChange={handlePassChange}
             />
+
+            <ToastContainer position="top-center" closeButton={false} icon={false} />
         </>
     );
 };

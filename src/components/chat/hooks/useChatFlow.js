@@ -3,6 +3,7 @@ import { questionOrder, fieldKeys, initialForm, buildSystemPrompt } from "../con
 import { prefillFromUser } from "../utils/prefillFromUser";
 import { requestCounselling } from "../services/openai";
 import { saveCounselling } from "../services/counsellingApi";
+import { toast } from "react-toastify";
 
 export function useChatFlow({ customUser, onClose }) {
     const [step, setStep] = useState(0);
@@ -88,6 +89,7 @@ export function useChatFlow({ customUser, onClose }) {
                     ...prev.filter((m) => m.message !== "상담 내용을 분석 중입니다..."),
                     { sender: "ai", message: "AI 응답 오류가 발생했습니다." },
                 ]);
+                toast.error("AI 응답 처리 중 문제가 발생했습니다.", { position: "top-center", closeButton: false, icon: false });
             } finally {
                 setIsTyping(false);
             }
@@ -105,12 +107,13 @@ export function useChatFlow({ customUser, onClose }) {
                 상태: form.상태,
                 상담받고싶은내용: form.상담받고싶은내용,
             });
-            console.log("✅ DB 저장 완료");
+            toast.success("상담 내용이 저장되었습니다.", { position: "top-center", closeButton: false, icon: false });
         } catch (err) {
             if (err.message === "NO_TOKEN") {
-                alert("로그인이 필요합니다.");
+                toast.error("로그인이 필요합니다.", { position: "top-center", closeButton: false, icon: false });
             } else {
                 console.error("❌ DB 저장 중 오류:", err);
+                toast.error("저장 중 오류가 발생했습니다.", { position: "top-center", closeButton: false, icon: false });
             }
         }
 
@@ -120,7 +123,6 @@ export function useChatFlow({ customUser, onClose }) {
         ]);
         setIsChatEnded(true);
 
-        // 모달/패널 닫기
         setTimeout(() => {
             onClose?.();
         }, 1500);

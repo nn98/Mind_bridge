@@ -199,7 +199,6 @@ const App = () => {
             customUser={customUser}
             isCustomLoggedIn={isCustomLoggedIn}
           />
-          <Toast message={appToast.message} show={appToast.show} />
         </>
       )}
 

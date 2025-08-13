@@ -19,11 +19,32 @@ import {
 } from "@mui/material";
 
 import "../css/login.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { createRoot } from "react-dom/client";
 
 const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
 const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
 const BACKEND_URL = "http://localhost:8080";
 
+if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
+  window.__WELCOME_TOAST_MOUNTED__ = true;
+  const el = document.createElement("div");
+  el.id = "welcome-toast-root";
+  document.body.appendChild(el);
+  const root = createRoot(el);
+  root.render(
+    <ToastContainer
+      containerId="welcome"
+      position="top-center"
+      autoClose={2000}
+      newestOnTop
+      limit={3}
+      closeOnClick
+      pauseOnHover
+    />
+  );
+}
 const TermsModal = ({ content, onClose, onConfirm }) => {
   return (
     <div className="modal-backdrop-2" onClick={onClose}>
@@ -139,7 +160,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init(KAKAO_REST_API_KEY);  // .env에 보관된 키 사용 권장
+        window.Kakao.init(KAKAO_REST_API_KEY);
         console.log('Kakao SDK initialized:', window.Kakao.isInitialized());
       }
     };
@@ -164,9 +185,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (onLoginSuccess) onLoginSuccess();
 
+        const nickname = user?.nickname || "사용자";
+        toast.success(`${nickname}님 환영합니다!`, {
+          containerId: "welcome"
+        });
+
         window.history.replaceState({}, '', '/login');
         navigate("/");
-
       } catch (err) {
         console.error(`${provider} login error:`, err);
         alert(err.response?.data?.message || `${provider} 로그인 처리 중 오류가 발생했습니다.`);
@@ -182,7 +207,6 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
       processSocialLogin(provider, code);
     }
   }, [navigate, setIsCustomLoggedIn, setCustomUser, onLoginSuccess]);
-
 
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
@@ -263,6 +287,12 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (onLoginSuccess) onLoginSuccess();
+
+        /* ▼▼ 추가: 환영 토스트 ▼▼ */
+        const nickname = user?.nickname || "사용자";
+        toast.success(`${nickname}님 환영합니다!`);
+        /* ▲▲ 추가 끝 ▲▲ */
+
         navigate("/");
       } else if (type === "signup") {
         if (Object.keys(errors).length > 0 || !emailCheck.isAvailable || !formData.termsAgreed) {
@@ -331,13 +361,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
       alert("카카오 로그인 설정이 올바르지 않습니다.");
       return;
     }
-    console.log(`KAKAO_REDIRECT_URI${ KAKAO_REDIRECT_URI }`);
+    console.log(`KAKAO_REDIRECT_URI${KAKAO_REDIRECT_URI}`);
     window.Kakao.Auth.authorize({
-      redirectUri:KAKAO_REDIRECT_URI,
-      scope: 'account_email,profile_nickname',  // 필수 권한 명시
+      redirectUri: KAKAO_REDIRECT_URI,
+      scope: 'account_email,profile_nickname',
     });
     const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
-    //window.location.href = authUrl;
+    // window.location.href = authUrl;
   };
 
   const handleGoogleLogin = () => {
