@@ -214,7 +214,9 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
       localStorage.removeItem("token");
       if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
       if (setCustomUser) setCustomUser(null);
-      navigate("/", { state: { message: "로그아웃 되었습니다!" } });
+      // 전역 컨테이너(welcome)로 로그아웃 토스트 출력
+      toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
+      navigate("/", { replace: true });
     }
   }, [type, navigate, setIsCustomLoggedIn, setCustomUser]);
 
