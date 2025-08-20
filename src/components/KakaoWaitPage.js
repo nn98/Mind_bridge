@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
-const BACKEND_API_URL = process.env.REACT_APP_KAKAO_BACKEND_API_URL; // 실제 API 엔드포인트
+const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao"; // 실제 API 엔드포인트
 
 function KakaoWaitPage() {
   // 쿼리스트링에서 code 추출

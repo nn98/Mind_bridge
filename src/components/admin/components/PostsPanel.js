@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { getAllPosts, deletePostById } from "../services/adminApi";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -132,22 +134,65 @@ const PostsPanel = () => {
         if (e.key === "Enter") onSearchSubmit(e);
     };
 
-    const onDelete = async (postId) => {
-        const ok = window.confirm("정말 이 게시글을 삭제하시겠습니까?");
-        if (!ok) return;
-        try {
-            const token = localStorage.getItem("token");
-            await deletePostById(token, postId);
-            setOpenRowId((prev) => (prev === postId ? null : prev)); // 펼침 닫기
-            fetch(); // 재조회
-        } catch (e) {
-            console.error(e);
-            alert(
-                e?.response?.status === 403
-                    ? "삭제 권한이 없습니다. (관리자 권한이 필요하거나 작성자만 삭제 가능합니다)"
-                    : "삭제 중 오류가 발생했습니다."
-            );
-        }
+    const onDelete = (postId) => {
+        const toastId = toast.info(
+            <div>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                    정말 이 게시글을 삭제하시겠습니까?
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const token = localStorage.getItem("token");
+                                await deletePostById(token, postId);
+                                setOpenRowId((prev) => (prev === postId ? null : prev));
+                                toast.dismiss(toastId);
+                                toast.success("게시글이 삭제되었습니다.");
+                                fetch();
+                            } catch (e) {
+                                console.error(e);
+                                toast.dismiss(toastId);
+                                toast.error(
+                                    e?.response?.status === 403
+                                        ? "삭제 권한이 없습니다. (관리자 권한이 필요하거나 작성자만 삭제 가능합니다)"
+                                        : "삭제 중 오류가 발생했습니다."
+                                );
+                            }
+                        }}
+                        style={{
+                            background: "#d9534f",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            borderRadius: 6
+                        }}
+                    >
+                        삭제
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        style={{
+                            background: "#e0e0e0",
+                            color: "#000",
+                            border: "none",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            borderRadius: 6
+                        }}
+                    >
+                        취소
+                    </button>
+                </div>
+            </div>,
+            {
+                autoClose: false,
+                closeOnClick: false,
+                draggable: false,
+                position: "top-center"
+            }
+        );
     };
 
     const handleHeaderSort = (key) => {
@@ -384,6 +429,10 @@ const PostsPanel = () => {
                     </button>
                 </div>
             </div>
+            <ToastContainer
+                position="top-center"
+                closeButton={false}
+                icon={false} />
         </div>
     );
 };

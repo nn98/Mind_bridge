@@ -224,6 +224,10 @@
   animation: toast-slide-down 0.4s ease-out;
 }
 
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
 @keyframes toast-slide-down {
   from {
     bottom: -50px;
