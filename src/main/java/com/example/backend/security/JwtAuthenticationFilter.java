@@ -1,17 +1,6 @@
 package com.example.backend.security;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
-
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +8,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -28,10 +26,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
-    // 🔽 인증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = List.of(
-            "/api/users/find-id" //아이디 찾기
-
+            "/api/users/find-id",
+            "/api/users/find-password",
+            "/api/auth/social/kakao"  // 반드시 추가
     );
 
     @Override
@@ -42,11 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        if (//path.equals("/api/users/login")
-                //|| path.equals("/api/users/register")
-                //|| path.equals("/api/users/check-email")
-                path.equals("/api/users/find-id")
-                || path.equals("/api/users/find-password")) {
+        if (EXCLUDE_URLS.contains(path)) {
+            log.debug("인증 제외 URL 접근: {}", path);
             filterChain.doFilter(request, response);
             return;
         }
@@ -54,27 +49,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         log.debug("Authorization Header: {}", authHeader);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Authorization 헤더가 없거나 Bearer 토큰 아님");
-            filterChain.doFilter(request, response);
+        String token = null;
+
+        // 1) Authorization 헤더에서 Bearer 토큰 추출 시도
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            log.debug("Authorization 헤더에서 추출된 토큰: {}", token);
+        } else {
+            log.warn("Authorization 헤더 없거나 Bearer 토큰 아님, 쿠키에서 토큰 검사 시도");
+            // 2) 쿠키에서 jwt 토큰 추출 시도
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("jwt".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        log.debug("쿠키에서 추출된 토큰: {}", token);
+                        break;
+                    }
+                }
+            } else {
+                log.warn("요청에 쿠키 없음");
+            }
+        }
+
+        if (token == null) {
+            log.warn("토큰을 찾지 못함, 인증 실패 처리");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String token = authHeader.substring(7); // "Bearer " 이후 토큰
-
         boolean authenticated = false;
 
-        // 1. Clerk 토큰 검증 시도
+        // 3. Clerk 토큰 검증 시도
         try {
             DecodedJWT clerkJwt = ClerkJwtUtil.verifyClerkToken(token);
             String email = clerkJwt.getClaim("email").asString();
             if (email != null && !email.isEmpty()) {
                 UsernamePasswordAuthenticationToken authentication
                         = new UsernamePasswordAuthenticationToken(
-                                email,
-                                null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER")) // 기본 권한 추가
-                        );
+                        email,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Clerk 사용자 인증 성공: {}", email);
                 authenticated = true;
@@ -83,21 +98,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("Clerk 토큰 아님 또는 유효하지 않음: {}", e.getMessage());
         }
 
-        // 2. 커스텀 토큰 검증 (fallback)
+        // 4. 커스텀 JWT 검증
         if (!authenticated) {
             if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.getEmailFromToken(token);
-                log.debug("커스텀 사용자 이메일: {}", email);
+                log.debug("커스텀 토큰에서 읽은 이메일: {}", email);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                if (userDetails != null) {
-                    UsernamePasswordAuthenticationToken authentication
-                            = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.info("커스텀 사용자 인증 성공: {}", email);
-                    authenticated = true;
-                } else {
-                    log.warn("커스텀 사용자 정보를 찾을 수 없음");
+                try {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    if (userDetails != null) {
+                        UsernamePasswordAuthenticationToken authentication
+                                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("커스텀 사용자 인증 성공: {}", email);
+                        authenticated = true;
+                    } else {
+                        log.warn("커스텀 사용자 정보를 찾을 수 없음");
+                    }
+                } catch (Exception e) {
+                    log.error("커스텀 사용자 로드중 예외 발생: {}", e.getMessage());
                 }
             } else {
                 log.warn("커스텀 토큰 유효성 검사 실패");
@@ -105,6 +124,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (!authenticated) {
+            log.warn("인증 실패, 401 응답");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
