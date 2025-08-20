@@ -85,7 +85,7 @@ const App = () => {
     if (token) {
       axios
         .get("http://localhost:8080/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         })
         .then((res) => {
           setCustomUser(res.data);
@@ -101,6 +101,10 @@ const App = () => {
       setCustomUser(null);
     }
   };
+
+  console.log("App: setCustomUser", typeof setCustomUser);
+  console.log("App: setIsCustomLoggedIn", typeof setIsCustomLoggedIn);
+  console.log("App: fetchCustomUser", typeof fetchCustomUser);
 
   useEffect(() => {
     if (location.state?.message) {
@@ -222,6 +226,20 @@ const App = () => {
 
       <Routes>
         <Route
+          path="/login/wait"
+          element={
+            <KakaoWaitPage
+
+              isCustomLoggedIn = {isCustomLoggedIn}
+              setCustomUser={setCustomUser}
+              setIsCustomLoggedIn={setIsCustomLoggedIn}
+              onLoginSuccess={fetchCustomUser}
+              signupState={signupState}
+              setSignupState={setSignupState}
+            />
+          }
+        />
+        <Route
           path="/admin"
           element={
             isCustomLoggedIn && customUser?.role === "ADMIN" ? (
@@ -286,7 +304,6 @@ const App = () => {
             setCustomUser,
           })}
         />
-        <Route path="/login/wait" element={<KakaoWaitPage />} />
         <Route
           path="/logout"
           element={

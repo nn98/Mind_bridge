@@ -123,6 +123,7 @@ const IdFoundModal = ({ email, onClose }) => {
 };
 
 const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess }) => {
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -176,10 +177,10 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         const response = await axios.post(`${BACKEND_URL}/api/users/social-login`, {
           provider,
           code,
-        });
+        }, { withCredentials: true });
 
         const { token, user } = response.data;
-        localStorage.setItem("token", token);
+        localStorage.setItem("token", "LOGIN");
 
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
@@ -266,7 +267,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     }
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email });
+      const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
       if (response.data.isAvailable) {
         setEmailCheck({ isChecking: false, isAvailable: true, message: "사용 가능한 이메일입니다." });
       } else {
@@ -283,8 +284,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         const response = await axios.post(`${BACKEND_URL}/api/users/login`, {
           email: formData.email,
           password: formData.password,
-        });
+        }, { withCredentials: true });
         const { token, user } = response.data;
+        console.log(`token: ${token}`);
+        console.log(`user: ${user}`);
+        // console.log(`setCustomUser: ${setCustomUser}`);
+        // console.log(`setIsCustomLoggedIn: ${setIsCustomLoggedIn}`);
+        // console.log(`onLoginSuccess: ${onLoginSuccess}`);
         localStorage.setItem("token", token);
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
@@ -315,14 +321,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           mentalState: formData.mentalState,
           age: formData.age,
           gender: formData.gender,
-        });
+        }, { withCredentials: true });
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
       } else if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
-        });
+        }, { withCredentials: true });
         if (response.data.email) {
           setFoundId(response.data.email);
           setIsIdModalOpen(true);
@@ -333,7 +339,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
-        });
+        }, { withCredentials: true });
         if (response.data.tempPassword) {
           setTempPassword(response.data.tempPassword);
           setIsPasswordModalOpen(true);

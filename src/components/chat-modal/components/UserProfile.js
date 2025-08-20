@@ -30,7 +30,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                 if (!userId || !token) { setIsLoading(false); return; }
 
                 const response = await axios.get(`${BACKEND_URL}/api/users/details/${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
                 });
                 const dbUser = response.data;
 
@@ -80,7 +81,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                 counselingGoal: editedInfo.counselingGoal
             };
             await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
             });
             setUserInfo(editedInfo);
             setIsEditing(false);
@@ -115,7 +117,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                             try {
                                 const payload = { email: userInfo.email };
                                 await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
-                                    headers: { Authorization: `Bearer ${token}` }
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    withCredentials: true,
                                 });
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
@@ -163,7 +166,8 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
         try {
             const payload = { email: userInfo.email, password };
             await axios.put(`${BACKEND_URL}/api/users/change`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
             });
             toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
             handleLogout();

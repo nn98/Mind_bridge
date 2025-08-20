@@ -12,6 +12,7 @@ const Header = ({
   const location = useLocation();
 
   const isLoggedIn = isCustomLoggedIn;
+  // console.log(`isLoggedIn: ${isLoggedIn}`);
 
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {
