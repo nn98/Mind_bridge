@@ -1,29 +1,25 @@
 package com.example.backend.controller;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.backend.dto.FindIdRequest;
-import com.example.backend.dto.ResetPasswordRequest;//비번찾기-초기화
+import com.example.backend.dto.ResetPasswordRequest;
 import com.example.backend.dto.UserDto;
 import com.example.backend.dto.UserRegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -41,20 +37,42 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+        System.out.println("[Login] 로그인 요청 시작");
         try {
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
+            System.out.println("[Login] 이메일: " + email);
+            System.out.println("[Login] 패스워드: " + (password != null ? "*****" : "null"));
+
+            // 이메일, 비밀번호 기반 인증 수행
             String token = userService.login(email, password);
+            System.out.println("[Login] 인증 성공, JWT 토큰 생성: " + token);
 
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
             UserDto userDto = new UserDto(user);
+            System.out.println("[Login] 사용자 정보 조회 완료: " + userDto);
 
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "user", userDto
-            ));
+            // JWT 토큰을 HttpOnly 쿠키로 설정
+            ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                    .httpOnly(true)
+                    .secure(true) // HTTPS 환경에서만 전송 권장
+                    .path("/")
+                    .maxAge(24 * 60 * 60) // 1일 만료
+                    .sameSite("Strict") // CSRF 방지 정책
+                    .build();
+            System.out.println("[Login] Set-Cookie 헤더 생성: " + cookie.toString());
+
+            // 토큰은 쿠키에 담아주고, 사용자 정보는 Body로 전달
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(Map.of(
+                            "success", true,
+                            "user", userDto
+                    ));
+
         } catch (Exception e) {
+            System.err.println("[Login] 로그인 처리 실패: " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
         }
     }
@@ -65,27 +83,41 @@ public class UserController {
         boolean isAvailable = userService.isEmailAvailable(email);
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
-
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication, HttpServletRequest request) {
+        System.out.println("[GetCurrentUser] 요청 진입");
+        System.out.println("Authorization 헤더: " + request.getHeader("Authorization"));
+
         if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("[GetCurrentUser] 인증 실패 또는 인증 정보 없음");
             return ResponseEntity.status(401).build();
         }
 
         Object principal = authentication.getPrincipal();
         String email;
+        System.out.println("[GetCurrentUser] 인증된 principal 타입: " + principal.getClass().getName());
 
         if (principal instanceof String) {
             email = (String) principal;
         } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
             email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
         } else {
+            System.out.println("[GetCurrentUser] 알 수 없는 principal 타입");
             return ResponseEntity.status(401).build();
         }
+        System.out.println("[GetCurrentUser] 인증된 사용자 이메일: " + email);
 
         return userService.findByEmail(email)
-                .map(user -> ResponseEntity.ok(new UserDto(user)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(user -> {
+                    System.out.println("[GetCurrentUser] 사용자 조회 성공: " + user.getEmail());
+                    UserDto userDto = new UserDto(user);
+                    System.out.println("[GetCurrentUser] 반환 UserDto: " + userDto);
+                    return ResponseEntity.ok(userDto);
+                })
+                .orElseGet(() -> {
+                    System.out.println("[GetCurrentUser] 사용자 없음");
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     //https:localhost:8080/api/users/update
