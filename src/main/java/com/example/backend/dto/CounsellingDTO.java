@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CounsellingDTO {
+    
     private Long counselId;
     private String email;
     private String userCounsellingSummation;
