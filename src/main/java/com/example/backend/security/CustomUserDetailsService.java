@@ -28,4 +28,24 @@ public class CustomUserDetailsService implements UserDetailsService {
             List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
     }
+
+    // 소셜 로그인 사용자 처리 예제 메소드
+    public UserDetails loadOrCreateUserByEmail(String email, String nickname) {
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    newUser.setNickname(nickname);
+                    newUser.setRole("USER"); // 기본 권한 설정
+                    // 소셜 로그인용 유저는 비밀번호는 임의로 생성하거나 null일 수 있음
+                    newUser.setPassword("");
+                    return userRepository.save(newUser);
+                });
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword() != null ? user.getPassword() : "",
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+        );
+    }
 }

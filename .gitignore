@@ -3,6 +3,11 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.env
+.env.local
+.vercel
+node_modules
+out
 
 ### STS ###
 .apt_generated
