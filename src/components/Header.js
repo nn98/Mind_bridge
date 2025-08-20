@@ -39,7 +39,7 @@ const Header = ({
       <nav className="nav">
         <div className="nav-left">
           <Link to="/" className="logo-link">
-            <img src="/img/로고2.png" alt="Mind Bridge 로고" className="logo" />
+            <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo" />
           </Link>
         </div>
 

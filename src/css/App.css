@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg,    #a18cd1, #fbc2eb);
+  background: white;
   padding: 0rem 2rem;
   position: sticky;
   top: 0;
@@ -29,7 +29,7 @@
 }
 
 .nav-link {
-  color: white;
+  color: #db6eff;
   text-decoration: none;
   font-weight: bold;
   cursor: pointer;
@@ -39,7 +39,6 @@
   display: inline-block;
 }
 .nav-link:hover {
-  color: #db6eff;
   transform: scale(1.1);
 }
 

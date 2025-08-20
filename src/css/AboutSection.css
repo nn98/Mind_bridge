@@ -2,6 +2,7 @@
     padding: 2rem 0;
     font-family: 'Pretendard', sans-serif;
     background-color: #ffffff;
+    box-shadow:  0 -10px 10px rgba(117, 117, 117, 0.3);
 }
 
 .about-title {
