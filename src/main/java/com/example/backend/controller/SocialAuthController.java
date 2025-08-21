@@ -1,11 +1,8 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.UserDto;
-import com.example.backend.entity.User;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.KakaoOAuthService;
-import com.example.backend.service.UserService;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -15,8 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.example.backend.dto.UserDto;
+import com.example.backend.entity.UserEntity;
+import com.example.backend.security.JwtUtil;
+import com.example.backend.service.KakaoOAuthService;
+import com.example.backend.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth/social")
@@ -42,17 +44,17 @@ public class SocialAuthController {
             Map<String, Object> payload = kakaoOAuthService.extractJwtPayload(userInfo);
             System.out.println("[KakaoLogin] JWT 페이로드 (payload): " + payload);
 
-            String email = (String)payload.get("email");
-            String nickname = (String)payload.get("nickname");
+            String email = (String) payload.get("email");
+            String nickname = (String) payload.get("nickname");
 
             if (email == null || email.isEmpty()) {
                 throw new RuntimeException("이메일 정보가 카카오 계정에 존재하지 않습니다.");
             }
 
             // 1. DB에 해당 이메일 사용자 존재 여부 확인
-            User user = userService.findByEmail(email).orElseGet(() -> {
+            UserEntity user = userService.findByEmail(email).orElseGet(() -> {
                 // DB에 없으면 자동 회원가입
-                User newUser = new User();
+                UserEntity newUser = new UserEntity();
                 newUser.setEmail(email);
                 newUser.setNickname(nickname != null ? nickname : "kakaoUser_" + System.currentTimeMillis());
                 newUser.setRole("USER");
@@ -76,7 +78,16 @@ public class SocialAuthController {
             System.out.println("[KakaoLogin] Set-Cookie 헤더 생성: " + cookie.toString());
 
             // 4. 사용자 정보는 필요에 따라 JSON 응답에 포함 가능
-            UserDto userDto = new UserDto(user);
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setEmail(user.getEmail());
+            userDto.setFullName(user.getFullName());
+            userDto.setNickname(user.getNickname());
+            userDto.setPhoneNumber(user.getPhoneNumber());
+            userDto.setGender(user.getGender());
+            userDto.setAge(user.getAge());
+            userDto.setRole(user.getRole());
+            userDto.setMentalState(user.getMentalState());
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())

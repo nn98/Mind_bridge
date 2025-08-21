@@ -1,6 +1,6 @@
 package com.example.backend.security;
 
-import com.example.backend.entity.User;
+import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return new org.springframework.security.core.userdetails.User(
@@ -31,9 +31,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     // 소셜 로그인 사용자 처리 예제 메소드
     public UserDetails loadOrCreateUserByEmail(String email, String nickname) {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    User newUser = new User();
+                    UserEntity newUser = new UserEntity();
                     newUser.setEmail(email);
                     newUser.setNickname(nickname);
                     newUser.setRole("USER"); // 기본 권한 설정

@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.entity.User;
+import com.example.backend.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -110,7 +110,7 @@ public class KakaoOAuthService {
     }
 
     // 자동 회원가입 처리 메소드 추가
-    public User registerKakaoUserIfNotExist(Map<String, Object> userInfo) {
+    public UserEntity registerKakaoUserIfNotExist(Map<String, Object> userInfo) {
         Map<String, Object> kakaoAccount = (Map<String, Object>) userInfo.get("kakao_account");
         Map<String, Object> properties = (Map<String, Object>) userInfo.get("properties");
 
@@ -123,14 +123,14 @@ public class KakaoOAuthService {
             throw new RuntimeException("카카오 계정에 이메일이 존재하지 않습니다.");
         }
 
-        Optional<User> existingUser = userService.findByEmail(email);
+        Optional<UserEntity> existingUser = userService.findByEmail(email);
 
         if (existingUser.isPresent()) {
             System.out.println("[Auto Registration] 기존 사용자 존재, 등록하지 않음");
             return existingUser.get();
         } else {
             System.out.println("[Auto Registration] 신규 사용자 등록 시작");
-            User newUser = new User();
+            UserEntity newUser = new UserEntity();
             newUser.setEmail(email);
             newUser.setNickname(nickname != null ? nickname : "kakaoUser_" + System.currentTimeMillis());
             newUser.setRole("USER");
@@ -140,7 +140,7 @@ public class KakaoOAuthService {
 
             // 필요한 추가 필드 (fullName, gender, phoneNumber 등) api에서 없으면 기본 값으로 처리 가능
 
-            User savedUser = userService.save(newUser);
+            UserEntity savedUser = userService.save(newUser);
             System.out.println("[Auto Registration] 신규 사용자 등록 완료: " + savedUser.getEmail());
             return savedUser;
         }

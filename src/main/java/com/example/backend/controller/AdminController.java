@@ -1,12 +1,13 @@
 package com.example.backend.controller;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.AdminStatsDTO;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
 
@@ -20,21 +21,16 @@ public class AdminController {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    //총 게시글수 와 총 유저수 확인
     @GetMapping("/stats")
-    public AdminStatsDTO getAdminStats() {
+    public ResponseEntity<Map<String, Object>> getAdminStats() {
         long totalUsers = userRepository.count();
         long totalPosts = postRepository.count();
 
-        List<AdminStatsDTO.UserDto> users = userRepository.findAll()
-        .stream()
-        .map(u -> new AdminStatsDTO.UserDto(
-                u.getNickname(),
-                u.getEmail(),
-                u.getPhoneNumber()
-        ))
-        .toList();
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalUsers", totalUsers);
+        response.put("totalPosts", totalPosts);
 
-
-        return new AdminStatsDTO(totalUsers, totalPosts, users);
+        return ResponseEntity.ok(response);
     }
 }

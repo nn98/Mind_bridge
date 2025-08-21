@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.PostRequest;
-import com.example.backend.entity.Post;
-import com.example.backend.entity.User;
+import com.example.backend.entity.PostEntity;
 import com.example.backend.repository.PostRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.request.PostRequest;
+import com.example.backend.service.PostService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,52 +28,32 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final PostService postService;
 
+    //전체 조회
     @GetMapping
-    public ResponseEntity<List<Post>> getPosts() {
-        List<Post> posts = postRepository.findAll();
+    public ResponseEntity<List<PostEntity>> getPosts() {
+        List<PostEntity> posts = postRepository.findAll();
         return ResponseEntity.ok(posts);
     }
 
     // 생성
     @PostMapping
     public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest postRequest, Authentication authentication) {
-
-        System.out.println("createPost 호출됨 - postRequest: " + postRequest);
-
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
 
-        String userEmail = authentication.getName(); // 인증된 사용자의 이메일
-
-        // 사용자 정보 조회
-        Optional<User> userOpt = userRepository.findByEmail(userEmail);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("사용자를 찾을 수 없습니다");
-        }
-
-        User user = userOpt.get();
-
-        // Post 엔티티 생성
-        Post post = new Post();
-        post.setContent(postRequest.getContent());
-        post.setVisibility(postRequest.getVisibility());
-        post.setUserEmail(userEmail); // 이메일 설정
-        post.setUserNickname(user.getNickname()); // 닉네임 설정
-        post.setUser(user);
-        post.setCreatedAt(java.time.LocalDateTime.now());
-
-        Post savedPost = postRepository.save(post);
+        String userEmail = authentication.getName();
+        PostEntity savedPost = postService.createPost(postRequest, userEmail);
         return ResponseEntity.ok(savedPost);
     }
 
     // 조회
     @GetMapping("/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id) {
-        System.out.println("getPost 요청 id: " + id);
-        Optional<Post> postOpt = postRepository.findById(id);
+        //System.out.println("getPost 요청 id: " + id);
+        Optional<PostEntity> postOpt = postRepository.findById(id);
 
         if (postOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -92,12 +71,12 @@ public class PostController {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
 
-        Optional<Post> postOpt = postRepository.findById(id);
+        Optional<PostEntity> postOpt = postRepository.findById(id);
         if (postOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Post post = postOpt.get();
+        PostEntity post = postOpt.get();
 
         // 관리자 권한 확인부분
         boolean isAdmin = authentication.getAuthorities().stream()
@@ -112,7 +91,7 @@ public class PostController {
         post.setContent(postRequest.getContent());
         post.setVisibility(postRequest.getVisibility());
 
-        Post updatedPost = postRepository.save(post);
+        PostEntity updatedPost = postRepository.save(post);
         return ResponseEntity.ok(updatedPost);
     }
 
@@ -122,15 +101,16 @@ public class PostController {
             return ResponseEntity.status(401).body("인증이 필요합니다");
         }
 
-        Optional<Post> postOpt = postRepository.findById(id);
+        Optional<PostEntity> postOpt = postRepository.findById(id);
         if (postOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
+        PostEntity post = postOpt.get();
+
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
-        Post post = postOpt.get();
 
         // 작성자 확인 (이메일로 비교)
         if (!isAdmin && post.getUserEmail().equals(authentication.getName())) {
@@ -143,15 +123,15 @@ public class PostController {
 
     // 특정 사용자의 게시글 조회
     @GetMapping("/user/{email}")
-    public ResponseEntity<List<Post>> getPostsByUserEmail(@PathVariable String email) {
-        List<Post> posts = postRepository.findByUserEmail(email);
+    public ResponseEntity<List<PostEntity>> getPostsByUserEmail(@PathVariable String email) {
+        List<PostEntity> posts = postRepository.findByUserEmail(email);
         return ResponseEntity.ok(posts);
     }
 
     // 공개 게시글만 조회
     @GetMapping("/public")
-    public ResponseEntity<List<Post>> getPublicPosts() {
-        List<Post> publicPosts = postRepository.findByVisibility("public");
+    public ResponseEntity<List<PostEntity>> getPublicPosts() {
+        List<PostEntity> publicPosts = postRepository.findByVisibility("public");
         return ResponseEntity.ok(publicPosts);
     }
 }

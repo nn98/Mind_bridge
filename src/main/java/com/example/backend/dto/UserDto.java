@@ -1,8 +1,9 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.User;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class UserDto {
     private Long id;
@@ -14,16 +15,4 @@ public class UserDto {
     private Integer age;        // String → Integer 변경
     private String role;
     private String mentalState;
-
-    public UserDto(User user) {
-        this.id = user.getId();
-        this.email = user.getEmail();
-        this.fullName = user.getFullName();
-        this.nickname = user.getNickname();
-        this.gender = user.getGender();
-        this.phoneNumber = user.getPhoneNumber();
-        this.age = user.getAge();
-        this.role = user.getRole();
-        this.mentalState = user.getMentalState();
-    }
 }

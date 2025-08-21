@@ -14,4 +14,5 @@ public class CounsellingDTO {
     private String userCounsellingSummation;
     private String userCounsellingEmotion;
     private String counselorSummation;
+    
 }
