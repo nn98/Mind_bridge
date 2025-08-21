@@ -29,7 +29,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.info("SecurityFilterChain 설정 시작");
+//        log.info("SecurityFilterChain 설정 시작");
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -41,13 +41,13 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        log.info("SecurityFilterChain 설정 완료");
+//        log.info("SecurityFilterChain 설정 완료");
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        log.info("CORS 설정 로드 시작");
+//        log.info("CORS 설정 로드 시작");
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
@@ -58,24 +58,24 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
-        log.info("CORS 설정 완료: Origins={}, Methods={}, Headers={}, AllowCredentials={}",
-                configuration.getAllowedOriginPatterns(),
-                configuration.getAllowedMethods(),
-                configuration.getAllowedHeaders(),
-                configuration.getAllowCredentials());
+//        log.info("CORS 설정 완료: Origins={}, Methods={}, Headers={}, AllowCredentials={}",
+//                configuration.getAllowedOriginPatterns(),
+//                configuration.getAllowedMethods(),
+//                configuration.getAllowedHeaders(),
+//                configuration.getAllowCredentials());
 
         return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        log.info("PasswordEncoder(BCryptPasswordEncoder) 빈 생성");
+//        log.info("PasswordEncoder(BCryptPasswordEncoder) 빈 생성");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        log.info("AuthenticationManager 빈 생성");
+//        log.info("AuthenticationManager 빈 생성");
         return configuration.getAuthenticationManager();
     }
 }
