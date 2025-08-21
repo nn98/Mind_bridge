@@ -58,7 +58,7 @@ public class SocialAuthController {
                 // DB에 없으면 자동 회원가입
                 UserEntity newUser = new UserEntity();
                 newUser.setEmail(email);
-                newUser.setFullName(fullName != null ? fullName : "kakaoUser_" + System.currentTimeMillis());
+                newUser.setFullName(nickname != null ? nickname : "kakaoUser_" + System.currentTimeMillis());
                 newUser.setRole("USER");
                 newUser.setPassword("");  // 소셜 로그인 유저는 패스워드 빈 문자열 또는 랜덤값
                 return userService.save(newUser);
