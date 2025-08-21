@@ -43,7 +43,7 @@ public class SocialAuthController {
             System.out.println("[KakaoLogin] JWT 페이로드 (payload): " + payload);
 
             String email = (String)payload.get("email");
-            String nickname = (String)payload.get("nickname");
+            String fullName = (String)payload.get("nickname");
 
             if (email == null || email.isEmpty()) {
                 throw new RuntimeException("이메일 정보가 카카오 계정에 존재하지 않습니다.");
@@ -54,7 +54,7 @@ public class SocialAuthController {
                 // DB에 없으면 자동 회원가입
                 User newUser = new User();
                 newUser.setEmail(email);
-                newUser.setNickname(nickname != null ? nickname : "kakaoUser_" + System.currentTimeMillis());
+                newUser.setFullName(fullName != null ? fullName : "kakaoUser_" + System.currentTimeMillis());
                 newUser.setRole("USER");
                 newUser.setPassword("");  // 소셜 로그인 유저는 패스워드 빈 문자열 또는 랜덤값
                 return userService.save(newUser);
