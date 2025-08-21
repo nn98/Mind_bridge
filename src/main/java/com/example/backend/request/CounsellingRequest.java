@@ -7,11 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CounsellingSaveRequest {
+public class CounsellingRequest {
     private String email;
     private String userCounsellingSummation;
     private String userCounsellingEmotion;
     private String counselorSummation;
-
     
 }

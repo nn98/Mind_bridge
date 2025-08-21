@@ -10,9 +10,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.backend.dto.UserRegisterRequest;
-import com.example.backend.entity.User;
+import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.request.UserRequest;
 import com.example.backend.security.JwtUtil;
 
 import jakarta.transaction.Transactional;
@@ -26,10 +26,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-
     private final JavaMailSender mailSender;
 
-    public void register(UserRegisterRequest req) {
+    //회원가입
+    public void register(UserRequest.Register req) {
         // 이메일 중복 확인
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new RuntimeException("이미 사용중인 이메일입니다.");
@@ -40,7 +40,7 @@ public class UserService {
             throw new RuntimeException("이미 사용중인 닉네임입니다.");
         }
 
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setEmail(req.getEmail());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setFullName(req.getFullName());         // fullName 추가
@@ -54,6 +54,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    //로그인
     public String login(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         return jwtUtil.generateToken(email);
@@ -67,29 +68,30 @@ public class UserService {
         return !userRepository.existsByNickname(nickname);
     }
 
-    public Optional<User> findByEmail(String email) {
+    //사용자 조회
+    public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<User> findByNickname(String nickname) {
+    public Optional<UserEntity> findByNickname(String nickname) {
         return userRepository.findByNickname(nickname);
     }
 
-    //쳇모델에서 변경
-    public User save(User user) {
+    //사용자 저장
+    public UserEntity save(UserEntity user) {
         return userRepository.save(user);
     }
 
-    //쳇모델 삭제
+    //사용자 삭제
     @Transactional
-    public void deleteUser(User user) {
-        System.out.println("Deleting user: " + user.getEmail());
+    public void deleteUser(UserEntity user) {
+        //System.out.println("Deleting user: " + user.getEmail());
         userRepository.delete(user);
     }
 
     // 사용자 정보 업데이트
-    public User updateUser(String email, UserRegisterRequest req) {
-        User user = userRepository.findByEmail(email)
+    public UserEntity updateUser(String email, UserRequest.Register req) {
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 닉네임 변경 시 중복 확인
@@ -108,14 +110,22 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    //비번변경
+    public UserEntity changePassword(String email, String newPassword) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
     //비번찾기-초기화-이메일
     public String resetPasswordByEmail(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
             return null;
         }
 
-        User user = optionalUser.get();
+        UserEntity user = optionalUser.get();
 
         // 1. 임시 비밀번호 생성
         String tempPassword = generateTempPassword();
@@ -155,8 +165,8 @@ public class UserService {
 
     //아이디 찾기
     public String findUserIdByPhoneAndNickname(String phoneNumber, String nickname) {
-        Optional<User> optionalUser = userRepository.findByPhoneNumberAndNickname(phoneNumber, nickname);
-        return optionalUser.map(User::getEmail).orElse(null); // 이메일을 아이디로 사용한다고 가정
+        Optional<UserEntity> optionalUser = userRepository.findByPhoneNumberAndNickname(phoneNumber, nickname);
+        return optionalUser.map(UserEntity::getEmail).orElse(null); // 이메일을 아이디로 사용한다고 가정
     }
 
 }

@@ -1,26 +1,27 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.Post;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.backend.entity.PostEntity;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     // 사용자 이메일로 게시글 조회
-    List<Post> findByUserEmail(String userEmail);
+    List<PostEntity> findByUserEmail(String userEmail);
 
     // 공개 설정으로 게시글 조회
-    List<Post> findByVisibility(String visibility);
+    List<PostEntity> findByVisibility(String visibility);
 
     // 사용자 이메일과 공개 설정으로 게시글 조회
-    List<Post> findByUserEmailAndVisibility(String userEmail, String visibility);
+    List<PostEntity> findByUserEmailAndVisibility(String userEmail, String visibility);
 
     // 최신 순 정렬로 조회
-    List<Post> findAllByOrderByCreatedAtDesc();
+    List<PostEntity> findAllByOrderByCreatedAtDesc();
 
     // 특정 사용자의 최신 게시글 조회
-    List<Post> findByUserEmailOrderByCreatedAtDesc(String userEmail);
+    List<PostEntity> findByUserEmailOrderByCreatedAtDesc(String userEmail);
 }

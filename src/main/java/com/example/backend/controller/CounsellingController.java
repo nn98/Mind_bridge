@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.CounsellingDTO;
-import com.example.backend.request.CounsellingSaveRequest;
+import com.example.backend.request.CounsellingRequest;
 import com.example.backend.service.CounsellingService;
 
 @RestController
@@ -26,7 +26,7 @@ public class CounsellingController {
 
     //저장
     @PostMapping("/save")
-    public ResponseEntity<CounsellingDTO> saveCounselling(@RequestBody CounsellingSaveRequest requestDTO) {
+    public ResponseEntity<CounsellingDTO> saveCounselling(@RequestBody CounsellingRequest requestDTO) {
         CounsellingDTO saved = counsellingService.saveCounselling(requestDTO);
         return ResponseEntity.ok(saved);
     }
@@ -37,4 +37,5 @@ public class CounsellingController {
         List<CounsellingDTO> counsellingList = counsellingService.getCounsellingListByEmail(email);
         return ResponseEntity.ok(counsellingList);
     }
+    
 }

@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.CounsellingDTO;
-import com.example.backend.entity.Counselling;
+import com.example.backend.entity.CounsellingEntity;
 import com.example.backend.repository.CounsellingRepository;
-import com.example.backend.request.CounsellingSaveRequest;
+import com.example.backend.request.CounsellingRequest;
 
 @Service
 public class CounsellingService {
@@ -22,32 +22,29 @@ public class CounsellingService {
 
     /**
      * 상담 내용 저장
-     *
-     * @param request 클라이언트에서 전달받은 상담 데이터
-     * @return 저장된 상담 정보 DTO
      */
     @Transactional
-    public CounsellingDTO saveCounselling(CounsellingSaveRequest request) {
-        Counselling counselling = new Counselling();
+    public CounsellingDTO saveCounselling(CounsellingRequest request) {
+        // 요청 DTO → 엔티티 변환
+        CounsellingEntity counselling = new CounsellingEntity();
         counselling.setEmail(request.getEmail());
         counselling.setUserCounsellingSummation(request.getUserCounsellingSummation());
         counselling.setUserCounsellingEmotion(request.getUserCounsellingEmotion());
         counselling.setCounselorSummation(request.getCounselorSummation());
 
-        Counselling saved = counsellingRepository.save(counselling);
+        // 엔티티 저장
+        CounsellingEntity saved = counsellingRepository.save(counselling);
 
+        // 엔티티 → DTO 변환 후 반환
         return mapToDTO(saved);
     }
 
     /**
      * 이메일 기준 상담 기록 조회
-     *
-     * @param email 조회할 사용자 이메일
-     * @return 상담 기록 리스트
      */
     @Transactional(readOnly = true)
     public List<CounsellingDTO> getCounsellingListByEmail(String email) {
-        List<Counselling> counsellingList = counsellingRepository.findByEmail(email);
+        List<CounsellingEntity> counsellingList = counsellingRepository.findByEmail(email);
         return counsellingList.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -56,7 +53,7 @@ public class CounsellingService {
     /**
      * Entity → DTO 변환
      */
-    private CounsellingDTO mapToDTO(Counselling counselling) {
+    private CounsellingDTO mapToDTO(CounsellingEntity counselling) {
         CounsellingDTO dto = new CounsellingDTO();
         dto.setCounselId(counselling.getCounselId());
         dto.setEmail(counselling.getEmail());
@@ -64,5 +61,6 @@ public class CounsellingService {
         dto.setUserCounsellingEmotion(counselling.getUserCounsellingEmotion());
         dto.setCounselorSummation(counselling.getCounselorSummation());
         return dto;
+        
     }
 }

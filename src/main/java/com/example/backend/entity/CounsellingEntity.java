@@ -13,7 +13,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "counselling")
 @Getter @Setter @NoArgsConstructor
-public class Counselling {
+public class CounsellingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +32,5 @@ public class Counselling {
 
     @Column(name = "counselor_summation")
     private String counselorSummation;
+    
 }

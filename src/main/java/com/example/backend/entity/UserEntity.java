@@ -13,7 +13,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,4 +44,5 @@ public class User {
 
     @Column(name = "mental_state")
     private String mentalState;
+
 }
