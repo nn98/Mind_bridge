@@ -1,6 +1,6 @@
+// src/components/chat/ChatWidget.js
 import { useChatFlow } from "./hooks/useChatFlow";
 
-// UI 컴포넌트
 export default function ChatWidget({ setIsOpen, customUser }) {
     const {
         chatInput,
@@ -12,58 +12,60 @@ export default function ChatWidget({ setIsOpen, customUser }) {
         inputRef,
         handleSubmit,
         handleEndChat,
-    } = useChatFlow({
-        customUser,
-        onClose: () => setIsOpen?.(false),
-    });
+        handleRestartChat,
+    } = useChatFlow({ customUser, onClose: () => setIsOpen?.(false) });
 
     return (
-        <div className="tab-content">
-            <h3>AI 상담 챗봇</h3>
-            <div className="chat-box" style={{ maxHeight: 400, overflowY: "auto" }}>
-                {chatHistory.map((msg, i) => (
-                    <div key={i} className={`bubble ${msg.sender}`}>
-                        {msg.message}
+        <div className="chat-container card">
+            <div className="chat-header">
+                <div className="chat-title">상담</div>
+                <div className="chat-actions">
+                    <button className="btn" onClick={handleRestartChat} disabled={isTyping}>
+                        다시 시작
+                    </button>
+                </div>
+            </div>
+
+            <div className="chat-box">
+                {chatHistory.map((m, idx) => (
+                    <div key={idx} className={`msg ${m.sender === "ai" ? "ai" : "user"}`}>
+                        <div className="bubble">{m.message}</div>
                     </div>
                 ))}
-                {isTyping && <div className="bubble ai typing">AI 응답 생성 중...</div>}
+
+                {isTyping && (
+                    <div className="msg ai">
+                        <div className="bubble">상담사가 답변을 작성 중이에요…</div>
+                    </div>
+                )}
                 <div ref={chatEndRef} />
             </div>
 
-            <div className="input-wrapper">
-                <textarea
+            <div className="chat-input-row">
+                <input
                     ref={inputRef}
-                    placeholder="메시지를 입력하세요..."
-                    className="input-fixed"
+                    className="chat-input"
+                    type="text"
+                    placeholder={isChatEnded ? "상담이 종료되었습니다" : "메시지를 입력하세요"}
+                    disabled={isTyping || isChatEnded}
                     value={chatInput}
-                    onChange={(e) => {
-                        setChatInput(e.target.value);
-                        const el = e.target;
-                        el.scrollTop = el.scrollHeight;
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSubmit();
-                        }
-                    }}
-                    readOnly={isTyping || isChatEnded}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                 />
                 <button
-                    className="chat-button1"
+                    className="btn chat-send"
                     onClick={handleSubmit}
                     disabled={isTyping || isChatEnded}
+                    aria-label="메시지 전송"
+                    title="메시지 전송"
                 >
                     📩
                 </button>
             </div>
 
-            <button
-                className="chat-button"
-                onClick={handleEndChat}
-                disabled={isTyping || isChatEnded}
-            >
-                상담 종료</button>
+            <button className="btn chat-end" onClick={handleEndChat} disabled={isTyping || isChatEnded}>
+                상담 종료
+            </button>
         </div>
     );
 }

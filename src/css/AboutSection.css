@@ -1,7 +1,7 @@
 .about-section {
     padding: 2rem 0;
     font-family: 'Pretendard', sans-serif;
-    background-color: #ffffff;
+    /* background-color: #ffffff; ❌ 제거 */
 }
 
 .about-title {
@@ -16,8 +16,8 @@
     max-width: 900px;
     margin: 0 auto 2rem auto;
     padding: 1.5rem;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
+    /* background-color: #f9f9f9; ❌ 제거 */
+    /* border: 1px solid #ccc; ❌ 제거 */
     border-radius: 8px;
 }
 
@@ -42,7 +42,7 @@
 
 .about-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 1px 10px #a18cd1
+    box-shadow: 0 1px 10px #a18cd1;
 }
 
 .about-card h2 {
@@ -94,9 +94,9 @@
     font-weight: bold;
 }
 
-/* ✅ 정신 건강 통계 차트 영역 추가 */
+/* ✅ 정신 건강 통계 차트 영역 - 배경 제거 */
 .mental-health-chart-section {
-    background-color: #ffffff;
+    /* background-color: #ffffff; ❌ 제거 */
     padding: 3rem 1rem;
     font-family: 'Pretendard', sans-serif;
 }
@@ -127,8 +127,6 @@
         padding: 2rem 1rem;
     }
 }
-
-/* login.css 파일에 추가 */
 
 /* --- 임시 비밀번호 모달 스타일 --- */
 .modal-backdrop-3 {
@@ -191,4 +189,17 @@
     margin-bottom: 1.5rem;
     word-wrap: break-word;
     /* 긴 비밀번호 줄바꿈 처리 */
+}
+
+/* 대시보드 임베드 최소 여백 */
+.about-embed .section {
+    margin: 0 0 28px 0;
+}
+
+.about-embed .about-title {
+    margin-top: 0;
+}
+
+.about-embed .mental-health-chart-section {
+    padding-top: 4px;
 }
