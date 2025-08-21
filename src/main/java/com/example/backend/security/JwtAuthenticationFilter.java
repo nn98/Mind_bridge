@@ -1,6 +1,5 @@
 package com.example.backend.security;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/users/find-id",
             "/api/users/find-password",
-            "/api/auth/social/kakao"  // 반드시 추가
+            "/api/auth/social/kakao"
     );
 
     @Override
@@ -78,25 +76,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         boolean authenticated = false;
-
-        // 3. Clerk 토큰 검증 시도
-        try {
-            DecodedJWT clerkJwt = ClerkJwtUtil.verifyClerkToken(token);
-            String email = clerkJwt.getClaim("email").asString();
-            if (email != null && !email.isEmpty()) {
-                UsernamePasswordAuthenticationToken authentication
-                        = new UsernamePasswordAuthenticationToken(
-                        email,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("Clerk 사용자 인증 성공: {}", email);
-                authenticated = true;
-            }
-        } catch (Exception e) {
-            log.info("Clerk 토큰 아님 또는 유효하지 않음: {}", e.getMessage());
-        }
 
         // 4. 커스텀 JWT 검증
         if (!authenticated) {

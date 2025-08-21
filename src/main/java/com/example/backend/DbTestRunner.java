@@ -1,12 +1,11 @@
 package com.example.backend;
 
-import java.util.List;
-
+import com.example.backend.entity.Counselling;
+import com.example.backend.repository.CounsellingRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.example.backend.entity.Counselling;
-import com.example.backend.repository.CounsellingRepository;
+import java.util.List;
 
 @Component
 public class DbTestRunner implements CommandLineRunner {
