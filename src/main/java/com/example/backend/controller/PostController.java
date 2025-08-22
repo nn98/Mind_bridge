@@ -113,7 +113,7 @@ public class PostController {
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
         // 작성자 확인 (이메일로 비교)
-        if (!isAdmin && post.getUserEmail().equals(authentication.getName())) {
+        if (!isAdmin && !post.getUserEmail().equals(authentication.getName())) {
             return ResponseEntity.status(403).body("삭제 권한이 없습니다");
         }
 
