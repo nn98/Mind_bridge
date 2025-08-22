@@ -86,23 +86,15 @@ const App = () => {
     fetchCustomUser();
   }, []);
 
-  const fetchCustomUser = () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios
-        .get("http://localhost:8080/api/auth/me", { withCredentials: true })
-        .then((res) => {
-          setCustomUser(res.data);
-          setIsCustomLoggedIn(true);
-        })
-        .catch(() => {
-          localStorage.removeItem("token");
-          setCustomUser(null);
-          setIsCustomLoggedIn(false);
-        });
-    } else {
-      setIsCustomLoggedIn(false);
+  const fetchCustomUser = async () => {
+    try {
+      // 쿠키 기반 요청
+      const res = await axios.get("http://localhost:8080/api/auth/me", { withCredentials: true });
+      setCustomUser(res.data);
+      setIsCustomLoggedIn(true);
+    } catch (err) {
       setCustomUser(null);
+      setIsCustomLoggedIn(false);
     }
   };
 
