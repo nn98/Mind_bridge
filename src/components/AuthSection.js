@@ -281,17 +281,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   const handleSubmit = async () => {
     try {
       if (type === "login") {
-        const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
+        await axios.post(`${BACKEND_URL}/api/auth/login`, {
           email: formData.email,
           password: formData.password,
         }, { withCredentials: true });
-        const { token, user } = response.data;
-        //console.log(`token: ${token}`);
-        //console.log(`user: ${user}`);
-        // console.log(`setCustomUser: ${setCustomUser}`);
-        // console.log(`setIsCustomLoggedIn: ${setIsCustomLoggedIn}`);
-        // console.log(`onLoginSuccess: ${onLoginSuccess}`);
-        //localStorage.setItem("token", token);
+
+        const res = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
+        const user = res.data;
+
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (onLoginSuccess) onLoginSuccess();
@@ -301,6 +298,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         toast.success(`${nickname}님 환영합니다!`);
         /* ▲▲ 추가 끝 ▲▲ */
         navigate("/");
+
       } else if (type === "signup") {
         if (Object.keys(errors).length > 0 || !emailCheck.isAvailable || !formData.termsAgreed) {
           let alertMessage = "입력 정보를 다시 확인해주세요.";
@@ -321,24 +319,29 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           age: formData.age,
           gender: formData.gender,
         }, { withCredentials: true });
+
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
+
       } else if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
         }, { withCredentials: true });
+
         if (response.data.email) {
           setFoundId(response.data.email);
           setIsIdModalOpen(true);
         } else {
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
+
       } else if (type === "find-password") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
+        
         if (response.data.tempPassword) {
           setTempPassword(response.data.tempPassword);
           setIsPasswordModalOpen(true);
@@ -386,7 +389,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     // }
     // const scope = "openid profile email";
     // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
-    window.location.href = BACKEND_URL+'/api/auth/social/google/login';
+    window.location.href = BACKEND_URL + '/api/auth/social/google/login';
   };
 
   const termsContent = `
