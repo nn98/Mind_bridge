@@ -49,7 +49,7 @@ public class UserController {
      */
     @PutMapping("/update")
     public UserEntity updateUser(@RequestBody UserRequest.Register req, Authentication authentication) {
-        String email = authentication.getName(); 
+        String email = authentication.getName();
         return userService.updateUser(email, req);
     }
 
@@ -84,23 +84,23 @@ public class UserController {
      * ✅ 아이디 찾기
      */
     @PostMapping("/find-id")
-    public String findUserId(@Valid @RequestBody UserRequest.FindId req) {
+    public Map<String, String> findUserId(@Valid @RequestBody UserRequest.FindId req) {
         String email = userService.findUserIdByPhoneAndNickname(req.getPhoneNumber(), req.getNickname());
         if (email == null) {
             throw new RuntimeException("일치하는 회원 정보를 찾을 수 없습니다.");
         }
-        return email;
+        return Map.of("email", email);
     }
 
     /**
      * ✅ 비밀번호 찾기
      */
     @PostMapping("/find-password")
-    public String resetPassword(@Valid @RequestBody UserRequest.ResetPassword req) {
+    public Map<String, String> resetPassword(@Valid @RequestBody UserRequest.ResetPassword req) {
         String tempPassword = userService.resetPasswordByEmail(req.getEmail());
         if (tempPassword == null) {
             throw new RuntimeException("해당 이메일로 등록된 계정이 없습니다.");
         }
-        return tempPassword;
+        return Map.of("tempPassword", tempPassword);
     }
 }
