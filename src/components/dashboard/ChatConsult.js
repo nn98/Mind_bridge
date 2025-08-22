@@ -41,7 +41,7 @@ export default function ChatConsult({ customUser }) {
   // 입력창 포커스 유지
   useEffect(() => {
     if (!isTyping) inputRef.current?.focus();
-  }, [isTyping]);
+  }, [inputRef, isTyping]);
   useEffect(() => {
     inputRef.current?.focus();
   }, []);

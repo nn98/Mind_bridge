@@ -435,17 +435,11 @@ body {
 .consult-stream {
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     gap: 14px;
     padding: 15px;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    /* 스크롤바 숨기고 싶으면 주석 해제
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    }
-    .consult-stream::-webkit-scrollbar { display: none; } */
+    max-height: 60vh;
 }
 
 /* 기존 margin/padding-top 대신 고정 spacer로 여백 제공 → 앵커링 방지 */
