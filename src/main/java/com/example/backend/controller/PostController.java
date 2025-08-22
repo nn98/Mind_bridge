@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.PostDto;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.request.PostRequest;
@@ -32,8 +33,8 @@ public class PostController {
 
     //전체 조회
     @GetMapping
-    public ResponseEntity<List<PostEntity>> getPosts() {
-        List<PostEntity> posts = postRepository.findAll();
+    public ResponseEntity<List<PostDto>> getPosts() {
+        List<PostDto> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
@@ -110,7 +111,6 @@ public class PostController {
 
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
 
         // 작성자 확인 (이메일로 비교)
         if (!isAdmin && post.getUserEmail().equals(authentication.getName())) {

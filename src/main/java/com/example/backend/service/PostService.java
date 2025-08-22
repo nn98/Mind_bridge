@@ -3,9 +3,11 @@ package com.example.backend.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.backend.dto.PostDto;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.PostRepository;
@@ -63,9 +65,21 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-    // 조회 로직 (그대로 유지)
-    public List<PostEntity> getAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc();
+    // 전체 조회 로직 (그대로 유지)
+    public List<PostDto> getAllPosts() {
+        return postRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(post -> {
+                    PostDto dto = new PostDto();
+                    dto.setId(post.getId());
+                    dto.setContent(post.getContent());
+                    dto.setUserEmail(post.getUserEmail());
+                    dto.setUserNickname(post.getUserNickname());
+                    dto.setCreatedAt(post.getCreatedAt());
+                    dto.setVisibility(post.getVisibility());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public List<PostEntity> getPublicPosts() {
