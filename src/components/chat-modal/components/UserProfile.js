@@ -131,13 +131,11 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
         try {
             const payload = {
-                email: userInfo.email,
                 nickname: editedInfo.nickname,
                 mentalState: editedInfo.mentalState,
                 counselingGoal: editedInfo.counselingGoal,
             };
             await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
-                headers: { Authorization: `Bearer ${token}` },
                 withCredentials: true,
             });
             setUserInfo(editedInfo);
