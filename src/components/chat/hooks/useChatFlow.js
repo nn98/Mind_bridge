@@ -1,4 +1,3 @@
-// src/components/chat/hooks/useChatFlow.js
 import { useEffect, useRef, useState, useCallback } from "react";
 import { questionOrder, fieldKeys, initialForm, buildSystemPrompt } from "../constants";
 import { prefillFromUser } from "../utils/prefillFromUser";
@@ -6,17 +5,8 @@ import { requestCounselling } from "../services/openai";
 import { saveCounselling } from "../services/counsellingApi";
 import { toast } from "react-toastify";
 
-/**
- * 옵션 설명
- * - disableQuestionnaire: true  → 기본 질문지(이름/성별/나이…) 비활성
- * - fieldsToAsk: ["상담받고싶은내용","이전상담경험"] 처럼 **최소 질문만** 순서대로 수집
- * - introMessage: 첫 안내 문구
- * - enforceGreeting: true → AI 응답 맨 앞에 "안녕하세요, {이름}님."을 보장(중복시 추가 X)
- * - autoStartFromProfile / askProfileIfMissing: 기존 동작과 동일(질문지 모드에서만 의미)
- */
 export function useChatFlow({
     customUser,
-    onClose,
     disableQuestionnaire = false,
     fieldsToAsk = [],
     introMessage,
@@ -24,11 +14,9 @@ export function useChatFlow({
     autoStartFromProfile = true,
     askProfileIfMissing = true,
 } = {}) {
-    // ===== 모드 계산 =====
     const questionnaireMode = !disableQuestionnaire;
-    const quickMode = disableQuestionnaire && Array.isArray(fieldsToAsk) && fieldsToAsk.length > 0;
+    const quickMode = !!disableQuestionnaire;
 
-    // ===== 질문 문구 맵(필요 최소 필드 전용) =====
     const QUESTION_BY_KEY = {
         이름: "이름을 입력해주세요.",
         성별: "성별을 입력해주세요.",
@@ -39,10 +27,7 @@ export function useChatFlow({
     };
     const getQuestion = (key) => QUESTION_BY_KEY[key] || "내용을 입력해주세요.";
 
-    // ===== 초기 상태 =====
-    const [step, setStep] = useState(
-        quickMode ? 0 : questionnaireMode ? 0 : fieldKeys.length
-    );
+    const [step, setStep] = useState(quickMode ? 0 : questionnaireMode ? 0 : fieldKeys.length);
     const [chatInput, setChatInput] = useState("");
     const [chatHistory, setChatHistory] = useState(
         quickMode
@@ -58,9 +43,37 @@ export function useChatFlow({
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
 
-    // ===== 자동 프리필 (질문지 모드에서만) =====
+    // 모드 전환 감지: 로그인/로그아웃 등으로 disableQuestionnaire 변경 시 리셋
+    const prevModeRef = useRef({ quickMode, questionnaireMode });
     useEffect(() => {
-        if (!questionnaireMode) return; // quick/AI 모드에선 사용 안 함
+        const prev = prevModeRef.current;
+        if (prev.quickMode !== quickMode || prev.questionnaireMode !== questionnaireMode) {
+            // 모드가 바뀌면 상태 초기화
+            setForm(initialForm);
+            setIsChatEnded(false);
+            setIsTyping(false);
+
+            if (quickMode) {
+                // 바로 상담 모드: 인트로만
+                setStep(0);
+                setChatHistory([
+                    { sender: "ai", message: introMessage || "상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?" },
+                ]);
+            } else if (questionnaireMode) {
+                // 질문지 모드: 첫 질문부터
+                setStep(0);
+                setChatHistory([{ sender: "ai", message: questionOrder[0] }]);
+            } else {
+                setStep(fieldKeys.length);
+                setChatHistory([]);
+            }
+            prevModeRef.current = { quickMode, questionnaireMode };
+        }
+    }, [quickMode, questionnaireMode, introMessage]);
+
+    //자동 프리필 (질문지 모드에서만)
+    useEffect(() => {
+        if (!questionnaireMode) return;
 
         const { prefill, filledCount } = prefillFromUser(customUser);
         if (filledCount > 0) {
@@ -68,7 +81,9 @@ export function useChatFlow({
 
             const firstUnansweredIndex = fieldKeys.findIndex((key) => !prefill[key]);
             const goTo = askProfileIfMissing
-                ? (firstUnansweredIndex >= 0 ? firstUnansweredIndex : fieldKeys.length)
+                ? firstUnansweredIndex >= 0
+                    ? firstUnansweredIndex
+                    : fieldKeys.length
                 : fieldKeys.length;
 
             setStep(goTo);
@@ -82,7 +97,7 @@ export function useChatFlow({
                 return [...prev, intro];
             });
 
-            // 자동 시작
+            // 자동 시작(필수 값이 충분하면)
             if (autoStartFromProfile && goTo >= fieldKeys.length) {
                 const readyKeys = ["이름", "나이", "상태", "상담받고싶은내용"];
                 const enough = readyKeys.every((k) => (prefill[k] ?? "").toString().trim().length > 0);
@@ -95,9 +110,7 @@ export function useChatFlow({
                             const displayName =
                                 customUser?.fullName || customUser?.nickname || customUser?.name || "고객";
                             const aiMsgRaw = result?.상담사_응답 || "상담 응답을 불러오지 못했습니다.";
-                            const aiMsg = enforceGreeting
-                                ? ensureGreeting(aiMsgRaw, displayName)
-                                : aiMsgRaw;
+                            const aiMsg = enforceGreeting ? ensureGreeting(aiMsgRaw, displayName) : aiMsgRaw;
                             setChatHistory((h) => [...h, { sender: "ai", message: aiMsg }]);
                             setIsChatEnded(!!result?.세션_종료);
                         } catch (e) {
@@ -113,12 +126,12 @@ export function useChatFlow({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [customUser, questionnaireMode, autoStartFromProfile, askProfileIfMissing, enforceGreeting]);
 
-    // 스크롤 고정
+    //스크롤 고정
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, [chatHistory, isTyping]);
 
-    // ===== 제출 처리 =====
+    //제출 처리
     const handleSubmit = useCallback(async () => {
         if (isTyping || isChatEnded) return;
 
@@ -132,8 +145,8 @@ export function useChatFlow({
         setChatHistory((prev) => [...prev, { sender: "user", message: input }]);
         setChatInput("");
 
-        // ---- QUICK MODE: 최소 질문 수집 ----
-        if (quickMode && step < fieldsToAsk.length) {
+        //QUICK MODE: 최소 질문 수집(있는 경우에만)
+        if (quickMode && fieldsToAsk.length > 0 && step < fieldsToAsk.length) {
             const key = fieldsToAsk[step];
             setForm((prev) => ({ ...prev, [key]: input }));
 
@@ -148,7 +161,7 @@ export function useChatFlow({
             // 최소 질문 수집 완료 → 상담 호출 진행
         }
 
-        // ---- 질문지 모드: 전체 수집 ----
+        //질문지 모드: 전체 수집
         if (questionnaireMode && step < fieldKeys.length && askProfileIfMissing) {
             const currentKey = fieldKeys[step];
             setForm((prev) => ({ ...prev, [currentKey]: input }));
@@ -164,13 +177,12 @@ export function useChatFlow({
             // 전체 수집 완료 → 상담 호출 진행
         }
 
-        // ---- 본격 상담 호출 (quick/질문지 공통) ----
+        //본격 상담 호출 (quick/질문지 공통)
         try {
             setIsTyping(true);
 
             // 로그인 정보 보강
-            const nameFromLogin =
-                customUser?.fullName || customUser?.nickname || customUser?.name || "";
+            const nameFromLogin = customUser?.fullName || customUser?.nickname || customUser?.name || "";
             const finalForm = {
                 ...form,
                 이름: form["이름"] || nameFromLogin,
@@ -267,7 +279,7 @@ export function useChatFlow({
     };
 }
 
-// ===== 유틸: 인사 강제(중복 방지) =====
+//유틸: 인사 강제(중복 방지)
 function ensureGreeting(text, name) {
     const t = (text || "").trim();
     const hasHello = /^(안녕|안녕하세요|반갑|어서)/u.test(t);
