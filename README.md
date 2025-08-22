@@ -5,6 +5,7 @@
 > ## Architecture
 > ![](https://velog.velcdn.com/images/nn98/post/8d6dd7ff-cf5a-40dc-90a0-442c12827114/image.png)
 
+<<<<<<< HEAD
 ***
 
 > ## Usecase
@@ -41,3 +42,4 @@
 > |  `조치`  |                클린 테스트, 단위/웹 테스트 구현으로 항상성/무결성 보장                 |
 > 
 > - ### [_기록_](https://tattered-reason-ed8.notion.site/error-2025-08-22-2579e83ff32d8013a385d2ca1c4ac149)
+

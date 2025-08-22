@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useEffect, useState, useRef } from "react";
 import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -15,24 +16,29 @@ import "./css/selfTest.css";
 import "./css/result.css";
 import "./css/banner.css";
 import "./css/HospitalRegionPage.css";
+import "./css/dashboard.css";
+import "./css/theme.css";
 
 import Map from "./components/Map";
 import Header from "./components/Header";
 import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
-import ChatModal from './components/chat-modal/ChatModal';
+import ChatModal from "./components/chat-modal/ChatModal";
 import Footer from "./components/Footer";
-import AboutSection from './components/about/AboutSection/AboutSectionMain';
-import { BoardSection } from './components/board/BoardSectionmain';
+import AboutSection from "./components/about/AboutSection/AboutSectionMain";
+import { BoardSection } from "./components/board/BoardSectionmain";
 import AuthSection from "./components/AuthSection";
 import FloatingSidebar from "./components/FloatingSidebar";
 import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
-import AdminPage from './components/admin/AdminPage';
-import KakaoWaitPage from './components/KakaoWaitPage'
+import AdminPage from "./components/admin/AdminPage";
+import KakaoWaitPage from "./components/KakaoWaitPage";
+import UserProfile from "./components/chat-modal/components/UserProfile";
 
+import DashboardLayout from "./components/layout/DashboardLayout";
+import ChatConsult from "./components/dashboard/ChatConsult";
 
 const App = () => {
   const navigate = useNavigate();
@@ -40,8 +46,8 @@ const App = () => {
 
   const [appToast, setAppToast] = useState({ show: false, message: "" });
 
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(!!localStorage.getItem("token"));
   const [customUser, setCustomUser] = useState(null);
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
@@ -57,24 +63,24 @@ const App = () => {
 
   const [isEmotionModalOpen, setIsEmotionModalOpen] = useState(false);
 
+  // ✅ 중앙 챗 → 모달로 넘길 첫 질문
+  const [bootstrapQuery, setBootstrapQuery] = useState("");
+
   const loginRef = useRef(null);
   const introRef = useRef(null);
   const servicesRef = useRef(null);
   const locationRef = useRef(null);
   const infoRef = useRef(null);
 
-  const Toast = ({ message, show }) => {
-    if (!show) return null;
-    return <div className="app-toast">{message}</div>;
-  };
+  const Toast = ({ message, show }) => (show ? <div className="app-toast">{message}</div> : null);
 
-  const isAuthPageOrAdmin = [
-    "/login",
-    "/signup",
-    "/find-id",
-    "/find-password",
-    "/admin",
-  ].includes(location.pathname);
+  const isAuthPageOrAdmin = ["/login", "/signup", "/find-id", "/find-password", "/admin"].includes(
+    location.pathname
+  );
+
+  // "/" 에서는 헤더/푸터 숨김 (네 로직 유지)
+  const isDashboard = location.pathname === "/";
+  const hideShell = isAuthPageOrAdmin || isDashboard;
 
   useEffect(() => {
     fetchCustomUser();
@@ -84,9 +90,7 @@ const App = () => {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:8080/api/users/me", {
-          withCredentials: true,
-        })
+        .get("http://localhost:8080/api/auth/me", { withCredentials: true })
         .then((res) => {
           setCustomUser(res.data);
           setIsCustomLoggedIn(true);
@@ -102,26 +106,23 @@ const App = () => {
     }
   };
 
-  console.log("App: setCustomUser", typeof setCustomUser);
-  console.log("App: setIsCustomLoggedIn", typeof setIsCustomLoggedIn);
-  console.log("App: fetchCustomUser", typeof fetchCustomUser);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setCustomUser(null);
+    setIsCustomLoggedIn(false);
+    navigate("/login", { replace: true, state: { message: "로그아웃되었습니다." } });
+  };
 
   useEffect(() => {
     if (location.state?.message) {
       setAppToast({ show: true, message: location.state.message });
-      setTimeout(() => {
-        setAppToast({ show: false, message: "" });
-      }, 3000);
+      setTimeout(() => setAppToast({ show: false, message: "" }), 3000);
       navigate(location.pathname, { replace: true });
     }
   }, [location, navigate]);
 
   useEffect(() => {
-    if (
-      isCustomLoggedIn &&
-      customUser &&
-      ["/login", "/signup"].includes(location.pathname)
-    ) {
+    if (isCustomLoggedIn && customUser && ["/login", "/signup"].includes(location.pathname)) {
       navigate("/");
     }
   }, [isCustomLoggedIn, customUser, navigate, location.pathname]);
@@ -131,9 +132,7 @@ const App = () => {
       if (
         loginRef.current &&
         !loginRef.current.contains(event.target) &&
-        ["/login", "/signup", "/find-id", "/find-password"].includes(
-          location.pathname
-        )
+        ["/login", "/signup", "/find-id", "/find-password"].includes(location.pathname)
       ) {
         setIsOutsideClicked(true);
       } else {
@@ -145,12 +144,8 @@ const App = () => {
   }, [location]);
 
   const BoardRouteElement = () => {
-    if (isCustomLoggedIn && customUser === null) {
-      return <div>사용자 정보 불러오는 중...</div>;
-    }
-    if (isCustomLoggedIn && customUser) {
-      return <BoardSection user={customUser} />;
-    }
+    if (isCustomLoggedIn && customUser === null) return <div>사용자 정보 불러오는 중...</div>;
+    if (isCustomLoggedIn && customUser) return <BoardSection user={customUser} />;
     return <Navigate to="/login" state={{ message: "로그인이 필요한 서비스입니다." }} />;
   };
 
@@ -158,8 +153,13 @@ const App = () => {
     <div
       ref={loginRef}
       style={{
-        position: "fixed", top: 0, left: 0, width: "100%",
-        height: "100%", background: "#f5f5f5", zIndex: 1000,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "#f5f5f5",
+        zIndex: 1000,
       }}
     >
       {!isOutsideClicked && (
@@ -174,9 +174,16 @@ const App = () => {
     </div>
   );
 
+  const handleConsultSubmit = (text) => {
+    setBootstrapQuery(text);
+    setTab("chat");
+    setIsOpen(true);
+  };
+
   return (
     <>
-      {!isAuthPageOrAdmin && (
+      {/* 기존 헤더/플로팅/FAQ/지도는 hideShell로 제어 */}
+      {!hideShell && (
         <>
           <Header
             introRef={introRef}
@@ -192,45 +199,79 @@ const App = () => {
             faqVisible={faqVisible}
             setFaqVisible={setFaqVisible}
           />
-          <ChatModal
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            tab={tab}
-            setTab={setTab}
-            selectedChat={selectedChat}
-            setSelectedChat={setSelectedChat}
-            resultText={resultText}
-            customUser={customUser}
-            isCustomLoggedIn={isCustomLoggedIn}
-          />
         </>
       )}
 
-      {faqVisible && !isAuthPageOrAdmin && <Faq />}
+      {faqVisible && !hideShell && <Faq />}
 
-      {mapVisible && !isAuthPageOrAdmin && (
-        <div style={{
-          position: "fixed", top: "150px", right: "150px", zIndex: 1000,
-          background: "white", boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          borderRadius: "12px", padding: "10px",
-        }}>
+      {mapVisible && !hideShell && (
+        <div
+          style={{
+            position: "fixed",
+            top: "150px",
+            right: "150px",
+            zIndex: 1000,
+            background: "white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            borderRadius: "12px",
+            padding: "10px",
+          }}
+        >
           <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
           <Map />
         </div>
       )}
 
-      <EmotionAnalysisPage
-        isOpen={isEmotionModalOpen}
-        onClose={() => setIsEmotionModalOpen(false)}
+      <EmotionAnalysisPage isOpen={isEmotionModalOpen} onClose={() => setIsEmotionModalOpen(false)} />
+
+      {/* ✅ ChatModal은 항상 렌더. 홈에서는 런처(말풍선 버튼)만 숨김 */}
+      <ChatModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        tab={tab}
+        setTab={setTab}
+        selectedChat={selectedChat}
+        setSelectedChat={setSelectedChat}
+        resultText={resultText}
+        customUser={customUser}
+        isCustomLoggedIn={isCustomLoggedIn}
+        bootstrapQuery={bootstrapQuery}
+        onConsumeBootstrapQuery={() => setBootstrapQuery("")}
+        hideLauncher={isDashboard}
       />
 
       <Routes>
+        <Route element={<DashboardLayout currentUser={customUser} onLogout={handleLogout} />}>
+          <Route index element={<ChatConsult />} />
+          <Route path="/emotion" element={<div style={{ padding: 16 }}><h1>감성 분석</h1></div>} />
+          <Route path="/img" element={<Picture customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />} />
+          <Route path="/board" element={<BoardRouteElement />} />
+          <Route path="/hospital-region" element={<HospitalRegionPage />} />
+          <Route path="/library" element={<ResourceLibrary />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/help" element={<div style={{ padding: 16 }}><h1>도움말</h1></div>} />
+          {isCustomLoggedIn && customUser && (
+            <>
+              <Route
+                path="/profile"
+                element={<UserProfile
+                  customUser={customUser}
+                  isCustomLoggedIn={isCustomLoggedIn}
+                  setCustomUser={setCustomUser}
+                  setIsCustomLoggedIn={setIsCustomLoggedIn}
+                />
+                } />
+              <Route path="/contact" element={<div style={{ padding: 16 }}><h1>문의하기</h1></div>} />
+            </>
+          )}
+        </Route>
+
+        {/* 레이아웃 밖 라우트들 */}
         <Route
           path="/login/wait"
           element={
             <KakaoWaitPage
-
-              isCustomLoggedIn = {isCustomLoggedIn}
+              isCustomLoggedIn={isCustomLoggedIn}
               setCustomUser={setCustomUser}
               setIsCustomLoggedIn={setIsCustomLoggedIn}
               onLoginSuccess={fetchCustomUser}
@@ -250,31 +291,13 @@ const App = () => {
           }
         />
         <Route
-          path="/"
+          path="/legacy-home"
           element={
             <AboutSection
-              refs={{
-                introRef: introRef,
-                locationRef: locationRef,
-                servicesRef: servicesRef,
-                infoRef: infoRef,
-              }}
+              refs={{ introRef, locationRef, servicesRef, infoRef }}
               scrollTarget={scrollTarget}
               setScrollTarget={setScrollTarget}
               setIsEmotionModalOpen={setIsEmotionModalOpen}
-            />
-          }
-        />
-        <Route path="/library" element={<ResourceLibrary />} />
-        <Route path="/map" element={<Map />} />
-        <Route path="/hospital-region" element={<HospitalRegionPage />} />
-        <Route path="/board" element={<BoardRouteElement />} />
-        <Route
-          path="/img"
-          element={
-            <Picture
-              customUser={customUser}
-              isCustomLoggedIn={isCustomLoggedIn}
             />
           }
         />
@@ -297,37 +320,25 @@ const App = () => {
             />
           }
         />
-        <Route
-          path="/login"
-          element={authSectionWrapper("login", {
-            setIsCustomLoggedIn,
-            setCustomUser,
-          })}
-        />
+        <Route path="/login" element={authSectionWrapper("login", { setIsCustomLoggedIn, setCustomUser })} />
         <Route
           path="/logout"
-          element={
-            <AuthSection
-              type="logout"
-              setIsCustomLoggedIn={setIsCustomLoggedIn}
-              setCustomUser={setCustomUser}
-            />
-          }
+          element={<AuthSection type="logout" setIsCustomLoggedIn={setIsCustomLoggedIn} setCustomUser={setCustomUser} />}
         />
-        <Route
-          path="/signup"
-          element={authSectionWrapper("signup")}
-        />
+        <Route path="/signup" element={authSectionWrapper("signup")} />
         <Route path="/find-id" element={authSectionWrapper("find-id")} />
         <Route
           path="/find-password"
-          element={authSectionWrapper("find-password", {
-            onFindPasswordSuccess: () => setIsOutsideClicked(false),
-          })}
+          element={authSectionWrapper("find-password", { onFindPasswordSuccess: () => setIsOutsideClicked(false) })}
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {!isAuthPageOrAdmin && <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />}
+      {!hideShell && (
+        <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />
+      )}
+
+      <Toast show={appToast.show} message={appToast.message} />
     </>
   );
 };

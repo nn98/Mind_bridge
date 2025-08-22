@@ -12,7 +12,6 @@ const Header = ({
   const location = useLocation();
 
   const isLoggedIn = isCustomLoggedIn;
-  // console.log(`isLoggedIn: ${isLoggedIn}`);
 
   const scrollOrNavigate = (ref, target) => {
     if (ref?.current) {
@@ -70,7 +69,7 @@ const Header = ({
         <div className="nav-right">
           {isLoggedIn ? (
             <>
-              {customUser?.role === "ADMIN" && (
+              {String(customUser?.role || "").toUpperCase() !== "ADMIN" && (
                 <button
                   onClick={() => navigate("/admin")}
                   className="custom-blue-btn ml-4"
