@@ -7,13 +7,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -24,11 +27,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
-    private static final List<String> EXCLUDE_URLS = List.of(
+    // ★ 토큰 검사 제외 경로 (패턴 지원)
+    private static final List<String> EXCLUDE_PATTERNS = List.of(
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh",
             "/api/users/find-id",
             "/api/users/find-password",
-            "/api/auth/social/kakao"
+            "/api/auth/social/kakao",
+            "/actuator/health",
+            "/error",
+            "/favicon.ico"
     );
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
+
+    private boolean isExcluded(@NonNull String uri) {
+        for (String pattern : EXCLUDE_PATTERNS) {
+            if (PATH_MATCHER.match(pattern, uri)) return true;
+        }
+        return false;
+    }
+
+    // ★ OPTIONS(프리플라이트) + 화이트리스트는 아예 필터 스킵
+    @Override
+    protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+        return isExcluded(request.getRequestURI());
+    }
 
     @Override
     protected void doFilterInternal(
@@ -37,77 +63,71 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @Nonnull FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-        if (EXCLUDE_URLS.contains(path)) {
-            log.debug("인증 제외 URL 접근: {}", path);
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String authHeader = request.getHeader("Authorization");
-        log.debug("Authorization Header: {}", authHeader);
+        final String path = request.getRequestURI();
+        final String authHeader = request.getHeader("Authorization");
+        log.debug("[JWT] URI={}, Authorization={}", path, authHeader);
 
         String token = null;
 
-        // 1) Authorization 헤더에서 Bearer 토큰 추출 시도
+        // 1) Authorization Bearer 토큰 우선 추출
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            log.debug("Authorization 헤더에서 추출된 토큰: {}", token);
+            log.debug("[JWT] Bearer token extracted");
         } else {
-            log.warn("Authorization 헤더 없거나 Bearer 토큰 아님, 쿠키에서 토큰 검사 시도");
-            // 2) 쿠키에서 jwt 토큰 추출 시도
+            // 2) 쿠키에서 jwt 토큰 보조 추출
             if (request.getCookies() != null) {
                 for (var cookie : request.getCookies()) {
                     if ("jwt".equals(cookie.getName())) {
                         token = cookie.getValue();
-                        log.debug("쿠키에서 추출된 토큰: {}", token);
+                        log.debug("[JWT] Cookie token extracted");
                         break;
                     }
                 }
-            } else {
-                log.warn("요청에 쿠키 없음");
             }
         }
 
-        if (token == null) {
-            log.warn("토큰을 찾지 못함, 인증 실패 처리");
+        // ★ 보호 경로인데 토큰이 전혀 없으면 401
+        if (token == null || token.isBlank()) {
+            log.warn("[JWT] No token for protected resource → 401");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        boolean authenticated = false;
-
-        // 4. 커스텀 JWT 검증
-        if (!authenticated) {
-            if (jwtUtil.validateToken(token)) {
-                String email = jwtUtil.getEmailFromToken(token);
-                log.debug("커스텀 토큰에서 읽은 이메일: {}", email);
-
-                try {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                    if (userDetails != null) {
-                        UsernamePasswordAuthenticationToken authentication
-                                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.info("커스텀 사용자 인증 성공: {}", email);
-                        authenticated = true;
-                    } else {
-                        log.warn("커스텀 사용자 정보를 찾을 수 없음");
-                    }
-                } catch (Exception e) {
-                    log.error("커스텀 사용자 로드중 예외 발생: {}", e.getMessage());
-                }
-            } else {
-                log.warn("커스텀 토큰 유효성 검사 실패");
+        try {
+            // 3) 토큰 유효성 검사
+            if (!jwtUtil.validateToken(token)) {
+                log.warn("[JWT] Token validation failed → 401");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
-        }
 
-        if (!authenticated) {
-            log.warn("인증 실패, 401 응답");
+            final String email = jwtUtil.getEmailFromToken(token);
+            if (email == null || email.isBlank()) {
+                log.warn("[JWT] Email missing in token → 401");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            // 4) 사용자 로드 & SecurityContext 설정
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (userDetails == null) {
+                log.warn("[JWT] UserDetails not found: {}", email);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null,
+                    userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("[JWT] Auth success for {}", email);
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            log.warn("[JWT] Exception: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
         }
-
-        filterChain.doFilter(request, response);
     }
 }
