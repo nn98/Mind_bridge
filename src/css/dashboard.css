@@ -1,7 +1,10 @@
 /**************
- * MindBridge UI — Clean Dark v3 (Fix: 내부 스크롤 전용)
- * - 색상/타이포/정렬/간격 유지
- * - 페이지 스크롤 제거, consult-stream 내부만 스크롤
+ * MindBridge UI — Clean Dark v3 (Fix)
+ * - 대비 강화
+ * - 상담 화면 수직/수평 중앙정렬
+ * - 불필요한 보더 제거
+ * - 입력창 가독성↑
+ * - 사이드바 고정 / 중앙 스크롤
  **************/
 
 :root {
@@ -9,12 +12,9 @@
     --bg: #0b1220;
     --panel: #0f172a;
     --panel-2: #0e1526;
-    /* 사이드/입력 바 배경 살짝 밝게 */
     --line: #1e2a3c;
     --text: #f1f5fb;
-    /* 본문 텍스트 더 밝게 */
     --muted: #b1bcc8;
-    /* 보조 텍스트 더 밝게 */
 
     --primary: #3b82f6;
     --primary-2: #1d4ed8;
@@ -41,11 +41,8 @@
 }
 
 html,
-body,
-#root {
+body {
     height: 100%;
-    overflow: hidden;
-    /* 페이지 스크롤 제거 */
 }
 
 body {
@@ -53,6 +50,7 @@ body {
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+    /* 외부 스크롤 설정은 유지 */
 }
 
 /* ============ Layout ============ */
@@ -60,7 +58,8 @@ body {
     display: flex;
     min-height: 100vh;
     height: 100vh;
-    /* 상위 높이 고정 */
+    overflow: hidden;
+    /* 중앙만 스크롤 */
 }
 
 /* Sidebar */
@@ -72,6 +71,14 @@ body {
     flex-direction: column;
     gap: 12px;
     padding: 16px 12px;
+
+    position: sticky;
+    /* 고정 */
+    top: 0;
+    height: 100vh;
+    flex: 0 0 240px;
+    overflow-y: auto;
+    /* 메뉴 길면 내부 스크롤 */
 }
 
 .nav-close .dash-sidebar {
@@ -127,7 +134,7 @@ body {
     display: block;
     padding: 10px 12px;
     border-radius: 10px;
-    color: gray;
+    color: var(--text);
     text-decoration: none;
     transition: background .15s ease, color .15s ease, outline-color .15s ease;
 }
@@ -152,7 +159,6 @@ body {
     text-align: center;
 }
 
-/* Sidebar bottom card */
 .upgrade {
     margin-top: auto;
     padding: 12px;
@@ -172,8 +178,9 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    /* 내부 스크롤 허용 */
+    height: 100vh;
+    overflow: hidden;
+    /* 내부 스크롤 컨테이너로 위임 */
 }
 
 /* Topbar */
@@ -231,19 +238,14 @@ body {
     background: #0c1426;
 }
 
-/* 메인 컨텐츠를 세로로도 가운데 배치 */
+/* 중앙 영역만 스크롤 */
 .dash-content {
-    padding: 32px 24px;
-    display: flex;
-    align-items: center;
-    /* 수직 가운데 */
-    justify-content: center;
-    /* 수평 가운데 */
     flex: 1 1 auto;
     min-height: 0;
-    /* 내부 스크롤 허용 */
-    overflow: hidden;
-    /* 하위에서만 스크롤 */
+    overflow-y: auto;
+    /* 중앙 스크롤 */
+    overflow-x: hidden;
+    padding: 32px 24px;
 }
 
 /* ============ Cards / Grid ============ */
@@ -325,9 +327,9 @@ body {
 }
 
 .cta {
-    margin-top: 14px;
     display: flex;
     justify-content: flex-end;
+    margin-top: 14px;
 }
 
 .btn-primary {
@@ -369,7 +371,6 @@ body {
     color: #e8f0ff;
 }
 
-/* 불필요한 박스 보더 제거(스크린샷의 “이상한 보더”) */
 .chat-card {
     position: relative;
     width: 100%;
@@ -386,24 +387,22 @@ body {
     position: relative;
     width: 100%;
     max-width: 960px;
-    /* 원래: min-height: calc(100vh - 120px); */
-    height: 100%;
-    /* 상위 영역 안에 고정 */
-    min-height: 0;
-    /* 내부 스크롤 허용 */
+    min-height: calc(100vh - 120px);
     margin: 0 auto;
     padding: 24px 16px 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 18px;
-    overflow: hidden;
-    /* 래퍼 자체 스크롤 제거 */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    /* 헤더 / 스트림 / 입력 */
+    row-gap: 18px;
 }
 
 .consult-header {
     text-align: center;
     margin: 0 0 6px;
+    position: sticky;
+    /* 상단 고정 */
+    top: 0;
+    z-index: 2;
 }
 
 .consult-logo {
@@ -411,6 +410,7 @@ body {
     font-size: 56px;
     margin: 20px 0 8px 0;
     text-align: center;
+
     /* 핵심 */
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     background-clip: text;
@@ -431,28 +431,30 @@ body {
     text-align: center;
 }
 
+/* 내부 스크롤(점프 방지용 spacer 사용) */
 .consult-stream {
-    /* 원래: margin-top: 300px;  => 바깥 레이아웃 안 밀리게 padding으로 대체 */
-    padding-top: 300px;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    /* 내부 스크롤 */
-    overflow-x: hidden;
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE, Edge */
     gap: 14px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: 15px;
     min-height: 0;
-    /* 내부 스크롤 핵심 */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* 스크롤바 숨기고 싶으면 주석 해제
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    }
+    .consult-stream::-webkit-scrollbar { display: none; } */
 }
 
-.consult-stream::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari */
+/* 기존 margin/padding-top 대신 고정 spacer로 여백 제공 → 앵커링 방지 */
+.consult-spacer {
+    height: 300px;
+    /* 기존 margin-top: 400px과 동일한 시각적 위치 */
+    flex: 0 0 auto;
+    overflow-anchor: none;
+    /* 브라우저 스크롤 앵커링 비활성화 */
 }
 
 .consult-bubble {
@@ -574,9 +576,7 @@ body {
 
     .consult-wrap {
         max-width: 96vw;
-        /* 모바일에서도 상위 안에 고정 */
-        height: 100%;
-        min-height: 0;
+        min-height: calc(100vh - 100px);
     }
 
     .consult-bubble {
@@ -597,4 +597,34 @@ body {
         height: 38px;
         border-radius: 10px;
     }
+}
+
+
+
+.consult-stream::-webkit-scrollbar {
+    display: none;
+}
+
+/* 숨기길 원할 때만 */
+/* 중앙 본문(dash-content)도 스크롤바 감추고 싶다면 추가 */
+.dash-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.dash-content::-webkit-scrollbar {
+    display: none;
+}
+
+/* 사이드바 내부 스크롤바도 감추고 싶을 때만 사용 */
+.dash-sidebar {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.dash-sidebar::-webkit-scrollbar {
+    display: none;
 }

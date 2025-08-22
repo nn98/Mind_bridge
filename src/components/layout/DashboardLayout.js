@@ -8,7 +8,7 @@ export default function DashboardLayout({ currentUser, onLogout }) {
   const role = String(currentUser?.role || "").toUpperCase();
   const isAdmin = role === "ADMIN";
 
-  const menu = [
+  const  menu = [
     { label: "챗 상담", to: "/", section: "탐색" },
     { label: "감성", to: "/emotion", section: "탐색" },
     { label: "이미지", to: "/img", section: "탐색" },

@@ -20,7 +20,6 @@ import "./css/dashboard.css";
 import "./css/theme.css";
 
 import Map from "./components/Map";
-import Header from "./components/Header";
 import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
 import ChatModal from "./components/chat-modal/ChatModal";
@@ -185,14 +184,6 @@ const App = () => {
       {/* 기존 헤더/플로팅/FAQ/지도는 hideShell로 제어 */}
       {!hideShell && (
         <>
-          <Header
-            introRef={introRef}
-            servicesRef={servicesRef}
-            infoRef={infoRef}
-            setScrollTarget={setScrollTarget}
-            isCustomLoggedIn={isCustomLoggedIn}
-            customUser={customUser}
-          />
           <FloatingSidebar
             mapVisible={mapVisible}
             setMapVisible={setMapVisible}
