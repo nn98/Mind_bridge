@@ -46,8 +46,8 @@ const App = () => {
 
   const [appToast, setAppToast] = useState({ show: false, message: "" });
 
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(!!localStorage.getItem("token"));
   const [customUser, setCustomUser] = useState(null);
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
@@ -254,7 +254,13 @@ const App = () => {
             <>
               <Route
                 path="/profile"
-                element={<UserProfile customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />} />
+                element={<UserProfile
+                  customUser={customUser}
+                  isCustomLoggedIn={isCustomLoggedIn}
+                  setCustomUser={setCustomUser}
+                  setIsCustomLoggedIn={setIsCustomLoggedIn}
+                />
+                } />
               <Route path="/contact" element={<div style={{ padding: 16 }}><h1>문의하기</h1></div>} />
             </>
           )}

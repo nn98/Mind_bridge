@@ -16,7 +16,7 @@ export const signup = async (userData) => {
     throw error;
   }
 
-  return axios.post(`${BASE_URL}/signup`, userData);
+  //return axios.post(`${BASE_URL}/signup`, userData);
 };
 
 export const login = async (credentials) => {
