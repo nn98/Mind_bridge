@@ -108,7 +108,7 @@ const PostsPanel = () => {
             setError("");
 
             //쿠키 기반이므로 token 전달 필요 없음
-            const data = await getAllPosts(token, { page, size, search, sort: sortParam });
+            const data = await getAllPosts({ page, size, search, sort: sortParam });
 
             setPosts(data.content || []);
             setTotalPages(data.totalPages ?? 0);
