@@ -286,12 +286,12 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           password: formData.password,
         }, { withCredentials: true });
         const { token, user } = response.data;
-        console.log(`token: ${token}`);
-        console.log(`user: ${user}`);
+        //console.log(`token: ${token}`);
+        //console.log(`user: ${user}`);
         // console.log(`setCustomUser: ${setCustomUser}`);
         // console.log(`setIsCustomLoggedIn: ${setIsCustomLoggedIn}`);
         // console.log(`onLoginSuccess: ${onLoginSuccess}`);
-        localStorage.setItem("token", token);
+        //localStorage.setItem("token", token);
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (onLoginSuccess) onLoginSuccess();
@@ -300,7 +300,6 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`);
         /* ▲▲ 추가 끝 ▲▲ */
-
         navigate("/");
       } else if (type === "signup") {
         if (Object.keys(errors).length > 0 || !emailCheck.isAvailable || !formData.termsAgreed) {
