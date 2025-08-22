@@ -1,29 +1,30 @@
+// src/components/dashboard/ChatConsult.jsx
 import { useEffect, useMemo } from "react";
 import { useChatFlow } from "../chat/hooks/useChatFlow";
 
 function ChatConsultInner({ customUser, isLoggedIn }) {
-    const {
-        chatInput,
-        setChatInput,
-        chatHistory,
-        isTyping,
-        isChatEnded,
-        chatEndRef,
-        inputRef,
-        handleSubmit,
-        handleEndChat,
-        handleRestartChat,
-    } = useChatFlow({
-        customUser,
-        disableQuestionnaire: isLoggedIn,
-        askProfileIfMissing: !isLoggedIn,
-        fieldsToAsk: [],
-        introMessage: isLoggedIn
-            ? "로그인 정보를 확인했어요. 상담받고 싶은 내용을 말씀해주세요."
-            : undefined,
-        enforceGreeting: true,
-        autoStartFromProfile: isLoggedIn,
-    });
+  const {
+    chatInput,
+    setChatInput,
+    chatHistory,
+    isTyping,
+    isChatEnded,
+    chatEndRef,
+    inputRef,
+    handleSubmit,
+    handleEndChat,
+    handleRestartChat,
+  } = useChatFlow({
+    customUser,
+    disableQuestionnaire: isLoggedIn,
+    askProfileIfMissing: !isLoggedIn,
+    fieldsToAsk: [],
+    introMessage: isLoggedIn
+      ? "로그인 정보를 확인했어요. 상담받고 싶은 내용을 말씀해주세요."
+      : undefined,
+    enforceGreeting: true,
+    autoStartFromProfile: isLoggedIn,
+  });
 
   const lastUserQuery = useMemo(() => {
     for (let i = chatHistory.length - 1; i >= 0; i--) {
@@ -32,15 +33,21 @@ function ChatConsultInner({ customUser, isLoggedIn }) {
     return "";
   }, [chatHistory]);
 
-  // 새 메시지/타이핑 변화 시 항상 맨 밑(입력칸)으로 스크롤
+  // 새 메시지/타이핑 변화 시 항상 최신 메시지 보이기
   useEffect(() => {
+    // 1) 앵커로 스크롤
     chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    // 2) 부모 컨테이너를 강제로 바닥으로
+    const parent = chatEndRef.current?.parentNode;
+    if (parent && typeof parent.scrollTop === "number") {
+      parent.scrollTop = parent.scrollHeight;
+    }
   }, [chatHistory, isTyping, chatEndRef]);
 
   // 입력창 포커스 유지
   useEffect(() => {
     if (!isTyping) inputRef.current?.focus();
-  }, [inputRef, isTyping]);
+  }, [isTyping]);
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -68,7 +75,7 @@ function ChatConsultInner({ customUser, isLoggedIn }) {
         <div ref={chatEndRef} />
       </div>
 
-      {/* 하단 입력창: 화면 하단에 고정 */}
+      {/* 하단 입력창: sticky 고정 */}
       <form
         className="consult-inputbar"
         onSubmit={(e) => {
@@ -135,8 +142,16 @@ function ChatConsultInner({ customUser, isLoggedIn }) {
 }
 
 export default function ChatConsult({ customUser }) {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const isLoggedIn = !!(customUser?.id || customUser?.email || token);
-    const modeKey = isLoggedIn ? "logged-in" : "logged-out";
-    return <ChatConsultInner key={modeKey} customUser={customUser} isLoggedIn={isLoggedIn} />;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const isLoggedIn = !!(customUser?.id || customUser?.email || token);
+  const modeKey = isLoggedIn ? "logged-in" : "logged-out";
+
+  return (
+    <ChatConsultInner
+      key={modeKey}
+      customUser={customUser}
+      isLoggedIn={isLoggedIn}
+    />
+  );
 }

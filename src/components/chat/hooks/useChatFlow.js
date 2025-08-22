@@ -126,11 +126,6 @@ export function useChatFlow({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [customUser, questionnaireMode, autoStartFromProfile, askProfileIfMissing, enforceGreeting]);
 
-    //스크롤 고정
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, [chatHistory, isTyping]);
-
     //제출 처리
     const handleSubmit = useCallback(async () => {
         if (isTyping || isChatEnded) return;
