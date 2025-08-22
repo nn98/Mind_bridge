@@ -11,36 +11,13 @@ body {
     z-index: 1;
 }
 
-/* ✅ 위/아래 그림자 추가 */
-.banner-container::before,
-.banner-container::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 5px;
-    /* 그림자 두께 (원하는 만큼 조절) */
-    z-index: 2;
-    pointer-events: none;
-    /* 클릭 방해 X */
-}
-
-.banner-container::before {
-    top: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent);
-}
-
-.banner-container::after {
-    bottom: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
-}
 
 .banner-slides {
     display: flex;
     transition: transform 0.5s ease-in-out;
     width: 100%;
     height: 100%;
-
+    
 }
 
 .banner-slides a {
@@ -54,7 +31,7 @@ body {
     width: 100%;
     height: 400px;
     object-fit: cover;
-
+    
 }
 
 .button-container {
