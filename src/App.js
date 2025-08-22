@@ -90,7 +90,7 @@ const App = () => {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:8080/api/users/me", { withCredentials: true })
+        .get("http://localhost:8080/api/auth/me", { withCredentials: true })
         .then((res) => {
           setCustomUser(res.data);
           setIsCustomLoggedIn(true);
