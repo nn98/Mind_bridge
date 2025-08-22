@@ -267,7 +267,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     }
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/auth/check-email`, { email: formData.email }, { withCredentials: true });
+      const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
       if (response.data.isAvailable) {
         setEmailCheck({ isChecking: false, isAvailable: true, message: "사용 가능한 이메일입니다." });
       } else {
@@ -313,7 +313,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           alert(alertMessage);
           return;
         }
-        await axios.post(`${BACKEND_URL}/api/auth/register`, {
+        await axios.post(`${BACKEND_URL}/api/users/register`, {
           email: formData.email,
           password: formData.password,
           nickname: formData.nickname,
