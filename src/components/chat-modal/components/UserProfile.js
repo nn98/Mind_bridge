@@ -6,10 +6,23 @@ import PasswordChangeModal from './PasswordChangeModal';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const UserProfile = ({ customUser, isCustomLoggedIn }) => {
+const noop = () => { };
+const call = (fn, ...args) => (typeof fn === 'function' ? fn(...args) : undefined);
+
+const UserProfile = ({
+    customUser,
+    isCustomLoggedIn,
+    setCustomUser = noop,           // ✅ 기본 no-op
+    setIsCustomLoggedIn = noop,     // ✅ 기본 no-op
+}) => {
     const [userInfo, setUserInfo] = useState({
-        age: '', gender: '', email: '', phoneNumber: '',
-        mentalState: '', nickname: '', counselingGoal: ''
+        age: '',
+        gender: '',
+        email: '',
+        phoneNumber: '',
+        mentalState: '',
+        nickname: '',
+        counselingGoal: '',
     });
     const [editedInfo, setEditedInfo] = useState({ ...userInfo });
     const [isEditing, setIsEditing] = useState(false);
@@ -18,9 +31,35 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     const userId = customUser?.id;
 
-    // 공통: 서버 응답을 단일 형태로 정규화
+    const printAxiosError = (error, label = 'AxiosError') => {
+        if (!error?.response) {
+            console.error(`${label} (no response):`, {
+                message: error?.message,
+                code: error?.code,
+                config: error?.config,
+                cause: error?.cause,
+            });
+            toast.error('서버에 연결하지 못했습니다. (네트워크/CORS 확인)');
+            return;
+        }
+        const { status, statusText, data, config } = error.response;
+        console.error(`${label}:`, {
+            status,
+            statusText,
+            data,
+            url: config?.url,
+            method: config?.method,
+        });
+        const msg =
+            data?.message ||
+            data?.error ||
+            (typeof data === 'string' ? data : '') ||
+            `요청 실패 (${status})`;
+        toast.error(msg);
+    };
+
     const normalizeUser = (raw, fallback = {}) => {
-        const data = raw?.data ?? raw; // {data:{...}} or {...}
+        const data = raw?.data ?? raw;
         return {
             nickname: data?.nickname ?? fallback.nickname ?? '',
             email: data?.email ?? fallback.email ?? '',
@@ -30,6 +69,44 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             mentalState: data?.mentalState ?? fallback.mentalState ?? '선택되지 않음',
             counselingGoal: data?.counselingGoal ?? fallback.counselingGoal ?? '',
         };
+    };
+
+    const buildUpdatePayload = (base, edited) => {
+        const normalizeNumber = (v) => {
+            if (v === null || v === undefined || v === '') return null;
+            const n = Number(v);
+            return Number.isFinite(n) ? n : null;
+        };
+        return {
+            email: edited.email || base.email || '',
+            nickname: edited.nickname ?? base.nickname ?? '',
+            phoneNumber: edited.phoneNumber ?? base.phoneNumber ?? '',
+            gender: edited.gender ?? base.gender ?? '',
+            age: normalizeNumber(edited.age ?? base.age),
+            mentalState: edited.mentalState ?? base.mentalState ?? '',
+            counselingGoal: edited.counselingGoal ?? base.counselingGoal ?? '',
+        };
+    };
+
+    // ✅ 세션 쿠키 기반 재조회 — 안전 호출 사용
+    const fetchCustomUser = () => {
+        const token = localStorage.getItem('token'); // 존재만 확인
+        if (token) {
+            axios
+                .get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true })
+                .then((res) => {
+                    call(setCustomUser, res.data);
+                    call(setIsCustomLoggedIn, true);
+                })
+                .catch(() => {
+                    localStorage.removeItem('token');
+                    call(setCustomUser, null);
+                    call(setIsCustomLoggedIn, false);
+                });
+        } else {
+            call(setIsCustomLoggedIn, false);
+            call(setCustomUser, null);
+        }
     };
 
     useEffect(() => {
@@ -43,10 +120,6 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             }
             setIsLoading(true);
 
-            const token = localStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-            // customUser 기반 기본값 준비(요청 실패 시 화면이라도 보이게)
             const fallbackFromCustom = {
                 email: customUser?.email || '',
                 nickname: customUser?.nickname || '',
@@ -60,43 +133,37 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
             try {
                 let resp = null;
 
-                // 1) id가 있으면 /details/{id}
-                if (userId && token) {
+                if (userId) {
                     try {
                         resp = await axios.get(
                             `${BACKEND_URL}/api/users/details/${userId}`,
-                            { headers, withCredentials: true, signal: controller.signal }
+                            { withCredentials: true, signal: controller.signal }
                         );
-                    } catch (e) {
-                        // 다음 폴백으로 진행
-                    }
+                    } catch (_) { }
                 }
 
-                // 2) 토큰이 있으면 /me
-                if (!resp && token) {
+                if (!resp) {
                     try {
-                        resp = await axios.get(
-                            `${BACKEND_URL}/api/users/me`,
-                            { headers, withCredentials: true, signal: controller.signal }
-                        );
-                    } catch (e) {
-                        // 다음 폴백으로 진행
-                    }
+                        resp = await axios.get(`${BACKEND_URL}/api/users/me`, {
+                            withCredentials: true,
+                            signal: controller.signal,
+                        });
+                    } catch (_) { }
                 }
 
-                // 3) 이메일이 있으면 /by-email?email=...
-                if (!resp && (customUser?.email)) {
+                if (!resp && customUser?.email) {
                     try {
-                        resp = await axios.get(
-                            `${BACKEND_URL}/api/users/by-email`,
-                            { headers, withCredentials: true, params: { email: customUser.email }, signal: controller.signal }
-                        );
-                    } catch (e) {
-                        // 전부 실패 → fallback 적용
-                    }
+                        resp = await axios.get(`${BACKEND_URL}/api/users/by-email`, {
+                            withCredentials: true,
+                            params: { email: customUser.email },
+                            signal: controller.signal,
+                        });
+                    } catch (_) { }
                 }
 
-                const normalized = resp ? normalizeUser(resp, fallbackFromCustom) : fallbackFromCustom;
+                const normalized = resp
+                    ? normalizeUser(resp, fallbackFromCustom)
+                    : fallbackFromCustom;
 
                 if (!cancel) {
                     setUserInfo(normalized);
@@ -122,28 +189,36 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
     }, [isCustomLoggedIn, customUser, userId]);
 
     const handleEdit = () => setIsEditing(true);
-    const handleCancel = () => { setIsEditing(false); setEditedInfo(userInfo); };
+    const handleCancel = () => {
+        setIsEditing(false);
+        setEditedInfo(userInfo);
+    };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) { toast.error('로그인 상태가 아닙니다.'); return; }
-        if (!userInfo.email) { toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.'); return; }
+        const token = localStorage.getItem('token'); // 요구사항대로 체크만
+        if (!token) {
+            toast.error('로그인 상태가 아닙니다.');
+            return;
+        }
+        if (!userInfo.email) {
+            toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.');
+            return;
+        }
 
         try {
-            const payload = {
-                nickname: editedInfo.nickname,
-                mentalState: editedInfo.mentalState,
-                counselingGoal: editedInfo.counselingGoal,
-            };
+            const payload = buildUpdatePayload(userInfo, editedInfo);
+
             await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
                 withCredentials: true,
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
-            setUserInfo(editedInfo);
+
+            setUserInfo((prev) => ({ ...prev, ...editedInfo }));
             setIsEditing(false);
             toast.success('회원 정보가 저장되었습니다.');
+            fetchCustomUser(); // ✅ 안전 호출로 내부에서 처리
         } catch (error) {
-            console.error('정보 업데이트 실패:', error);
-            toast.error('정보 저장 중 오류가 발생했습니다.');
+            printAxiosError(error, '정보 업데이트 실패');
         }
     };
 
@@ -154,8 +229,14 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     const handleDeleteAccount = () => {
         const token = localStorage.getItem('token');
-        if (!token) { toast.error('로그인 상태가 아닙니다.'); return; }
-        if (!userInfo.email) { toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.'); return; }
+        if (!token) {
+            toast.error('로그인 상태가 아닙니다.');
+            return;
+        }
+        if (!userInfo.email) {
+            toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.');
+            return;
+        }
 
         const toastId = toast.info(
             <div>
@@ -171,39 +252,27 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                             try {
                                 const payload = { email: userInfo.email };
                                 await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
-                                    headers: { Authorization: `Bearer ${token}` },
                                     withCredentials: true,
+                                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
+
+                                fetchCustomUser(); // ✅ 안전
+
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
                                 handleLogout();
                             } catch (error) {
-                                console.error('회원 탈퇴 처리 중 오류 발생:', error);
+                                printAxiosError(error, '회원 탈퇴 처리 중 오류 발생');
                                 toast.dismiss(toastId);
-                                toast.error('회원 탈퇴 중 오류가 발생했습니다.');
                             }
                         }}
-                        style={{
-                            background: '#d9534f',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '6px 10px',
-                            cursor: 'pointer',
-                            borderRadius: 6
-                        }}
+                        style={{ background: '#d9534f', color: '#fff', border: 'none', padding: '6px 10px', cursor: 'pointer', borderRadius: 6 }}
                     >
                         탈퇴
                     </button>
                     <button
                         onClick={() => toast.dismiss(toastId)}
-                        style={{
-                            background: '#e0e0e0',
-                            color: '#000',
-                            border: 'none',
-                            padding: '6px 10px',
-                            cursor: 'pointer',
-                            borderRadius: 6
-                        }}
+                        style={{ background: '#e0e0e0', color: '#000', border: 'none', padding: '6px 10px', cursor: 'pointer', borderRadius: 6 }}
                     >
                         취소
                     </button>
@@ -215,19 +284,27 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
 
     const handlePassChange = async (password) => {
         const token = localStorage.getItem('token');
-        if (!token) { toast.error('로그인 상태가 아닙니다.'); return; }
-        if (!userInfo.email) { toast.error('이메일 정보가 없습니다.'); return; }
+        if (!token) {
+            toast.error('로그인 상태가 아닙니다.');
+            return;
+        }
+        if (!userInfo.email) {
+            toast.error('이메일 정보가 없습니다.');
+            return;
+        }
         try {
             const payload = { email: userInfo.email, password };
             await axios.put(`${BACKEND_URL}/api/users/change`, payload, {
-                headers: { Authorization: `Bearer ${token}` },
                 withCredentials: true,
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
+
+            fetchCustomUser(); // ✅ 안전
+
             toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
             handleLogout();
         } catch (error) {
-            console.error('비밀번호 변경 실패:', error);
-            toast.error('비밀번호 변경 중 오류가 발생했습니다.');
+            printAxiosError(error, '비밀번호 변경 실패');
         }
     };
 
@@ -262,10 +339,22 @@ const UserProfile = ({ customUser, isCustomLoggedIn }) => {
                         )}
                     </div>
 
-                    <div className="profile-field"><span>나이</span><p style={{ color: '#777' }}>{userInfo.age || '─'}</p></div>
-                    <div className="profile-field"><span>성별</span><p style={{ color: '#777' }}>{userInfo.gender || '─'}</p></div>
-                    <div className="profile-field"><span>전화번호</span><p style={{ color: '#777' }}>{userInfo.phoneNumber || '─'}</p></div>
-                    <div className="profile-field"><span>이메일</span><p style={{ color: '#777' }}>{userInfo.email}</p></div>
+                    <div className="profile-field">
+                        <span>나이</span>
+                        <p style={{ color: '#777' }}>{userInfo.age || '─'}</p>
+                    </div>
+                    <div className="profile-field">
+                        <span>성별</span>
+                        <p style={{ color: '#777' }}>{userInfo.gender || '─'}</p>
+                    </div>
+                    <div className="profile-field">
+                        <span>전화번호</span>
+                        <p style={{ color: '#777' }}>{userInfo.phoneNumber || '─'}</p>
+                    </div>
+                    <div className="profile-field">
+                        <span>이메일</span>
+                        <p style={{ color: '#777' }}>{userInfo.email}</p>
+                    </div>
 
                     <div className="profile-field">
                         <span>나의 상태</span>

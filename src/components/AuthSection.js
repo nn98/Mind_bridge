@@ -25,7 +25,7 @@ import { createRoot } from "react-dom/client";
 
 const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
 const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
   window.__WELCOME_TOAST_MOUNTED__ = true;
@@ -283,11 +283,7 @@ const AuthSection = ({
     }
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/auth/check-email`,
-        { email: formData.email },
-        { withCredentials: true }
-      );
+      const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
       if (response.data.isAvailable) {
         setEmailCheck({
           isChecking: false,
@@ -353,30 +349,22 @@ const AuthSection = ({
           alert(alertMessage);
           return;
         }
-        await axios.post(
-          `${BACKEND_URL}/api/auth/register`,
-          {
-            email: formData.email,
-            password: formData.password,
-            nickname: formData.nickname,
-            phoneNumber: formData.phoneNumber,
-            mentalState: formData.mentalState,
-            age: formData.age,
-            gender: formData.gender,
-          },
-          { withCredentials: true }
-        );
+        await axios.post(`${BACKEND_URL}/api/users/register`, {
+          email: formData.email,
+          password: formData.password,
+          nickname: formData.nickname,
+          phoneNumber: formData.phoneNumber,
+          mentalState: formData.mentalState,
+          age: formData.age,
+          gender: formData.gender,
+        }, { withCredentials: true });
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
       } else if (type === "find-id") {
-        const response = await axios.post(
-          `${BACKEND_URL}/api/auth/find-id`,
-          {
-            phoneNumber: formData.phoneNumber,
-            nickname: formData.nickname,
-          },
-          { withCredentials: true }
-        );
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
+          phoneNumber: formData.phoneNumber,
+          nickname: formData.nickname,
+        }, { withCredentials: true });
         if (response.data.email) {
           setFoundId(response.data.email);
           setIsIdModalOpen(true);
@@ -384,14 +372,10 @@ const AuthSection = ({
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
       } else if (type === "find-password") {
-        const response = await axios.post(
-          `${BACKEND_URL}/api/auth/find-password`,
-          {
-            email: formData.email,
-            phoneNumber: formData.phoneNumber,
-          },
-          { withCredentials: true }
-        );
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+        }, { withCredentials: true });
         if (response.data.tempPassword) {
           setTempPassword(response.data.tempPassword);
           setIsPasswordModalOpen(true);
@@ -431,15 +415,15 @@ const AuthSection = ({
   };
 
   const handleGoogleLogin = () => {
-    const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    const REDIRECT_URI = "http://localhost:3000/login";
-    if (!GOOGLE_CLIENT_ID) {
-      alert("구글 로그인 설정이 올바르지 않습니다.");
-      return;
-    }
-    const scope = "openid profile email";
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
-    window.location.href = authUrl;
+    // const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    // const REDIRECT_URI = "http://localhost:3000/login";
+    // if (!GOOGLE_CLIENT_ID) {
+    //   alert("구글 로그인 설정이 올바르지 않습니다.");
+    //   return;
+    // }
+    // const scope = "openid profile email";
+    // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
+    window.location.href = BACKEND_URL+'/api/auth/social/google/login';
   };
 
   const termsContent = `

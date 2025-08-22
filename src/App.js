@@ -38,6 +38,7 @@ import UserProfile from "./components/chat-modal/components/UserProfile";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ChatConsult from "./components/dashboard/ChatConsult";
+import AuthLoadingPage from './components/AuthLoadingPage'
 
 const App = () => {
   const navigate = useNavigate();
@@ -45,8 +46,8 @@ const App = () => {
 
   const [appToast, setAppToast] = useState({ show: false, message: "" });
 
-  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(!!localStorage.getItem("token"));
   const [customUser, setCustomUser] = useState(null);
+  const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
@@ -245,7 +246,13 @@ const App = () => {
             <>
               <Route
                 path="/profile"
-                element={<UserProfile customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />} />
+                element={<UserProfile
+                  customUser={customUser}
+                  isCustomLoggedIn={isCustomLoggedIn}
+                  setCustomUser={setCustomUser}
+                  setIsCustomLoggedIn={setIsCustomLoggedIn}
+                />
+                } />
               <Route path="/contact" element={<div style={{ padding: 16 }}><h1>문의하기</h1></div>} />
             </>
           )}
@@ -262,6 +269,16 @@ const App = () => {
               onLoginSuccess={fetchCustomUser}
               signupState={signupState}
               setSignupState={setSignupState}
+            />
+          }
+        />
+        <Route
+          path="/auth/loading"
+          element={
+            <AuthLoadingPage
+              setCustomUser={setCustomUser}
+              setIsCustomLoggedIn={setIsCustomLoggedIn}
+              onLoginSuccess={fetchCustomUser}
             />
           }
         />
