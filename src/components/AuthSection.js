@@ -212,9 +212,15 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
       logoutExecuted.current = true;
-      localStorage.removeItem("token");
+
+
       if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
       if (setCustomUser) setCustomUser(null);
+
+      // 서버에 로그아웃 API 호출 (선택 사항, 서버에서 쿠키 만료 처리)
+      axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true })
+        .catch(() => { /* 실패해도 상태 초기화는 계속 */ });
+
       // 전역 컨테이너(welcome)로 로그아웃 토스트 출력
       toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
       navigate("/", { replace: true });
@@ -341,7 +347,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           email: formData.email,
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
-        
+
         if (response.data.tempPassword) {
           setTempPassword(response.data.tempPassword);
           setIsPasswordModalOpen(true);

@@ -89,23 +89,14 @@ const UserProfile = ({
     };
 
     // ✅ 세션 쿠키 기반 재조회 — 안전 호출 사용
-    const fetchCustomUser = () => {
-        const token = localStorage.getItem('token'); // 존재만 확인
-        if (token) {
-            axios
-                .get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true })
-                .then((res) => {
-                    call(setCustomUser, res.data);
-                    call(setIsCustomLoggedIn, true);
-                })
-                .catch(() => {
-                    localStorage.removeItem('token');
-                    call(setCustomUser, null);
-                    call(setIsCustomLoggedIn, false);
-                });
-        } else {
-            call(setIsCustomLoggedIn, false);
-            call(setCustomUser, null);
+    const fetchCustomUser = async () => {
+        try {
+            const res = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
+            setCustomUser(res.data);
+            setIsCustomLoggedIn(true);
+        } catch {
+            setCustomUser(null);
+            setIsCustomLoggedIn(false);
         }
     };
 
@@ -195,8 +186,7 @@ const UserProfile = ({
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token'); // 요구사항대로 체크만
-        if (!token) {
+        if (!isCustomLoggedIn || !customUser) {
             toast.error('로그인 상태가 아닙니다.');
             return;
         }
@@ -222,14 +212,28 @@ const UserProfile = ({
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+    const handleLogout = async () => {
+        try {
+            // 서버에 로그아웃 요청 (쿠키 만료)
+            await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
+
+            // 상태 초기화
+            setCustomUser(null);
+            setIsCustomLoggedIn(false);
+
+            // 페이지 이동
+            window.location.href = '/login';
+        } catch (err) {
+            console.error('로그아웃 실패:', err);
+            // 그래도 강제로 상태 초기화 및 로그인 페이지 이동
+            setCustomUser(null);
+            setIsCustomLoggedIn(false);
+            window.location.href = '/login';
+        }
     };
 
     const handleDeleteAccount = () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!isCustomLoggedIn || !customUser) {
             toast.error('로그인 상태가 아닙니다.');
             return;
         }
@@ -283,8 +287,7 @@ const UserProfile = ({
     };
 
     const handlePassChange = async (password) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!isCustomLoggedIn || !customUser) {
             toast.error('로그인 상태가 아닙니다.');
             return;
         }
