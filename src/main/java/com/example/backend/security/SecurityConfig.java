@@ -29,53 +29,43 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        log.info("SecurityFilterChain 설정 시작");
-
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // 컨트롤러 권한은 그대로 두고(permitAll), 필터가 보호/화이트리스트를 통제
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 모든 요청 허용, 필요시 변경
+                        .anyRequest().permitAll()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
-                .formLogin(formLogin -> formLogin.disable())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .formLogin(formLogin -> formLogin.disable());
 
-//        log.info("SecurityFilterChain 설정 완료");
+        // ★ JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 두기
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-//        log.info("CORS 설정 로드 시작");
-
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // 개발환경: 명시 오리진 권장 (와일드카드 대신)
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
-//        log.info("CORS 설정 완료: Origins={}, Methods={}, Headers={}, AllowCredentials={}",
-//                configuration.getAllowedOriginPatterns(),
-//                configuration.getAllowedMethods(),
-//                configuration.getAllowedHeaders(),
-//                configuration.getAllowCredentials());
-
         return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-//        log.info("PasswordEncoder(BCryptPasswordEncoder) 빈 생성");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-//        log.info("AuthenticationManager 빈 생성");
         return configuration.getAuthenticationManager();
     }
 }

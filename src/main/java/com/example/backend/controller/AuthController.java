@@ -38,6 +38,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserRequest.Login loginRequest) {
         try {
+            System.out.println(loginRequest.getEmail());
+            System.out.println(loginRequest.getPassword());
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
@@ -45,6 +47,7 @@ public class AuthController {
             );
 
             String token = jwtUtil.generateToken(loginRequest.getEmail());
+            System.out.println(token);
 
             ResponseCookie cookie = ResponseCookie.from("jwt", token)
                     .httpOnly(true)
