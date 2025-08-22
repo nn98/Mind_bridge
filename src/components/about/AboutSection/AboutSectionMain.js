@@ -9,10 +9,6 @@ import MonthlyLineChart from '../charts/MonthlyLineChart';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import HeroBanner from '../../banner/HeroBanner/HeroBanner';
 
-/**
- * visibleSections?: string[] // ["hero","intro","stress","services","how","contact"]
- * layout?: "page" | "embed"
- */
 export default function AboutSection({
   refs = {},                       // ✅ 기본값
   scrollTarget,

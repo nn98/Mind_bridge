@@ -1,8 +1,6 @@
-import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 
 export default function DashboardLayout({ currentUser, onLogout }) {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
 
   const isLoggedIn = !!currentUser;
   const role = String(currentUser?.role || "").toUpperCase();

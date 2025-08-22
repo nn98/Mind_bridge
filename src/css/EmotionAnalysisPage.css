@@ -1,513 +1,158 @@
-.emotion-analysis-page {
-    background-color: #f8fafc;
+/* =========================
+   Help Page (2×2 Grid) 전용
+   - 위 2개 / 아래 2개 카드
+   - EmotionAnalysis의 .analysis-card는 그대로 사용하되,
+     도움말 컨테이너 내부에서만 레이아웃/폭을 재정의
+   ========================= */
+
+/* 도움말 페이지 래퍼 (HelpPage.jsx 최상단 div에 className="help-page" 권장) */
+.help-page {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* 카드 폭/여백: 도움말에서는 가로 2열로 꽉 채우기 */
+.help-page .analysis-card {
+    max-width: 100% !important;
+    width: 100%;
+    margin: 0 !important;
+}
+
+/* 상단 퀵 액션 카드 버튼 묶음 */
+.help-actions {
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* 퀵 액션 버튼 (약관/개인정보/메일문의) */
+.help-btn {
+    width: 100%;
+    color: #fff;
+    background: linear-gradient(45deg, #6c63ff, #4a90e2);
+    border: none;
+    border-radius: 10px;
+    height: 48px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
-    font-family: sans-serif;
 }
 
-.analysis-card {
-    width: 100%;
-    max-width: 42rem;
-    background-color: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    padding: 2rem;
-    text-align: center;
+.help-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
 }
 
-.analysis-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
+.help-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
 }
 
-.analysis-subtitle {
-    color: #6b7280;
+/* FAQ 카드 안의 details 스타일 */
+.help-faq details {
+    background: #0e1526;
+    /* 다크 배경 */
+    border: 1px solid #1e2a3c;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    color: #e8eefb;
+}
+
+.help-faq summary {
+    cursor: pointer;
+    font-weight: 800;
+    list-style: none;
+    /* 파이어폭스 기본 삼각형 제거 */
+}
+
+.help-faq details[open] summary {
+    opacity: .95;
+}
+
+.help-faq summary::-webkit-details-marker {
+    display: none;
+}
+
+.help-faq .answer {
+    margin-top: 8px;
+    color: #b1bcc8;
+    line-height: 1.7;
+}
+
+/* 고객센터 카드 단락 간격 정리 */
+.help-center p,
+.help-center div {
+    margin: 6px 0;
+}
+
+/* 문의하기(ContactForm) 카드 내부 정리 */
+.help-contact .contact-form {
+    margin-top: 8px;
+}
+
+.help-contact .contact-form .row-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.help-contact .contact-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     margin-bottom: 10px;
 }
 
-.analysis-textarea {
+.help-contact .contact-form label {
+    font-weight: 700;
+    color: #374151;
+}
+
+.help-contact .contact-form input,
+.help-contact .contact-form textarea {
     width: 100%;
-    height: 10rem;
-    padding: 1rem;
     border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    resize: none;
-    margin-bottom: 1rem;
-    transition: box-shadow 0.2s, border-color 0.2s;
-}
-
-.analysis-textarea:focus {
-    outline: none;
-    border-color: #a18cd1;
-    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.5);
-}
-
-.analysis-button {
-    width: 100%;
-    color: white;
-    background-color: #a18cd1;
-    font-weight: 700;
-    border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: opacity 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.analysis-button:hover {
-    opacity: 0.9;
-}
-
-.analysis-button:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-}
-
-.loading-spinner-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-top: 2rem;
-}
-
-.loading-spinner {
-    animation: spin 1s linear infinite;
-    height: 3rem;
-    width: 3rem;
-    border-radius: 9999px;
-    border-bottom-width: 2px;
-    border-color: #6c63ff;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.results-section {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-    text-align: left;
-}
-
-.results-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-}
-
-.progress-bars-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.progress-bar-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.25rem;
-}
-
-.progress-bar-emotion-name {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.progress-bar-percentage {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.progress-bar-track {
-    width: 100%;
-    background-color: #e5e7eb;
-    border-radius: 9999px;
-    height: 1.25rem;
-}
-
-.progress-bar-fill {
-    height: 1.25rem;
-    border-radius: 9999px;
-    transition: width 0.5s ease-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    overflow: hidden;
-}
-
-.result-message-box {
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-    text-align: center;
-}
-
-.result-message-text {
-    font-weight: 500;
-    font-size: 1.125rem;
-}
-
-.progress-bar-fill.happiness {
-    background-color: #facc15;
-    color: #92400e;
-}
-
-.result-message-box.happiness {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-
-.progress-bar-fill.sadness {
-    background-color: #3b82f6;
-}
-
-.result-message-box.sadness {
-    background-color: #dbeafe;
-    color: #1e40af;
-}
-
-.progress-bar-fill.anger {
-    background-color: #ef4444;
-}
-
-.result-message-box.anger {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.progress-bar-fill.anxiety {
-    background-color: #a855f7;
-}
-
-.result-message-box.anxiety {
-    background-color: #f3e8ff;
-    color: #6b21a8;
-}
-
-.progress-bar-fill.calmness {
-    background-color: #22c55e;
-}
-
-.result-message-box.calmness {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.progress-bar-fill.default {
-    background-color: #6b7280;
-}
-
-.result-message-box.default {
-    background-color: #f3f4f6;
-    color: #1f2937;
-}
-
-.loading-indicator::after {
-    content: ' ▓ ▓ ▓';
-    font-size: 12px;
-    margin-left: 6px;
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.4;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-/* 감정 분석 모달 전용 스타일 */
-
-.emotion-modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.65);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.emotion-modal-content {
-    position: relative;
-    padding: 40px;
-    /* 내부 여백을 조금 더 주었습니다. */
-    max-width: 750px;
-    /* 최대 너비를 550px에서 750px로 늘렸습니다. */
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    animation: slideUp 0.4s ease-out;
-}
-
-#emotion-modal-close-btn {
-    position: absolute;
-    top: 50px;
-    right: 55px;
-    background: none;
-    border: none;
-    font-size: 2.5rem;
-    color: #aaa;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    transition: color 0.2s, transform 0.2s;
-}
-
-#emotion-modal-close-btn:hover {
-    color: #333;
-    transform: scale(1.1);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* --- 내부 UI 스타일 (기존 EmotionAnalysisPage.css 내용) --- */
-
-.analysis-card {
-    font-family: 'Pretendard', sans-serif;
-}
-
-.analysis-title {
-    color: #2c3e50;
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-    text-align: center;
-    font-weight: 600;
-}
-
-.analysis-subtitle {
-    color: #7f8c8d;
-    text-align: center;
-    margin-bottom: 24px;
-}
-
-.analysis-textarea {
-    width: 100%;
-    min-height: 120px;
-    padding: 12px;
-    border: 1px solid #ddd;
     border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.help-contact .contact-form textarea {
     resize: vertical;
-    margin-bottom: 16px;
+    min-height: 120px;
 }
 
-.analysis-textarea:focus {
-    outline: none;
-    border-color: #6c63ff;
-    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
-}
-
-.analysis-button {
-    width: 100%;
-    padding: 14px 0;
-    background: linear-gradient(45deg, #6c63ff, #4a90e2);
-    color: white;
+.help-contact .contact-form button[type="submit"] {
+    margin-top: 8px;
+    height: 46px;
     border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    border-radius: 10px;
+    background: #a18cd1;
+    color: #fff;
+    font-weight: 800;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: opacity .2s ease;
 }
 
-.analysis-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.help-contact .contact-form button[type="submit"]:hover {
+    opacity: .9;
 }
 
-.analysis-button:disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-}
-
-.loading-spinner-container {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.loading-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #6c63ff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+/* 반응형: 1080px 이하 1열 */
+@media (max-width: 1080px) {
+    .help-page {
+        grid-template-columns: 1fr;
     }
 
-    100% {
-        transform: rotate(360deg);
+    .help-contact .contact-form .row-two {
+        grid-template-columns: 1fr;
     }
-}
-
-.results-section {
-    margin-top: 24px;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-.results-title {
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-}
-
-.progress-bar-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    font-size: 0.9rem;
-}
-
-.progress-bar-emotion-name {
-    color: #555;
-    font-weight: bold;
-}
-
-.progress-bar-percentage {
-    color: #777;
-}
-
-.progress-bar-track {
-    background-color: #eee;
-    border-radius: 4px;
-    height: 20px;
-    overflow: hidden;
-    margin-bottom: 12px;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 8px;
-    font-size: 0.8rem;
-    box-sizing: border-box;
-    transition: width 0.5s ease-in-out;
-}
-
-.progress-bar-fill.happiness {
-    background-color: #2ecc71;
-}
-
-.progress-bar-fill.sadness {
-    background-color: #3498db;
-}
-
-.progress-bar-fill.anger {
-    background-color: #e74c3c;
-}
-
-.progress-bar-fill.anxiety {
-    background-color: #f39c12;
-}
-
-.progress-bar-fill.calmness {
-    background-color: #9b59b6;
-}
-
-.result-message-box {
-    margin-top: 24px;
-    padding: 16px;
-    border-radius: 8px;
-    border-left-width: 5px;
-    border-left-style: solid;
-}
-
-.result-message-box p {
-    margin: 0;
-    line-height: 1.6;
-}
-
-.result-message-box.happiness {
-    border-left-color: #2ecc71;
-    background-color: #eafaf1;
-}
-
-.result-message-box.sadness {
-    border-left-color: #3498db;
-    background-color: #ebf5fb;
-}
-
-.result-message-box.anger {
-    border-left-color: #e74c3c;
-    background-color: #fdedec;
-}
-
-.result-message-box.anxiety {
-    border-left-color: #f39c12;
-    background-color: #fef5e7;
-}
-
-.result-message-box.calmness {
-    border-left-color: #9b59b6;
-    background-color: #f5eef8;
-}
-
-.result-message-box.default {
-    border-left-color: #7f8c8d;
-    background-color: #f4f6f7;
 }

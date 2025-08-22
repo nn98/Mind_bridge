@@ -20,7 +20,7 @@ function ChatConsultInner({ customUser, isLoggedIn }) {
     askProfileIfMissing: !isLoggedIn,
     fieldsToAsk: [],
     introMessage: isLoggedIn
-      ? "로그인 정보를 확인했어요. 상담받고 싶은 내용을 말씀해주세요."
+      ? "상담 받고 싶은 내용을 말씀해주세요"
       : undefined,
     enforceGreeting: true,
     autoStartFromProfile: isLoggedIn,

@@ -1,3 +1,4 @@
+// src/components/EmotionAnalysisPage.jsx
 import { useState } from 'react';
 import '../css/EmotionAnalysisPage.css';
 
@@ -51,10 +52,21 @@ const emotionNames = {
   calmness: '평온',
 };
 
-const EmotionAnalysisPage = ({ isOpen, onClose }) => {
+/**
+ * mode: "page" | "modal"
+ * - "page": 대시보드 메인 영역에서 페이지로 사용
+ * - "modal": 배경 딤 + 닫기 버튼 (모달처럼)
+ *
+ * 포커스 이슈 방지:
+ * - 함수 내부에서 새 컴포넌트(Wrapper) 선언하지 않음
+ * - key로 강제 리마운트 유발하지 않음
+ */
+export default function EmotionAnalysisPage({ mode = "page", isOpen, onClose }) {
   const [text, setText] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  if (mode === "modal" && !isOpen) return null;
 
   const handleAnalyze = async () => {
     setIsLoading(true);
@@ -82,7 +94,9 @@ const EmotionAnalysisPage = ({ isOpen, onClose }) => {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('JSON 파싱 실패');
       const percentages = JSON.parse(jsonMatch[0]);
-      const dominantEmotion = Object.keys(percentages).reduce((a, b) => percentages[a] > percentages[b] ? a : b);
+      const dominantEmotion = Object.keys(percentages).reduce((a, b) =>
+        percentages[a] > percentages[b] ? a : b
+      );
       const messages = emotionMessages[dominantEmotion] || emotionMessages.default;
       const randomMessage = messages[Math.floor(Math.random() * messages.length)];
       setResult({ percentages, dominantEmotion, message: randomMessage });
@@ -94,71 +108,95 @@ const EmotionAnalysisPage = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
-
   const handleClose = () => {
     setText('');
     setResult(null);
-    onClose();
-  }
+    if (typeof onClose === 'function') onClose();
+  };
 
+  // 모달 모드일 때만 isOpen 체크 (명시적으로 true일 때만 렌더)
+  if (mode === 'modal' && !isOpen) return null;
 
-  return (
-    <div className="emotion-modal-backdrop" onClick={handleClose}>
-      <div className="emotion-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="analysis-card">
-        <button onClick={handleClose} id="emotion-modal-close-btn">&times;</button>
-          <h1 className="analysis-title">마음 상태 분석기</h1>
-          <p className="analysis-subtitle">
-            오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.
-          </p>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="analysis-textarea"
-            placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
-          />
-          <button
-            onClick={handleAnalyze}
-            disabled={isLoading || !text.trim()}
-            className="analysis-button"
-          >
-            {isLoading ? <span>분석 중...</span> : '마음 분석하기'}
-          </button>
-          {isLoading && (
-            <div className="loading-spinner-container"><div className="loading-spinner"></div></div>
-          )}
-          {result && (
-            <div className="results-section">
-              <h2 className="results-title">분석 결과</h2>
-              {result.percentages && (
-                <div className="progress-bars-container">
-                  {Object.entries(result.percentages).sort(([, a], [, b]) => b - a).map(([emotion, value]) => (
+  // 공통 본문
+  const Content = (
+    <div className="analysis-card">
+      {mode === 'modal' && (
+        <button onClick={handleClose} id="emotion-modal-close-btn" aria-label="닫기">&times;</button>
+      )}
+
+      <h1 className="analysis-title">마음 상태 분석기</h1>
+      <p className="analysis-subtitle">오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.</p>
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className="analysis-textarea"
+        placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
+      />
+
+      <button
+        onClick={handleAnalyze}
+        disabled={isLoading || !text.trim()}
+        className="analysis-button"
+        type="button"
+      >
+        {isLoading ? <span>분석 중...</span> : '마음 분석하기'}
+      </button>
+
+      {isLoading && (
+        <div className="loading-spinner-container">
+          <div className="loading-spinner" />
+        </div>
+      )}
+
+      {result && (
+        <div className="results-section">
+          <h2 className="results-title">분석 결과</h2>
+
+          {result.percentages && (
+            <div className="progress-bars-container">
+              {Object.entries(result.percentages)
+                .sort(([, a], [, b]) => b - a)
+                .map(([emotion, value]) => {
+                  const v = Number(value);
+                  return (
                     <div key={emotion}>
                       <div className="progress-bar-label">
                         <span className="progress-bar-emotion-name">{emotionNames[emotion]}</span>
-                        <span className="progress-bar-percentage">{value.toFixed(1)}%</span>
+                        <span className="progress-bar-percentage">{v.toFixed(1)}%</span>
                       </div>
                       <div className="progress-bar-track">
-                        <div className={`progress-bar-fill ${emotion}`} style={{ width: `${value}%` }}>
-                          {value > 10 && <span>{value.toFixed(1)}%</span>}
+                        <div
+                          className={`progress-bar-fill ${emotion}`}
+                          style={{ width: `${v}%` }}
+                        >
+                          {v > 10 && <span>{v.toFixed(1)}%</span>}
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-              <div className={`result-message-box ${result.dominantEmotion}`}>
-                <p className="result-message-text">{result.message}</p>
-              </div>
+                  );
+                })}
             </div>
           )}
+
+          <div className={`result-message-box ${result.dominantEmotion}`}>
+            <p className="result-message-text">{result.message}</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
-};
 
-export default EmotionAnalysisPage;
+  // 모달/페이지 모드 분기 (컴포넌트 선언 없이 div만 전환)
+  if (mode === 'modal') {
+    return (
+      <div className="emotion-modal-backdrop" onClick={handleClose}>
+        <div className="emotion-modal-content" onClick={(e) => e.stopPropagation()}>
+          {Content}
+        </div>
+      </div>
+    );
+  }
+
+  return <div className="emotion-page">{Content}</div>;
+}
