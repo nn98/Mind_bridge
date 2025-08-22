@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.entity.UserEntity;
-import com.example.backend.request.UserRequest;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.service.UserService;
 
 import jakarta.validation.Valid;

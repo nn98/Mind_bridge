@@ -29,6 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ★ 토큰 검사 제외 경로 (패턴 지원)
     private static final List<String> EXCLUDE_PATTERNS = List.of(
+            "/api/auth/social/google/login",
+            "/api/auth/social/google/callback",
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",

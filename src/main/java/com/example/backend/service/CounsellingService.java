@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.backend.dto.CounsellingDTO;
+import com.example.backend.dto.response.CounsellingDTO;
 import com.example.backend.entity.CounsellingEntity;
 import com.example.backend.repository.CounsellingRepository;
-import com.example.backend.request.CounsellingRequest;
+import com.example.backend.dto.request.CounsellingRequest;
 
 @Service
 public class CounsellingService {

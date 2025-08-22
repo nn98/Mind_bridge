@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.CounsellingDTO;
-import com.example.backend.request.CounsellingRequest;
+import com.example.backend.dto.response.CounsellingDTO;
+import com.example.backend.dto.request.CounsellingRequest;
 import com.example.backend.service.CounsellingService;
 
 @RestController

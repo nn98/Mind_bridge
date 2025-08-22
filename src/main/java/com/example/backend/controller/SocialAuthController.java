@@ -1,8 +1,11 @@
 package com.example.backend.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.example.backend.dto.response.UserDto;
+import com.example.backend.entity.UserEntity;
+import com.example.backend.security.JwtUtil;
+import com.example.backend.service.KakaoOAuthService;
+import com.example.backend.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -12,13 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.UserDto;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.KakaoOAuthService;
-import com.example.backend.service.UserService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth/social")
@@ -95,7 +93,8 @@ public class SocialAuthController {
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(Map.of(
                             "success", true,
-                            "user", userDto
+                            "user", userDto,
+                            "type", "Kakao"
                     ));
 
         } catch (Exception e) {
