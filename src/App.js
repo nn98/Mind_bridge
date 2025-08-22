@@ -39,6 +39,7 @@ import UserProfile from "./components/chat-modal/components/UserProfile";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ChatConsult from "./components/dashboard/ChatConsult";
+import AuthLoadingPage from './components/AuthLoadingPage'
 
 const App = () => {
   const navigate = useNavigate();
@@ -277,6 +278,16 @@ const App = () => {
               onLoginSuccess={fetchCustomUser}
               signupState={signupState}
               setSignupState={setSignupState}
+            />
+          }
+        />
+        <Route
+          path="/auth/loading"
+          element={
+            <AuthLoadingPage
+              setCustomUser={setCustomUser}
+              setIsCustomLoggedIn={setIsCustomLoggedIn}
+              onLoginSuccess={fetchCustomUser}
             />
           }
         />

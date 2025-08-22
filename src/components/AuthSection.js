@@ -25,7 +25,7 @@ import { createRoot } from "react-dom/client";
 
 const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
 const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
   window.__WELCOME_TOAST_MOUNTED__ = true;
@@ -379,15 +379,15 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   };
 
   const handleGoogleLogin = () => {
-    const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    const REDIRECT_URI = "http://localhost:3000/login";
-    if (!GOOGLE_CLIENT_ID) {
-      alert("구글 로그인 설정이 올바르지 않습니다.");
-      return;
-    }
-    const scope = "openid profile email";
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
-    window.location.href = authUrl;
+    // const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    // const REDIRECT_URI = "http://localhost:3000/login";
+    // if (!GOOGLE_CLIENT_ID) {
+    //   alert("구글 로그인 설정이 올바르지 않습니다.");
+    //   return;
+    // }
+    // const scope = "openid profile email";
+    // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
+    window.location.href = BACKEND_URL+'/api/auth/social/google/login';
   };
 
   const termsContent = `
