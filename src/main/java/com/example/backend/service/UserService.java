@@ -95,17 +95,18 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 닉네임 변경 시 중복 확인
-        if (!user.getNickname().equals(req.getNickname())
+        if (req.getNickname() != null
+                && !req.getNickname().equals(user.getNickname())
                 && userRepository.existsByNickname(req.getNickname())) {
             throw new RuntimeException("이미 사용중인 닉네임입니다.");
         }
 
-        user.setFullName(req.getFullName());
-        user.setNickname(req.getNickname());
-        user.setGender(req.getGender());
-        user.setAge(req.getAge());
-        user.setPhoneNumber(req.getPhoneNumber());
-        user.setMentalState(req.getMentalState());
+        if (req.getNickname() != null) {
+            user.setNickname(req.getNickname());
+        }
+        if (req.getMentalState() != null) {
+            user.setMentalState(req.getMentalState());
+        }
 
         return userRepository.save(user);
     }

@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import java.util.Map;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,8 +48,9 @@ public class UserController {
      * ✅ 사용자 정보 수정
      */
     @PutMapping("/update")
-    public UserEntity updateUser(@Valid @RequestBody UserRequest.Register req) {
-        return userService.updateUser(req.getEmail(), req);
+    public UserEntity updateUser(@RequestBody UserRequest.Register req, Authentication authentication) {
+        String email = authentication.getName(); 
+        return userService.updateUser(email, req);
     }
 
     /**
