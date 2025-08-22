@@ -325,7 +325,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
       } else if (type === "find-id") {
-        const response = await axios.post(`${BACKEND_URL}/api/auth/find-id`, {
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
         }, { withCredentials: true });
@@ -336,7 +336,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
       } else if (type === "find-password") {
-        const response = await axios.post(`${BACKEND_URL}/api/auth/find-password`, {
+        const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
