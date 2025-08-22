@@ -76,4 +76,13 @@ public class UserRequest {
         @NotBlank
         private String nickname;
     }
+
+    @Getter
+    @Setter
+    public static class Update {
+
+        private String nickname;
+        private String mentalState;
+        private String counselingGoal; // 필요 시 UserEntity에 컬럼 추가
+    }
 }
