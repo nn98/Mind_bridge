@@ -105,17 +105,11 @@ export default function DashboardLayout({ currentUser, onLogout }) {
       </aside>
 
       {/* 메인 */}
-      <div className="dash-main">
-        {isAdmin && pathname !== "/admin" && (
-          <button className="btn-ghost" onClick={() => navigate("/admin")}>
-            관리자 페이지로
-          </button>
-        )}
 
         <main className="dash-content">
           <Outlet />
         </main>
-      </div>
+      
     </div>
   );
 }
