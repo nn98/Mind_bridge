@@ -5,7 +5,6 @@
 > ## Architecture
 > ![](https://velog.velcdn.com/images/nn98/post/8d6dd7ff-cf5a-40dc-90a0-442c12827114/image.png)
 
-<<<<<<< HEAD
 ***
 
 > ## Usecase
