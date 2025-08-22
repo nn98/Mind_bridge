@@ -1,0 +1,610 @@
+:root {
+    --bg: #0a0f1c;
+    --panel: #0f172a;
+    --panel-2: #111827;
+    --line: #1f2937;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --primary: #3b82f6;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+}
+
+/* Reset */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ===== Layout ===== */
+.dash-wrap {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.dash-sidebar {
+    width: 260px;
+    background: var(--panel-2);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 16px;
+}
+
+.nav-close .dash-sidebar {
+    width: 72px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.brand-text .title {
+    font-weight: 700;
+}
+
+.brand-text .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.nav-close .brand-text {
+    display: none;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-section {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 8px;
+}
+
+.menu-item {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background: #0b1220;
+    color: #cde2ff;
+}
+
+a.menu-item.active {
+    outline: 1px solid var(--line);
+}
+
+.nav-close .menu-section {
+    display: none;
+}
+
+.nav-close .menu-item {
+    padding: 10px;
+    text-align: center;
+}
+
+/* Sidebar bottom card */
+.upgrade {
+    margin-top: auto;
+    padding: 12px;
+    background: #0b1220;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.upgrade-text {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+/* Main */
+.dash-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-topbar {
+    border-bottom: 1px solid var(--line);
+}
+
+.notice {
+    background: #ffffff11;
+    color: #ffffdd;
+    padding: 10px 14px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.topbar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: #111827;
+}
+
+.grow {
+    flex: 1;
+}
+
+.tenant {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.btn-ghost {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: #cde2ff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-ghost:hover {
+    background: #0b1220;
+}
+
+.dash-content {
+    padding: 20px;
+}
+
+/* Cards / Grid */
+.grid {
+    display: grid;
+}
+
+.grid-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.gap-16 {
+    gap: 16px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.card-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.card-head h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.card-head .sub {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.card-head.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.card-body.chart {
+    padding: 8px 12px 12px;
+}
+
+/* Chips / Tags (generic) */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    border: 1px solid var(--line);
+    background: #0b1220;
+}
+
+.chips.green .chip {
+    background: rgba(34, 197, 94, .12);
+    border-color: rgba(34, 197, 94, .35);
+    color: #bbf7d0;
+}
+
+.chips.red .chip {
+    background: rgba(239, 68, 68, .12);
+    border-color: rgba(239, 68, 68, .35);
+    color: #fecaca;
+}
+
+.cta {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: .95;
+}
+
+/* Responsive */
+@media (max-width: 1080px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Center Chat Hero (landing prompt) ===== */
+.chat-hero {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: calc(100vh - 120px);
+    padding: 32px 16px;
+}
+
+.chat-hero-inner {
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.chat-logo {
+    margin-bottom: 28px;
+}
+
+.chat-logo-text {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #e5e7eb;
+}
+
+.chat-card {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .06);
+}
+
+.chat-input {
+    width: 100%;
+    height: 56px;
+    padding: 0 14px;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    background: transparent;
+    color: #111827;
+}
+
+.chat-input::placeholder {
+    color: #9ca3af;
+}
+
+.chat-actions {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.chat-submit {
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.chat-submit:hover {
+    filter: brightness(0.95);
+}
+
+/* Quick tag chips used on hero */
+.chip-row {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.chip-row .chip {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #374151;
+    padding: 8px 12px;
+    border-radius: 9999px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.chip-row .chip:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+}
+
+/* ===== Page Chat (ChatConsult live chat) ===== */
+.consult-wrap {
+    position: relative;
+    min-height: calc(100vh - 80px);
+    padding: 24px 0 120px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.consult-header {
+    text-align: center;
+    margin: 8px 16px 24px;
+}
+
+.consult-logo {
+    font-weight: 700;
+    color: #cde2ff;
+    margin-bottom: 8px;
+}
+
+.consult-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    margin: 0;
+    word-break: break-word;
+}
+
+.consult-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 16px 16px;
+}
+
+.consult-bubble {
+    max-width: 100%;
+    width: fit-content;
+    border-radius: 14px;
+    padding: 12px 14px;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.consult-bubble.user {
+    align-self: flex-start;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #1f2937;
+}
+
+.consult-bubble.ai {
+    align-self: flex-start;
+    background: #111827;
+    border: 1px solid var(--line);
+    color: var(--text);
+}
+
+.consult-bubble.typing {
+    opacity: .85;
+    font-style: italic;
+}
+
+.consult-inputbar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    max-width: 980px;
+    background: linear-gradient(180deg, rgba(10, 15, 28, 0), var(--bg) 40%);
+    padding: 12px 16px 20px;
+}
+
+.consult-input {
+    width: 100%;
+    min-height: 48px;
+    max-height: 200px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    outline: none;
+    font-size: 16px;
+    color: var(--text);
+    resize: none;
+    background: var(--panel-2);
+}
+
+.consult-input::placeholder {
+    color: #9ca3af;
+}
+
+.consult-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.consult-send {
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.consult-send:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.consult-send:hover:not(:disabled) {
+    filter: brightness(0.95);
+}
+
+.consult-end {
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.consult-end:hover {
+    background: #0b1220;
+}
+
+@media (max-width: 640px) {
+    .chat-logo-text {
+        font-size: 28px;
+    }
+
+    .chat-input {
+        height: 52px;
+        font-size: 16px;
+    }
+
+    .chat-submit {
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .consult-title {
+        font-size: 22px;
+    }
+}
+
+/* 가독성: 다크 배경에서 텍스트/버블 색 보정 */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.consult-title {
+    color: var(--text);
+}
+
+/* 메시지 버블 */
+.consult-bubble.user {
+    align-self: flex-start;
+    background: #eef2ff;
+    /* 밝은 배경 */
+    border: 1px solid #c7d2fe;
+    color: #1f2937;
+    /* 어두운 텍스트 */
+}
+
+.consult-bubble.ai {
+    align-self: flex-start;
+    background: #1f2937;
+    /* 다크 */
+    border: 1px solid #374151;
+    color: #e5e7eb;
+    /* 밝은 텍스트 */
+}
+
+/* 입력창: 다크 배경 위에서도 선명 */
+.consult-input {
+    background: #0f172a;
+    /* panel-2 */
+    color: #e5e7eb;
+    border: 1px solid #374151;
+}
+
+.consult-input::placeholder {
+    color: #9ca3af;
+}
+
+/* 버튼 */
+.consult-send {
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #fff;
+}
+
+.consult-end {
+    border: 1px solid #374151;
+    background: transparent;
+    color: #e5e7eb;
+}

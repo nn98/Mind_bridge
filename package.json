@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@clerk/localizations": "^3.18.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
@@ -15,7 +14,6 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.10.0",
-    "clerk": "^0.8.3",
     "date-holidays": "^3.25.0",
     "dayjs": "^1.11.13",
     "emailjs-com": "^3.2.0",
@@ -29,6 +27,7 @@
     "react-router-dom": "^7.6.3",
     "react-scripts": "^5.0.1",
     "react-toastify": "^11.0.5",
+    "recharts": "^3.1.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

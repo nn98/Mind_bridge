@@ -1,0 +1,106 @@
+/* src/css/theme.css */
+/* 전역 보라색 팔레트(테마 변수) — 기존 CSS는 그대로 두고, 변수 기반으로 일괄 테마 적용 */
+:root {
+    --brand-50: #f3f2ff;
+    --brand-100: #e9e7ff;
+    --brand-200: #d4d1ff;
+    --brand-300: #b6b0ff;
+    --brand-400: #978eff;
+    --brand-500: #7c73ff;
+    --brand-600: #6c63ff;
+    /* 메인 보라 */
+    --brand-700: #5b52e6;
+    --brand-800: #4a41cc;
+    --brand-900: #2f28a3;
+
+    --brand: var(--brand-600);
+    --brand-fg: #ffffff;
+
+    --text-strong: #1f2937;
+    --text: #374151;
+    --text-muted: #6b7280;
+
+    --surface: #ffffff;
+    --surface-alt: #fafafa;
+
+    --border: #e5e7eb;
+    --ring: rgba(108, 99, 255, 0.35);
+    --shadow: 0 8px 24px rgba(108, 99, 255, 0.15);
+}
+
+/* 공통 UI 토큰: 버튼/링크/포커스/배지 등 */
+a,
+.link {
+    color: var(--brand-700);
+    text-decoration: none;
+}
+
+a:hover,
+.link:hover {
+    color: var(--brand-900);
+    text-decoration: underline;
+}
+
+.btn,
+button,
+input[type="submit"] {
+    background: var(--brand);
+    color: var(--brand-fg);
+    border: 1px solid var(--brand-700);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn:hover,
+button:hover,
+input[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(108, 99, 255, 0.25);
+}
+
+.btn:disabled,
+button:disabled,
+input[type="submit"]:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--brand-400);
+    box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* 카드/컨테이너 */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+/* 토스트/배지류(필요시) */
+.badge {
+    display: inline-block;
+    background: var(--brand-50);
+    color: var(--brand-900);
+    border: 1px solid var(--brand-200);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-size: 12px;
+}

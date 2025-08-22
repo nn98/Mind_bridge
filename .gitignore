@@ -36,6 +36,5 @@ key.env
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
-.env*.local
 .idea
+.vscode
