@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.request.UserRequest;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.security.JwtUtil;
 
 import jakarta.transaction.Transactional;

@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.backend.dto.PostDto;
+import com.example.backend.dto.response.PostDto;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.request.PostRequest;
+import com.example.backend.dto.request.PostRequest;
 
 import lombok.RequiredArgsConstructor;
 

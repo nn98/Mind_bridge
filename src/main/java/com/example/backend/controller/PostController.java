@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.PostDto;
+import com.example.backend.dto.response.PostDto;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.repository.PostRepository;
-import com.example.backend.request.PostRequest;
+import com.example.backend.dto.request.PostRequest;
 import com.example.backend.service.PostService;
 
 import jakarta.validation.Valid;

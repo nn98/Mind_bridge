@@ -1,14 +1,17 @@
 package com.example.backend.repository;
 
-import java.util.List;
-
+import com.example.backend.entity.PostEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.backend.entity.PostEntity;
+import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
+
+    @EntityGraph(attributePaths = {"user"})
+    List<PostEntity> findAll();
 
     // 사용자 이메일로 게시글 조회
     List<PostEntity> findByUserEmail(String userEmail);

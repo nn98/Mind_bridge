@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.UserDto;
-import com.example.backend.request.UserRequest;
+import com.example.backend.dto.response.UserDto;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.service.UserService;
 
