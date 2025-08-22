@@ -1,27 +1,60 @@
+/**************
+ * MindBridge UI — Clean Dark v3 (Fix)
+ * - 대비 강화
+ * - 상담 화면 수직/수평 중앙정렬
+ * - 불필요한 보더 제거
+ * - 입력창 가독성↑
+ **************/
+
 :root {
-    --bg: #0a0f1c;
+    /* Base palette */
+    --bg: #0b1220;
     --panel: #0f172a;
-    --panel-2: #111827;
-    --line: #1f2937;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
+    --panel-2: #0e1526;
+    /* 사이드/입력 바 배경 살짝 밝게 */
+    --line: #1e2a3c;
+    --text: #f1f5fb;
+    /* 본문 텍스트 더 밝게 */
+    --muted: #b1bcc8;
+    /* 보조 텍스트 더 밝게 */
+
     --primary: #3b82f6;
-    --green: #22c55e;
-    --amber: #f59e0b;
-    --red: #ef4444;
+    --primary-2: #1d4ed8;
+
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+
+    /* Bubbles */
+    --bubble-ai-bg: #0f172a;
+    --bubble-ai-bd: #22314a;
+    --bubble-ai-text: #eaf1ff;
+
+    --bubble-user-bg: #eaf1ff;
+    --bubble-user-bd: #c7d2fe;
+    --bubble-user-text: #0b1220;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .12);
+    --shadow-2: 0 10px 34px rgba(0, 0, 0, .22);
 }
 
-/* Reset */
 * {
     box-sizing: border-box;
 }
 
+html,
 body {
-    background: var(--bg);
-    color: var(--text);
+    height: 100%;
 }
 
-/* ===== Layout ===== */
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+}
+
+/* ============ Layout ============ */
 .dash-wrap {
     display: flex;
     min-height: 100vh;
@@ -29,13 +62,13 @@ body {
 
 /* Sidebar */
 .dash-sidebar {
-    width: 260px;
+    width: 240px;
     background: var(--panel-2);
     border-right: 1px solid var(--line);
     display: flex;
     flex-direction: column;
+    gap: 12px;
     padding: 16px 12px;
-    gap: 16px;
 }
 
 .nav-close .dash-sidebar {
@@ -45,15 +78,16 @@ body {
 .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     padding: 6px 8px;
 }
 
 .avatar {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: #1f2937;
+    background: #1e293b;
+    color: #d7e2ee;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -61,7 +95,7 @@ body {
 }
 
 .brand-text .title {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .brand-text .subtitle {
@@ -80,7 +114,7 @@ body {
 }
 
 .menu-section {
-    margin-top: 8px;
+    margin-top: 6px;
     font-size: 12px;
     color: var(--muted);
     padding: 4px 8px;
@@ -89,19 +123,21 @@ body {
 .menu-item {
     display: block;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--text);
     text-decoration: none;
+    transition: background .15s ease, color .15s ease, outline-color .15s ease;
 }
 
-.menu-item:hover,
+.menu-item:hover {
+    background: rgba(59, 130, 246, .10);
+    color: #e6f0ff;
+}
+
 .menu-item.active {
-    background: #0b1220;
-    color: #cde2ff;
-}
-
-a.menu-item.active {
-    outline: 1px solid var(--line);
+    background: rgba(59, 130, 246, .18);
+    outline: 1px solid rgba(59, 130, 246, .35);
+    color: #f0f6ff;
 }
 
 .nav-close .menu-section {
@@ -117,7 +153,7 @@ a.menu-item.active {
 .upgrade {
     margin-top: auto;
     padding: 12px;
-    background: #0b1220;
+    background: #0c1426;
     border: 1px solid var(--line);
     border-radius: 12px;
 }
@@ -125,7 +161,7 @@ a.menu-item.active {
 .upgrade-text {
     font-size: 13px;
     color: var(--muted);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 /* Main */
@@ -135,13 +171,14 @@ a.menu-item.active {
     flex-direction: column;
 }
 
+/* Topbar */
 .dash-topbar {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgba(31, 41, 55, .6);
 }
 
 .notice {
-    background: #ffffff11;
-    color: #ffffdd;
+    background: rgba(255, 255, 255, .08);
+    color: #fffbe1;
     padding: 10px 14px;
     font-size: 12px;
     text-align: center;
@@ -151,7 +188,7 @@ a.menu-item.active {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 12px 18px;
 }
 
 .icon-btn {
@@ -164,7 +201,7 @@ a.menu-item.active {
 }
 
 .icon-btn:hover {
-    background: #111827;
+    background: #0e1627;
 }
 
 .grow {
@@ -179,21 +216,27 @@ a.menu-item.active {
 .btn-ghost {
     border: 1px solid var(--line);
     background: transparent;
-    color: #cde2ff;
+    color: #e6f0ff;
     padding: 8px 12px;
     border-radius: 10px;
     cursor: pointer;
 }
 
 .btn-ghost:hover {
-    background: #0b1220;
+    background: #0c1426;
 }
 
+/* 메인 컨텐츠를 세로로도 가운데 배치 */
 .dash-content {
-    padding: 20px;
+    padding: 32px 24px;
+    display: flex;
+    align-items: center;
+    /* 수직 가운데 */
+    justify-content: center;
+    /* 수평 가운데 */
 }
 
-/* Cards / Grid */
+/* ============ Cards / Grid ============ */
 .grid {
     display: grid;
 }
@@ -211,6 +254,7 @@ a.menu-item.active {
     border: 1px solid var(--line);
     border-radius: 14px;
     overflow: hidden;
+    box-shadow: var(--shadow-1);
 }
 
 .card-head {
@@ -221,7 +265,7 @@ a.menu-item.active {
 .card-head h3 {
     margin: 0;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .card-head .sub {
@@ -243,7 +287,6 @@ a.menu-item.active {
     padding: 8px 12px 12px;
 }
 
-/* Chips / Tags (generic) */
 .chips {
     display: flex;
     flex-wrap: wrap;
@@ -256,7 +299,7 @@ a.menu-item.active {
     border-radius: 999px;
     font-size: 13px;
     border: 1px solid var(--line);
-    background: #0b1220;
+    background: #0c1426;
 }
 
 .chips.green .chip {
@@ -279,7 +322,7 @@ a.menu-item.active {
 
 .btn-primary {
     background: var(--primary);
-    color: white;
+    color: #fff;
     border: none;
     border-radius: 10px;
     padding: 10px 14px;
@@ -287,19 +330,11 @@ a.menu-item.active {
 }
 
 .btn-primary:hover {
-    opacity: .95;
+    filter: brightness(.95);
 }
 
-/* Responsive */
-@media (max-width: 1080px) {
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ===== Center Chat Hero (landing prompt) ===== */
+/* ============ Landing (옵션) ============ */
 .chat-hero {
-    position: relative;
     display: grid;
     place-items: center;
     min-height: calc(100vh - 120px);
@@ -314,149 +349,97 @@ a.menu-item.active {
 }
 
 .chat-logo {
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .chat-logo-text {
     font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #e5e7eb;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #e8f0ff;
 }
 
+/* 불필요한 박스 보더 제거(스크린샷의 “이상한 보더”) */
 .chat-card {
     position: relative;
     width: 100%;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 14px 16px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .06);
-}
-
-.chat-input {
-    width: 100%;
-    height: 56px;
-    padding: 0 14px;
-    border: none;
-    outline: none;
-    font-size: 18px;
     background: transparent;
-    color: #111827;
+    color: var(--text);
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: none;
 }
 
-.chat-input::placeholder {
-    color: #9ca3af;
-}
-
-.chat-actions {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.chat-submit {
-    height: 40px;
-    padding: 0 14px;
-    border: 1px solid var(--primary);
-    background: var(--primary);
-    color: #fff;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.chat-submit:hover {
-    filter: brightness(0.95);
-}
-
-/* Quick tag chips used on hero */
-.chip-row {
-    margin-top: 18px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-.chip-row .chip {
-    border: 1px solid #e5e7eb;
-    background: #f9fafb;
-    color: #374151;
-    padding: 8px 12px;
-    border-radius: 9999px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.chip-row .chip:hover {
-    background: #eef2ff;
-    border-color: #c7d2fe;
-    color: #3730a3;
-}
-
-/* ===== Page Chat (ChatConsult live chat) ===== */
 .consult-wrap {
     position: relative;
-    min-height: calc(100vh - 80px);
-    padding: 24px 0 120px;
-    max-width: 980px;
+    width: 100%;
+    max-width: 960px;
+    min-height: calc(100vh - 120px);
     margin: 0 auto;
+    padding: 24px 16px 24px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 18px;
 }
 
 .consult-header {
     text-align: center;
-    margin: 8px 16px 24px;
+    margin: 0 0 6px;
 }
 
 .consult-logo {
-    font-weight: 700;
-    color: #cde2ff;
-    margin-bottom: 8px;
+    font-weight: 800;
+    font-size: 56px;
+    color: #d9e9ff;
+    margin: 20px 0 8px 0;
+    text-align: center;
 }
 
 .consult-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.01em;
-    margin: 0;
-    word-break: break-word;
+    margin: 0 0 24px 0;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -.01em;
+    color: var(--bubble-ai-bd);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .25);
+    text-align: center;
 }
 
 .consult-stream {
+    margin-top: 400px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 0 16px 16px;
+    gap: 14px;
+    padding: 15px;
 }
 
 .consult-bubble {
-    max-width: 100%;
+    max-width: 760px;
     width: fit-content;
     border-radius: 14px;
     padding: 12px 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     word-break: break-word;
     white-space: pre-wrap;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-}
-
-.consult-bubble.user {
-    align-self: flex-start;
-    background: #eef2ff;
-    border: 1px solid #c7d2fe;
-    color: #1f2937;
+    box-shadow: var(--shadow-1);
+    font-size: 16px;
 }
 
 .consult-bubble.ai {
     align-self: flex-start;
-    background: #111827;
-    border: 1px solid var(--line);
-    color: var(--text);
+    margin-left: 8px;
+    background: var(--bubble-ai-bg);
+    border: 1px solid var(--bubble-ai-bd);
+    color: var(--bubble-ai-text);
+}
+
+.consult-bubble.user {
+    align-self: flex-end;
+    margin-right: 8px;
+    background: var(--bubble-user-bg);
+    border: 1px solid var(--bubble-user-bd);
+    color: var(--bubble-user-text);
 }
 
 .consult-bubble.typing {
@@ -465,50 +448,55 @@ a.menu-item.active {
 }
 
 .consult-inputbar {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    max-width: 980px;
-    background: linear-gradient(180deg, rgba(10, 15, 28, 0), var(--bg) 40%);
-    padding: 12px 16px 20px;
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
 }
 
 .consult-input {
     width: 100%;
-    min-height: 48px;
-    max-height: 200px;
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    outline: none;
+    min-height: 54px;
+    max-height: 220px;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 14px;
     font-size: 16px;
     color: var(--text);
+    background-color: white;
+    box-shadow: none;
     resize: none;
-    background: var(--panel-2);
+}
+
+.consult-input:focus {
+    outline-color: rgba(59, 130, 246, .55);
 }
 
 .consult-input::placeholder {
-    color: #9ca3af;
+    color: #c5cfdb;
 }
 
 .consult-actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-    margin-top: 8px;
+    margin-top: 10px;
 }
 
 .consult-send {
-    height: 40px;
-    padding: 0 14px;
+    height: 42px;
+    padding: 0 16px;
     border: 1px solid var(--primary);
     background: var(--primary);
     color: #fff;
-    border-radius: 10px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-weight: 800;
     cursor: pointer;
+}
+
+.consult-send:hover {
+    filter: brightness(.95);
 }
 
 .consult-send:disabled {
@@ -516,95 +504,54 @@ a.menu-item.active {
     cursor: not-allowed;
 }
 
-.consult-send:hover:not(:disabled) {
-    filter: brightness(0.95);
-}
-
 .consult-end {
-    height: 40px;
+    height: 42px;
     padding: 0 14px;
     border: 1px solid var(--line);
     background: transparent;
     color: var(--text);
-    border-radius: 10px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-weight: 700;
     cursor: pointer;
 }
 
 .consult-end:hover {
-    background: #0b1220;
+    background: #0c1426;
 }
 
-@media (max-width: 640px) {
+/* ============ Responsive ============ */
+@media (max-width:1080px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width:760px) {
+    .dash-sidebar {
+        width: 72px;
+    }
+
+    .consult-wrap {
+        max-width: 96vw;
+        min-height: calc(100vh - 100px);
+    }
+
+    .consult-bubble {
+        max-width: 88vw;
+        font-size: 15.5px;
+    }
+
     .chat-logo-text {
         font-size: 28px;
     }
 
-    .chat-input {
-        height: 52px;
-        font-size: 16px;
+    .consult-title {
+        font-size: 24px;
     }
 
-    .chat-submit {
-        height: 36px;
+    .consult-send,
+    .consult-end {
+        height: 38px;
         border-radius: 10px;
     }
-
-    .consult-title {
-        font-size: 22px;
-    }
-}
-
-/* 가독성: 다크 배경에서 텍스트/버블 색 보정 */
-body {
-    background: var(--bg);
-    color: var(--text);
-}
-
-.consult-title {
-    color: var(--text);
-}
-
-/* 메시지 버블 */
-.consult-bubble.user {
-    align-self: flex-start;
-    background: #eef2ff;
-    /* 밝은 배경 */
-    border: 1px solid #c7d2fe;
-    color: #1f2937;
-    /* 어두운 텍스트 */
-}
-
-.consult-bubble.ai {
-    align-self: flex-start;
-    background: #1f2937;
-    /* 다크 */
-    border: 1px solid #374151;
-    color: #e5e7eb;
-    /* 밝은 텍스트 */
-}
-
-/* 입력창: 다크 배경 위에서도 선명 */
-.consult-input {
-    background: #0f172a;
-    /* panel-2 */
-    color: #e5e7eb;
-    border: 1px solid #374151;
-}
-
-.consult-input::placeholder {
-    color: #9ca3af;
-}
-
-/* 버튼 */
-.consult-send {
-    border: 1px solid var(--primary);
-    background: var(--primary);
-    color: #fff;
-}
-
-.consult-end {
-    border: 1px solid #374151;
-    background: transparent;
-    color: #e5e7eb;
 }
