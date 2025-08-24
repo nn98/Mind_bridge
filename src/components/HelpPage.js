@@ -1,46 +1,11 @@
 import { useState } from 'react';
+import Modal from './Modal';
 import '../css/header.css';
+import '../css/EmotionAnalysisPage.css';
 
-const Modal = ({ title, onClose, content }) => {
-  const handleBackdropClick = (e) => {
-    if (e.currentTarget === e.target) {
-      onClose();
-    }
-  };
+import ContactForm from '../components/about/AboutSection/ContactForm';
 
-  const formattedContent = content.split('\n').map((line, index) => {
-    const trimmedLine = line.trim();
-    if (trimmedLine.startsWith('### **')) {
-      return <h3 key={index} style={{ marginTop: '2em', marginBottom: '1em' }}>{trimmedLine.replace('### **', '').replace('**', '')}</h3>;
-    }
-    if (trimmedLine.startsWith('|')) {
-      return <p key={index} style={{ margin: '0.2em 0', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>{line}</p>;
-    }
-    if (trimmedLine.startsWith('1.') || trimmedLine.startsWith('2.') || trimmedLine.startsWith('3.') || trimmedLine.startsWith('4.')) {
-      return <p key={index} style={{ textIndent: '-1em', paddingLeft: '1.5em' }}>{line}</p>;
-    }
-    return <p key={index}>{line}</p>;
-  });
-
-
-  return (
-    <div className="modal-backdrop-1" onClick={handleBackdropClick}>
-      <div className="modal-content-1">
-        <button onClick={onClose} className="modal-close-btn-1">&times;</button>
-        <h2>{title}</h2>
-        <div className="terms-text-content">
-          {formattedContent}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Footer = ({ setIsOpen }) => {
-  const [isTermsOpen, setIsTermsOpen] = useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
-
-  const termsContent = `제 1 장 총칙
+const termsContent = `제 1 장 총칙
 제 1 조 (목적)
 본 약관은 (주)Mind Bridge(이하 “회사”라 합니다)이 운영하는 웹사이트 Mind Bridge (https://mind-bridge-zeta.vercel.app/) (이하 “웹사이트”라 합니다)에서 제공하는 온라인 서비스(이하 “서비스”라 한다)를 이용함에 있어 사이버몰과 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
 제 2 조 (용어의 정의)
@@ -139,7 +104,7 @@ const Footer = ({ setIsOpen }) => {
 <부칙>
 본 약관은 2025년 07월 31일부터 적용한다.`;
 
-  const privacyContent = `시행일: 2025년 7월 31일
+const privacyContent = `시행일: 2025년 7월 31일
 
 마인드브릿지(MindBridge)('이하 '회사'라 함)은 정보통신망 이용촉진 및 정보보호 등에 관한 법률, 개인정보 보호법 등 관련 법령상의 개인정보보호 규정을 준수하며, 관련 법령에 의거한 개인정보 처리방침을 정하여 이용자 권익 보호에 최선을 다하고 있습니다.
 본 개인정보 처리방침은 마인드브릿지(MindBridge) 서비스에 적용되며, 다음과 같은 내용을 담고 있습니다.
@@ -250,44 +215,106 @@ const Footer = ({ setIsOpen }) => {
 이 개인정보 처리방침은 시행일로부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는 변경사항의 시행 7일 전부터 공지사항을 통하여 고지할 것입니다.
 `;
 
-  return (
-    <>
-      <footer className="footer">
-        <div className="footer-grid">
-          <div className="footer-column">
-            <h4>ⓘ MindBridge</h4>
-            <p>마음을 연결하고 치유하는 AI 테라피 솔루션</p>
-          </div>
+export default function HelpPage() {
+    const [openTerms, setOpenTerms] = useState(false);
+    const [openPrivacy, setOpenPrivacy] = useState(false);
 
-          <div className="footer-column">
-            <h4>서비스</h4>
-            <ul>
-              <li onClick={() => setIsOpen(true)} style={{ cursor: 'pointer' }}>AI 상담</li>
-              <li>감정 분석</li>
-              <li>이미지 테라피</li>
-            </ul>
-          </div>
+    return (
+        // ✅ 여기: emotion-page → help-page 로 변경
+        <div className="help-page">
+            {/* 1. 빠른 실행 */}
+            <div className="analysis-card">
+                <h1 className="analysis-title">도움말 & 고객지원</h1>
+                <p className="analysis-subtitle">
+                    자주 묻는 질문과 약관, 개인정보 처리방침, 문의하기를 확인하세요.
+                </p>
 
-          <div className="footer-column">
-            <h4>법적 정보</h4>
-            <ul>
-              <li onClick={() => setIsTermsOpen(true)} style={{ cursor: 'pointer' }}>이용약관</li>
-              <li onClick={() => setIsPrivacyOpen(true)} style={{ cursor: 'pointer' }}>개인정보처리방침</li>
-            </ul>
-          </div>
+                {/* ✅ 버튼 묶음은 help-actions / help-btn 사용 */}
+                <div className="help-actions">
+                    <button className="help-btn" type="button" onClick={() => setOpenTerms(true)}>
+                        이용약관 보기
+                    </button>
+                    <button className="help-btn" type="button" onClick={() => setOpenPrivacy(true)}>
+                        개인정보처리방침 보기
+                    </button>
+                </div>
+            </div>
+
+            {/* 2. FAQ */}
+            <div className="analysis-card help-faq">
+                <h2 className="results-title">자주 묻는 질문</h2>
+
+                <details style={detailsStyle} open>
+                    <summary style={sumStyle}>로그인 없이도 서비스 이용이 가능한가요?</summary>
+                    <div style={ansStyle}>
+                        일부 체험 기능은 비회원도 사용 가능하지만, 상담 기록 저장 등 개인화 기능은 로그인 후
+                        이용할 수 있습니다.
+                    </div>
+                </details>
+
+                <details style={detailsStyle}>
+                    <summary style={sumStyle}>AI 상담 내용은 어떻게 보관되나요?</summary>
+                    <div style={ansStyle}>
+                        이용자 동의 하에 암호화되어 저장되며, 개선 목적으론 통계 형태로만 활용됩니다. 자세한
+                        내용은 개인정보 처리방침을 확인하세요.
+                    </div>
+                </details>
+
+                <details style={detailsStyle}>
+                    <summary style={sumStyle}>결제/환불 정책이 궁금합니다.</summary>
+                    <div style={ansStyle}>
+                        유료 서비스 결제, 환불, 배송 등은 <b>이용약관 제5장</b> 및{' '}
+                        <b>18조(취소 및 반품 환불 규정)</b>을 참고해 주세요.
+                    </div>
+                </details>
+            </div>
+
+            {/* 3. 고객센터 */}
+            <div className="analysis-card help-center">
+                <h2 className="results-title">고객센터</h2>
+                <div style={{ lineHeight: 1.8 }}>
+                    <div>
+                        대표 이메일:{' '}
+                        <a href="mailto:mindbridge2020@gmail.com">mindbridge2020@gmail.com</a>
+                    </div>
+                    <div>대표 전화: 02-123-4567 (평일 10:00~17:00)</div>
+                    <div>주소: 서울특별시 종로구 종로12길 15 코아빌딩 2층</div>
+                </div>
+            </div>
+
+            {/* 4. 문의하기 폼 */}
+            <div className="analysis-card help-contact">
+                <h2 className="results-title">문의하기</h2>
+                <p className="analysis-subtitle">서비스 이용 중 불편 사항이나 개선 제안을 보내주세요.</p>
+                <ContactForm />
+            </div>
+
+            {/* 모달 */}
+            {openTerms && (
+                <Modal
+                    title="이용약관"
+                    content={termsContent ?? ''}     // 안전 가드
+                    onClose={() => setOpenTerms(false)}
+                />
+            )}
+            {openPrivacy && (
+                <Modal
+                    title="개인정보 처리방침"
+                    content={privacyContent ?? ''}   // 안전 가드
+                    onClose={() => setOpenPrivacy(false)}
+                />
+            )}
         </div>
+    );
+}
 
-        <hr />
-
-        <div className="footer-bottom">
-          <p>© 2025 MindBridge. All rights reserved.</p>
-          <p>서울특별시 종로구 종로12길 15 코아빌딩 2층 | 사업자등록번호: 123-45-67890</p>
-        </div>
-      </footer>
-      {isTermsOpen && <Modal title="이용약관" content={termsContent} onClose={() => setIsTermsOpen(false)} />}
-      {isPrivacyOpen && <Modal title="개인정보 처리방침" content={privacyContent} onClose={() => setIsPrivacyOpen(false)} />}
-    </>
-  );
+// 그대로 사용 (FAQ 인라인 스타일)
+const detailsStyle = {
+    background: 'var(--panel-2, #0e1526)',
+    border: '1px solid var(--line, #1e2a3c)',
+    borderRadius: 10,
+    padding: '10px 12px',
+    margin: '10px 0'
 };
-
-export default Footer;
+const sumStyle = { cursor: 'pointer', fontWeight: 700 };
+const ansStyle = { marginTop: 8, color: 'var(--muted, #b1bcc8)' };

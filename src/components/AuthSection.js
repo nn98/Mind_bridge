@@ -122,8 +122,12 @@ const IdFoundModal = ({ email, onClose }) => {
   );
 };
 
-const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess }) => {
-
+const AuthSection = ({
+  type,
+  setIsCustomLoggedIn,
+  setCustomUser,
+  onLoginSuccess,
+}) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -153,8 +157,8 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   const logoutExecuted = useRef(false);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
+    const script = document.createElement("script");
+    script.src = "https://developers.kakao.com/sdk/js/kakao.js";
     script.async = true;
 
     document.body.appendChild(script);
@@ -162,7 +166,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
         window.Kakao.init(KAKAO_REST_API_KEY);
-        console.log('Kakao SDK initialized:', window.Kakao.isInitialized());
+        console.log("Kakao SDK initialized:", window.Kakao.isInitialized());
       }
     };
 
@@ -174,10 +178,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   useEffect(() => {
     const processSocialLogin = async (provider, code) => {
       try {
-        const response = await axios.post(`${BACKEND_URL}/api/auth/social-login`, {
-          provider,
-          code,
-        }, { withCredentials: true });
+        const response = await axios.post(
+          `${BACKEND_URL}/api/auth/social-login`,
+          {
+            provider,
+            code,
+          },
+          { withCredentials: true }
+        );
 
         const { token, user } = response.data;
         localStorage.setItem("token", "LOGIN");
@@ -188,14 +196,17 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`, {
-          containerId: "welcome"
+          containerId: "welcome",
         });
 
-        window.history.replaceState({}, '', '/login');
+        window.history.replaceState({}, "", "/login");
         navigate("/");
       } catch (err) {
         console.error(`${provider} login error:`, err);
-        alert(err.response?.data?.message || `${provider} 로그인 처리 중 오류가 발생했습니다.`);
+        alert(
+          err.response?.data?.message ||
+            `${provider} 로그인 처리 중 오류가 발생했습니다.`
+        );
         navigate("/login");
       }
     };
@@ -212,9 +223,15 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
       logoutExecuted.current = true;
-      localStorage.removeItem("token");
+
+
       if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
       if (setCustomUser) setCustomUser(null);
+
+      // 서버에 로그아웃 API 호출 (선택 사항, 서버에서 쿠키 만료 처리)
+      axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true })
+        .catch(() => { /* 실패해도 상태 초기화는 계속 */ });
+
       // 전역 컨테이너(welcome)로 로그아웃 토스트 출력
       toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
       navigate("/", { replace: true });
@@ -224,7 +241,10 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => {
-      const newData = { ...prevData, [name]: type === "checkbox" ? checked : value };
+      const newData = {
+        ...prevData,
+        [name]: type === "checkbox" ? checked : value,
+      };
       validateField(name, value, newData);
       return newData;
     });
@@ -250,9 +270,11 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
       }
     }
     if (name === "password") {
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+      const passwordRegex =
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
       if (!passwordRegex.test(value)) {
-        newErrors.password = "8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.";
+        newErrors.password =
+          "8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.";
       } else {
         delete newErrors.password;
       }
@@ -269,29 +291,38 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     try {
       const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
       if (response.data.isAvailable) {
-        setEmailCheck({ isChecking: false, isAvailable: true, message: "사용 가능한 이메일입니다." });
+        setEmailCheck({
+          isChecking: false,
+          isAvailable: true,
+          message: "사용 가능한 이메일입니다.",
+        });
       } else {
-        setEmailCheck({ isChecking: false, isAvailable: false, message: "이미 사용 중인 이메일입니다." });
+        setEmailCheck({
+          isChecking: false,
+          isAvailable: false,
+          message: "이미 사용 중인 이메일입니다.",
+        });
       }
     } catch (err) {
-      setEmailCheck({ isChecking: false, isAvailable: false, message: "확인 중 오류가 발생했습니다." });
+      setEmailCheck({
+        isChecking: false,
+        isAvailable: false,
+        message: "확인 중 오류가 발생했습니다.",
+      });
     }
   };
 
   const handleSubmit = async () => {
     try {
       if (type === "login") {
-        const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
+        await axios.post(`${BACKEND_URL}/api/auth/login`, {
           email: formData.email,
           password: formData.password,
         }, { withCredentials: true });
-        const { token, user } = response.data;
-        console.log(`token: ${token}`);
-        console.log(`user: ${user}`);
-        // console.log(`setCustomUser: ${setCustomUser}`);
-        // console.log(`setIsCustomLoggedIn: ${setIsCustomLoggedIn}`);
-        // console.log(`onLoginSuccess: ${onLoginSuccess}`);
-        localStorage.setItem("token", token);
+
+        const res = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
+        const user = res.data;
+
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         if (onLoginSuccess) onLoginSuccess();
@@ -300,10 +331,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`);
         /* ▲▲ 추가 끝 ▲▲ */
-
         navigate("/");
+
       } else if (type === "signup") {
-        if (Object.keys(errors).length > 0 || !emailCheck.isAvailable || !formData.termsAgreed) {
+        if (
+          Object.keys(errors).length > 0 ||
+          !emailCheck.isAvailable ||
+          !formData.termsAgreed
+        ) {
           let alertMessage = "입력 정보를 다시 확인해주세요.";
           if (!emailCheck.isAvailable) {
             alertMessage = "이메일 중복 확인을 완료해주세요.";
@@ -322,24 +357,29 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
           age: formData.age,
           gender: formData.gender,
         }, { withCredentials: true });
+
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login");
+
       } else if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
         }, { withCredentials: true });
+
         if (response.data.email) {
           setFoundId(response.data.email);
           setIsIdModalOpen(true);
         } else {
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
+
       } else if (type === "find-password") {
         const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
+
         if (response.data.tempPassword) {
           setTempPassword(response.data.tempPassword);
           setIsPasswordModalOpen(true);
@@ -372,7 +412,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     console.log(`KAKAO_REDIRECT_URI${KAKAO_REDIRECT_URI}`);
     window.Kakao.Auth.authorize({
       redirectUri: KAKAO_REDIRECT_URI,
-      scope: 'account_email,profile_nickname',
+      scope: "account_email,profile_nickname",
     });
     const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
     // window.location.href = authUrl;
@@ -387,7 +427,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
     // }
     // const scope = "openid profile email";
     // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
-    window.location.href = BACKEND_URL+'/api/auth/social/google/login';
+    window.location.href = BACKEND_URL + '/api/auth/social/google/login';
   };
 
   const termsContent = `
@@ -424,19 +464,69 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   const renderForm = () => {
     switch (type) {
       case "logout":
-        return (<div style={{ textAlign: "center", padding: "2rem" }}>로그아웃 처리 중입니다...</div>);
+        return (
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            로그아웃 처리 중입니다...
+          </div>
+        );
 
       case "login":
         return (
-          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <Box className="form-section">
-              <Link to="/" style={{ display: "inline-block", width: "40px", height: "80px" }}>
-                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "40px",
+                  height: "80px",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>로그인</Typography>
-              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
-              <TextField className="input-wrapper" fullWidth label="비밀번호" name="password" type="password" margin="normal" value={formData.password} onChange={handleChange} />
-              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>로그인</Button>
+              <Typography variant="h4" component="h1" gutterBottom>
+                로그인
+              </Typography>
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="이메일"
+                name="email"
+                margin="normal"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="비밀번호"
+                name="password"
+                type="password"
+                margin="normal"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <Button
+                className="login-button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2, mb: 1 }}
+                onClick={handleSubmit}
+              >
+                로그인
+              </Button>
 
               <Box className="social-buttons">
                 <Box className="social-login-divider">
@@ -445,19 +535,35 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
                   <Box className="divider-line" />
                 </Box>
                 <Box className="button-container1">
-                  <Button fullWidth variant="contained" onClick={handleKakaoLogin} className="social-button kakao-login-button">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={handleKakaoLogin}
+                    className="social-button kakao-login-button"
+                  >
                     카카오로 계속하기
                   </Button>
-                  <Button fullWidth variant="outlined" onClick={handleGoogleLogin} className="social-button google-login-button">
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={handleGoogleLogin}
+                    className="social-button google-login-button"
+                  >
                     Google로 계속하기
                   </Button>
                 </Box>
               </Box>
 
               <Box className="form-links">
-                <RouterLink to="/signup" className="form-link">회원가입</RouterLink>
-                <RouterLink to="/find-id" className="form-link">아이디 찾기</RouterLink>
-                <RouterLink to="/find-password" className="form-link">비밀번호 찾기</RouterLink>
+                <RouterLink to="/signup" className="form-link">
+                  회원가입
+                </RouterLink>
+                <RouterLink to="/find-id" className="form-link">
+                  아이디 찾기
+                </RouterLink>
+                <RouterLink to="/find-password" className="form-link">
+                  비밀번호 찾기
+                </RouterLink>
               </Box>
             </Box>
           </Box>
@@ -465,51 +571,254 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
       case "signup":
         return (
-          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <Box component="form" noValidate className="form-section-flex">
               <Box className="form-left">
                 <Link to="/" style={{ display: "flex", height: "auto" }}>
-                  <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-sign-up" />
+                  <img
+                    src="/img/로고1.png"
+                    alt="Mind Bridge 로고"
+                    className="logo-sign-up"
+                  />
                 </Link>
-                <Typography variant="h5" component="h2" gutterBottom>회원가입</Typography>
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  회원가입
+                </Typography>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="닉네임"
+                  name="nickname"
+                  value={formData.nickname}
+                  onChange={handleChange}
+                  error={!!errors.nickname}
+                  helperText={errors.nickname}
+                />
                 <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                  <TextField className="input-wrapper" margin="normal" required fullWidth label="나이" name="age" type="number" value={formData.age} onChange={handleChange} sx={{ flex: 1 }} />
+                  <TextField
+                    className="input-wrapper"
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="나이"
+                    name="age"
+                    type="number"
+                    value={formData.age}
+                    onChange={handleChange}
+                    sx={{ flex: 1 }}
+                  />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                  <TextField className="input-wrapper" margin="dense" required fullWidth label="이메일 (아이디)" name="email" value={formData.email} onChange={handleChange} error={!!errors.email || (emailCheck.message && !emailCheck.isAvailable)} helperText={errors.email || emailCheck.message} sx={{ "& .MuiFormHelperText-root": { color: emailCheck.isAvailable ? "green" : undefined, }, }} />
-                  <Button className="auth-button" variant="outlined" onClick={handleCheckEmail} disabled={emailCheck.isChecking} sx={{ mt: "8px", height: "55px", flexShrink: 0, color: "#ffffff", backgroundColor: "#a18cd1", border: "none", }}>
-                    {emailCheck.isChecking ? <CircularProgress size={24} /> : "중복확인"}
+                  <TextField
+                    className="input-wrapper"
+                    margin="dense"
+                    required
+                    fullWidth
+                    label="이메일 (아이디)"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={
+                      !!errors.email ||
+                      (emailCheck.message && !emailCheck.isAvailable)
+                    }
+                    helperText={errors.email || emailCheck.message}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        color: emailCheck.isAvailable ? "green" : undefined,
+                      },
+                    }}
+                  />
+                  <Button
+                    className="auth-button"
+                    variant="outlined"
+                    onClick={handleCheckEmail}
+                    disabled={emailCheck.isChecking}
+                    sx={{
+                      mt: "8px",
+                      height: "55px",
+                      flexShrink: 0,
+                      color: "#ffffff",
+                      backgroundColor: "#a18cd1",
+                      border: "none",
+                    }}
+                  >
+                    {emailCheck.isChecking ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "중복확인"
+                    )}
                   </Button>
                 </Box>
-                <TextField className="input-wrapper" margin="normal" fullWidth label="전화번호" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} sx={{ "& .MuiInputBase-root": { backgroundColor: "#ffffffff" }, "& .MuiFormHelperText-root": { backgroundColor: "transparent", }, }} helperText={errors.password || "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."} />
-                <TextField className="input-wrapper" margin="normal" required fullWidth label="비밀번호 확인" name="passwordConfirm" type="password" value={formData.passwordConfirm} onChange={handleChange} error={!!errors.passwordConfirm} helperText={errors.passwordConfirm} sx={{ backgroundColor: "#ffffffff" }} />
-                <FormControl component="fieldset" margin="normal" sx={{ flex: 2 }}>
-                  <FormLabel component="legend" sx={{ mb: 1, fontSize: '0.8rem' }}>성별</FormLabel>
-                  <ToggleButtonGroup value={formData.gender} exclusive onChange={handleGenderChange} aria-label="gender selection" fullWidth>
-                    <ToggleButton value="male" aria-label="male">남성</ToggleButton>
-                    <ToggleButton value="female" aria-label="female">여성</ToggleButton>
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  fullWidth
+                  label="전화번호"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  error={!!errors.password}
+                  sx={{
+                    "& .MuiInputBase-root": { backgroundColor: "#ffffffff" },
+                    "& .MuiFormHelperText-root": {
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                  helperText={
+                    errors.password ||
+                    "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
+                  }
+                />
+                <TextField
+                  className="input-wrapper"
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="비밀번호 확인"
+                  name="passwordConfirm"
+                  type="password"
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
+                  error={!!errors.passwordConfirm}
+                  helperText={errors.passwordConfirm}
+                  sx={{ backgroundColor: "#ffffffff" }}
+                />
+                <FormControl
+                  component="fieldset"
+                  margin="normal"
+                  sx={{ flex: 2 }}
+                >
+                  <FormLabel
+                    component="legend"
+                    sx={{ mb: 1, fontSize: "0.8rem" }}
+                  >
+                    성별
+                  </FormLabel>
+                  <ToggleButtonGroup
+                    value={formData.gender}
+                    exclusive
+                    onChange={handleGenderChange}
+                    aria-label="gender selection"
+                    fullWidth
+                  >
+                    <ToggleButton value="male" aria-label="male">
+                      남성
+                    </ToggleButton>
+                    <ToggleButton value="female" aria-label="female">
+                      여성
+                    </ToggleButton>
                   </ToggleButtonGroup>
                 </FormControl>
-                <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>가입하기</Button>
+                <Button
+                  className="login-button"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 2, mb: 1 }}
+                  onClick={handleSubmit}
+                >
+                  가입하기
+                </Button>
                 <Box className="form-links">
-                  <RouterLink to="/login" className="form-link">이미 계정이 있으신가요? 로그인</RouterLink>
+                  <RouterLink to="/login" className="form-link">
+                    이미 계정이 있으신가요? 로그인
+                  </RouterLink>
                 </Box>
               </Box>
               <Box className="form-right-legend">
-                <FormControl component="fieldset" margin="normal" error={!!errors.mentalState}>
-                  <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
-                  <RadioGroup row name="mentalState" value={formData.mentalState} onChange={handleChange} className="radio-list">
-                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (
-                      <FormControlLabel key={state} value={state} control={<Radio sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />} label={state} />
-                    ))}
+                <FormControl
+                  component="fieldset"
+                  margin="normal"
+                  error={!!errors.mentalState}
+                >
+                  <FormLabel component="legend">
+                    내가 생각하는 나의 현재 상태
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    name="mentalState"
+                    value={formData.mentalState}
+                    onChange={handleChange}
+                    className="radio-list"
+                  >
+                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map(
+                      (state) => (
+                        <FormControlLabel
+                          key={state}
+                          value={state}
+                          control={
+                            <Radio
+                              sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                            />
+                          }
+                          label={state}
+                        />
+                      )
+                    )}
                   </RadioGroup>
-                  {errors.mentalState && (<FormHelperText>{errors.mentalState}</FormHelperText>)}
+                  {errors.mentalState && (
+                    <FormHelperText>{errors.mentalState}</FormHelperText>
+                  )}
                 </FormControl>
                 <Box>
-                  <FormControlLabel control={<Checkbox name="termsAgreed" checked={formData.termsAgreed} onChange={handleChange} disabled={!termsViewed} sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />} label={<Typography component="span" sx={{ fontSize: "0.9rem" }}> <Button variant="text" onClick={handleOpenTermsModal} sx={{ p: 0, color: "#a18cd1", textDecoration: "underline", }}> 서비스 이용약관 </Button> 에 동의합니다. </Typography>} />
-                  {!termsViewed && (<FormHelperText sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}> 이용약관을 클릭하여 확인 후 동의해주세요. </FormHelperText>)}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="termsAgreed"
+                        checked={formData.termsAgreed}
+                        onChange={handleChange}
+                        disabled={!termsViewed}
+                        sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
+                      />
+                    }
+                    label={
+                      <Typography component="span" sx={{ fontSize: "0.9rem" }}>
+                        {" "}
+                        <Button
+                          variant="text"
+                          onClick={handleOpenTermsModal}
+                          sx={{
+                            p: 0,
+                            color: "#a18cd1",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {" "}
+                          서비스 이용약관{" "}
+                        </Button>{" "}
+                        에 동의합니다.{" "}
+                      </Typography>
+                    }
+                  />
+                  {!termsViewed && (
+                    <FormHelperText
+                      sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}
+                    >
+                      {" "}
+                      이용약관을 클릭하여 확인 후 동의해주세요.{" "}
+                    </FormHelperText>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -518,17 +827,64 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
       case "find-id":
         return (
-          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <Box className="form-section">
-              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
-                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "50px",
+                  height: "auto",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>아이디 찾기</Typography>
-              <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
-              <TextField className="input-wrapper" fullWidth label="닉네임" name="nickname" margin="normal" value={formData.nickname} onChange={handleChange} />
-              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>아이디 찾기</Button>
+              <Typography variant="h4" component="h1" gutterBottom>
+                아이디 찾기
+              </Typography>
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="전화번호"
+                name="phoneNumber"
+                margin="normal"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="닉네임"
+                name="nickname"
+                margin="normal"
+                value={formData.nickname}
+                onChange={handleChange}
+              />
+              <Button
+                className="login-button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2, mb: 1 }}
+                onClick={handleSubmit}
+              >
+                아이디 찾기
+              </Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
+                <RouterLink to="/login" className="form-link">
+                  로그인으로 돌아가기
+                </RouterLink>
               </Box>
             </Box>
           </Box>
@@ -536,17 +892,64 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
 
       case "find-password":
         return (
-          <Box sx={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+            }}
+          >
             <Box className="form-section">
-              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
-                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
+              <Link
+                to="/"
+                style={{
+                  display: "inline-block",
+                  width: "50px",
+                  height: "auto",
+                }}
+              >
+                <img
+                  src="/img/로고1.png"
+                  alt="Mind Bridge 로고"
+                  className="logo-login"
+                />
               </Link>
-              <Typography variant="h4" component="h1" gutterBottom>비밀번호 찾기</Typography>
-              <TextField className="input-wrapper" fullWidth label="이메일" name="email" margin="normal" value={formData.email} onChange={handleChange} />
-              <TextField className="input-wrapper" fullWidth label="전화번호" name="phoneNumber" margin="normal" value={formData.phoneNumber} onChange={handleChange} />
-              <Button className="login-button" fullWidth variant="contained" sx={{ mt: 2, mb: 1 }} onClick={handleSubmit}>임시 비밀번호 발급</Button>
+              <Typography variant="h4" component="h1" gutterBottom>
+                비밀번호 찾기
+              </Typography>
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="이메일"
+                name="email"
+                margin="normal"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <TextField
+                className="input-wrapper"
+                fullWidth
+                label="전화번호"
+                name="phoneNumber"
+                margin="normal"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+              <Button
+                className="login-button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2, mb: 1 }}
+                onClick={handleSubmit}
+              >
+                임시 비밀번호 발급
+              </Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
+                <RouterLink to="/login" className="form-link">
+                  로그인으로 돌아가기
+                </RouterLink>
               </Box>
             </Box>
           </Box>
@@ -559,9 +962,28 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser, onLoginSuccess 
   return (
     <section>
       {renderForm()}
-      {isTermsModalOpen && (<TermsModal content={termsContent} onClose={handleCloseTermsModal} onConfirm={handleModalConfirm} />)}
-      {isPasswordModalOpen && (<TempPasswordModal password={tempPassword} onClose={() => setIsPasswordModalOpen(false)} />)}
-      {isIdModalOpen && (<IdFoundModal email={foundId} onClose={() => { setIsIdModalOpen(false); navigate("/login"); }} />)}
+      {isTermsModalOpen && (
+        <TermsModal
+          content={termsContent}
+          onClose={handleCloseTermsModal}
+          onConfirm={handleModalConfirm}
+        />
+      )}
+      {isPasswordModalOpen && (
+        <TempPasswordModal
+          password={tempPassword}
+          onClose={() => setIsPasswordModalOpen(false)}
+        />
+      )}
+      {isIdModalOpen && (
+        <IdFoundModal
+          email={foundId}
+          onClose={() => {
+            setIsIdModalOpen(false);
+            navigate("/login");
+          }}
+        />
+      )}
     </section>
   );
 };

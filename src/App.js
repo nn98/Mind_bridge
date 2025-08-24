@@ -20,11 +20,8 @@ import "./css/dashboard.css";
 import "./css/theme.css";
 
 import Map from "./components/Map";
-import Header from "./components/Header";
 import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
-import ChatModal from "./components/chat-modal/ChatModal";
-import Footer from "./components/Footer";
 import AboutSection from "./components/about/AboutSection/AboutSectionMain";
 import { BoardSection } from "./components/board/BoardSectionmain";
 import AuthSection from "./components/AuthSection";
@@ -36,6 +33,7 @@ import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/admin/AdminPage";
 import KakaoWaitPage from "./components/KakaoWaitPage";
 import UserProfile from "./components/chat-modal/components/UserProfile";
+import HelpPage from './components/HelpPage';
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ChatConsult from "./components/dashboard/ChatConsult";
@@ -50,9 +48,7 @@ const App = () => {
   const [customUser, setCustomUser] = useState(null);
   const [isCustomLoggedIn, setIsCustomLoggedIn] = useState(false);
 
-  const [selectedChat, setSelectedChat] = useState(null);
   const [signupState, setSignupState] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState("chat");
   const [resultText, setResultText] = useState("");
   const [testType, setTestType] = useState("우울증");
@@ -87,23 +83,23 @@ const App = () => {
     fetchCustomUser();
   }, []);
 
-  const fetchCustomUser = () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios
-        .get("http://localhost:8080/api/auth/me", { withCredentials: true })
-        .then((res) => {
-          setCustomUser(res.data);
-          setIsCustomLoggedIn(true);
-        })
-        .catch(() => {
-          localStorage.removeItem("token");
-          setCustomUser(null);
-          setIsCustomLoggedIn(false);
-        });
-    } else {
-      setIsCustomLoggedIn(false);
+  const fetchCustomUser = async () => {
+    try {
+      // 쿠키 기반 요청
+      const res = await axios.get("http://localhost:8080/api/auth/me", { withCredentials: true });
+      const u = res?.data || null;
+      const id = u?.id ?? u?.userId ?? u?._id ?? null;
+      const email = u?.email ?? null;
+      if (id && email) {
+        setCustomUser({ ...u, id, email });
+        setIsCustomLoggedIn(true);
+      } else {
+        setCustomUser(null);
+        setIsCustomLoggedIn(false);
+      }
+    } catch (err) {
       setCustomUser(null);
+      setIsCustomLoggedIn(false);
     }
   };
 
@@ -178,7 +174,6 @@ const App = () => {
   const handleConsultSubmit = (text) => {
     setBootstrapQuery(text);
     setTab("chat");
-    setIsOpen(true);
   };
 
   return (
@@ -186,14 +181,6 @@ const App = () => {
       {/* 기존 헤더/플로팅/FAQ/지도는 hideShell로 제어 */}
       {!hideShell && (
         <>
-          <Header
-            introRef={introRef}
-            servicesRef={servicesRef}
-            infoRef={infoRef}
-            setScrollTarget={setScrollTarget}
-            isCustomLoggedIn={isCustomLoggedIn}
-            customUser={customUser}
-          />
           <FloatingSidebar
             mapVisible={mapVisible}
             setMapVisible={setMapVisible}
@@ -223,34 +210,16 @@ const App = () => {
         </div>
       )}
 
-      <EmotionAnalysisPage isOpen={isEmotionModalOpen} onClose={() => setIsEmotionModalOpen(false)} />
-
-      {/* ✅ ChatModal은 항상 렌더. 홈에서는 런처(말풍선 버튼)만 숨김 */}
-      <ChatModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        tab={tab}
-        setTab={setTab}
-        selectedChat={selectedChat}
-        setSelectedChat={setSelectedChat}
-        resultText={resultText}
-        customUser={customUser}
-        isCustomLoggedIn={isCustomLoggedIn}
-        bootstrapQuery={bootstrapQuery}
-        onConsumeBootstrapQuery={() => setBootstrapQuery("")}
-        hideLauncher={isDashboard}
-      />
-
       <Routes>
         <Route element={<DashboardLayout currentUser={customUser} onLogout={handleLogout} />}>
-          <Route index element={<ChatConsult />} />
-          <Route path="/emotion" element={<div style={{ padding: 16 }}><h1>감성 분석</h1></div>} />
+          <Route index element={<ChatConsult customUser={customUser} />} />
+          <Route path="/emotion" element={<EmotionAnalysisPage mode="page" />} />
           <Route path="/img" element={<Picture customUser={customUser} isCustomLoggedIn={isCustomLoggedIn} />} />
           <Route path="/board" element={<BoardRouteElement />} />
           <Route path="/hospital-region" element={<HospitalRegionPage />} />
           <Route path="/library" element={<ResourceLibrary />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/help" element={<div style={{ padding: 16 }}><h1>도움말</h1></div>} />
+          <Route path="/help" element={<HelpPage />} />
           {isCustomLoggedIn && customUser && (
             <>
               <Route
@@ -344,10 +313,6 @@ const App = () => {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      {!hideShell && (
-        <Footer setIsOpen={setIsOpen} isOpen={isOpen} setIsEmotionModalOpen={setIsEmotionModalOpen} />
-      )}
 
       <Toast show={appToast.show} message={appToast.message} />
     </>

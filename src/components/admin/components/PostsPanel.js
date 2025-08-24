@@ -106,8 +106,10 @@ const PostsPanel = () => {
         try {
             setLoading(true);
             setError("");
-            const token = localStorage.getItem("token");
-            const data = await getAllPosts(token, { page, size, search, sort: sortParam });
+
+            //쿠키 기반이므로 token 전달 필요 없음
+            const data = await getAllPosts({ page, size, search, sort: sortParam });
+
             setPosts(data.content || []);
             setTotalPages(data.totalPages ?? 0);
             setTotalElements(data.totalElements ?? (data.content?.length || 0));
@@ -144,8 +146,8 @@ const PostsPanel = () => {
                     <button
                         onClick={async () => {
                             try {
-                                const token = localStorage.getItem("token");
-                                await deletePostById(token, postId);
+                                await deletePostById(postId);
+                                
                                 setOpenRowId((prev) => (prev === postId ? null : prev));
                                 toast.dismiss(toastId);
                                 toast.success("게시글이 삭제되었습니다.");

@@ -25,6 +25,7 @@ body,
 
 .logo {
     width: 150px;
+    margin: 10px;
     z-index: 1001;
 }
 
@@ -141,7 +142,7 @@ body,
 .custom-blue-btn {
   width: 80px;
   height: 30px;
-  background: #fff;
+  background: #f9d8ff;
   color: #000000;
   box-shadow: 0 2px 8px 0 rgba(74, 111, 165, 0.1);
   border: none;
@@ -479,5 +480,3 @@ body,
   font-size: 0.95em;
   text-align: justify;
 }
-
-.custom-blue-btn1 {}
