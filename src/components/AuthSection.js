@@ -126,7 +126,6 @@ const AuthSection = ({
   type,
   setIsCustomLoggedIn,
   setCustomUser,
-  onLoginSuccess,
 }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -192,7 +191,6 @@ const AuthSection = ({
 
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-        if (onLoginSuccess) onLoginSuccess();
 
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`, {
@@ -218,7 +216,7 @@ const AuthSection = ({
     if (code && provider) {
       processSocialLogin(provider, code);
     }
-  }, [navigate, setIsCustomLoggedIn, setCustomUser, onLoginSuccess]);
+  }, [navigate, setIsCustomLoggedIn, setCustomUser]);
 
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
@@ -289,8 +287,8 @@ const AuthSection = ({
     }
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
-      if (response.data.isAvailable) {
+      const response = await axios.get(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
+      if (response.data.data.isAvailable) {
         setEmailCheck({
           isChecking: false,
           isAvailable: true,
@@ -315,24 +313,28 @@ const AuthSection = ({
   const handleSubmit = async () => {
     try {
       if (type === "login") {
-        await axios.post(`${BACKEND_URL}/api/auth/login`, {
-          email: formData.email,
-          password: formData.password,
-        }, { withCredentials: true });
+        const loginResponse = await axios.post(
+          `${BACKEND_URL}/api/auth/login`,
+          {
+            email: formData.email,
+            password: formData.password,
+          },
+          { withCredentials: true }
+        );
 
-        const res = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
-        const user = res.data;
+        // 로그인 응답에서 사용자 정보 바로 가져오기
+        const user = loginResponse.data.data.profile;
+        console.log(user);
 
         if (setCustomUser) setCustomUser(user);
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-        if (onLoginSuccess) onLoginSuccess();
+        console.log()
 
-        /* ▼▼ 추가: 환영 토스트 ▼▼ */
+        // 환영 토스트
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`);
-        /* ▲▲ 추가 끝 ▲▲ */
-        navigate("/");
 
+        navigate("/");
       } else if (type === "signup") {
         if (
           Object.keys(errors).length > 0 ||
@@ -362,26 +364,26 @@ const AuthSection = ({
         navigate("/login");
 
       } else if (type === "find-id") {
-        const response = await axios.post(`${BACKEND_URL}/api/users/find-id`, {
+        const response = await axios.post(`${BACKEND_URL}/api/auth/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
         }, { withCredentials: true });
 
-        if (response.data.email) {
-          setFoundId(response.data.email);
+        if (response.data.data.email) {
+          setFoundId(response.data.data.email);
           setIsIdModalOpen(true);
         } else {
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
 
       } else if (type === "find-password") {
-        const response = await axios.post(`${BACKEND_URL}/api/users/find-password`, {
+        const response = await axios.post(`${BACKEND_URL}/api/auth/reset-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
 
-        if (response.data.tempPassword) {
-          setTempPassword(response.data.tempPassword);
+        if (response.data.data.tempPassword) {
+          setTempPassword(response.data.data.tempPassword);
           setIsPasswordModalOpen(true);
         } else {
           alert("임시 비밀번호 발급에 실패했습니다.");

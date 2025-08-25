@@ -1,14 +1,13 @@
 const BACKEND_URL = "http://localhost:8080";
 
-export async function saveCounselling({ token, email, 상태, 상담받고싶은내용 }) {
-    if (!token) throw new Error("NO_TOKEN");
-
-    const response = await fetch(`${BACKEND_URL}/api/counselling/save`, {
+export async function saveCounselling({ email, 상태, 상담받고싶은내용 }) {
+    const response = await fetch(`${BACKEND_URL}/api/chat/session/save`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            // Authorization 헤더 제거
         },
+        credentials: 'include', // 쿠키 자동 전송
         body: JSON.stringify({
             email: email || "",
             userCounsellingSummation: 상태 || "",

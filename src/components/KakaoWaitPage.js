@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao";
 
-function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
+function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -38,15 +38,14 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
         const data = res.data;
         console.log("서버 응답 데이터:", data);
 
-        if (data.success) {
+        if (data.data.success) {
           setMessage('로그인 성공! 환영합니다.');
 
-          if (data.user) {
-            console.log('user:', data.user);
+          if (data.data.user) {
+            console.log('user:', data.data.user);
             localStorage.setItem("token", "LOGIN");
-            if (setCustomUser) setCustomUser(data.user);
+            if (setCustomUser) setCustomUser(data.data.user);
             if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-            if (onLoginSuccess) onLoginSuccess();
           }
 
           setTimeout(() => navigate('/'), 1000);
@@ -62,7 +61,7 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
     loginProcess();
 
     // Cleanup 함수 필요 없으므로 생략
-  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn, onLoginSuccess]);
+  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn]);
 
   return (
     <div>

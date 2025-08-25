@@ -11,12 +11,14 @@ export const usePosts = (user) => {
         try {
             setLoading(true);
             setError("");
-            const data = await getPosts();
-            setPosts(Array.isArray(data) ? data : []);
+            const posts = await getPosts();
+          console.log(`posts: ${posts}`);
+            setPosts(Array.isArray(posts) ? posts : []);
         } catch (e) {
             console.error("게시글 불러오기 실패:", e);
             setError("게시글을 불러오지 못했습니다.");
         } finally {
+          console.log(`posts: ${JSON.stringify(posts)}`);
             setLoading(false);
         }
     }, []);

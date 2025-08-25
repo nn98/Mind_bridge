@@ -125,7 +125,7 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
       if (!res.ok) throw new Error((await res.json()).error.message);
 
       const data = await res.json();
-      const newImageUrl = data.data[0].url;
+      const newImageUrl = data.data.data[0].url;
       const imageHtml = `<br><br><img src="${newImageUrl}" alt="${imagePrompt}" style="max-width: 400px; height: auto; display: block; margin: 16px auto; border-radius: 8px;" />`;
       setMessage(prevMessage => prevMessage + imageHtml);
 

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const AuthLoadingPage = ({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) => {
+const AuthLoadingPage = ({ setCustomUser, setIsCustomLoggedIn }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,10 +20,6 @@ const AuthLoadingPage = ({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess })
         if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
         localStorage.setItem("customUser", JSON.stringify(res.data));
 
-        // // 로그인 성공 콜백 호출
-        // 임마가 로그인데이터 날라가는 원흉이었네
-        // if (onLoginSuccess) onLoginSuccess();
-
         // 리다이렉트
         navigate("/", { replace: true });
       } catch (error) {
@@ -36,7 +32,7 @@ const AuthLoadingPage = ({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess })
     };
 
     fetchUserAndRedirect();
-  }, [navigate, setCustomUser, setIsCustomLoggedIn, onLoginSuccess]);
+  }, [navigate, setCustomUser, setIsCustomLoggedIn]);
 
   return (
     <div style={{ padding: 20, textAlign: "center" }}>

@@ -78,29 +78,7 @@ const App = () => {
   const isDashboard = location.pathname === "/";
   const hideShell = isAuthPageOrAdmin || isDashboard;
 
-  useEffect(() => {
-    fetchCustomUser();
-  }, []);
-
-  const fetchCustomUser = async () => {
-    try {
-      // 쿠키 기반 요청
-      const res = await axios.get("http://localhost:8080/api/auth/me", { withCredentials: true });
-      const u = res?.data || null;
-      const id = u?.id ?? u?.userId ?? u?._id ?? null;
-      const email = u?.email ?? null;
-      if (id && email) {
-        setCustomUser({ ...u, id, email });
-        setIsCustomLoggedIn(true);
-      } else {
-        setCustomUser(null);
-        setIsCustomLoggedIn(false);
-      }
-    } catch (err) {
-      setCustomUser(null);
-      setIsCustomLoggedIn(false);
-    }
-  };
+  console.log(`LoggedIn? : ${isCustomLoggedIn}`);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -163,7 +141,6 @@ const App = () => {
           type={type}
           signupState={signupState}
           setSignupState={setSignupState}
-          onLoginSuccess={fetchCustomUser}
           {...extraProps}
         />
       )}
@@ -243,7 +220,6 @@ const App = () => {
               isCustomLoggedIn={isCustomLoggedIn}
               setCustomUser={setCustomUser}
               setIsCustomLoggedIn={setIsCustomLoggedIn}
-              onLoginSuccess={fetchCustomUser}
               signupState={signupState}
               setSignupState={setSignupState}
             />
@@ -255,7 +231,6 @@ const App = () => {
             <AuthLoadingPage
               setCustomUser={setCustomUser}
               setIsCustomLoggedIn={setIsCustomLoggedIn}
-              onLoginSuccess={fetchCustomUser}
             />
           }
         />

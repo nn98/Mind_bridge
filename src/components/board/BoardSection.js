@@ -7,6 +7,7 @@ import '../../css/board.css';
 
 const BoardSection = ({ user }) => {
     const { posts, loading, error, addPost, editPost, removePost } = usePosts(user);
+  console.log(`posts: ${JSON.stringify(posts)}`);
 
     const [selectedBoard, setSelectedBoard] = useState("general");
     const [sortOrder, setSortOrder] = useState("newest");

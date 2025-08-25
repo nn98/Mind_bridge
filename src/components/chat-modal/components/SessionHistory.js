@@ -3,22 +3,20 @@ import axios from "axios";
 
 const BACKEND_URL = "http://localhost:8080"; // 백엔드 주소
 
-const SessionHistory = ({ userEmail, token }) => {
+const SessionHistory = ({ userEmail }) => {
     const [history, setHistory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!userEmail) return; //이메일로 식별
+        if (!userEmail) return;
 
         const fetchHistory = async () => {
             try {
-                const response = await axios.get(`${BACKEND_URL}/api/counselling/list`, {
+                const response = await axios.get(`${BACKEND_URL}/api/chat/sessions`, {
                     params: { email: userEmail },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    withCredentials: true, // 쿠키 자동 전송
                 });
-                setHistory(response.data); // 백에서 반환한 CounsellingDTO 배열
+                setHistory(response.data);
             } catch (error) {
                 console.error("상담 이력 조회 실패:", error);
             } finally {
@@ -27,7 +25,7 @@ const SessionHistory = ({ userEmail, token }) => {
         };
 
         fetchHistory();
-    }, [userEmail, token]);
+    }, [userEmail]);
 
     //if (isLoading) return <p>상담 이력을 불러오는 중...</p>;
 
