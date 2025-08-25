@@ -88,18 +88,6 @@ const UserProfile = ({
         };
     };
 
-    // ✅ 세션 쿠키 기반 재조회 — 안전 호출 사용
-    const fetchCustomUser = async () => {
-        try {
-            const res = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
-            setCustomUser(res.data);
-            setIsCustomLoggedIn(true);
-        } catch {
-            setCustomUser(null);
-            setIsCustomLoggedIn(false);
-        }
-    };
-
     useEffect(() => {
         let cancel = false;
         const controller = new AbortController();
@@ -126,29 +114,16 @@ const UserProfile = ({
 
                 if (userId) {
                     try {
-                        resp = await axios.get(
-                            `${BACKEND_URL}/api/users/details/${userId}`,
-                            { withCredentials: true, signal: controller.signal }
-                        );
                     } catch (_) { }
                 }
 
                 if (!resp) {
                     try {
-                        resp = await axios.get(`${BACKEND_URL}/api/users/me`, {
-                            withCredentials: true,
-                            signal: controller.signal,
-                        });
                     } catch (_) { }
                 }
 
                 if (!resp && customUser?.email) {
                     try {
-                        resp = await axios.get(`${BACKEND_URL}/api/users/by-email`, {
-                            withCredentials: true,
-                            params: { email: customUser.email },
-                            signal: controller.signal,
-                        });
                     } catch (_) { }
                 }
 
@@ -206,7 +181,6 @@ const UserProfile = ({
             setUserInfo((prev) => ({ ...prev, ...editedInfo }));
             setIsEditing(false);
             toast.success('회원 정보가 저장되었습니다.');
-            fetchCustomUser(); // ✅ 안전 호출로 내부에서 처리
         } catch (error) {
             printAxiosError(error, '정보 업데이트 실패');
         }
@@ -260,8 +234,6 @@ const UserProfile = ({
                                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
 
-                                fetchCustomUser(); // ✅ 안전
-
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
                                 handleLogout();
@@ -301,8 +273,6 @@ const UserProfile = ({
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
-
-            fetchCustomUser(); // ✅ 안전
 
             toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
             handleLogout();

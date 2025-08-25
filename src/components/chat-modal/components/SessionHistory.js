@@ -12,7 +12,7 @@ const SessionHistory = ({ userEmail }) => {
 
         const fetchHistory = async () => {
             try {
-                const response = await axios.get(`${BACKEND_URL}/api/counselling/list`, {
+                const response = await axios.get(`${BACKEND_URL}/api/chat/sessions`, {
                     params: { email: userEmail },
                     withCredentials: true, // 쿠키 자동 전송
                 });

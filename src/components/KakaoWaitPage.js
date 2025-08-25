@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao";
 
-function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
+function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -46,7 +46,6 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
             localStorage.setItem("token", "LOGIN");
             if (setCustomUser) setCustomUser(data.user);
             if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-            if (onLoginSuccess) onLoginSuccess();
           }
 
           setTimeout(() => navigate('/'), 1000);
@@ -62,7 +61,7 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn, onLoginSuccess }) {
     loginProcess();
 
     // Cleanup 함수 필요 없으므로 생략
-  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn, onLoginSuccess]);
+  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn]);
 
   return (
     <div>

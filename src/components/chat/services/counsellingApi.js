@@ -1,7 +1,7 @@
 const BACKEND_URL = "http://localhost:8080";
 
 export async function saveCounselling({ email, 상태, 상담받고싶은내용 }) {
-    const response = await fetch(`${BACKEND_URL}/api/counselling/save`, {
+    const response = await fetch(`${BACKEND_URL}/api/chat/session/save`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
