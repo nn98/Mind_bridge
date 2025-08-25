@@ -1,48 +1,68 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "full_name")
-    private String fullName;
-
-    @Column(nullable = false, unique = true)
-    private String nickname;
-
-    @Column(nullable = false)
-    private String gender;
-
-    @Column(nullable = false)
-    private Integer age;        // String → Integer 변경
-
-    @Column(nullable = false)
+    // 소셜 로그인에서 비밀번호 없을 수 있음
+    @Column(length = 255)
     private String password;
 
-    @Column(name = "phone_number")
+    @Column(length = 100)
+    private String fullName;
+
+    @Column(length = 100)
+    private String nickname;
+
+    private Integer age;
+
+    @Column(length = 20)
+    private String gender;
+
+    @Column(length = 50)
+    private String mentalState;
+
+    @Column(length = 20)
     private String phoneNumber;
 
-    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'USER'")
+    @Column(nullable = false, length = 20)
     private String role = "USER";
 
-    @Column(name = "mental_state")
-    private String mentalState;
+    // 소셜 로그인 관련
+    @Column(length = 50)
+    private String provider;  // google, kakao, naver, local
+
+    @Column(length = 100)
+    private String socialId;
+
+    @Column(columnDefinition = "TEXT")
+    private String chatGoal;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
 }

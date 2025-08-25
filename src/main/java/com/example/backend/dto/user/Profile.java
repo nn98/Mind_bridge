@@ -1,18 +1,39 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.user;
 
+import com.example.backend.entity.UserEntity;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
-@Setter
 @Getter
-public class UserDto {
+@Setter
+@NoArgsConstructor  // 기본 생성자 추가
+@AllArgsConstructor // 모든 필드 생성자
+public class Profile {
+
     private Long id;
     private String email;
     private String fullName;
     private String nickname;
+    private String gender;
+    private Integer age;
     private String phoneNumber;
-    private String gender;      // Gender → gender (소문자)
-    private Integer age;        // String → Integer 변경
-    private String role;
     private String mentalState;
+    private String chatGoal;
+    private String role;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public Profile(UserEntity user) {
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.fullName = user.getFullName();
+        this.nickname = user.getNickname();
+        this.age = user.getAge();
+        this.gender = user.getGender();
+        this.mentalState = user.getMentalState();
+        this.role = user.getRole();
+    }
 }

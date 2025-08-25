@@ -1,10 +1,24 @@
-package com.example.backend.dto.response;
+// dto/auth/LoginResponse.java
+package com.example.backend.dto.auth;
 
+import com.example.backend.dto.user.Profile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
-public class LoginResponseDto {
-    private String token;
+public class LoginResponse {
+
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType;
+    private long expiresIn;
+    private Profile profile; // 로그인한 사용자 기본 정보
+
+    public LoginResponse(String accessToken, Profile profile) {
+        this.accessToken = accessToken;
+        this.profile = profile;
+    }
 }

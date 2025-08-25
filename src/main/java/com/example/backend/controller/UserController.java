@@ -1,22 +1,26 @@
 package com.example.backend.controller;
 
-import java.util.Map;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.backend.entity.UserEntity;
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.dto.user.Profile;
+import com.example.backend.dto.user.RegistrationRequest;
+import com.example.backend.dto.user.Summary;
+import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-//USETCONTROLLER 에는 회원가입/이메일 중복 확인/사용자 정보 수정/사용자 삭제/비밀번호 변경/아이디 찾기/비번 찾기
+import java.util.Map;
+
+/**
+ * 사용자 관리 관련 REST API 컨트롤러
+ * 회원가입, 정보 수정, 조회, 삭제 등의 기능 제공
+ */
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -25,82 +29,177 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * ✅ 회원가입
+     * 회원가입
+     * @param request 회원가입 요청 정보
+     * @return 생성된 사용자 프로필
      */
     @PostMapping("/register")
-    public UserEntity register(@Valid @RequestBody UserRequest.Register req) {
-        userService.register(req);
-        return userService.findByEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("회원가입 후 사용자 조회 실패"));
-    }
+    public ResponseEntity<ApiResponse<Profile>> register(@Valid @RequestBody RegistrationRequest request) {
+        try {
+            Profile profile = userService.register(request);
+            log.info("회원가입 완료: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(profile));
 
-    /**
-     * ✅ 이메일 중복 확인
-     */
-    @PostMapping("/check-email")
-    public Map<String, Boolean> checkEmail(@RequestBody Map<String, String> emailRequest) {
-        String email = emailRequest.get("email");
-        boolean isAvailable = userService.isEmailAvailable(email);
-        return Map.of("isAvailable", isAvailable);
-    }
-
-    /**
-     * ✅ 사용자 정보 수정
-     */
-    @PutMapping("/update")
-    public UserEntity updateUser(@RequestBody UserRequest.Register req, Authentication authentication) {
-        String email = authentication.getName();
-        return userService.updateUser(email, req);
-    }
-
-    /**
-     * ✅ 사용자 삭제
-     */
-    @PostMapping("/delete")
-    public UserEntity deleteUser(@RequestBody Map<String, String> deleteRequest) {
-        String email = deleteRequest.get("email");
-        UserEntity user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        userService.deleteUser(user);
-        return user;
-    }
-
-    /**
-     * ✅ 비밀번호 변경
-     */
-    @PutMapping("/change")
-    public UserEntity changePassword(@RequestBody Map<String, String> changeRequest) {
-        String email = changeRequest.get("email");
-        String newPassword = changeRequest.get("password");
-
-        if (newPassword == null || newPassword.isBlank()) {
-            throw new RuntimeException("새 비밀번호가 비어 있습니다.");
+        } catch (RuntimeException e) {
+            log.error("회원가입 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage(), null));
         }
-
-        return userService.changePassword(email, newPassword);
     }
 
     /**
-     * ✅ 아이디 찾기
+     * 이메일 중복 확인
+     * @param email 확인할 이메일
+     * @return 사용 가능 여부
      */
-    @PostMapping("/find-id")
-    public Map<String, String> findUserId(@Valid @RequestBody UserRequest.FindId req) {
-        String email = userService.findUserIdByPhoneAndNickname(req.getPhoneNumber(), req.getNickname());
-        if (email == null) {
-            throw new RuntimeException("일치하는 회원 정보를 찾을 수 없습니다.");
+    @GetMapping("/check-email")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam String email) {
+        try {
+            boolean isAvailable = userService.isEmailAvailable(email);
+            return ResponseEntity.ok(
+                    ApiResponse.success(Map.of("isAvailable", isAvailable))
+            );
+        } catch (Exception e) {
+            log.error("이메일 중복 확인 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("이메일 중복 확인에 실패했습니다.", e.getMessage()));
         }
-        return Map.of("email", email);
     }
 
     /**
-     * ✅ 비밀번호 찾기
+     * 닉네임 중복 확인
+     * @param nickname 확인할 닉네임
+     * @return 사용 가능 여부
      */
-    @PostMapping("/find-password")
-    public Map<String, String> resetPassword(@Valid @RequestBody UserRequest.ResetPassword req) {
-        String tempPassword = userService.resetPasswordByEmail(req.getEmail());
-        if (tempPassword == null) {
-            throw new RuntimeException("해당 이메일로 등록된 계정이 없습니다.");
+    @GetMapping("/check-nickname")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkNickname(@RequestParam String nickname) {
+        try {
+            boolean isAvailable = userService.isNicknameAvailable(nickname);
+            return ResponseEntity.ok(
+                    ApiResponse.success(Map.of("isAvailable", isAvailable))
+            );
+        } catch (Exception e) {
+            log.error("닉네임 중복 확인 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("닉네임 중복 확인에 실패했습니다.", e.getMessage()));
         }
-        return Map.of("tempPassword", tempPassword);
+    }
+
+    /**
+     * 현재 사용자 정보 조회
+     * @param authentication 인증 정보
+     * @return 사용자 프로필
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<Profile>> getUserProfile(Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            return userService.getUserByEmail(email)
+                    .map(profile -> ResponseEntity.ok(ApiResponse.success(profile)))
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
+
+        } catch (Exception e) {
+            log.error("사용자 정보 조회 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
+        }
+    }
+
+    /**
+     * 닉네임으로 사용자 요약 정보 조회
+     * @param nickname 조회할 닉네임
+     * @return 사용자 요약 정보
+     */
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<Summary>> getUserSummary(@RequestParam String nickname) {
+        try {
+            return userService.getUserByNickname(nickname)
+                    .map(summary -> ResponseEntity.ok(ApiResponse.success(summary)))
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
+
+        } catch (Exception e) {
+            log.error("사용자 요약 정보 조회 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
+        }
+    }
+
+    /**
+     * 사용자 정보 수정
+     * @param request 수정할 정보
+     * @param authentication 인증 정보
+     * @return 수정된 사용자 프로필
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse<Profile>> updateUser(
+            @Valid @RequestBody UpdateRequest request,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Profile updatedProfile = userService.updateUser(email, request);
+
+            log.info("사용자 정보 수정 완료: {}", email);
+            return ResponseEntity.ok(ApiResponse.success(updatedProfile));
+
+        } catch (RuntimeException e) {
+            log.error("사용자 정보 수정 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage(), null));
+        }
+    }
+
+    /**
+     * 비밀번호 변경
+     * @param request 새 비밀번호 정보
+     * @param authentication 인증 정보
+     * @return 수정된 사용자 프로필
+     */
+    @PutMapping("/password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            String newPassword = request.get("newPassword");
+
+            if (newPassword == null || newPassword.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("새 비밀번호가 비어 있습니다.", null));
+            }
+
+            userService.changePassword(email, newPassword);
+            log.info("비밀번호 변경 완료: {}", email);
+
+            return ResponseEntity.ok(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다."));
+
+        } catch (RuntimeException e) {
+            log.error("비밀번호 변경 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage(), null));
+        }
+    }
+
+    /**
+     * 회원 탈퇴
+     * @param authentication 인증 정보
+     * @return 탈퇴 결과
+     */
+    @DeleteMapping("/account")
+    public ResponseEntity<ApiResponse<String>> deleteUser(Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            userService.deleteUser(email);
+
+            log.info("회원 탈퇴 완료: {}", email);
+            return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다."));
+
+        } catch (RuntimeException e) {
+            log.error("회원 탈퇴 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage(), null));
+        }
     }
 }
