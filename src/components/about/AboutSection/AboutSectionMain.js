@@ -7,7 +7,6 @@ import ContactForm from './ContactForm';
 import ContactInfo from './ContactInfo';
 import MonthlyLineChart from '../charts/MonthlyLineChart';
 import useSmoothScroll from '../hooks/useSmoothScroll';
-import HeroBanner from '../../banner/HeroBanner/HeroBanner';
 
 export default function AboutSection({
   refs = {},                       // ✅ 기본값
@@ -51,7 +50,6 @@ export default function AboutSection({
 
   return (
     <>
-      {layout === 'page' && show.hero && <HeroBanner />}
 
       <div className={wrapClass}>
         {show.intro && (

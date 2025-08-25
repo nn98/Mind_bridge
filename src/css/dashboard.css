@@ -1,8 +1,8 @@
 /**************
  * MindBridge UI — Clean Dark v3 (Fixed Full CSS)
- * - 중앙(스트림)만 스크롤, 크기 고정
+ * - 중앙(.dash-content) 스크롤 활성화 + 스크롤바 비가시화
  * - 헤더 sticky, 입력창 sticky 하단 고정
- * - 스크롤바 숨김 제거(보이도록). 디자인 마무리 시 다시 숨겨도 됨
+ * - 사이드바/채팅 스트림도 스크롤 가능(바는 숨김)
  **************/
 
 :root {
@@ -74,8 +74,8 @@ body {
     height: 100vh;
     flex: 0 0 240px;
 
-    /* 스크롤 보이도록 */
     overflow-y: auto;
+    /* 스크롤 가능 (바는 아래에서 숨김) */
 }
 
 .nav-close .dash-sidebar {
@@ -235,12 +235,13 @@ body {
     background: #0c1426;
 }
 
-/* 중앙 영역은 더 이상 스크롤하지 않음 — 스트림만 스크롤 */
+/* 중앙 컨텐츠: 스크롤 가능 (스크롤바는 비가시화) */
 .dash-content {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
-    /* 중앙 자체 스크롤 금지 */
+    /* flex 자식 스크롤 필수 */
+    overflow: auto;
+    /* ← 핵심: 스크롤 활성화 */
     padding: 32px 24px;
 }
 
@@ -384,7 +385,7 @@ body {
     width: 100%;
     max-width: 960px;
     height: calc(100vh - 120px);
-    /* 페이지 상단/하단 여백 고려해 조정 */
+    /* 페이지 상단/하단 여백 고려 */
     min-height: 0;
     margin: 0 auto;
     padding: 24px 16px 24px;
@@ -411,7 +412,6 @@ body {
     font-size: 56px;
     margin: 20px 0 8px 0;
     text-align: center;
-
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     background-clip: text;
     -webkit-background-clip: text;
@@ -443,23 +443,6 @@ body {
     /* 내부 스크롤 */
     overflow-x: hidden;
     scroll-behavior: smooth;
-
-    /* 크기가 커지지 않도록 고정 — grid 가운데 행이 정확히 1fr */
-    /* max-height 제거 (고정 영역 유지) */
-}
-
-/* 스크롤바(보이도록) */
-.consult-stream::-webkit-scrollbar {
-    width: 8px;
-}
-
-.consult-stream::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, .6);
-    border-radius: 8px;
-}
-
-.consult-stream::-webkit-scrollbar-track {
-    background: transparent;
 }
 
 /* 버블 */
@@ -605,12 +588,25 @@ body {
         border-radius: 10px;
     }
 }
-.consult-stream::-webkit-scrollbar { display: none; }
 
-/* ===== 스크롤 숨김 규칙(필요시만 켜세요) =====
-.dash-content { scrollbar-width: none; -ms-overflow-style: none; }
-.dash-content::-webkit-scrollbar { display: none; }
-.dash-sidebar { scrollbar-width: none; -ms-overflow-style: none; }
-.dash-sidebar::-webkit-scrollbar { display: none; }
-.consult-stream::-webkit-scrollbar { display: none; }
-*/
+/* ===== 공통: 스크롤바 비가시화(스크롤 기능 유지) ===== */
+/* Firefox */
+.dash-sidebar,
+.dash-content,
+.consult-stream {
+    scrollbar-width: none;
+}
+
+/* IE/Edge 레거시 */
+.dash-sidebar,
+.dash-content,
+.consult-stream {
+    -ms-overflow-style: none;
+}
+
+/* WebKit(Chrome/Safari) */
+.dash-sidebar::-webkit-scrollbar,
+.dash-content::-webkit-scrollbar,
+.consult-stream::-webkit-scrollbar {
+    display: none;
+}

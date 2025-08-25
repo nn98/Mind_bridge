@@ -14,7 +14,6 @@ import "./css/small_translate.css";
 import "./css/FloatingChatButton.css";
 import "./css/selfTest.css";
 import "./css/result.css";
-import "./css/banner.css";
 import "./css/HospitalRegionPage.css";
 import "./css/dashboard.css";
 import "./css/theme.css";

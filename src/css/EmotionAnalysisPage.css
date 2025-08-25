@@ -1,158 +1,264 @@
-/* =========================
-   Help Page (2×2 Grid) 전용
-   - 위 2개 / 아래 2개 카드
-   - EmotionAnalysis의 .analysis-card는 그대로 사용하되,
-     도움말 컨테이너 내부에서만 레이아웃/폭을 재정의
-   ========================= */
+/***** EmotionAnalysisPage.css — 깔끔/반응형 레이아웃 *****/
 
-/* 도움말 페이지 래퍼 (HelpPage.jsx 최상단 div에 className="help-page" 권장) */
-.help-page {
+/* 메인 래퍼: 가운데 정렬 + 적절한 최대폭 */
+.emotion-page {
+    max-width: 980px;
+    margin: 40px auto;
+    padding: 0 24px;
+}
+
+/* 카드: 배경/보더/그림자 */
+.analysis-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, .06));
     padding: 24px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-/* 카드 폭/여백: 도움말에서는 가로 2열로 꽉 채우기 */
-.help-page .analysis-card {
-    max-width: 100% !important;
     width: 100%;
-    margin: 0 !important;
+    min-width: 0;
 }
 
-/* 상단 퀵 액션 카드 버튼 묶음 */
-.help-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
+/* 제목/부제 */
+.analysis-title {
+    font-size: clamp(22px, 1.6vw + 14px, 32px);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--text-strong, #1f2937);
+    margin: 0 0 6px;
 }
 
-/* 퀵 액션 버튼 (약관/개인정보/메일문의) */
-.help-btn {
+.analysis-subtitle {
+    color: var(--text-muted, #6b7280);
+    margin: 0 0 18px;
+    line-height: 1.6;
+}
+
+/* 입력 영역 */
+.analysis-textarea {
     width: 100%;
-    color: #fff;
-    background: linear-gradient(45deg, #6c63ff, #4a90e2);
-    border: none;
-    border-radius: 10px;
-    height: 48px;
-    font-weight: 800;
-    letter-spacing: -.01em;
-    cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    max-width: 100%;
+    min-height: 180px;
+    resize: none;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    padding: 12px 14px;
+    line-height: 1.6;
+    font-size: 15px;
+    outline: none;
+    background: var(--surface, #fff);
+}
+
+.analysis-textarea:focus {
+    border-color: var(--brand-400, #978eff);
+    box-shadow: 0 0 0 3px var(--ring, rgba(108, 99, 255, .35));
+}
+
+/* 버튼은 입력 아래에 자연스럽게 */
+.analysis-button {
+    margin-top: 12px;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: var(--brand, #6c63ff);
+    color: var(--brand-fg, #fff);
+    border: 1px solid var(--brand-700, #5b52e6);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow, 0 8px 24px rgba(108, 99, 255, .15));
+    transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
 }
 
-.help-btn:hover {
+.analysis-button:hover:enabled {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+    box-shadow: 0 10px 30px rgba(108, 99, 255, .25);
 }
 
-.help-btn:disabled {
+.analysis-button:disabled {
     opacity: .6;
     cursor: not-allowed;
 }
 
-/* FAQ 카드 안의 details 스타일 */
-.help-faq details {
-    background: #0e1526;
-    /* 다크 배경 */
-    border: 1px solid #1e2a3c;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin: 10px 0;
-    color: #e8eefb;
-}
-
-.help-faq summary {
-    cursor: pointer;
-    font-weight: 800;
-    list-style: none;
-    /* 파이어폭스 기본 삼각형 제거 */
-}
-
-.help-faq details[open] summary {
-    opacity: .95;
-}
-
-.help-faq summary::-webkit-details-marker {
-    display: none;
-}
-
-.help-faq .answer {
-    margin-top: 8px;
-    color: #b1bcc8;
-    line-height: 1.7;
-}
-
-/* 고객센터 카드 단락 간격 정리 */
-.help-center p,
-.help-center div {
-    margin: 6px 0;
-}
-
-/* 문의하기(ContactForm) 카드 내부 정리 */
-.help-contact .contact-form {
-    margin-top: 8px;
-}
-
-.help-contact .contact-form .row-two {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.help-contact .contact-form .form-group {
+/* 로딩 스피너 */
+.loading-spinner-container {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
 }
 
-.help-contact .contact-form label {
-    font-weight: 700;
-    color: #374151;
+.loading-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0, 0, 0, .15);
+    border-top-color: var(--brand, #6c63ff);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
 }
 
-.help-contact .contact-form input,
-.help-contact .contact-form textarea {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 15px;
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.help-contact .contact-form textarea {
-    resize: vertical;
-    min-height: 120px;
+/* 결과 섹션 */
+.results-section {
+    margin-top: 22px;
+    border-top: 1px dashed var(--border, #e5e7eb);
+    padding-top: 18px;
 }
 
-.help-contact .contact-form button[type="submit"] {
-    margin-top: 8px;
-    height: 46px;
-    border: none;
-    border-radius: 10px;
-    background: #a18cd1;
-    color: #fff;
+.results-title {
+    font-size: 18px;
     font-weight: 800;
+    margin: 0 0 12px;
+    color: var(--text-strong, #1f2937);
+}
+
+/* 막대 그래프들 */
+.progress-bars-container {
+    display: grid;
+    gap: 10px 14px;
+}
+
+.progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    color: var(--text, #374151);
+}
+
+.progress-bar-emotion-name {
+    font-weight: 800;
+}
+
+.progress-bar-percentage {
+    color: var(--text-muted, #6b7280);
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--surface-alt, #fafafa);
+    border: 1px solid var(--border, #e5e7eb);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 999px;
+    transition: width .35s ease;
+}
+
+/* 감정별 색상 */
+.progress-bar-fill.happiness {
+    background: linear-gradient(90deg, #fbd34d, #f59e0b);
+}
+
+.progress-bar-fill.sadness {
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+}
+
+.progress-bar-fill.anger {
+    background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+.progress-bar-fill.anxiety {
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+}
+
+.progress-bar-fill.calmness {
+    background: linear-gradient(90deg, #34d399, #10b981);
+}
+
+/* 메시지 카드 */
+.result-message-box {
+    margin-top: 16px;
+    border-radius: 14px;
+    padding: 14px 16px;
+    line-height: 1.7;
+    color: #fff;
+}
+
+.result-message-box.happiness {
+    background: linear-gradient(45deg, #f59e0b, #fbbf24);
+}
+
+.result-message-box.sadness {
+    background: linear-gradient(45deg, #3b82f6, #60a5fa);
+}
+
+.result-message-box.anger {
+    background: linear-gradient(45deg, #ef4444, #f87171);
+}
+
+.result-message-box.anxiety {
+    background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+}
+
+.result-message-box.calmness {
+    background: linear-gradient(45deg, #10b981, #34d399);
+}
+
+.result-message-text {
+    margin: 0;
+}
+
+/* 모달 모드(옵션) */
+.emotion-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: grid;
+    place-items: center;
+    z-index: 50;
+}
+
+.emotion-modal-content {
+    width: min(920px, calc(100vw - 40px));
+    max-height: calc(100vh - 80px);
+    overflow: auto;
+}
+
+#emotion-modal-close-btn {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 0;
+    background: var(--surface-alt, #fafafa);
+    color: var(--text, #374151);
+    font-size: 22px;
+    line-height: 1;
     cursor: pointer;
-    transition: opacity .2s ease;
 }
 
-.help-contact .contact-form button[type="submit"]:hover {
-    opacity: .9;
-}
-
-/* 반응형: 1080px 이하 1열 */
-@media (max-width: 1080px) {
-    .help-page {
-        grid-template-columns: 1fr;
+/* 반응형 */
+@media (max-width: 768px) {
+    .emotion-page {
+        margin: 24px auto;
+        padding: 0 16px;
     }
 
-    .help-contact .contact-form .row-two {
-        grid-template-columns: 1fr;
+    .analysis-card {
+        padding: 18px;
+    }
+
+    .analysis-textarea {
+        min-height: 160px;
     }
 }

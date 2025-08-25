@@ -9,7 +9,7 @@ export default function DashboardLayout({ currentUser, onLogout }) {
   const  menu = [
     { label: "챗 상담", to: "/", section: "탐색" },
     { label: "감성", to: "/emotion", section: "탐색" },
-    { label: "이미지", to: "/img", section: "탐색" },
+    { label: "이메일", to: "/img", section: "탐색" },
     { label: "게시판", to: "/board", section: "탐색" },
 
     { label: "병원", to: "/hospital-region", section: "서비스" },
