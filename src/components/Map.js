@@ -218,7 +218,7 @@ const Map = () => {
         return res.json();
       })
       .then((data) => {
-        const section = data.routes?.[0]?.sections?.[0];
+        const section = data.data.routes?.[0]?.sections?.[0];
         if (!section?.roads) throw new Error('경로 데이터가 없습니다.');
 
         const coords = section.roads.flatMap((road) =>

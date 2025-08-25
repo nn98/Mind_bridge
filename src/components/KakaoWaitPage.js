@@ -38,13 +38,13 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
         const data = res.data;
         console.log("서버 응답 데이터:", data);
 
-        if (data.success) {
+        if (data.data.success) {
           setMessage('로그인 성공! 환영합니다.');
 
-          if (data.user) {
-            console.log('user:', data.user);
+          if (data.data.user) {
+            console.log('user:', data.data.user);
             localStorage.setItem("token", "LOGIN");
-            if (setCustomUser) setCustomUser(data.user);
+            if (setCustomUser) setCustomUser(data.data.user);
             if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
           }
 

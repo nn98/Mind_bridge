@@ -110,9 +110,9 @@ const PostsPanel = () => {
             //쿠키 기반이므로 token 전달 필요 없음
             const data = await getAllPosts({ page, size, search, sort: sortParam });
 
-            setPosts(data.content || []);
-            setTotalPages(data.totalPages ?? 0);
-            setTotalElements(data.totalElements ?? (data.content?.length || 0));
+            setPosts(data.data.content || []);
+            setTotalPages(data.data.totalPages ?? 0);
+            setTotalElements(data.data.totalElements ?? (data.data.content?.length || 0));
         } catch (e) {
             console.error(e);
             setError("게시글을 불러오는 중 오류가 발생했습니다.");

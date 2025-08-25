@@ -288,7 +288,7 @@ const AuthSection = ({
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
       const response = await axios.get(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
-      if (response.data.isAvailable) {
+      if (response.data.data.isAvailable) {
         setEmailCheck({
           isChecking: false,
           isAvailable: true,
@@ -369,8 +369,8 @@ const AuthSection = ({
           nickname: formData.nickname,
         }, { withCredentials: true });
 
-        if (response.data.email) {
-          setFoundId(response.data.email);
+        if (response.data.data.email) {
+          setFoundId(response.data.data.email);
           setIsIdModalOpen(true);
         } else {
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
@@ -382,8 +382,8 @@ const AuthSection = ({
           phoneNumber: formData.phoneNumber,
         }, { withCredentials: true });
 
-        if (response.data.tempPassword) {
-          setTempPassword(response.data.tempPassword);
+        if (response.data.data.tempPassword) {
+          setTempPassword(response.data.data.tempPassword);
           setIsPasswordModalOpen(true);
         } else {
           alert("임시 비밀번호 발급에 실패했습니다.");

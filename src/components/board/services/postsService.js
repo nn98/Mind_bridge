@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 export const getPosts = async () => {
     const res = await apiClient.get("/api/posts", { withCredentials: true });
     console.log(`getPosts ${JSON.stringify(res.data)}`);
-    return res.data;
+    return res.data.data;
 };
 
 export const createPost = async (payload) => {

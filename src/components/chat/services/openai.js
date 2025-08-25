@@ -25,9 +25,9 @@ export async function requestCounselling(systemPrompt) {
     // 백엔드에서 이미 파싱된 응답을 바로 반환
     // (백엔드에서 ChatMessageResponseDto 형태로 반환하므로 추가 파싱 불필요)
     return {
-        감정: data.감정 || "분석 실패",
-        상담사_응답: data.상담사_응답 || "응답 오류",
-        요약: data.요약 || "요약 오류",
-        세션_종료: data.세션_종료 || false,
+        감정: data.data.감정 || "분석 실패",
+        상담사_응답: data.data.상담사_응답 || "응답 오류",
+        요약: data.data.요약 || "요약 오류",
+        세션_종료: data.data.세션_종료 || false,
     };
 }

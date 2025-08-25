@@ -89,8 +89,8 @@ export default function EmotionAnalysisPage({ mode = "page", isOpen, onClose }) 
         }),
       });
       const data = await response.json();
-      if (!data.choices || data.choices.length === 0) throw new Error('OpenAI 응답 없음');
-      const content = data.choices[0].message.content;
+      if (!data.data.choices || data.data.choices.length === 0) throw new Error('OpenAI 응답 없음');
+      const content = data.data.choices[0].message.content;
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('JSON 파싱 실패');
       const percentages = JSON.parse(jsonMatch[0]);
