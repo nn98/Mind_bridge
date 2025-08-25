@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.response.UserDto;
+import com.example.backend.dto.user.Profile;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.service.KakaoOAuthService;
@@ -78,22 +78,22 @@ public class SocialAuthController {
             System.out.println("[KakaoLogin] Set-Cookie 헤더 생성: " + cookie.toString());
 
             // 4. 사용자 정보는 필요에 따라 JSON 응답에 포함 가능
-            UserDto userDto = new UserDto();
-            userDto.setId(user.getId());
-            userDto.setEmail(user.getEmail());
-            userDto.setFullName(user.getFullName());
-            userDto.setNickname(user.getNickname());
-            userDto.setPhoneNumber(user.getPhoneNumber());
-            userDto.setGender(user.getGender());
-            userDto.setAge(user.getAge());
-            userDto.setRole(user.getRole());
-            userDto.setMentalState(user.getMentalState());
+            Profile profile = new Profile();
+            profile.setId(user.getId());
+            profile.setEmail(user.getEmail());
+            profile.setFullName(user.getFullName());
+            profile.setNickname(user.getNickname());
+            profile.setPhoneNumber(user.getPhoneNumber());
+            profile.setGender(user.getGender());
+            profile.setAge(user.getAge());
+            profile.setRole(user.getRole());
+            profile.setMentalState(user.getMentalState());
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(Map.of(
                             "success", true,
-                            "user", userDto,
+                            "user", profile,
                             "type", "Kakao"
                     ));
 

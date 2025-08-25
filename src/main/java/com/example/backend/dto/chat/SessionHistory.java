@@ -1,4 +1,4 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.chat;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CounsellingDTO {
+public class History {
     
     private Long counselId;
     private String email;
