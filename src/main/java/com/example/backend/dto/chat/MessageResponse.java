@@ -1,4 +1,5 @@
-package com.example.backend.dto.response;
+// dto/chat/MessageResponse.java
+package com.example.backend.dto.chat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageResponse {
+public class MessageResponse {
+
     @JsonProperty("감정")
     private String emotion;
 
@@ -22,4 +24,6 @@ public class ChatMessageResponse {
 
     @JsonProperty("세션_종료")
     private boolean sessionEnd;
+
+    private String sessionId;
 }

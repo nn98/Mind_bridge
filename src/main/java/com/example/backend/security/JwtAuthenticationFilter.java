@@ -39,8 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/social/kakao",
             "/actuator/health",
             "/error",
-            "/favicon.ico",
-            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
+            "/favicon.ico"
+//            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
     );
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();

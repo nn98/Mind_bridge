@@ -1,65 +1,104 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.chat.History;
-import com.example.backend.dto.request.CounsellingRequest;
-import com.example.backend.entity.ChatEntity;
-import com.example.backend.repository.CounsellingRepository;
+import com.example.backend.dto.chat.SessionHistory;
+import com.example.backend.dto.chat.SessionRequest;
+import com.example.backend.entity.ChatSessionEntity;
+import com.example.backend.repository.ChatSessionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 채팅 세션 관리 서비스
+ */
+@Slf4j
 @Service
-public class CounsellingService {
+@RequiredArgsConstructor
+public class ChatSessionService {
 
-    private final CounsellingRepository counsellingRepository;
-
-    public CounsellingService(CounsellingRepository counsellingRepository) {
-        this.counsellingRepository = counsellingRepository;
-    }
+    private final ChatSessionRepository chatSessionRepository;
 
     /**
-     * 상담 내용 저장
+     * 채팅 세션 저장
      */
     @Transactional
-    public History saveCounselling(CounsellingRequest request) {
+    public SessionHistory saveSession(SessionRequest request) {
         // 요청 DTO → 엔티티 변환
-        ChatEntity counselling = new ChatEntity();
-        counselling.setEmail(request.getEmail());
-        counselling.setUserCounsellingSummation(request.getUserCounsellingSummation());
-        counselling.setUserCounsellingEmotion(request.getUserCounsellingEmotion());
-        counselling.setCounselorSummation(request.getCounselorSummation());
+        ChatSessionEntity entity = createChatSessionEntity(request);
 
         // 엔티티 저장
-        ChatEntity saved = counsellingRepository.save(counselling);
+        ChatSessionEntity savedEntity = chatSessionRepository.save(entity);
+
+        log.info("새 채팅 세션 저장 완료 - ID: {}, 사용자: {}", savedEntity.getSessionId(), savedEntity.getEmail());
 
         // 엔티티 → DTO 변환 후 반환
-        return mapToDTO(saved);
+        return mapToSessionHistory(savedEntity);
     }
 
     /**
-     * 이메일 기준 상담 기록 조회
+     * 이메일 기준 채팅 세션 목록 조회
      */
     @Transactional(readOnly = true)
-    public List<History> getCounsellingListByEmail(String email) {
-        List<ChatEntity> counsellingList = counsellingRepository.findByEmail(email);
-        return counsellingList.stream()
-                .map(this::mapToDTO)
+    public List<SessionHistory> getSessionsByEmail(String email) {
+        List<ChatSessionEntity> sessions = chatSessionRepository.findByEmailOrderByCreatedAtDesc(email);
+
+        return sessions.stream()
+                .map(this::mapToSessionHistory)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Entity → DTO 변환
+     * 완료된 세션 수 조회
      */
-    private History mapToDTO(ChatEntity counselling) {
-        History dto = new History();
-        dto.setCounselId(counselling.getCounselId());
-        dto.setEmail(counselling.getEmail());
-        dto.setUserCounsellingSummation(counselling.getUserCounsellingSummation());
-        dto.setUserCounsellingEmotion(counselling.getUserCounsellingEmotion());
-        dto.setCounselorSummation(counselling.getCounselorSummation());
-        return dto;
-        
+    @Transactional(readOnly = true)
+    public long getCompletedSessionCount(String email) {
+        return chatSessionRepository.countCompletedSessionsByEmail(email);
+    }
+
+    /**
+     * 진행 중인 세션 조회
+     */
+    @Transactional(readOnly = true)
+    public Optional<SessionHistory> getActiveSession(String email) {
+        return chatSessionRepository.findByEmailAndSessionStatus(email, "IN_PROGRESS")
+                .map(this::mapToSessionHistory);
+    }
+
+    // === Private Helper Methods ===
+
+    /**
+     * 요청 DTO로부터 ChatSessionEntity 생성
+     */
+    private ChatSessionEntity createChatSessionEntity(SessionRequest request) {
+        ChatSessionEntity entity = new ChatSessionEntity();
+        entity.setEmail(request.getEmail());
+        entity.setUserChatSummary(request.getUserChatSummary());
+        entity.setUserEmotionAnalysis(request.getUserEmotionAnalysis());
+        entity.setAiResponseSummary(request.getAiResponseSummary());
+        entity.setSessionStatus(request.getSessionStatus());
+        entity.setConversationScore(request.getConversationScore());
+        return entity;
+    }
+
+    /**
+     * ChatSessionEntity → SessionHistory DTO 변환
+     */
+    private SessionHistory mapToSessionHistory(ChatSessionEntity entity) {
+        return new SessionHistory(
+                entity.getSessionId(),  // sessionId로 수정
+                entity.getEmail(),
+                entity.getUserChatSummary(),
+                entity.getUserEmotionAnalysis(),
+                entity.getAiResponseSummary(),
+                entity.getSessionStatus(),
+                entity.getConversationScore(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
+        );
     }
 }

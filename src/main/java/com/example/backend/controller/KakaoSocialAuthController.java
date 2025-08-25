@@ -6,6 +6,7 @@ import com.example.backend.security.JwtUtil;
 import com.example.backend.service.KakaoOAuthService;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -18,96 +19,145 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 카카오 소셜 로그인을 위한 REST API 컨트롤러
+ */
+@Slf4j
 @RestController
-@RequestMapping("/api/auth/social")
+@RequestMapping("/api/auth/social/kakao")
 @RequiredArgsConstructor
-public class SocialAuthController {
+public class KakaoSocialAuthController {
 
     private final KakaoOAuthService kakaoOAuthService;
     private final JwtUtil jwtUtil;
-    private final UserService userService;  // 사용자 가입/조회 서비스 추가
+    private final UserService userService;
 
-    @GetMapping("/kakao")
-    public ResponseEntity<?> kakaoLogin(@RequestParam("code") String code) {
-        System.out.println("[KakaoLogin] 요청 진입");
-        System.out.println("[KakaoLogin] 인가 코드 (code): " + code);
+    /**
+     * 카카오 로그인 콜백 처리
+     * @param code 카카오에서 전달받은 인증 코드
+     * @return JWT 토큰과 사용자 정보
+     */
+    @GetMapping("/callback")
+    public ResponseEntity<?> kakaoCallback(@RequestParam("code") String code) {
+        log.info("[KakaoLogin] 카카오 로그인 콜백 요청 - code: {}", code);
 
         try {
+            // 1. 카카오 액세스 토큰 요청
             String accessToken = kakaoOAuthService.requestAccessToken(code);
-            System.out.println("[KakaoLogin] 카카오 액세스 토큰: " + accessToken);
+            log.info("[KakaoLogin] 카카오 액세스 토큰 획득 성공");
 
+            // 2. 카카오 사용자 정보 조회
             Map<String, Object> userInfo = kakaoOAuthService.requestUserInfo(accessToken);
-            System.out.println("[KakaoLogin] 사용자 정보 (userInfo): " + userInfo);
+            log.info("[KakaoLogin] 사용자 정보 조회 성공");
 
+            // 3. JWT 페이로드 추출
             Map<String, Object> payload = kakaoOAuthService.extractJwtPayload(userInfo);
-            System.out.println("[KakaoLogin] JWT 페이로드 (payload): " + payload);
-
-
             String email = (String) payload.get("email");
             String nickname = (String) payload.get("nickname");
 
+            validateKakaoUserInfo(email);
 
-            if (email == null || email.isEmpty()) {
-                throw new RuntimeException("이메일 정보가 카카오 계정에 존재하지 않습니다.");
-            }
+            // 4. 카카오 사용자 찾기 또는 생성
+            UserEntity user = userService.findOrCreateKakaoUser(email, nickname);
+            log.info("[KakaoLogin] 사용자 처리 완료 - 이메일: {}, 닉네임: {}",
+                    user.getEmail(), user.getNickname());
 
-            // 1. DB에 해당 이메일 사용자 존재 여부 확인
-            UserEntity user = userService.findByEmail(email).orElseGet(() -> {
-                // DB에 없으면 자동 회원가입
-                UserEntity newUser = new UserEntity();
-                newUser.setEmail(email);
-                newUser.setFullName(nickname != null ? nickname : "kakaoUser_" + System.currentTimeMillis());
-                newUser.setRole("USER");
-                newUser.setPassword("");  // 소셜 로그인 유저는 패스워드 빈 문자열 또는 랜덤값
-                return userService.save(newUser);
-            });
-            System.out.println("[KakaoLogin] 최종 사용자: " + user.getEmail() + ", 닉네임: " + user.getNickname());
-
-            // 2. 이메일 클레임을 사용해 JWT 토큰 생성 (payload.toString() 대신)
+            // 5. JWT 토큰 생성 및 쿠키 설정
             String token = jwtUtil.generateToken(email);
-            System.out.println("[KakaoLogin] JWT 토큰 생성: " + token);
+            ResponseCookie cookie = createKakaoJwtCookie(token);
 
-            // 3. JWT 토큰을 HttpOnly 쿠키로 설정
-            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                    .httpOnly(true)
-                    .secure(true) // HTTPS 환경 권장, 개발 시 false로 변경 가능
-                    .path("/")
-                    .maxAge(24 * 60 * 60) // 1일
-                    .sameSite("Strict")
-                    .build();
-            System.out.println("[KakaoLogin] Set-Cookie 헤더 생성: " + cookie.toString());
+            // 6. 사용자 정보를 Profile DTO로 변환
+            Profile profile = convertKakaoUserToProfile(user);
 
-            // 4. 사용자 정보는 필요에 따라 JSON 응답에 포함 가능
-            Profile profile = new Profile();
-            profile.setId(user.getId());
-            profile.setEmail(user.getEmail());
-            profile.setFullName(user.getFullName());
-            profile.setNickname(user.getNickname());
-            profile.setPhoneNumber(user.getPhoneNumber());
-            profile.setGender(user.getGender());
-            profile.setAge(user.getAge());
-            profile.setRole(user.getRole());
-            profile.setMentalState(user.getMentalState());
+            log.info("[KakaoLogin] 카카오 로그인 성공 - 사용자: {}", email);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(Map.of(
                             "success", true,
                             "user", profile,
-                            "type", "Kakao"
+                            "provider", "KAKAO",
+                            "message", "카카오 로그인 성공"
                     ));
 
         } catch (Exception e) {
-            System.err.println("[KakaoLogin] 예외 발생: " + e.getMessage());
-            e.printStackTrace();
-
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", "카카오 로그인 처리 실패");
-            errorResponse.put("error", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            log.error("[KakaoLogin] 카카오 로그인 실패: {}", e.getMessage(), e);
+            return buildKakaoErrorResponse(e);
         }
     }
 
+    /**
+     * 카카오 로그인 시작 페이지로 리다이렉트
+     * @return 카카오 OAuth URL로 리다이렉트
+     */
+    @GetMapping("/login")
+    public ResponseEntity<?> initiateKakaoLogin() {
+        try {
+            // 카카오 OAuth URL 생성 로직 (KakaoOAuthService에 구현 필요)
+            String kakaoAuthUrl = kakaoOAuthService.getAuthorizationUrl();
+
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header(HttpHeaders.LOCATION, kakaoAuthUrl)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("[KakaoLogin] 카카오 로그인 시작 실패: {}", e.getMessage());
+            return buildKakaoErrorResponse(e);
+        }
+    }
+
+    /**
+     * 카카오 사용자 정보 유효성 검증
+     */
+    private void validateKakaoUserInfo(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new RuntimeException("카카오 계정에서 이메일 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    /**
+     * 카카오 전용 JWT 쿠키 생성
+     */
+    private ResponseCookie createKakaoJwtCookie(String token) {
+        return ResponseCookie.from("jwt", token)
+                .httpOnly(true)
+                .secure(false) // 로컬 개발환경용
+                .path("/")
+                .maxAge(24 * 60 * 60) // 1일
+                .sameSite("Strict")
+                .build();
+    }
+
+    /**
+     * 카카오 사용자 Entity를 Profile DTO로 변환
+     */
+    private Profile convertKakaoUserToProfile(UserEntity user) {
+        Profile profile = new Profile();
+        profile.setId(user.getId());
+        profile.setEmail(user.getEmail());
+        profile.setFullName(user.getFullName());
+        profile.setNickname(user.getNickname());
+        profile.setPhoneNumber(user.getPhoneNumber());
+        profile.setGender(user.getGender());
+        profile.setAge(user.getAge());
+        profile.setMentalState(user.getMentalState());
+        profile.setChatGoal(user.getChatGoal());
+        profile.setCreatedAt(user.getCreatedAt());
+        profile.setUpdatedAt(user.getUpdatedAt());
+        return profile;
+    }
+
+    /**
+     * 카카오 로그인 에러 응답 생성
+     */
+    private ResponseEntity<Map<String, Object>> buildKakaoErrorResponse(Exception e) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("success", false);
+        errorResponse.put("message", "카카오 로그인 처리 실패");
+        errorResponse.put("provider", "KAKAO");
+        errorResponse.put("error", e.getMessage());
+        errorResponse.put("timestamp", System.currentTimeMillis());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
 }

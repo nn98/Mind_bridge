@@ -1,141 +1,127 @@
 package com.example.backend.controller;
 
-import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import com.example.backend.dto.auth.FindIdRequest;
+import com.example.backend.dto.auth.LoginRequest;
+import com.example.backend.dto.auth.LoginResponse;
+import com.example.backend.dto.auth.ResetPasswordRequest;
+import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.response.UserDto;
-import com.example.backend.dto.request.UserRequest;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.UserService;
+import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-
+/**
+ * 인증 관련 REST API 컨트롤러
+ * 로그인, 아이디/비밀번호 찾기 등의 인증 기능 제공
+ */
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    private final UserService userService;
+    private final AuthService authService;
 
     /**
-     * ✅ 로그인
+     * 사용자 로그인 - HTTP 처리만 담당
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserRequest.Login loginRequest) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response) {
         try {
-            System.out.println(loginRequest.getEmail());
-            System.out.println(loginRequest.getPassword());
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(),
-                            loginRequest.getPassword())
-            );
+            // AuthService에서 이미 토큰까지 생성해서 줌
+            LoginResponse loginResponse = authService.login(request);
 
-            String token = jwtUtil.generateToken(loginRequest.getEmail());
-            System.out.println(token);
+            // 쿠키 설정만 Controller에서
+            setJwtCookie(response, loginResponse.getAccessToken());
 
-            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(24 * 60 * 60)
-                    .sameSite("Strict")
-                    .build();
+            return ResponseEntity.ok(ApiResponse.success(loginResponse));
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(Map.of("success", true));
-
-        } catch (AuthenticationException ex) {
-            return ResponseEntity.status(401).body("Invalid email or password");
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("로그인 실패", e.getMessage()));
         }
     }
 
     /**
-     * ✅ 로그아웃
+     * 로그아웃 - 쿠키 삭제만 담당
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0) // 즉시 만료
-                .sameSite("Strict")
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(Map.of("success", true, "message", "로그아웃 완료"));
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
+        clearJwtCookie(response);
+        return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다."));
     }
 
     /**
-     * ✅ 토큰 갱신
+     * 아이디 찾기
      */
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        String oldToken = jwtUtil.resolveToken(request);
+    @PostMapping("/find-id")
+    public ResponseEntity<ApiResponse<Map<String, String>>> findUserId(@Valid @RequestBody FindIdRequest request) {
+        try {
+            String maskedEmail = authService.findAndMaskUserEmail(request);
+            if (maskedEmail == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("일치하는 회원 정보를 찾을 수 없습니다.", null));
+            }
 
-        if (oldToken == null || !jwtUtil.validateToken(oldToken)) {
-            return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
+            return ResponseEntity.ok(ApiResponse.success(Map.of("email", maskedEmail)));
+
+        } catch (Exception e) {
+            log.error("아이디 찾기 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("아이디 찾기에 실패했습니다.", e.getMessage()));
         }
-
-        String email = jwtUtil.getEmailFromToken(oldToken);
-        String newToken = jwtUtil.generateToken(email);
-
-        ResponseCookie cookie = ResponseCookie.from("jwt", newToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(24 * 60 * 60)
-                .sameSite("Strict")
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(Map.of("success", true));
     }
 
     /**
-     * ✅ 현재 로그인된 사용자 확인
+     * 비밀번호 재설정
      */
-    @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(null); // UserDto 타입으로 명시
-        }
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            boolean success = authService.resetPassword(request);
+            if (!success) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("해당 이메일로 등록된 계정이 없습니다.", null));
+            }
 
-        String email = authentication.getName();
-        return userService.findByEmail(email)
-                .map(user -> {
-                    UserDto dto = new UserDto();
-                    dto.setId(user.getId());
-                    dto.setEmail(user.getEmail());
-                    dto.setFullName(user.getFullName());
-                    dto.setNickname(user.getNickname());
-                    dto.setPhoneNumber(user.getPhoneNumber());
-                    dto.setGender(user.getGender());
-                    dto.setAge(user.getAge());
-                    dto.setRole(user.getRole());
-                    dto.setMentalState(user.getMentalState());
-                    return ResponseEntity.ok(dto);
-                })
-                .orElse(ResponseEntity.status(404).body(null));
+            return ResponseEntity.ok(ApiResponse.success("임시 비밀번호가 이메일로 발송되었습니다."));
+
+        } catch (Exception e) {
+            log.error("비밀번호 재설정 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("비밀번호 재설정에 실패했습니다.", e.getMessage()));
+        }
     }
 
+    // === Private Utility Methods (HTTP 관련만) ===
+
+    private void setJwtCookie(HttpServletResponse response, String token) {
+        Cookie jwtCookie = new Cookie("jwt", token);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(3600); // 1시간
+        jwtCookie.setSecure(true); // HTTPS 환경에서만
+        response.addCookie(jwtCookie);
+    }
+
+    private void clearJwtCookie(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("jwt", "");
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);
+        response.addCookie(jwtCookie);
+    }
 }
