@@ -203,7 +203,7 @@ const AuthSection = ({
         console.error(`${provider} login error:`, err);
         alert(
           err.response?.data?.message ||
-            `${provider} 로그인 처리 중 오류가 발생했습니다.`
+          `${provider} 로그인 처리 중 오류가 발생했습니다.`
         );
         navigate("/login");
       }
@@ -287,7 +287,10 @@ const AuthSection = ({
     }
     setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/users/check-email`, { email: formData.email }, { withCredentials: true });
+      const response = await axios.get(`${BACKEND_URL}/api/users/check-email`, {
+        params: { email: formData.email },
+        withCredentials: true
+      });
       if (response.data.data.isAvailable) {
         setEmailCheck({
           isChecking: false,
