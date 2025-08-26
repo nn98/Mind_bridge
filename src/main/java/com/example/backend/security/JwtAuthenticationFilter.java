@@ -1,12 +1,9 @@
 package com.example.backend.security;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,9 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -32,13 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/social/google/login",
             "/api/auth/social/google/callback",
             "/api/auth/login",
-            "/api/auth/register",
+            "/api/users/register",
             "/api/auth/refresh",
             "/api/users/find-id",
             "/api/users/find-password",
             "/api/auth/social/kakao",
             "/actuator/health",
             "/error",
+            "/api/users/check-email",
             "/favicon.ico"
 //            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
     );
