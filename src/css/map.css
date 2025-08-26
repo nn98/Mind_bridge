@@ -1,50 +1,92 @@
-/* ✅ 12. 지도 섹션 */
+/* ✅ 12. 지도 섹션 — 안정화(단일 컬럼) */
+
 .map-container {
-  margin: 2rem auto;
-  max-width: 1000px;
+  /* 앱 사이드바(260px) 옆에 정확히 맞추기 */
+  max-width: 1100px;
+  margin: 40px 24px 80px 260px;
+  /* top right bottom left */
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
+/* 지도 박스(라운드 + 그림자 + 오버플로우 클리핑) */
+.map-box {
+  width: 100%;
+  /* 화면 비율에 맞게 유연 / 최소 높이 확보 */
+  aspect-ratio: 16 / 9;
+  min-height: 480px;
+  max-height: 640px;
+
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  /* infowindow/타일 라운드 안으로 */
+  background: #f8fafc;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+}
+
+/* 실제 지도 iframe */
 .map-iframe {
   width: 100%;
-  height: 600px;
-  border: none;
-  border-radius: 12px;
+  height: 100%;
+  border: 0;
   display: block;
 }
 
+/* 지도 캡션(선택) */
 .map-caption {
-  margin-top: 0.5rem;
+  margin-top: 8px;
   font-size: 0.9rem;
-  color: #777;
+  color: #6b7280;
 }
 
-.Toastify__toast {
-  box-shadow: 0 6px 24px 4px rgba(0, 0, 0, 0.22);
-  margin: 0 10rem 9rem 0;
-}
-
-.map-box {
-  width: 40vw;
-  height: calc(50vh - 60px);
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin: 10px;
-  margin-bottom: 20px;
-}
-
+/* 병원 정보 카드 — 지도 아래에 딱 맞게 */
 .hospital-info-box {
-  margin: 0 10px 15px;
-  padding: 16px;
-  background: #f7f7f7;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  max-width: 40vw;
-  font-size: 18px;
+  margin: 14px 0 0;
+  /* 위쪽만 간격 */
+  padding: 16px 18px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 16px;
   line-height: 1.6;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .04);
+
+  /* 스티키/고정 높이 제거 → 잔여 여백 사라짐 */
+  position: static;
+  max-height: none;
+  overflow: visible;
 }
 
 .hospital-info-box h3 {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+/* Toast 여백 축소(우측 아래 떠 있을 때 레이아웃 영향 최소화) */
+.Toastify__toast {
+  box-shadow: 0 6px 24px 4px rgba(0, 0, 0, 0.22);
+  margin: 0 16px 16px 0;
+  border-radius: 10px;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 1280px) {
+  .map-container {
+    margin-left: 240px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .map-container {
+    margin: 24px 16px 60px 16px;
+    padding: 0;
+  }
+
+  .map-box {
+    aspect-ratio: auto;
+    /* 작은 화면에서는 고정 높이로 */
+    height: 420px;
+  }
 }

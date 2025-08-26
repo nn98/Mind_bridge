@@ -8,6 +8,9 @@
     padding: 0 24px;
     font-family: 'Pretendard', sans-serif;
     color: #333;
+
+    /* 탭(사이드 ul)을 컨테이너 기준으로 절대배치하기 위해 필요 */
+    position: relative;
 }
 
 /* 제목: 가운데 정렬 제거, 좌측 정렬 */
@@ -31,48 +34,72 @@
 
 .library-sidebar {
     width: 200px;
-    /* 고정 폭 */
+    /* 고정 폭 (레이아웃 구조는 유지) */
 }
 
-/* 스티키 사이드 메뉴: 헤더가 있다면 필요한 만큼 top 조정 */
+/* === [변경] 사이드 ul을 제목 아래 '가로 탭 바'로 띄우기 === */
 .library-sidebar ul {
     list-style: none;
-    padding: 0;
+    padding: 6px 0;
     margin: 0;
-    position: sticky;
-    top: 40px;
+
+    /* 여기서부터 탭 바로 전환 */
+    position: absolute;
+    /* 컨테이너 기준 */
+    top: 56px;
+    /* 제목 아래 위치 (필요시 조정) */
+    left: 24px;
+    /* 컨테이너 padding과 맞춤 */
+    right: 24px;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    overflow-x: auto;
+    /* 항목이 많아지면 가로 스크롤 */
+    border-bottom: 1px solid #eee;
+    background: inherit;
+    z-index: 5;
 }
 
+/* === [변경] 버튼을 알약형 가로 탭으로 === */
 .sidebar-button {
-    width: 100%;
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    width: auto;
+    /* 가로 길이 자동(세로형의 100% 오버라이드) */
+    padding: 10px 16px;
+    margin: 0;
+    /* 세로형 간격 제거 */
     border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #a18cd1;
-    color: #fff;
-    text-align: left;
+    border-radius: 9999px;
+    background-color: #f8f8ff;
+    color: #4a4a4a;
+    text-align: center;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
+    white-space: nowrap;
+    /* 줄바꿈 방지 */
     cursor: pointer;
     transition: all 0.2s ease-in-out;
 }
 
 .sidebar-button:hover {
-    background-color: #805dd1;
-    border-color: #ccc;
+    background-color: #eee9ff;
+    border-color: #cfc3ff;
 }
 
 .sidebar-button.active {
     background-color: #805dd1;
     color: #fff;
     border-color: #805dd1;
+    box-shadow: 0 2px 8px rgba(128, 93, 209, .25);
 }
 
 /* 본문 영역 */
 .library-content {
     min-width: 0;
     /* 긴 내용 줄바꿈 위해 */
+    padding-top: 64px;
+    /* === [추가] 떠있는 탭 높이만큼 여백 줘서 겹침 방지 === */
 }
 
 .library-content h2 {
@@ -174,9 +201,18 @@
         width: auto;
     }
 
+    /* 모바일에서는 떠있지 않고 일반 흐름으로(겹침 방지용 padding 제거) */
     .library-sidebar ul {
         position: static;
+        /* absolute 해제 */
+        padding: 6px 0;
+        border-bottom: 1px solid #eee;
+        overflow-x: auto;
     }
 
-    /* 모바일에서 스티키 해제 */
+    .library-content {
+        padding-top: 0;
+        /* 상단 탭이 흐름에 있으므로 여백 제거 */
+    }
 }
+

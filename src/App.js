@@ -1,7 +1,6 @@
 // src/App.jsx
 import { useEffect, useState, useRef } from "react";
 import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
-import axios from "axios";
 
 import "./css/App.css";
 import "./css/chat.css";

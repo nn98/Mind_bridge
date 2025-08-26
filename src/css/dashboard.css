@@ -1,8 +1,9 @@
 /**************
- * MindBridge UI — Clean Dark v3 (Fixed Full CSS)
+ * MindBridge UI — Clean Dark v3 (Fixed Full CSS, Sidebar Contrast Up)
  * - 중앙(.dash-content) 스크롤 활성화 + 스크롤바 비가시화
  * - 헤더 sticky, 입력창 sticky 하단 고정
  * - 사이드바/채팅 스트림도 스크롤 가능(바는 숨김)
+ * - Sidebar 색상/텍스트 대비 강화
  **************/
 
 :root {
@@ -12,7 +13,8 @@
     --panel-2: #0e1526;
     --line: #1e2a3c;
     --text: #f1f5fb;
-    --muted: #b1bcc8;
+    --muted: #c7d2e1;
+    /* 살짝 더 밝게 */
 
     --primary: #3b82f6;
     --primary-2: #1d4ed8;
@@ -32,6 +34,20 @@
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, .12);
     --shadow-2: 0 10px 34px rgba(0, 0, 0, .22);
+
+    /* ===== Sidebar (대비 강화) ===== */
+    --sidebar-bg: #162235;
+    /* 기존보다 2단계 밝음 */
+    --sidebar-line: rgba(255, 255, 255, .10);
+    --sidebar-text: #eef4ff;
+    /* 사이드바 기본 글자색 */
+    --sidebar-muted: #c9d6f2;
+    /* 섹션 라벨 등 */
+    --sidebar-icon: #dbe6ff;
+    --sidebar-hover-bg: rgba(99, 102, 241, .18);
+    --sidebar-hover-text: #f7faff;
+    --sidebar-active-bg: rgba(59, 130, 246, .22);
+    --sidebar-active-outline: rgba(99, 102, 241, .65);
 }
 
 * {
@@ -62,8 +78,8 @@ body {
 /* Sidebar */
 .dash-sidebar {
     width: 240px;
-    background: var(--panel-2);
-    border-right: 1px solid var(--line);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-line);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -75,7 +91,7 @@ body {
     flex: 0 0 240px;
 
     overflow-y: auto;
-    /* 스크롤 가능 (바는 아래에서 숨김) */
+    /* 스크롤 가능 (바 숨김은 아래 공통 섹션) */
 }
 
 .nav-close .dash-sidebar {
@@ -87,27 +103,30 @@ body {
     align-items: center;
     gap: 10px;
     padding: 6px 8px;
+    color: var(--sidebar-text);
 }
 
 .avatar {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #1e293b;
-    color: #d7e2ee;
+    background: #203150;
+    color: var(--sidebar-icon);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, .08);
 }
 
 .brand-text .title {
     font-weight: 800;
+    color: var(--sidebar-text);
 }
 
 .brand-text .subtitle {
     font-size: 12px;
-    color: var(--muted);
+    color: var(--sidebar-muted);
 }
 
 .nav-close .brand-text {
@@ -123,28 +142,35 @@ body {
 .menu-section {
     margin-top: 6px;
     font-size: 12px;
-    color: var(--muted);
+    color: var(--sidebar-muted);
     padding: 4px 8px;
+    letter-spacing: .02em;
 }
 
 .menu-item {
     display: block;
     padding: 10px 12px;
     border-radius: 10px;
-    color: var(--text);
+    color: var(--sidebar-text);
     text-decoration: none;
-    transition: background .15s ease, color .15s ease, outline-color .15s ease;
+    transition: background .15s ease, color .15s ease, outline-color .15s ease, transform .05s ease;
+    outline: 1px solid transparent;
 }
 
 .menu-item:hover {
-    background: rgba(59, 130, 246, .10);
-    color: #e6f0ff;
+    background: var(--sidebar-hover-bg);
+    color: var(--sidebar-hover-text);
+}
+
+.menu-item:active {
+    transform: scale(.99);
 }
 
 .menu-item.active {
-    background: rgba(59, 130, 246, .18);
-    outline: 1px solid rgba(59, 130, 246, .35);
-    color: #f0f6ff;
+    background: var(--sidebar-active-bg);
+    outline: 1px solid var(--sidebar-active-outline);
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, .15) inset;
 }
 
 .nav-close .menu-section {
@@ -159,14 +185,15 @@ body {
 .upgrade {
     margin-top: auto;
     padding: 12px;
-    background: #0c1426;
-    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--sidebar-line);
     border-radius: 12px;
+    color: var(--sidebar-text);
 }
 
 .upgrade-text {
     font-size: 13px;
-    color: var(--muted);
+    color: var(--sidebar-muted);
     margin-bottom: 8px;
 }
 
@@ -235,13 +262,13 @@ body {
     background: #0c1426;
 }
 
-/* 중앙 컨텐츠: 스크롤 가능 (스크롤바는 비가시화) */
+/* 중앙 컨텐츠: 스크롤 가능 (스크롤바 비가시화) */
 .dash-content {
     flex: 1 1 auto;
     min-height: 0;
     /* flex 자식 스크롤 필수 */
     overflow: auto;
-    /* ← 핵심: 스크롤 활성화 */
+    /* ← 핵심 */
     padding: 32px 24px;
 }
 
@@ -496,8 +523,9 @@ body {
     border: none;
     border-radius: 14px;
     font-size: 16px;
-    color: var(--text);
-    background-color: white;
+    color: #0c1220;
+    /* 흰 배경에서 가독성↑ */
+    background-color: #ffffff;
     box-shadow: none;
     resize: none;
 }
@@ -507,7 +535,7 @@ body {
 }
 
 .consult-input::placeholder {
-    color: #c5cfdb;
+    color: #7c8aa3;
 }
 
 .consult-actions {
