@@ -30,19 +30,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ★ 토큰 검사 제외 경로 (패턴 지원)
     private static final List<String> EXCLUDE_PATTERNS = List.of(
+        "/api/auth/login",
+        "/api/auth/refresh",
+        "/api/auth/social/kakao/login",
         "/api/auth/social/google/login",
         "/api/auth/social/google/callback",
-        "/api/auth/login",
-        "/api/users/register",
-        "/api/auth/refresh",
         "/api/users/find-id",
+        "/api/users/register",
+        "/api/users/check-email",
         "/api/users/find-password",
-        "/api/auth/social/kakao",
         "/actuator/health",
         "/error",
-        "/api/users/check-email",
         "/favicon.ico"
-        //            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
     );
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
