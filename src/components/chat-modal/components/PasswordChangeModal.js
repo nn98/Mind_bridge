@@ -12,6 +12,8 @@ const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
     };
 
     const handleSubmit = () => {
+        console.log(`password: ${password}`);
+        console.log(`confirmPassword: ${confirmPassword}`);
         if (!password || !confirmPassword) {
             showToast('비밀번호를 모두 입력해주세요.');
             return;

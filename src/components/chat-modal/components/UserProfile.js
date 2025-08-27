@@ -5,16 +5,12 @@ import { BACKEND_URL, MENTAL_STATES } from '../constants';
 import PasswordChangeModal from './PasswordChangeModal';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../../../AuthContext';
 
-const noop = () => { };
-const call = (fn, ...args) => (typeof fn === 'function' ? fn(...args) : undefined);
+const UserProfile = () => {
+    const { profile, applyProfileUpdate, logoutSuccess } = useAuth();
+    const isLoggedIn = !!profile;
 
-const UserProfile = ({
-    customUser,
-    isCustomLoggedIn,
-    setCustomUser = noop,           // ✅ 기본 no-op
-    setIsCustomLoggedIn = noop,     // ✅ 기본 no-op
-}) => {
     const [userInfo, setUserInfo] = useState({
         age: '',
         gender: '',
@@ -22,14 +18,16 @@ const UserProfile = ({
         phoneNumber: '',
         mentalState: '',
         nickname: '',
-        counselingGoal: '',
+        chatGoal: '',
+        fullName: '',            // 추가
     });
+
     const [editedInfo, setEditedInfo] = useState({ ...userInfo });
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-    const userId = customUser?.id;
+    const userId = profile?.id;
 
     const printAxiosError = (error, label = 'AxiosError') => {
         if (!error?.response) {
@@ -43,13 +41,7 @@ const UserProfile = ({
             return;
         }
         const { status, statusText, data, config } = error.response;
-        console.error(`${label}:`, {
-            status,
-            statusText,
-            data,
-            url: config?.url,
-            method: config?.method,
-        });
+        console.error(`${label}:`, { status, statusText, data, url: config?.url, method: config?.method });
         const msg =
             data?.message ||
             data?.error ||
@@ -67,101 +59,75 @@ const UserProfile = ({
             gender: data?.gender ?? fallback.gender ?? '',
             phoneNumber: data?.phoneNumber ?? fallback.phoneNumber ?? '',
             mentalState: data?.mentalState ?? fallback.mentalState ?? '선택되지 않음',
-            counselingGoal: data?.counselingGoal ?? fallback.counselingGoal ?? '',
+            chatGoal: data?.chatGoal ?? fallback.chatGoal ?? '',
+            fullName: data?.fullName ?? fallback.fullName ?? '',  // 추가
         };
     };
 
-    const buildUpdatePayload = (base, edited) => {
-        const normalizeNumber = (v) => {
-            if (v === null || v === undefined || v === '') return null;
-            const n = Number(v);
-            return Number.isFinite(n) ? n : null;
-        };
-        return {
-            email: edited.email || base.email || '',
-            nickname: edited.nickname ?? base.nickname ?? '',
-            phoneNumber: edited.phoneNumber ?? base.phoneNumber ?? '',
-            gender: edited.gender ?? base.gender ?? '',
-            age: normalizeNumber(edited.age ?? base.age),
-            mentalState: edited.mentalState ?? base.mentalState ?? '',
-            counselingGoal: edited.counselingGoal ?? base.counselingGoal ?? '',
-        };
+    const normalizeNumber = (v) => {
+        if (v === null || v === undefined || v === '') return null;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
     };
+
+    const buildUpdatePayload = (base, edited) => ({
+        email: (edited.email ?? base.email ?? '').trim(),
+        nickname: (edited.nickname ?? base.nickname ?? '').trim(),
+        phoneNumber: (edited.phoneNumber ?? base.phoneNumber ?? '').trim(),
+        gender: (edited.gender ?? base.gender ?? '').trim(),
+        age: normalizeNumber(edited.age ?? base.age),
+        mentalState: (edited.mentalState ?? base.mentalState ?? '').trim(),
+        chatGoal: (edited.chatGoal ?? base.chatGoal ?? '').trim(),
+        fullName: (edited.fullName ?? base.fullName ?? '').trim(),   // 추가
+    });
 
     useEffect(() => {
         let cancel = false;
-        const controller = new AbortController();
-
-        const fetchUserData = async () => {
-            if (!isCustomLoggedIn) {
+        const init = async () => {
+            if (!isLoggedIn) {
                 setIsLoading(false);
                 return;
             }
             setIsLoading(true);
-
-            const fallbackFromCustom = {
-                email: customUser?.email || '',
-                nickname: customUser?.nickname || '',
-                age: customUser?.age || '',
-                gender: customUser?.gender || '',
-                phoneNumber: customUser?.phoneNumber || '',
-                mentalState: customUser?.mentalState || '선택되지 않음',
-                counselingGoal: customUser?.counselingGoal || '',
+            const fallbackFromProfile = {
+                email: profile?.email || '',
+                nickname: profile?.nickname || '',
+                age: profile?.age ?? '',
+                gender: profile?.gender || '',
+                phoneNumber: profile?.phoneNumber || '',
+                mentalState: profile?.mentalState || '선택되지 않음',
+                chatGoal: profile?.chatGoal || '',
+                fullName: profile?.fullName || '',  // 추가
             };
-
             try {
-                let resp = null;
-
-                if (userId) {
-                    try {
-                    } catch (_) { }
-                }
-
-                if (!resp) {
-                    try {
-                    } catch (_) { }
-                }
-
-                if (!resp && customUser?.email) {
-                    try {
-                    } catch (_) { }
-                }
-
-                const normalized = resp
-                    ? normalizeUser(resp, fallbackFromCustom)
-                    : fallbackFromCustom;
-
+                const normalized = normalizeUser(profile, fallbackFromProfile);
                 if (!cancel) {
                     setUserInfo(normalized);
                     setEditedInfo(normalized);
                 }
-            } catch (error) {
-                console.error('백엔드에서 사용자 정보 조회 실패:', error);
+            } catch (e) {
+                console.error('프로필 초기화 실패:', e);
                 if (!cancel) {
-                    setUserInfo(fallbackFromCustom);
-                    setEditedInfo(fallbackFromCustom);
+                    setUserInfo(fallbackFromProfile);
+                    setEditedInfo(fallbackFromProfile);
                 }
             } finally {
                 if (!cancel) setIsLoading(false);
             }
         };
-
-        fetchUserData();
-
-        return () => {
-            cancel = true;
-            controller.abort();
-        };
-    }, [isCustomLoggedIn, customUser, userId]);
+        init();
+        return () => { cancel = true; };
+    }, [isLoggedIn, profile]);
 
     const handleEdit = () => setIsEditing(true);
+
     const handleCancel = () => {
         setIsEditing(false);
         setEditedInfo(userInfo);
     };
 
     const handleSave = async () => {
-        if (!isCustomLoggedIn || !customUser) {
+        if (!isLoggedIn) {
             toast.error('로그인 상태가 아닙니다.');
             return;
         }
@@ -169,16 +135,14 @@ const UserProfile = ({
             toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.');
             return;
         }
-
         try {
             const payload = buildUpdatePayload(userInfo, editedInfo);
-
             await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
-
             setUserInfo((prev) => ({ ...prev, ...editedInfo }));
+            applyProfileUpdate(payload);  // 전역 프로필 동기화
             setIsEditing(false);
             toast.success('회원 정보가 저장되었습니다.');
         } catch (error) {
@@ -188,26 +152,17 @@ const UserProfile = ({
 
     const handleLogout = async () => {
         try {
-            // 서버에 로그아웃 요청 (쿠키 만료)
             await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
-
-            // 상태 초기화
-            setCustomUser(null);
-            setIsCustomLoggedIn(false);
-
-            // 페이지 이동
+            logoutSuccess();
             window.location.href = '/login';
         } catch (err) {
             console.error('로그아웃 실패:', err);
-            // 그래도 강제로 상태 초기화 및 로그인 페이지 이동
-            setCustomUser(null);
-            setIsCustomLoggedIn(false);
             window.location.href = '/login';
         }
     };
 
     const handleDeleteAccount = () => {
-        if (!isCustomLoggedIn || !customUser) {
+        if (!isLoggedIn) {
             toast.error('로그인 상태가 아닙니다.');
             return;
         }
@@ -215,7 +170,6 @@ const UserProfile = ({
             toast.error('이메일 정보가 없습니다. 다시 로그인 해주세요.');
             return;
         }
-
         const toastId = toast.info(
             <div>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
@@ -229,11 +183,10 @@ const UserProfile = ({
                         onClick={async () => {
                             try {
                                 const payload = { email: userInfo.email };
-                                await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
+                                await axios.delete(`${BACKEND_URL}/api/users/account`, {
                                     withCredentials: true,
                                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
-
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
                                 handleLogout();
@@ -258,38 +211,21 @@ const UserProfile = ({
         );
     };
 
-    const handlePassChange = async (password) => {
-        if (!isCustomLoggedIn || !customUser) {
-            toast.error('로그인 상태가 아닙니다.');
-            return;
-        }
-        if (!userInfo.email) {
-            toast.error('이메일 정보가 없습니다.');
-            return;
-        }
-        try {
-            const payload = { newPassword: password };
-            await axios.put(`${BACKEND_URL}/api/users/password`, payload, {
-                withCredentials: true,
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            });
-
-            toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
-            handleLogout();
-        } catch (error) {
-            printAxiosError(error, '비밀번호 변경 실패');
-        }
-    };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setEditedInfo((prev) => ({ ...prev, [name]: value }));
+        setEditedInfo((prev) => {
+            if (name === 'age') {
+                const onlyDigits = value.replace(/[^\d]/g, '');
+                return { ...prev, [name]: onlyDigits };
+            }
+            return { ...prev, [name]: value };
+        });
     };
 
     const openPasswordModal = () => setIsPasswordModalOpen(true);
 
     if (isLoading) return <div className="tab-content"><p>로딩 중...</p></div>;
-    if (!isCustomLoggedIn) return <div className="tab-content"><p>로그인 후 이용해주세요.</p></div>;
+    if (!isLoggedIn) return <div className="tab-content"><p>로그인 후 이용해주세요.</p></div>;
 
     return (
         <>
@@ -297,6 +233,23 @@ const UserProfile = ({
                 <div className="profile-section">
                     <h3>회원 정보</h3>
 
+                    {/* 성명 */}
+                    <div className="profile-field">
+                        <span>성명</span>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                name="fullName"
+                                value={editedInfo.fullName}
+                                placeholder="실명 또는 성명"
+                                onChange={handleChange}
+                            />
+                        ) : (
+                            <p>{userInfo.fullName || '─'}</p>
+                        )}
+                    </div>
+
+                    {/* 닉네임 */}
                     <div className="profile-field">
                         <span>닉네임</span>
                         {isEditing ? (
@@ -312,23 +265,71 @@ const UserProfile = ({
                         )}
                     </div>
 
-                    <div className="profile-field">
-                        <span>나이</span>
-                        <p style={{ color: '#777' }}>{userInfo.age || '─'}</p>
-                    </div>
-                    <div className="profile-field">
-                        <span>성별</span>
-                        <p style={{ color: '#777' }}>{userInfo.gender || '─'}</p>
-                    </div>
-                    <div className="profile-field">
-                        <span>전화번호</span>
-                        <p style={{ color: '#777' }}>{userInfo.phoneNumber || '─'}</p>
-                    </div>
+                    {/* 이메일 */}
                     <div className="profile-field">
                         <span>이메일</span>
-                        <p style={{ color: '#777' }}>{userInfo.email}</p>
+                        {isEditing ? (
+                            <input
+                                type="email"
+                                name="email"
+                                value={editedInfo.email}
+                                placeholder="example@domain.com"
+                                onChange={handleChange}
+                            />
+                        ) : (
+                            <p style={{ color: '#777' }}>{userInfo.email}</p>
+                        )}
                     </div>
 
+                    {/* 전화번호 */}
+                    <div className="profile-field">
+                        <span>전화번호</span>
+                        {isEditing ? (
+                            <input
+                                type="tel"
+                                name="phoneNumber"
+                                value={editedInfo.phoneNumber}
+                                placeholder="010-1234-5678"
+                                onChange={handleChange}
+                            />
+                        ) : (
+                            <p style={{ color: '#777' }}>{userInfo.phoneNumber || '─'}</p>
+                        )}
+                    </div>
+
+                    {/* 성별 */}
+                    <div className="profile-field">
+                        <span>성별</span>
+                        {isEditing ? (
+                            <select name="gender" value={editedInfo.gender} onChange={handleChange}>
+                                <option value="">선택해주세요</option>
+                                <option value="MALE">남성</option>
+                                <option value="FEMALE">여성</option>
+                                <option value="OTHER">기타</option>
+                            </select>
+                        ) : (
+                            <p style={{ color: '#777' }}>{userInfo.gender || '─'}</p>
+                        )}
+                    </div>
+
+                    {/* 나이 */}
+                    <div className="profile-field">
+                        <span>나이</span>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                name="age"
+                                value={editedInfo.age}
+                                placeholder="숫자만 입력"
+                                onChange={handleChange}
+                            />
+                        ) : (
+                            <p style={{ color: '#777' }}>{userInfo.age || '─'}</p>
+                        )}
+                    </div>
+
+                    {/* 나의 상태 */}
                     <div className="profile-field">
                         <span>나의 상태</span>
                         {isEditing ? (
@@ -343,6 +344,23 @@ const UserProfile = ({
                         )}
                     </div>
 
+                    {/* 상담 목표 */}
+                    <div className="profile-field">
+                        <span>상담 목표</span>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                name="chatGoal"
+                                value={editedInfo.chatGoal}
+                                placeholder="상담 목표를 입력하세요"
+                                onChange={handleChange}
+                            />
+                        ) : (
+                            <p style={{ color: '#777' }}>{userInfo.chatGoal || '─'}</p>
+                        )}
+                    </div>
+
+                    {/* 액션 */}
                     <div className="profile-actions">
                         {isEditing ? (
                             <>
@@ -362,7 +380,7 @@ const UserProfile = ({
                 <div className="profile-section">
                     <h4>계정 관리</h4>
                     <div className="account-actions">
-                        <button className="account-button" onClick={openPasswordModal}>비밀번호 변경</button>
+                        <button className="account-button" onClick={() => setIsPasswordModalOpen(true)}>비밀번호 변경</button>
                         <button className="account-button danger" onClick={handleDeleteAccount}>회원 탈퇴</button>
                     </div>
                 </div>
@@ -371,9 +389,28 @@ const UserProfile = ({
             <PasswordChangeModal
                 isOpen={isPasswordModalOpen}
                 onClose={() => setIsPasswordModalOpen(false)}
-                onPasswordChange={handlePassChange}
+                onPasswordChange={async (pwd) => {
+                    if (!isLoggedIn) {
+                        toast.error('로그인 상태가 아닙니다.');
+                        return;
+                    }
+                    if (!userInfo.email) {
+                        toast.error('이메일 정보가 없습니다.');
+                        return;
+                    }
+                    try {
+                        const payload = { newPassword: pwd };
+                        await axios.put(`${BACKEND_URL}/api/users/password`, payload, {
+                            withCredentials: true,
+                            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        });
+                        toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
+                        await handleLogout();
+                    } catch (error) {
+                        printAxiosError(error, '비밀번호 변경 실패');
+                    }
+                }}
             />
-
             <ToastContainer position="top-center" closeButton={false} icon={false} />
         </>
     );
