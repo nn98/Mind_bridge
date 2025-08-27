@@ -1,5 +1,13 @@
 package com.example.backend.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.backend.dto.post.CreateRequest;
 import com.example.backend.dto.post.Detail;
 import com.example.backend.dto.post.Summary;
@@ -8,18 +16,11 @@ import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 /**
- * 게시글 관리를 위한 비즈니스 로직 서비스
- * 게시글 CRUD 및 조회 필터링 기능 제공
+ * 게시글 관리를 위한 비즈니스 로직 서비스 게시글 CRUD 및 조회 필터링 기능 제공
  */
 @Slf4j
 @Service
@@ -31,6 +32,7 @@ public class PostService {
 
     /**
      * 게시글 작성
+     *
      * @param request 게시글 작성 요청
      * @param userEmail 작성자 이메일
      * @return 생성된 게시글 상세 정보
@@ -50,6 +52,7 @@ public class PostService {
 
     /**
      * 게시글 수정
+     *
      * @param postId 수정할 게시글 ID
      * @param request 수정 요청 정보
      * @param userEmail 수정 요청자 이메일
@@ -57,38 +60,40 @@ public class PostService {
      * @throws RuntimeException 게시글을 찾을 수 없거나 권한이 없을 시
      */
     @Transactional
-    public Detail updatePost(Long postId, UpdateRequest request, String userEmail) {
+    public Detail updatePost(Long postId, UpdateRequest request, Authentication authentication) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        validateUserPermission(post, userEmail, "수정");
+        validateUserPermission(post, authentication, "수정");
 
         updatePostFields(post, request);
         PostEntity updatedPost = postRepository.save(post);
 
-        log.info("게시글 수정 완료 - ID: {}, 수정자: {}", postId, userEmail);
+        log.info("게시글 수정 완료 - ID: {}, 수정자: {}", postId, authentication.getName());
         return mapToDetail(updatedPost);
     }
 
     /**
      * 게시글 삭제
+     *
      * @param postId 삭제할 게시글 ID
      * @param userEmail 삭제 요청자 이메일
      * @throws RuntimeException 게시글을 찾을 수 없거나 권한이 없을 시
      */
     @Transactional
-    public void deletePost(Long postId, String userEmail) {
+    public void deletePost(Long postId, Authentication authentication) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        validateUserPermission(post, userEmail, "삭제");
+        validateUserPermission(post, authentication, "삭제");
 
         postRepository.deleteById(postId);
-        log.info("게시글 삭제 완료 - ID: {}, 삭제자: {}", postId, userEmail);
+        log.info("게시글 삭제 완료 - ID: {}, 삭제자: {}", postId, authentication.getName());
     }
 
     /**
      * 모든 게시글 조회 (최신순)
+     *
      * @return 모든 게시글 상세 정보 목록
      */
     @Transactional(readOnly = true)
@@ -101,6 +106,7 @@ public class PostService {
 
     /**
      * 공개 게시글 목록 조회 (요약형)
+     *
      * @return 공개 게시글 요약 정보 목록
      */
     @Transactional(readOnly = true)
@@ -113,6 +119,7 @@ public class PostService {
 
     /**
      * 사용자별 게시글 목록 조회
+     *
      * @param userEmail 조회할 사용자 이메일
      * @return 해당 사용자의 게시글 상세 정보 목록
      */
@@ -126,6 +133,7 @@ public class PostService {
 
     /**
      * 게시글 상세 조회
+     *
      * @param postId 조회할 게시글 ID
      * @return 게시글 상세 정보 (Optional)
      */
@@ -137,6 +145,7 @@ public class PostService {
 
     /**
      * 공개 설정별 게시글 수 조회
+     *
      * @param userEmail 사용자 이메일
      * @param visibility 공개 설정 (public, private, friends)
      * @return 해당 조건의 게시글 수
@@ -148,6 +157,7 @@ public class PostService {
 
     /**
      * 최근 게시글 조회 (지정한 개수만큼)
+     *
      * @param limit 조회할 게시글 개수
      * @return 최근 게시글 요약 정보 목록
      */
@@ -160,7 +170,6 @@ public class PostService {
     }
 
     // === Private Helper Methods ===
-
     /**
      * CreateRequest로부터 PostEntity 생성
      */
@@ -188,8 +197,14 @@ public class PostService {
     /**
      * 사용자 권한 검증
      */
-    private void validateUserPermission(PostEntity post, String userEmail, String action) {
-        if (!post.getUserEmail().equals(userEmail)) {
+    private void validateUserPermission(PostEntity post, Authentication authentication, String action) {
+
+        String userEmail = authentication.getName();
+
+        UserEntity user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        if (!post.getUserEmail().equals(userEmail) && !"ADMIN".equalsIgnoreCase(user.getRole())) {
             throw new RuntimeException("게시글 " + action + " 권한이 없습니다.");
         }
     }
