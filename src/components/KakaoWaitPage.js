@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import jwt_decode from "jwt-decode";
 
-const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao";
+const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao/callback";
+
 
 function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
   const [searchParams] = useSearchParams();
@@ -38,13 +40,13 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
         const data = res.data;
         console.log("서버 응답 데이터:", data);
 
-        if (data.data.success) {
+        if (data.success) {
           setMessage('로그인 성공! 환영합니다.');
 
-          if (data.data.user) {
-            console.log('user:', data.data.user);
+          if (data.user) {
+            console.log('user:', data.user);
             localStorage.setItem("token", "LOGIN");
-            if (setCustomUser) setCustomUser(data.data.user);
+            if (setCustomUser) setCustomUser(data.user);
             if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
           }
 
