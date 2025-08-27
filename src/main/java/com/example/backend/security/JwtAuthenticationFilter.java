@@ -36,20 +36,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/users/register",
             "/api/auth/refresh",
             "/api/users/find-id",
-            "/api/users/find-password",
+            "/api/users/find-password", // 비번찾기
+            "/api/auth/reset-password", // 임시비번 발급
             "/api/auth/social/kakao",
             "/actuator/health",
             "/error",
             "/api/users/check-email",
             "/favicon.ico"
-//            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
+    // "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
     );
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private boolean isExcluded(@NonNull String uri) {
         for (String pattern : EXCLUDE_PATTERNS) {
-            if (PATH_MATCHER.match(pattern, uri)) return true;
+            if (PATH_MATCHER.match(pattern, uri))
+                return true;
         }
         return false;
     }
@@ -57,7 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // ★ OPTIONS(프리플라이트) + 화이트리스트는 아예 필터 스킵
     @Override
     protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()))
+            return true;
         return isExcluded(request.getRequestURI());
     }
 
@@ -123,8 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             var authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null,
-                    userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
-            );
+                    userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("[JWT] Auth success for {}", email);
 
