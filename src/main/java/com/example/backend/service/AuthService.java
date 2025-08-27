@@ -134,7 +134,7 @@ public class AuthService {
             return email;
         }
 
-        String masked = localPart.substring(0, 2) + "*".repeat(localPart.length() - 2);
+        String masked = localPart.substring(0, 2) + "*".repeat(localPart.length() - 1);
         return masked + "@" + domainPart;
     }
 
