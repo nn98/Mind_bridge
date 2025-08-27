@@ -182,7 +182,7 @@ public class PostController {
             @Valid @RequestBody UpdateRequest request,
             Authentication authentication) {
         try {
-            Detail updatedPost = postService.updatePost(id, request, authentication);
+            Detail updatedPost = postService.updatePost(id, request, authentication.getName());
 
             log.info("게시글 수정 완료 - ID: {}, 수정자: {}", id, authentication.getName());
             return ResponseEntity.ok(ApiResponse.success(updatedPost, "게시글이 성공적으로 수정되었습니다."));
@@ -205,7 +205,7 @@ public class PostController {
             @PathVariable Long id,
             Authentication authentication) {
         try {
-            postService.deletePost(id, authentication);
+            postService.deletePost(id, authentication.getName());
 
             log.info("게시글 삭제 완료 - ID: {}, 삭제자: {}", id, authentication.getName());
             return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 삭제되었습니다."));
