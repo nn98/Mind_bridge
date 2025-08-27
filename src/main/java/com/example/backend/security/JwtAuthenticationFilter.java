@@ -1,12 +1,9 @@
 package com.example.backend.security;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,9 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -29,18 +30,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ★ 토큰 검사 제외 경로 (패턴 지원)
     private static final List<String> EXCLUDE_PATTERNS = List.of(
-            "/api/auth/social/google/login",
-            "/api/auth/social/google/callback",
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/refresh",
-            "/api/users/find-id",
-            "/api/users/find-password",
-            "/api/auth/social/kakao",
-            "/actuator/health",
-            "/error",
-            "/favicon.ico",
-            "/api/posts" // 테스트 겸 게시글 확인
+        "/api/auth/social/google/login",
+        "/api/auth/social/google/callback",
+        "/api/auth/login",
+        "/api/users/register",
+        "/api/auth/refresh",
+        "/api/users/find-id",
+        "/api/users/find-password",
+        "/api/auth/social/kakao",
+        "/actuator/health",
+        "/error",
+        "/api/users/check-email",
+        "/favicon.ico"
+        //            "/api/posts" // 테스트 겸 게시글 확인은 가능하게 수정
     );
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
@@ -61,10 +63,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @Nonnull HttpServletRequest request,
-            @Nonnull HttpServletResponse response,
-            @Nonnull FilterChain filterChain)
-            throws ServletException, IOException {
+        @Nonnull HttpServletRequest request,
+        @Nonnull HttpServletResponse response,
+        @Nonnull FilterChain filterChain)
+        throws ServletException, IOException {
 
         final String path = request.getRequestURI();
         final String authHeader = request.getHeader("Authorization");
@@ -120,8 +122,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             var authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null,
-                    userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
+                userDetails, null,
+                userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("[JWT] Auth success for {}", email);
