@@ -228,8 +228,7 @@ const UserProfile = ({
                     <button
                         onClick={async () => {
                             try {
-                                const payload = { email: userInfo.email };
-                                await axios.post(`${BACKEND_URL}/api/users/delete`, payload, {
+                                await axios.delete(`${BACKEND_URL}/api/users/account`, {
                                     withCredentials: true,
                                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
