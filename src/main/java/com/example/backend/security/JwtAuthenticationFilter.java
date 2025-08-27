@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/api/auth/social/kakao/login",
         "/api/auth/social/google/login",
         "/api/auth/social/google/callback",
+        "/api/auth/reset-password", // 임시비번 발급
         "/api/users/find-id",
         "/api/users/register",
         "/api/users/check-email",
