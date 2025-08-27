@@ -1,15 +1,8 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.auth.FindIdRequest;
-import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
-import com.example.backend.dto.auth.ResetPasswordRequest;
-import com.example.backend.dto.user.Profile;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+import java.util.Random;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,8 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.Optional;
-import java.util.Random;
+import com.example.backend.dto.auth.FindIdRequest;
+import com.example.backend.dto.auth.LoginRequest;
+import com.example.backend.dto.auth.LoginResponse;
+import com.example.backend.dto.auth.ResetPasswordRequest;
+import com.example.backend.dto.user.Profile;
+import com.example.backend.entity.UserEntity;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.security.JwtUtil;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 인증 관련 비즈니스 로직을 처리하는 서비스
@@ -75,11 +77,11 @@ public class AuthService {
     /**
      * 비밀번호 재설정
      */
-    public boolean resetPassword(ResetPasswordRequest request) {
+    public String resetPassword(ResetPasswordRequest request) {
         Optional<UserEntity> optionalUser = userRepository.findByEmail(request.getEmail());
         if (optionalUser.isEmpty()) {
             log.warn("존재하지 않는 이메일로 비밀번호 재설정 시도: {}", request.getEmail());
-            return false;
+            return null;
         }
 
         UserEntity user = optionalUser.get();
@@ -94,11 +96,11 @@ public class AuthService {
             userRepository.save(user);
 
             log.info("비밀번호 재설정 완료: {}", user.getEmail());
-            return true;
+            return tempPassword;
 
         } catch (Exception e) {
             log.error("비밀번호 재설정 실패: {}", e.getMessage());
-            return false;
+            return null;
         }
     }
 
