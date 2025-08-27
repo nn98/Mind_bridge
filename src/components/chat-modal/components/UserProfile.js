@@ -268,8 +268,8 @@ const UserProfile = ({
             return;
         }
         try {
-            const payload = { email: userInfo.email, password };
-            await axios.put(`${BACKEND_URL}/api/users/change`, payload, {
+            const payload = { newPassword: password };
+            await axios.put(`${BACKEND_URL}/api/users/password`, payload, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
