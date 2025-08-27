@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link as RouterLink, useNavigate, Link } from "react-router-dom";
+import { useAuth } from '../AuthContext';
 import {
   Button,
   TextField,
@@ -127,6 +128,7 @@ const AuthSection = ({
   setIsCustomLoggedIn,
   setCustomUser,
 }) => {
+  const { profile, applyProfileUpdate, logoutSuccess } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -222,19 +224,25 @@ const AuthSection = ({
     if (type === "logout" && !logoutExecuted.current) {
       logoutExecuted.current = true;
 
-
-      if (setIsCustomLoggedIn) setIsCustomLoggedIn(false);
-      if (setCustomUser) setCustomUser(null);
-
-      // 서버에 로그아웃 API 호출 (선택 사항, 서버에서 쿠키 만료 처리)
+      // 전역 상태 초기화는 응답 이후로 미루는 편이 네트워크 확인엔 유리
       axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true })
-        .catch(() => { /* 실패해도 상태 초기화는 계속 */ });
-
-      // 전역 컨테이너(welcome)로 로그아웃 토스트 출력
-      toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
-      navigate("/", { replace: true });
+          .then(() => {
+            toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
+          })
+          .catch(() => {
+            // 실패해도 UI 초기화는 진행
+          })
+          .finally(() => {
+            // 전역 상태/컨텍스트 초기화
+            try { logoutSuccess?.(); } catch {}
+            // 필요하다면 기존 커스텀 상태도 함께 초기화
+            try { setIsCustomLoggedIn?.(false); } catch {}
+            try { setCustomUser?.(null); } catch {}
+            // 네트워크 탭 확인을 위해 아주 짧게 지연 후 이동해도 좋음
+            setTimeout(() => navigate('/'), 1000);
+          });
     }
-  }, [type, navigate, setIsCustomLoggedIn, setCustomUser]);
+  }, [type, navigate, logoutSuccess, setIsCustomLoggedIn, setCustomUser]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
