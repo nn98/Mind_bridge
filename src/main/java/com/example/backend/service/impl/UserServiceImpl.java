@@ -1,35 +1,195 @@
-// service/UserServiceImpl.java
-package com.example.backend.service;
+package com.example.backend.service.impl;
 
 import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.dto.user.Profile;
+import com.example.backend.dto.user.RegistrationRequest;
+import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final UserMapper userMapper;
 
 	@Override
-	@Transactional(readOnly = true)
-	public Optional<Profile> getUserByEmail(String email) {
-		return userRepository.findByEmail(email).map(UserMapper::toProfile);
+	@Transactional
+	public Profile register(RegistrationRequest request) {
+		if (userRepository.existsByEmail(request.getEmail())) {
+			throw new RuntimeException("이미 사용중인 이메일입니다.");
+		}
+		if (userRepository.existsByNickname(request.getNickname())) {
+			throw new RuntimeException("이미 사용중인 닉네임입니다.");
+		}
+		UserEntity user = createUserEntity(request);
+		UserEntity saved = userRepository.save(user);
+		log.info("새 사용자 가입 완료: {}", saved.getEmail());
+		return userMapper.toProfile(saved);
 	}
 
 	@Override
 	@Transactional
-	public Profile updateUser(String email, UpdateRequest req) {
-		UserEntity u = userRepository.findByEmail(email)
+	public Profile updateUser(String email, UpdateRequest request) {
+		UserEntity user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-		UserMapper.applyUpdate(u, req);
-		// JPA가 변경감지를 통해 업데이트 수행, 트랜잭션 커밋 시 flush
-		// 즉시 최신 DTO 생성
-		return UserMapper.toProfile(u);
+		if (request.getNickname() != null
+			&& !request.getNickname().equals(user.getNickname())
+			&& userRepository.existsByNickname(request.getNickname())) {
+			throw new RuntimeException("이미 사용중인 닉네임입니다.");
+		}
+		// 매퍼를 통해 부분 업데이트 적용
+		userMapper.applyUpdate(user, request);
+		UserEntity updated = userRepository.save(user);
+		log.info("사용자 정보 업데이트 완료: {}", email);
+		return userMapper.toProfile(updated);
+	}
+
+	@Override
+	@Transactional
+	public Profile changePassword(String email, String newPassword) {
+		UserEntity user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+		user.setPassword(passwordEncoder.encode(newPassword));
+		UserEntity updated = userRepository.save(user);
+		log.info("비밀번호 변경 완료: {}", email);
+		return userMapper.toProfile(updated);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Profile> getUserByEmail(String email) {
+		return userRepository.findByEmail(email).map(userMapper::toProfile);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Summary> getUserByNickname(String nickname) {
+		return userRepository.findByNickname(nickname).map(Summary::new);
+	}
+
+	@Override
+	@Transactional
+	public void deleteUser(String email) {
+		UserEntity user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+		userRepository.delete(user);
+		log.info("사용자 삭제 완료: {}", email);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isEmailAvailable(String email) {
+		return !userRepository.existsByEmail(email);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isNicknameAvailable(String nickname) {
+		return !userRepository.existsByNickname(nickname);
+	}
+
+	@Override
+	@Transactional
+	public UserEntity findOrCreateSocialUser(String email, String nickname) {
+		Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+		if (userOpt.isPresent()) return userOpt.get();
+		UserEntity u = new UserEntity();
+		u.setEmail(email);
+		u.setFullName(nickname != null ? nickname : "Social User");
+		u.setNickname(generateUniqueNickname(nickname));
+		u.setRole("USER");
+		u.setPassword("");
+		u.setAge(0);
+		u.setGender("unspecified");
+		return userRepository.save(u);
+	}
+
+	@Override
+	@Transactional
+	public UserEntity findOrCreateGoogleUser(String email, String nickname) {
+		return userRepository.findByEmail(email)
+			.orElseGet(() -> userRepository.save(createGoogleUser(email, nickname)));
+	}
+
+	@Override
+	@Transactional
+	public UserEntity findOrCreateKakaoUser(String email, String nickname) {
+		return userRepository.findByEmail(email)
+			.orElseGet(() -> userRepository.save(createKakaoUser(email, nickname)));
+	}
+
+	private UserEntity createUserEntity(RegistrationRequest request) {
+		UserEntity u = new UserEntity();
+		u.setEmail(request.getEmail());
+		u.setPassword(passwordEncoder.encode(request.getPassword()));
+		u.setFullName(request.getFullName());
+		u.setNickname(request.getNickname());
+		u.setGender(request.getGender());
+		u.setAge(request.getAge());
+		u.setPhoneNumber(request.getPhoneNumber());
+		u.setMentalState(request.getMentalState());
+		u.setRole("USER");
+		return u;
+	}
+
+	private String generateUniqueNickname(String preferredName) {
+		String base = (preferredName != null && !preferredName.trim().isEmpty())
+			? preferredName.trim() : "user";
+		String nickname = base;
+		int suffix = 1;
+		while (!isNicknameAvailable(nickname)) {
+			nickname = base + "_" + suffix++;
+			if (suffix > 100) { nickname = "user_" + System.currentTimeMillis(); break; }
+		}
+		return nickname;
+	}
+
+	private UserEntity createGoogleUser(String email, String nickname) {
+		UserEntity u = new UserEntity();
+		u.setEmail(email);
+		u.setFullName(nickname != null ? nickname : "Google User");
+		u.setNickname(generateUniqueNickname(nickname, "google"));
+		u.setRole("USER");
+		u.setPassword("");
+		u.setAge(0);
+		u.setGender("unspecified");
+		return u;
+	}
+
+	private UserEntity createKakaoUser(String email, String nickname) {
+		UserEntity u = new UserEntity();
+		u.setEmail(email);
+		u.setFullName(nickname != null ? nickname : "Kakao User");
+		u.setNickname(generateUniqueNickname(nickname, "kakao"));
+		u.setRole("USER");
+		u.setPassword("");
+		u.setAge(0);
+		u.setGender("unspecified");
+		return u;
+	}
+
+	private String generateUniqueNickname(String preferredName, String provider) {
+		String base = (preferredName != null && !preferredName.trim().isEmpty())
+			? preferredName.trim() : provider + "_user";
+		if (base.length() > 15) base = base.substring(0, 15);
+		String nickname = base;
+		int suffix = 1;
+		while (!isNicknameAvailable(nickname)) {
+			nickname = base + "_" + suffix++;
+			if (suffix > 100) { nickname = provider + "_" + System.currentTimeMillis(); break; }
+		}
+		return nickname;
 	}
 }
