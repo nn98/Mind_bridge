@@ -36,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/users/register",
             "/api/auth/refresh",
             "/api/users/find-id",
-            "/api/users/find-password",
+            "/api/users/find-password", // 비번찾기
+            "/api/auth/reset-password", // 임시비번 발급
             "/api/auth/social/kakao",
             "/actuator/health",
             "/error",
