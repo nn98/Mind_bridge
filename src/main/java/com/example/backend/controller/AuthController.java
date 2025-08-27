@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,6 @@ import com.example.backend.dto.auth.ResetPasswordRequest;
 import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.service.AuthService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +62,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
+        System.out.println("Logout Called");
         clearJwtCookie(response);
         return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다."));
     }
@@ -114,21 +115,29 @@ public class AuthController {
         }
     }
 
-    // === Private Utility Methods (HTTP 관련만) ===
+    // 로그인 시 쿠키 설정
     private void setJwtCookie(HttpServletResponse response, String token) {
-        Cookie jwtCookie = new Cookie("jwt", token);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(3600); // 1시간
-        jwtCookie.setSecure(true); // HTTPS 환경에서만
-        response.addCookie(jwtCookie);
+        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+            .httpOnly(true)
+            .secure(true)               // SameSite=None이면 필수
+            .path("/")
+            .maxAge(3600)
+            .sameSite("None")           // 크로스 도메인이라면 명시
+            // .domain("your.domain.com") // 필요 시 생성/삭제 모두 동일하게
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
+    // 로그아웃 시 쿠키 삭제
     private void clearJwtCookie(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("jwt", "");
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);
-        response.addCookie(jwtCookie);
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+            .httpOnly(true)
+            .secure(true)               // 생성 시와 동일
+            .path("/")
+            .maxAge(0)                  // 즉시 만료
+            .sameSite("None")           // 생성 시와 동일
+            // .domain("your.domain.com") // 생성 시와 동일
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 }
