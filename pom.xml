@@ -176,6 +176,7 @@
                     <release>17</release>
                     <encoding>UTF-8</encoding>
                     <annotationProcessorPaths>
+                        <parameters>true</parameters>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>

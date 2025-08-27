@@ -64,7 +64,8 @@ public class UserController {
      * @return 사용 가능 여부
      */
     @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam("email") String email) {
+        System.out.println("C-E: " + email);
         try {
             boolean isAvailable = userService.isEmailAvailable(email);
             return ResponseEntity.ok(
