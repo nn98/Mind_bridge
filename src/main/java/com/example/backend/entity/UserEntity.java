@@ -1,13 +1,21 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
@@ -65,4 +73,13 @@ public class UserEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
+    }
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

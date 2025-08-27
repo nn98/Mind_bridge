@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import java.util.Map;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -100,19 +101,25 @@ public class UserController {
      * @param authentication 인증 정보
      * @return 사용자 프로필
      */
+    // 프로필 조회: 민감 정보이므로 no-store 권장
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<Profile>> getUserProfile(Authentication authentication) {
         try {
             String email = authentication.getName();
-            return userService.getUserByEmail(email)
-                    .map(profile -> ResponseEntity.ok(ApiResponse.success(profile)))
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
-
+            Profile profile = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(ApiResponse.success(profile));
         } catch (Exception e) {
             log.error("사용자 정보 조회 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
         }
     }
 
@@ -142,21 +149,27 @@ public class UserController {
      * @param authentication 인증 정보
      * @return 수정된 사용자 프로필
      */
+    // 프로필 수정: 저장 직후 최신 DTO 반환 및 캐시 금지
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<Profile>> updateUser(
-            @Valid @RequestBody UpdateRequest request,
-            Authentication authentication) {
+        @RequestBody UpdateRequest request,
+        Authentication authentication) {
         try {
             String email = authentication.getName();
-            Profile updatedProfile = userService.updateUser(email, request);
-
+            Profile updated = userService.updateUser(email, request);
             log.info("사용자 정보 수정 완료: {}", email);
-            return ResponseEntity.ok(ApiResponse.success(updatedProfile));
-
+            return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(ApiResponse.success(updated));
         } catch (RuntimeException e) {
             log.error("사용자 정보 수정 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage(), null));
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(ApiResponse.error(e.getMessage(), null));
         }
     }
 
