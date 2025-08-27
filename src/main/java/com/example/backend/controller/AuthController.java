@@ -1,16 +1,8 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.auth.FindIdRequest;
-import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
-import com.example.backend.dto.auth.ResetPasswordRequest;
-import com.example.backend.dto.common.ApiResponse;
-import com.example.backend.service.AuthService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -19,11 +11,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.example.backend.dto.auth.FindIdRequest;
+import com.example.backend.dto.auth.LoginRequest;
+import com.example.backend.dto.auth.LoginResponse;
+import com.example.backend.dto.auth.ResetPasswordRequest;
+import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.service.AuthService;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 인증 관련 REST API 컨트롤러
- * 로그인, 아이디/비밀번호 찾기 등의 인증 기능 제공
+ * 인증 관련 REST API 컨트롤러 로그인, 아이디/비밀번호 찾기 등의 인증 기능 제공
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -89,15 +91,21 @@ public class AuthController {
      * 비밀번호 재설정
      */
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
-            boolean success = authService.resetPassword(request);
-            if (!success) {
+            String tempPassword = authService.resetPassword(request);
+
+            if (tempPassword == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error("해당 이메일로 등록된 계정이 없습니다.", null));
             }
 
-            return ResponseEntity.ok(ApiResponse.success("임시 비밀번호가 이메일로 발송되었습니다."));
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("tempPassword", tempPassword);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(responseData, "임시 비밀번호가 이메일로 발송되었습니다.")
+            );
 
         } catch (Exception e) {
             log.error("비밀번호 재설정 실패: {}", e.getMessage());
@@ -107,7 +115,6 @@ public class AuthController {
     }
 
     // === Private Utility Methods (HTTP 관련만) ===
-
     private void setJwtCookie(HttpServletResponse response, String token) {
         Cookie jwtCookie = new Cookie("jwt", token);
         jwtCookie.setHttpOnly(true);

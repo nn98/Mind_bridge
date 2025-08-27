@@ -1,20 +1,29 @@
 package com.example.backend.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.service.UserService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * 사용자 관리 관련 REST API 컨트롤러
@@ -134,7 +143,7 @@ public class UserController {
      * @param authentication 인증 정보
      * @return 수정된 사용자 프로필
      */
-    @PutMapping("/profile")
+    @PutMapping("/update")
     public ResponseEntity<ApiResponse<Profile>> updateUser(
             @Valid @RequestBody UpdateRequest request,
             Authentication authentication) {
