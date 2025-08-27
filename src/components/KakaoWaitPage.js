@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import jwt_decode from "jwt-decode";
 
 const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao/callback";
 
