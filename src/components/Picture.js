@@ -1,12 +1,31 @@
+// src/components/EmailComposer.jsx
 import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import emailjs from 'emailjs-com';
 import '../css/Picture.css';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
 const Toast = ({ message, show }) => (
-  <div className={`toast-message ${show ? 'show' : ''}`}>
-    {message}
-  </div>
+  <div className={`toast-message ${show ? 'show' : ''}`}>{message}</div>
 );
+
+/** AuthSection과 동일한 규약:
+ * - localStorage("token")에 토큰 저장
+ * - axios.defaults.headers.common.Authorization 로 기본 헤더 세팅
+ * 이 규약을 그대로 따라 /api/users/me 에서 이메일을 가져온다.
+ */
+function getBearerFromAuthSection() {
+  // 1) axios 기본 헤더 우선
+  const fromAxios = axios.defaults?.headers?.common?.Authorization;
+  if (fromAxios) return fromAxios;
+
+  // 2) localStorage("token")
+  const t = localStorage.getItem('token');
+  if (!t) return null;
+  // 이미 Bearer 접두어가 있다면 그대로, 아니면 붙여줌
+  return t.toLowerCase().startsWith('bearer ') ? t : `Bearer ${t}`;
+}
 
 function EmailComposer({ customUser, isCustomLoggedIn }) {
   const form = useRef();
@@ -23,30 +42,63 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
   const [userInfo, setUserInfo] = useState({ name: '', email: '' });
   const [isLoading, setIsLoading] = useState(true);
 
+  // 1) 먼저 부모가 내려준 로그인 정보 사용
   useEffect(() => {
+    if (isCustomLoggedIn && customUser) {
+      setUserInfo({
+        name: customUser.nickname || customUser.fullName || '사용자',
+        email: customUser.email || '이메일 정보 없음',
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (isCustomLoggedIn && !customUser) {
       setIsLoading(true);
       setUserInfo({ name: '사용자', email: '정보 로딩 중...' });
       return;
     }
 
-    // 로그인 완료 상태
-    if (isCustomLoggedIn && customUser) {
-      setUserInfo({
-        name: customUser.nickname || '사용자',
-        email: customUser.email || '이메일 정보 없음'
-      });
-    }
-    else {
-      setUserInfo({
-        name: '사용자',
-        email: '로그인이 필요합니다.'
-      });
-    }
-    setIsLoading(false);
+    // 2) 부모 props가 없으면, AuthSection 방식으로 토큰을 읽어 /api/users/me에서 불러오기
+    let mounted = true;
+    (async () => {
+      try {
+        setIsLoading(true);
+        const bearer = getBearerFromAuthSection();
+        if (!bearer) {
+          if (!mounted) return;
+          setUserInfo({ name: '사용자', email: '로그인이 필요합니다.' });
+          setIsLoading(false);
+          return;
+        }
 
+        // AuthSection과 동일하게 withCredentials 사용
+        const res = await axios.get(`${BACKEND_URL}/api/users/profile`, {
+          headers: { Authorization: bearer },
+          withCredentials: true,
+        });
+
+        const raw = res?.data;
+        const u = raw?.data ?? raw;
+        const email = u?.email ?? '이메일 정보 없음';
+        const name = u?.nickname || u?.fullName || u?.name || '사용자';
+
+        if (!mounted) return;
+        setUserInfo({ name, email });
+      } catch (err) {
+        if (!mounted) return;
+        setUserInfo({ name: '사용자', email: '로그인이 필요합니다.' });
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [customUser, isCustomLoggedIn]);
 
+  // contentEditable ↔ state 동기화(커서 유지)
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== message) {
       editorRef.current.innerHTML = message;
@@ -59,15 +111,15 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
     }
   }, [message]);
 
-  const displayToast = (message) => {
-    setToastMessage(message);
+  const displayToast = (msg) => {
+    setToastMessage(msg);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
 
   const sendEmail = (e) => {
     e.preventDefault();
-    if (!subject.trim() || !editorRef.current.textContent.trim()) {
+    if (!subject.trim() || !editorRef.current?.textContent?.trim()) {
       displayToast('제목과 내용을 모두 입력해주세요.');
       return;
     }
@@ -77,13 +129,15 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
     const templateID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
     const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
 
-    emailjs.sendForm(serviceID, templateID, form.current, publicKey)
+    emailjs
+      .sendForm(serviceID, templateID, form.current, publicKey)
       .then(() => {
         displayToast('메일이 성공적으로 전송되었습니다!');
         setSubject('');
         setMessage('');
-      }, (error) => {
-        displayToast('메일 전송에 실패했습니다: ' + error.text);
+      })
+      .catch((error) => {
+        displayToast('메일 전송에 실패했습니다: ' + (error?.text || error?.message || 'Unknown error'));
       })
       .finally(() => setIsSending(false));
   };
@@ -99,15 +153,11 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
     const apiAddress = process.env.REACT_APP_PICTURE_ADDRESS || 'https://api.openai.com/v1/images/generations';
 
     const promptTemplate = `
-  쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 $Picture 일러스트입니다.
-
-  1. 그림은 $Picture 에서 요구하는 사항을 우선시 하며 가장 중요한 것은 감정이 보여야 한다.
-
-  2. 요구하는 사항은 상담 결과를 제공하며 상황에 맞게 그림을 그려줘야 한다.
-
-  3. 상담받는 사람이 볼 수 있기에 그림체는 강압적이지 않게 보여야 한다.
-
-  `;
+쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 일러스트입니다.
+1. 아래 설명을 최우선 반영: "${imagePrompt}"
+2. 상담 맥락에 어울리도록 감정이 느껴지게.
+3. 강압적이지 않고 편안한 분위기.
+`;
 
     try {
       const res = await fetch(apiAddress, {
@@ -122,17 +172,26 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
         }),
       });
 
-      if (!res.ok) throw new Error((await res.json()).error.message);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
 
       const data = await res.json();
-      const newImageUrl = data.data.data[0].url;
-      const imageHtml = `<br><br><img src="${newImageUrl}" alt="${imagePrompt}" style="max-width: 400px; height: auto; display: block; margin: 16px auto; border-radius: 8px;" />`;
-      setMessage(prevMessage => prevMessage + imageHtml);
+      const newImageUrl = data?.data?.[0]?.url
+        ? data.data[0].url
+        : data?.data?.[0]?.b64_json
+          ? `data:image/png;base64,${data.data[0].b64_json}`
+          : null;
+
+      if (!newImageUrl) throw new Error('이미지 응답 파싱 실패');
+
+      const imageHtml = `<br><br><img src="${newImageUrl}" alt="${imagePrompt.replace(/"/g, '&quot;')}" style="max-width: 400px; height: auto; display: block; margin: 16px auto; border-radius: 8px;" />`;
+      setMessage((prev) => prev + imageHtml);
 
       displayToast('이미지가 생성되어 본문에 추가되었습니다!');
       setIsModalOpen(false);
       setImagePrompt('');
-
     } catch (err) {
       displayToast(`이미지 생성 실패: ${err.message}`);
     } finally {
@@ -159,7 +218,9 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
 
         <div className="field-row">
           <label className="field-label">보내는 사람</label>
-          <span className="field-value">{isLoading ? '로딩 중...' : `${userInfo.name} <${userInfo.email}>`}</span>
+          <span className="field-value">
+            {isLoading ? '로딩 중...' : `${userInfo.name} <${userInfo.email}>`}
+          </span>
         </div>
 
         <div className="field-row">
@@ -172,7 +233,7 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
           <input
             type="text"
             id="title"
-            name="title"
+            name="title"  // 현재 EmailJS 템플릿이 'title'을 참조한다면 유지하세요. (subject 쓰면 'subject'로 변경)
             placeholder="제목을 입력하세요"
             className="field-input"
             value={subject}
@@ -187,18 +248,14 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
             id="message-editor"
             className="composer-textarea"
             style={{ overflowY: 'auto' }}
-            contentEditable="true"
+            contentEditable
             onInput={handleContentChange}
-            suppressContentEditableWarning={true}
-          ></div>
+            suppressContentEditableWarning
+          />
+          {/* EmailJS 템플릿 변수명은 기존처럼 name/email 사용 */}
           <input type="hidden" name="name" value={userInfo.name} />
           <input type="hidden" name="email" value={userInfo.email} />
-          <textarea
-            name="message"
-            value={message}
-            readOnly
-            style={{ display: 'none' }}
-          />
+          <textarea name="message" value={message} readOnly style={{ display: 'none' }} />
         </div>
       </form>
 
@@ -220,7 +277,7 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
                 className="modal-textarea3"
                 value={imagePrompt}
                 onChange={(e) => setImagePrompt(e.target.value)}
-              ></textarea>
+              />
             </div>
             <div className="modal-footer3">
               <button

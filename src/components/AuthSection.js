@@ -28,6 +28,7 @@ const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
 const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+// 전역 Toast 컨테이너(한 번만 마운트)
 if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
   window.__WELCOME_TOAST_MOUNTED__ = true;
   const el = document.createElement("div");
@@ -46,6 +47,7 @@ if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
     />
   );
 }
+
 const TermsModal = ({ content, onClose, onConfirm }) => {
   return (
     <div className="modal-backdrop-2" onClick={onClose}>
@@ -128,7 +130,7 @@ const AuthSection = ({
   setIsCustomLoggedIn,
   setCustomUser,
 }) => {
-  const { profile, applyProfileUpdate, logoutSuccess } = useAuth();
+  const { applyProfileUpdate, logoutSuccess, fetchProfile } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -154,9 +156,24 @@ const AuthSection = ({
   const [foundId, setFoundId] = useState("");
   const [isIdModalOpen, setIsIdModalOpen] = useState(false);
 
+  const [submitting, setSubmitting] = useState(false);
+
   const navigate = useNavigate();
   const logoutExecuted = useRef(false);
 
+  // 인증 정보 영속화(공통): 토큰 응답이 있으면 저장, 없으면 쿠키 세션 마커 저장
+  const persistAuth = (payload) => {
+    const token = payload?.token || payload?.accessToken || null;
+    if (token) {
+      localStorage.setItem("token", token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      // 쿠키 세션 환경에서도 라우터-가드 통과용 마커
+      localStorage.setItem("token", "LOGIN");
+    }
+  };
+
+  // 카카오 SDK 로드
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://developers.kakao.com/sdk/js/kakao.js";
@@ -176,38 +193,41 @@ const AuthSection = ({
     };
   }, []);
 
+  // 소셜 로그인 처리
   useEffect(() => {
     const processSocialLogin = async (provider, code) => {
       try {
         const response = await axios.post(
           `${BACKEND_URL}/api/auth/social-login`,
-          {
-            provider,
-            code,
-          },
+          { provider, code },
           { withCredentials: true }
         );
 
-        const { token, user } = response.data;
-        localStorage.setItem("token", "LOGIN");
+        // 서버 포맷 방어적으로 처리 (data.data 또는 data)
+        const payload = response.data?.data || response.data || {};
+        const user = payload?.user || payload?.profile || {};
 
-        if (setCustomUser) setCustomUser(user);
-        if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
+        persistAuth(payload); // ✅ 토큰/마커 저장
+
+        applyProfileUpdate?.(user);
+        setCustomUser?.(user);
+        setIsCustomLoggedIn?.(true);
 
         const nickname = user?.nickname || "사용자";
-        toast.success(`${nickname}님 환영합니다!`, {
-          containerId: "welcome",
-        });
+        toast.success(`${nickname}님 환영합니다!`, { containerId: "welcome" });
 
+        fetchProfile();
+
+        // 쿼리 제거 후 홈 이동
         window.history.replaceState({}, "", "/login");
-        navigate("/");
+        navigate("/", { replace: true });
       } catch (err) {
         console.error(`${provider} login error:`, err);
         alert(
           err.response?.data?.message ||
           `${provider} 로그인 처리 중 오류가 발생했습니다.`
         );
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     };
 
@@ -218,29 +238,25 @@ const AuthSection = ({
     if (code && provider) {
       processSocialLogin(provider, code);
     }
-  }, [navigate, setIsCustomLoggedIn, setCustomUser]);
+  }, [navigate, setIsCustomLoggedIn, setCustomUser, applyProfileUpdate]);
 
+  // 로그아웃 처리
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
       logoutExecuted.current = true;
 
-      // 전역 상태 초기화는 응답 이후로 미루는 편이 네트워크 확인엔 유리
       axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true })
-          .then(() => {
-            toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
-          })
-          .catch(() => {
-            // 실패해도 UI 초기화는 진행
-          })
-          .finally(() => {
-            // 전역 상태/컨텍스트 초기화
-            try { logoutSuccess?.(); } catch {}
-            // 필요하다면 기존 커스텀 상태도 함께 초기화
-            try { setIsCustomLoggedIn?.(false); } catch {}
-            try { setCustomUser?.(null); } catch {}
-            // 네트워크 탭 확인을 위해 아주 짧게 지연 후 이동해도 좋음
-            setTimeout(() => navigate('/'), 1000);
-          });
+        .then(() => {
+          toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
+        })
+        .catch(() => {
+          // 실패해도 UI 초기화는 진행
+        })
+        .finally(() => {
+          try { logoutSuccess?.(); } catch {}
+          delete axios.defaults.headers.common['Authorization'];
+          setTimeout(() => navigate('/', { replace: true }), 500);
+        });
     }
   }, [type, navigate, logoutSuccess, setIsCustomLoggedIn, setCustomUser]);
 
@@ -324,6 +340,9 @@ const AuthSection = ({
   const handleSubmit = async () => {
     try {
       if (type === "login") {
+        if (submitting) return;
+        setSubmitting(true);
+
         const loginResponse = await axios.post(
           `${BACKEND_URL}/api/auth/login`,
           {
@@ -333,19 +352,28 @@ const AuthSection = ({
           { withCredentials: true }
         );
 
-        // 로그인 응답에서 사용자 정보 바로 가져오기
-        const user = loginResponse.data.data.profile;
-        console.log(user);
+        console.log("✅ loginResponse.data:", loginResponse.data);
 
-        if (setCustomUser) setCustomUser(user);
-        if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-        console.log()
+        const payload = loginResponse.data?.data || loginResponse.data || {};
+        console.log("✅ payload:", payload);
 
-        // 환영 토스트
-        const nickname = user?.nickname || "사용자";
-        toast.success(`${nickname}님 환영합니다!`);
+        const user = payload?.profile || payload?.user || {};
+        console.log("✅ user:", user);
 
-        navigate("/");
+        // ✅ 토큰/마커 저장 (쿠키 세션 환경 대응)
+        persistAuth(payload);
+
+        // 상태 갱신
+        applyProfileUpdate?.(user);
+        setCustomUser?.(user);
+        setIsCustomLoggedIn?.(true);
+
+        toast.success(`${user?.nickname || "사용자"}님 환영합니다!`);
+
+        // 안전한 전환
+        navigate("/", { replace: true });
+        setSubmitting(false);
+
       } else if (type === "signup") {
         if (
           Object.keys(errors).length > 0 ||
@@ -372,7 +400,7 @@ const AuthSection = ({
         }, { withCredentials: true });
 
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
-        navigate("/login");
+        navigate("/login", { replace: true });
 
       } else if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/auth/find-id`, {
@@ -401,6 +429,7 @@ const AuthSection = ({
         }
       }
     } catch (err) {
+      setSubmitting(false);
       console.error(`${type} error:`, err);
       alert(err.response?.data?.message || "요청 처리 중 오류가 발생했습니다.");
     }
@@ -422,24 +451,16 @@ const AuthSection = ({
       alert("카카오 로그인 설정이 올바르지 않습니다.");
       return;
     }
-    console.log(`KAKAO_REDIRECT_URI${KAKAO_REDIRECT_URI}`);
     window.Kakao.Auth.authorize({
       redirectUri: KAKAO_REDIRECT_URI,
       scope: "account_email,profile_nickname",
     });
-    const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
+    // 필요 시 직접 리디렉트 URL:
+    // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
     // window.location.href = authUrl;
   };
 
   const handleGoogleLogin = () => {
-    // const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    // const REDIRECT_URI = "http://localhost:3000/login";
-    // if (!GOOGLE_CLIENT_ID) {
-    //   alert("구글 로그인 설정이 올바르지 않습니다.");
-    //   return;
-    // }
-    // const scope = "openid profile email";
-    // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}&state=google`;
     window.location.href = BACKEND_URL + '/api/auth/social/google/login';
   };
 
@@ -497,11 +518,7 @@ const AuthSection = ({
             <Box className="form-section">
               <Link
                 to="/"
-                style={{
-                  display: "inline-block",
-                  width: "40px",
-                  height: "80px",
-                }}
+                style={{ display: "inline-block", width: "40px", height: "80px" }}
               >
                 <img
                   src="/img/로고1.png"
@@ -537,8 +554,9 @@ const AuthSection = ({
                 variant="contained"
                 sx={{ mt: 2, mb: 1 }}
                 onClick={handleSubmit}
+                disabled={submitting}
               >
-                로그인
+                {submitting ? "로그인 중..." : "로그인"}
               </Button>
 
               <Box className="social-buttons">
@@ -641,16 +659,9 @@ const AuthSection = ({
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    error={
-                      !!errors.email ||
-                      (emailCheck.message && !emailCheck.isAvailable)
-                    }
+                    error={!!errors.email || (emailCheck.message && !emailCheck.isAvailable)}
                     helperText={errors.email || emailCheck.message}
-                    sx={{
-                      "& .MuiFormHelperText-root": {
-                        color: emailCheck.isAvailable ? "green" : undefined,
-                      },
-                    }}
+                    sx={{ "& .MuiFormHelperText-root": { color: emailCheck.isAvailable ? "green" : undefined } }}
                   />
                   <Button
                     className="auth-button"
@@ -666,11 +677,7 @@ const AuthSection = ({
                       border: "none",
                     }}
                   >
-                    {emailCheck.isChecking ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      "중복확인"
-                    )}
+                    {emailCheck.isChecking ? <CircularProgress size={24} /> : "중복확인"}
                   </Button>
                 </Box>
                 <TextField
@@ -695,14 +702,9 @@ const AuthSection = ({
                   error={!!errors.password}
                   sx={{
                     "& .MuiInputBase-root": { backgroundColor: "#ffffffff" },
-                    "& .MuiFormHelperText-root": {
-                      backgroundColor: "transparent",
-                    },
+                    "& .MuiFormHelperText-root": { backgroundColor: "transparent" },
                   }}
-                  helperText={
-                    errors.password ||
-                    "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."
-                  }
+                  helperText={errors.password || "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."}
                 />
                 <TextField
                   className="input-wrapper"
@@ -718,15 +720,8 @@ const AuthSection = ({
                   helperText={errors.passwordConfirm}
                   sx={{ backgroundColor: "#ffffffff" }}
                 />
-                <FormControl
-                  component="fieldset"
-                  margin="normal"
-                  sx={{ flex: 2 }}
-                >
-                  <FormLabel
-                    component="legend"
-                    sx={{ mb: 1, fontSize: "0.8rem" }}
-                  >
+                <FormControl component="fieldset" margin="normal" sx={{ flex: 2 }}>
+                  <FormLabel component="legend" sx={{ mb: 1, fontSize: "0.8rem" }}>
                     성별
                   </FormLabel>
                   <ToggleButtonGroup
@@ -736,12 +731,8 @@ const AuthSection = ({
                     aria-label="gender selection"
                     fullWidth
                   >
-                    <ToggleButton value="male" aria-label="male">
-                      남성
-                    </ToggleButton>
-                    <ToggleButton value="female" aria-label="female">
-                      여성
-                    </ToggleButton>
+                    <ToggleButton value="male" aria-label="male">남성</ToggleButton>
+                    <ToggleButton value="female" aria-label="female">여성</ToggleButton>
                   </ToggleButtonGroup>
                 </FormControl>
                 <Button
@@ -760,14 +751,8 @@ const AuthSection = ({
                 </Box>
               </Box>
               <Box className="form-right-legend">
-                <FormControl
-                  component="fieldset"
-                  margin="normal"
-                  error={!!errors.mentalState}
-                >
-                  <FormLabel component="legend">
-                    내가 생각하는 나의 현재 상태
-                  </FormLabel>
+                <FormControl component="fieldset" margin="normal" error={!!errors.mentalState}>
+                  <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
                   <RadioGroup
                     row
                     name="mentalState"
@@ -775,24 +760,16 @@ const AuthSection = ({
                     onChange={handleChange}
                     className="radio-list"
                   >
-                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map(
-                      (state) => (
-                        <FormControlLabel
-                          key={state}
-                          value={state}
-                          control={
-                            <Radio
-                              sx={{ "&.Mui-checked": { color: "#a18cd1" } }}
-                            />
-                          }
-                          label={state}
-                        />
-                      )
-                    )}
+                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (
+                      <FormControlLabel
+                        key={state}
+                        value={state}
+                        control={<Radio sx={{ "&.Mui-checked": { color: "#a18cd1" } }} />}
+                        label={state}
+                      />
+                    ))}
                   </RadioGroup>
-                  {errors.mentalState && (
-                    <FormHelperText>{errors.mentalState}</FormHelperText>
-                  )}
+                  {errors.mentalState && <FormHelperText>{errors.mentalState}</FormHelperText>}
                 </FormControl>
                 <Box>
                   <FormControlLabel
@@ -811,25 +788,17 @@ const AuthSection = ({
                         <Button
                           variant="text"
                           onClick={handleOpenTermsModal}
-                          sx={{
-                            p: 0,
-                            color: "#a18cd1",
-                            textDecoration: "underline",
-                          }}
+                          sx={{ p: 0, color: "#a18cd1", textDecoration: "underline" }}
                         >
-                          {" "}
-                          서비스 이용약관{" "}
+                          {" "}서비스 이용약관{" "}
                         </Button>{" "}
                         에 동의합니다.{" "}
                       </Typography>
                     }
                   />
                   {!termsViewed && (
-                    <FormHelperText
-                      sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}
-                    >
-                      {" "}
-                      이용약관을 클릭하여 확인 후 동의해주세요.{" "}
+                    <FormHelperText sx={{ ml: "14px", color: "rgba(0, 0, 0, 0.6)" }}>
+                      {" "}이용약관을 클릭하여 확인 후 동의해주세요.{" "}
                     </FormHelperText>
                   )}
                 </Box>
@@ -850,19 +819,8 @@ const AuthSection = ({
             }}
           >
             <Box className="form-section">
-              <Link
-                to="/"
-                style={{
-                  display: "inline-block",
-                  width: "50px",
-                  height: "auto",
-                }}
-              >
-                <img
-                  src="/img/로고1.png"
-                  alt="Mind Bridge 로고"
-                  className="logo-login"
-                />
+              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
+                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
               </Link>
               <Typography variant="h4" component="h1" gutterBottom>
                 아이디 찾기
@@ -895,9 +853,7 @@ const AuthSection = ({
                 아이디 찾기
               </Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">
-                  로그인으로 돌아가기
-                </RouterLink>
+                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
               </Box>
             </Box>
           </Box>
@@ -915,19 +871,8 @@ const AuthSection = ({
             }}
           >
             <Box className="form-section">
-              <Link
-                to="/"
-                style={{
-                  display: "inline-block",
-                  width: "50px",
-                  height: "auto",
-                }}
-              >
-                <img
-                  src="/img/로고1.png"
-                  alt="Mind Bridge 로고"
-                  className="logo-login"
-                />
+              <Link to="/" style={{ display: "inline-block", width: "50px", height: "auto" }}>
+                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="logo-login" />
               </Link>
               <Typography variant="h4" component="h1" gutterBottom>
                 비밀번호 찾기
@@ -960,9 +905,7 @@ const AuthSection = ({
                 임시 비밀번호 발급
               </Button>
               <Box className="form-links">
-                <RouterLink to="/login" className="form-link">
-                  로그인으로 돌아가기
-                </RouterLink>
+                <RouterLink to="/login" className="form-link">로그인으로 돌아가기</RouterLink>
               </Box>
             </Box>
           </Box>
@@ -993,7 +936,7 @@ const AuthSection = ({
           email={foundId}
           onClose={() => {
             setIsIdModalOpen(false);
-            navigate("/login");
+            navigate("/login", { replace: true });
           }}
         />
       )}

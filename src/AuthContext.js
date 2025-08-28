@@ -1,5 +1,7 @@
 // AuthContext.js
-import React, { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import React, {
+    createContext, useContext, useEffect, useReducer, useRef, useCallback,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,25 +11,21 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const requiredFields = [
     'id', 'email', 'fullName', 'nickname', 'gender',
     'age', 'phoneNumber', 'mentalState',
-    // 'terms'
 ];
-
 const isFilled = (v) => v !== null && v !== undefined && v !== '';
 const isProfileComplete = (p) => !!p && requiredFields.every((f) => isFilled(p[f]));
 
-// 액션 타입
 const types = {
-    INIT_BOOT: 'INIT_BOOT',                 // 초기 로딩 시작
-    LOAD_PROFILE_SUCCESS: 'LOAD_PROFILE_SUCCESS', // 프로필 조회 성공
-    LOAD_PROFILE_FAILURE: 'LOAD_PROFILE_FAILURE', // 프로필 조회 실패
-    PROFILE_UPDATE_APPLIED: 'PROFILE_UPDATE_APPLIED', // 일부 필드 업데이트 적용
-    LOGOUT_LOCAL: 'LOGOUT_LOCAL',           // 클라이언트 상태만 정리
-    LOGOUT_SUCCESS: 'LOGOUT_SUCCESS',       // 서버 로그아웃 성공 후 정리
-    TOKEN_REFRESH_SUCCESS: 'TOKEN_REFRESH_SUCCESS', // 토큰 재발급 성공(선택)
-    SET_REDIRECT_GUARD: 'SET_REDIRECT_GUARD',       // 리다이렉트 1회 가드
+    INIT_BOOT: 'INIT_BOOT',
+    LOAD_PROFILE_SUCCESS: 'LOAD_PROFILE_SUCCESS',
+    LOAD_PROFILE_FAILURE: 'LOAD_PROFILE_FAILURE',
+    PROFILE_UPDATE_APPLIED: 'PROFILE_UPDATE_APPLIED',
+    LOGOUT_LOCAL: 'LOGOUT_LOCAL',
+    LOGOUT_SUCCESS: 'LOGOUT_SUCCESS',
+    TOKEN_REFRESH_SUCCESS: 'TOKEN_REFRESH_SUCCESS',
+    SET_REDIRECT_GUARD: 'SET_REDIRECT_GUARD',
 };
 
-// 전역 상태
 const initialState = {
     loading: true,
     profile: null,
@@ -35,7 +33,6 @@ const initialState = {
     navigatedOnce: false,
 };
 
-// 리듀서
 function authReducer(state, action) {
     switch (action.type) {
         case types.INIT_BOOT:
@@ -50,7 +47,7 @@ function authReducer(state, action) {
         case types.LOGOUT_SUCCESS:
             return { ...state, profile: null, error: null };
         case types.TOKEN_REFRESH_SUCCESS:
-            return state; // 필요시 토큰 관련 상태가 있다면 갱신
+            return state;
         case types.SET_REDIRECT_GUARD:
             return { ...state, navigatedOnce: true };
         default:
@@ -62,75 +59,84 @@ export const AuthProvider = ({ children }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const navigate = useNavigate();
     const location = useLocation();
+
+    // StrictMode 개발 모드 중복 실행 방지 플래그
+    // - 개발 모드에서 mount→unmount→remount 시 두 번째 진입을 즉시 무시한다. [2][3]
+    const bootOnceRef = useRef(false);
     const mountedRef = useRef(true);
 
-    // 1) 최초 마운트 시 1회 프로필 요청
+    // 외부에서도 재사용 가능한 프로필 재조회 액션
+    const fetchProfile = useCallback(async () => {
+        dispatch({ type: types.INIT_BOOT });
+        try {
+            const res = await axios.get(`${BACKEND_URL}/api/users/profile`, { withCredentials: true });
+            const data = res?.data?.data ?? null;
+            if (!mountedRef.current) return null;
+
+            dispatch({ type: types.LOAD_PROFILE_SUCCESS, payload: data });
+
+            if (data && !isProfileComplete(data)) {
+                if (location.pathname !== '/profile' && !state.navigatedOnce) {
+                    dispatch({ type: types.SET_REDIRECT_GUARD });
+                    navigate('/profile', { replace: true });
+                }
+            }
+            return data;
+        } catch (e) {
+            if (!mountedRef.current) return null;
+            dispatch({ type: types.LOAD_PROFILE_FAILURE, payload: e?.message });
+            return null;
+        }
+        // 의존성: navigate, location.pathname, state.navigatedOnce
+    }, [navigate, location.pathname, state.navigatedOnce]);
+
+    // 최초 부트스트랩(StrictMode 2회 실행 내성)
     useEffect(() => {
         mountedRef.current = true;
 
-        const fetchProfile = async () => {
-            dispatch({ type: types.INIT_BOOT });
-            try {
-                const res = await axios.get(`${BACKEND_URL}/api/users/profile`, { withCredentials: true });
-                const data = res?.data?.data ?? null;
-                if (!mountedRef.current) return;
-
-                // 성공
-                dispatch({ type: types.LOAD_PROFILE_SUCCESS, payload: data });
-
-                // 성공 + 불완전 -> /profile로 1회 이동 (단, /profile에서는 이동 금지)
-                if (data && !isProfileComplete(data)) {
-                    if (location.pathname !== '/profile' && !state.navigatedOnce) {
-                        dispatch({ type: types.SET_REDIRECT_GUARD });
-                        setTimeout(() => navigate('/profile', { replace: true }), 0);
-                    }
-                }
-            } catch (e) {
-                if (!mountedRef.current) return;
-                // 실패: 페이지 유지
-                dispatch({ type: types.LOAD_PROFILE_FAILURE, payload: e?.message });
-            }
-        };
+        // 개발 모드 StrictMode의 재마운트에서 두 번째 실행을 차단 [2][1]
+        if (bootOnceRef.current) {
+            return () => { mountedRef.current = false; };
+        }
+        bootOnceRef.current = true;
 
         fetchProfile();
 
         return () => { mountedRef.current = false; };
-        // 의존성 비워 최초 1회만 실행
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [fetchProfile]);
 
-    // 2) 라우트 전환 시 API 재호출 없이 상태만 보고 보조 라우팅
+    // 상태 기반 보조 라우팅(재조회 없이)
     useEffect(() => {
         if (state.loading) return;
-        if (location.pathname === '/profile') return; // /profile에서는 이동 금지
-
+        if (location.pathname === '/profile') return;
         if (state.profile && !isProfileComplete(state.profile)) {
             if (!state.navigatedOnce) {
                 dispatch({ type: types.SET_REDIRECT_GUARD });
                 navigate('/profile', { replace: true });
             }
         }
-        // 실패(profile === null) 또는 완전한 경우는 그대로 유지
     }, [state.loading, state.profile, state.navigatedOnce, location.pathname, navigate]);
 
     if (state.loading) return <div>Loading...</div>;
 
-    // 컨텍스트 값: 읽기 + 액션 래퍼
     const value = {
         profile: state.profile,
         error: state.error,
-        // 저장/수정 결과를 전역 상태에 반영
         applyProfileUpdate: (partial) =>
             dispatch({ type: types.PROFILE_UPDATE_APPLIED, payload: partial }),
-        // 로그아웃(서버 성공/실패와 무관하게 로컬 상태 정리)
         logoutLocal: () => dispatch({ type: types.LOGOUT_LOCAL }),
         logoutSuccess: () => dispatch({ type: types.LOGOUT_SUCCESS }),
         tokenRefreshSuccess: () => dispatch({ type: types.TOKEN_REFRESH_SUCCESS }),
         setRedirectGuard: () => dispatch({ type: types.SET_REDIRECT_GUARD }),
-        dispatch, // 필요 시 직접 액션 발행
+        fetchProfile, // 외부에서 로그인 직후/프로필 편집 후 재동기화에 사용
+        dispatch,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+    return ctx;
+};

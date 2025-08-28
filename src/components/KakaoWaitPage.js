@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from "../AuthContext";
 
 const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao/callback";
 
 
 function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
+  const [fetchProfile] = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -41,13 +43,7 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
 
         if (data.success) {
           setMessage('로그인 성공! 환영합니다.');
-
-          if (data.user) {
-            console.log('user:', data.user);
-            localStorage.setItem("token", "LOGIN");
-            if (setCustomUser) setCustomUser(data.user);
-            if (setIsCustomLoggedIn) setIsCustomLoggedIn(true);
-          }
+          fetchProfile();
 
           setTimeout(() => navigate('/'), 1000);
         } else {
@@ -65,10 +61,10 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
   }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn]);
 
   return (
-    <div>
-      <h2>카카오 로그인 처리 중</h2>
-      {loading ? <p>잠시만 기다려주세요...</p> : <p>{message}</p>}
-    </div>
+      <div>
+        <h2>카카오 로그인 처리 중</h2>
+        {loading ? <p>잠시만 기다려주세요...</p> : <p>{message}</p>}
+      </div>
   );
 }
 
