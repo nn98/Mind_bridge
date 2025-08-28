@@ -43,6 +43,12 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    background: none;
+    box-shadow: none;
+}
+.floating-button2:hover{
+    background: none;
+    box-shadow: none;
 }
 
 .modal-container {

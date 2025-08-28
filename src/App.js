@@ -68,12 +68,7 @@ const App = () => {
         <>
             {!hideShell && (
                 <>
-                    <FloatingSidebar
-                        mapVisible={mapVisible}
-                        setMapVisible={setMapVisible}
-                        faqVisible={faqVisible}
-                        setFaqVisible={setFaqVisible}
-                    />
+                    <FloatingSidebar scrollTargetSelector=".dash-content" />
                 </>
             )}
             {faqVisible && !hideShell && <Faq />}

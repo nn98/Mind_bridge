@@ -1,48 +1,77 @@
-const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible }) => {
+// FloatingSidebar.jsx
+import { useEffect, useState } from "react";
+
+const FloatingSidebar = ({ scrollTargetSelector, threshold = 120 }) => {
+  const [visible, setVisible] = useState(false);
+
+  // 실제 스크롤 대상 가져오기
+  const getTarget = () => {
+    if (scrollTargetSelector) {
+      const el = document.querySelector(scrollTargetSelector);
+      if (el) return el;
+    }
+    return window;
+  };
+
+  const getScrollTop = (t) => {
+    if (t === window) {
+      // 브라우저별 호환
+      return (
+        window.scrollY ??
+        document.documentElement.scrollTop ??
+        document.body.scrollTop ??
+        0
+      );
+    }
+    return t.scrollTop ?? 0;
+  };
+
+  useEffect(() => {
+    const target = getTarget();
+    if (!target) return;
+
+    const onScroll = () => {
+      const top = getScrollTop(target);
+      setVisible(top > threshold);
+    };
+
+    // 초기 상태 계산 + 리스너 등록
+    onScroll();
+    target.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      target.removeEventListener("scroll", onScroll);
+    };
+    // selector가 바뀌면 다시 바인딩
+  }, [scrollTargetSelector, threshold]);
+
   const handleScrollToTop = () => {
-    const root = document.getElementById('root');
-    if (root) {
-      root.scrollTo({ top: 0, behavior: 'smooth' });
+    const target = getTarget();
+    const opts = { top: 0, behavior: "smooth" };
+
+    if (target === window) {
+      window.scrollTo(opts);
+      // 사파리/레거시 대비
+      document.documentElement?.scrollTo?.(opts);
+      document.body?.scrollTo?.(opts);
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      target.scrollTo(opts);
     }
   };
 
-  const handleMapClick = () => {
-    setMapVisible(!mapVisible);
-  };
-
-  const handleFaqClick = () => {
-    setFaqVisible(!faqVisible);
-  };
+  if (!visible) return null;
 
   return (
-    <>
-      <div className="floating-sidebar">
-        {/* ✅ Q 버튼 (FAQ 박스) */}
-        <div className="floating-button1" onClick={handleFaqClick}>
-          {faqVisible ? (
-            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
-          ) : (
-            <img src="/img/qna.png" alt="자주묻는질문" style={{ width: '60px', height: '60px' }} />
-          )}
-        </div>
-
-        {/* 🗺 지도 버튼 */}
-        <div className="floating-button1" onClick={handleMapClick}>
-          {mapVisible ? (
-            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
-          ) : (
-            <img src="/img/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
-          )}
-        </div>
-
-        {/* ⬆ 위로 버튼 */}
-        <div className="floating-button2" onClick={handleScrollToTop}>
-          <img src="/img/up.png" alt="맨 위" style={{ width: '60px', height: '60px' }} />
-        </div>
-      </div>
-    </>
+    <div className="floating-sidebar">
+      <button
+        className="floating-button2"
+        onClick={handleScrollToTop}
+        aria-label="맨 위로"
+        type="button"
+      >
+        <img src="/img/up.png" alt="맨 위" style={{ width: 60, height: 60 }} />
+      </button>
+    </div>
   );
 };
 
