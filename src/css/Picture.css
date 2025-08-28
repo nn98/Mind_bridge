@@ -127,6 +127,7 @@ body {
     gap: 12px;
     padding: 12px 20px;
     border-bottom: 1px solid var(--line);
+    background: white;
 }
 
 .field-label {
@@ -161,7 +162,7 @@ body {
     padding: 18px 20px;
     font-size: 15px;
     line-height: 1.7;
-    background: transparent;
+    background: white;
 }
 
 .composer-textarea::placeholder {

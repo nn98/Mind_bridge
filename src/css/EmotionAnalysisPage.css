@@ -1,101 +1,178 @@
-/***** EmotionAnalysisPage.css — 깔끔/반응형 레이아웃 *****/
+/***** EmotionAnalysisPage.css — Aurora Glass Theme *****/
 
-/* 메인 래퍼: 가운데 정렬 + 적절한 최대폭 */
+/* ========== 기본 컬러 토큰 ========== */
+:root {
+    --bg: #0a0f1f;
+    --bg-2: #0d1326;
+
+    --surface: rgba(255, 255, 255, .08);
+    --surface-strong: rgba(255, 255, 255, .12);
+    --border: rgba(255, 255, 255, .18);
+
+    --text: #eaf1ff;
+    --text-weak: #b8c3d9;
+
+    --brand-1: #8b5cf6;
+    /* 보라 */
+    --brand-2: #22d3ee;
+    /* 민트 */
+    --brand-3: #34d399;
+    /* 그린 */
+
+    --glow: 0 20px 60px rgba(139, 92, 246, .25);
+
+    --radius: 16px;
+    --radius-sm: 12px;
+
+    --speed: .18s;
+
+    /* 감정 색상 (그래프/카드 공용) */
+    --happy-1: #fbbf24;
+    --happy-2: #f59e0b;
+    --sad-1: #60a5fa;
+    --sad-2: #3b82f6;
+    --ang-1: #f87171;
+    --ang-2: #ef4444;
+    --anx-1: #a78bfa;
+    --anx-2: #8b5cf6;
+    --cal-1: #34d399;
+    --cal-2: #10b981;
+}
+
+/* ========== 페이지 배경 ========== */
 .emotion-page {
-    max-width: 980px;
-    margin: 40px auto;
-    padding: 0 24px;
+    position: relative;
+    max-width: 880px;
+    margin: 28px auto;
+    padding: 0 18px;
+    color: var(--text);
+    isolation: isolate;
 }
 
-/* 카드: 배경/보더/그림자 */
+/* 오로라 그라데이션 (뒤 배경) */
+
+
+/* ========== 글래스 카드 ========== */
 .analysis-card {
-    background: var(--surface, #fff);
-    border: 1px solid var(--border, #e5e7eb);
-    border-radius: 16px;
-    box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, .06));
-    padding: 24px;
+    position: relative;
     width: 100%;
-    min-width: 0;
+    backdrop-filter: blur(14px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .06));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--glow);
+    overflow: clip;
 }
 
-/* 제목/부제 */
+/* 상단 라인 + 은은한 빛 */
+.analysis-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+    opacity: .85;
+}
+
+.analysis-card::after {
+    content: "";
+    position: absolute;
+    inset: -40% -20% 0 -20%;
+    background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .16), transparent 60%);
+    pointer-events: none;
+}
+
+/* ========== 타이포그래피 ========== */
 .analysis-title {
-    font-size: clamp(22px, 1.6vw + 14px, 32px);
-    font-weight: 900;
-    letter-spacing: -0.01em;
-    color: var(--text-strong, #1f2937);
-    margin: 0 0 6px;
+    margin: 2px 0 6px;
+    font-size: clamp(20px, 1.6vw + 12px, 28px);
+    font-weight: 800;
+    letter-spacing: -.01em;
 }
 
 .analysis-subtitle {
-    color: var(--text-muted, #6b7280);
-    margin: 0 0 18px;
+    margin: 0 0 12px;
+    color: var(--text-weak);
     line-height: 1.6;
+    font-size: 14px;
 }
 
-/* 입력 영역 */
+/* ========== 입력 영역(글래스) ========== */
 .analysis-textarea {
     width: 100%;
+    min-height: 140px;
     max-width: 100%;
-    min-height: 180px;
-    resize: none;
-    border: 1px solid var(--border, #e5e7eb);
-    border-radius: 12px;
+    resize: vertical;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     padding: 12px 14px;
-    line-height: 1.6;
-    font-size: 15px;
+    line-height: 1.55;
+    font-size: 14px;
     outline: none;
-    background: var(--surface, #fff);
+    transition: border-color var(--speed), box-shadow var(--speed), background var(--speed);
+}
+
+.analysis-textarea::placeholder {
+    color: #9fb0cc;
 }
 
 .analysis-textarea:focus {
-    border-color: var(--brand-400, #978eff);
-    box-shadow: 0 0 0 3px var(--ring, rgba(108, 99, 255, .35));
+    background: var(--surface-strong);
+    border-color: color-mix(in oklab, var(--brand-1) 55%, white 0%);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-1) 25%, transparent);
 }
 
-/* 버튼은 입력 아래에 자연스럽게 */
+/* ========== 버튼 ========== */
 .analysis-button {
-    margin-top: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    height: 44px;
+    margin-top: 10px;
+    height: 42px;
     padding: 0 16px;
     border-radius: 12px;
-    background: var(--brand, #6c63ff);
-    color: var(--brand-fg, #fff);
-    border: 1px solid var(--brand-700, #5b52e6);
-    font-weight: 700;
+    border: 1px solid color-mix(in oklab, var(--brand-1) 70%, black 0%);
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    font-weight: 800;
+    font-size: 14px;
     cursor: pointer;
-    box-shadow: var(--shadow, 0 8px 24px rgba(108, 99, 255, .15));
-    transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+    transition: transform .06s ease, box-shadow var(--speed), filter var(--speed);
+    box-shadow: 0 10px 28px rgba(139, 92, 246, .25);
 }
 
 .analysis-button:hover:enabled {
     transform: translateY(-1px);
-    box-shadow: 0 10px 30px rgba(108, 99, 255, .25);
+    filter: brightness(1.02);
+    box-shadow: 0 14px 36px rgba(34, 211, 238, .28);
 }
 
 .analysis-button:disabled {
-    opacity: .6;
+    opacity: .30;
     cursor: not-allowed;
+    color: #b6b6b6;
 }
 
-/* 로딩 스피너 */
+.analysis-button:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--brand-2) 45%, transparent);
+    outline-offset: 2px;
+}
+
+/* ========== 로딩 ========== */
 .loading-spinner-container {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .loading-spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(0, 0, 0, .15);
-    border-top-color: var(--brand, #6c63ff);
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    animation: spin 0.9s linear infinite;
+    border: 2px solid rgba(255, 255, 255, .18);
+    border-top-color: var(--brand-2);
+    animation: spin .9s linear infinite;
 }
 
 @keyframes spin {
@@ -104,32 +181,46 @@
     }
 }
 
-/* 결과 섹션 */
+/* ========== 결과 섹션 레이아웃 ========== */
 .results-section {
-    margin-top: 22px;
-    border-top: 1px dashed var(--border, #e5e7eb);
-    padding-top: 18px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, .15);
 }
 
 .results-title {
-    font-size: 18px;
+    margin: 0 0 10px;
+    font-size: 16px;
     font-weight: 800;
-    margin: 0 0 12px;
-    color: var(--text-strong, #1f2937);
 }
 
-/* 막대 그래프들 */
+/* 넓은 화면: 좌 그래프 / 우 메시지 */
+@media(min-width: 900px) {
+    .results-section {
+        display: grid;
+        grid-template-columns: 1.15fr .85fr;
+        gap: 14px 18px;
+        align-items: start;
+    }
+
+    .results-title {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ========== 그래프 ========== */
 .progress-bars-container {
     display: grid;
-    gap: 10px 14px;
+    gap: 8px 12px;
 }
 
 .progress-bar-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
-    color: var(--text, #374151);
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 13px;
 }
 
 .progress-bar-emotion-name {
@@ -137,15 +228,15 @@
 }
 
 .progress-bar-percentage {
-    color: var(--text-muted, #6b7280);
+    color: var(--text-weak);
 }
 
 .progress-bar-track {
     width: 100%;
     height: 12px;
     border-radius: 999px;
-    background: var(--surface-alt, #fafafa);
-    border: 1px solid var(--border, #e5e7eb);
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
     overflow: hidden;
 }
 
@@ -155,110 +246,185 @@
     align-items: center;
     justify-content: flex-end;
     padding-right: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    color: #0a0f1f;
     border-radius: 999px;
-    transition: width .35s ease;
+    transition: width .3s ease;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3);
 }
 
-/* 감정별 색상 */
+/* 감정별 그라데이션 */
 .progress-bar-fill.happiness {
-    background: linear-gradient(90deg, #fbd34d, #f59e0b);
+    background: linear-gradient(90deg, var(--happy-1), var(--happy-2));
 }
 
 .progress-bar-fill.sadness {
-    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    background: linear-gradient(90deg, var(--sad-1), var(--sad-2));
 }
 
 .progress-bar-fill.anger {
-    background: linear-gradient(90deg, #f87171, #ef4444);
+    background: linear-gradient(90deg, var(--ang-1), var(--ang-2));
 }
 
 .progress-bar-fill.anxiety {
-    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+    background: linear-gradient(90deg, var(--anx-1), var(--anx-2));
 }
 
 .progress-bar-fill.calmness {
-    background: linear-gradient(90deg, #34d399, #10b981);
+    background: linear-gradient(90deg, var(--cal-1), var(--cal-2));
 }
 
-/* 메시지 카드 */
+/* 퍼센트 텍스트 음영 */
+.progress-bar-fill span {
+    filter: drop-shadow(0 1px 2px rgba(255, 255, 255, .35));
+}
+
+/* ========== 메시지 카드 (글래스) ========== */
 .result-message-box {
-    margin-top: 16px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    line-height: 1.6;
+    font-size: 14px;
     border-radius: 14px;
-    padding: 14px 16px;
-    line-height: 1.7;
-    color: #fff;
+    color: #0a0f1f;
+    border: 1px solid rgba(255, 255, 255, .28);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .78));
+    box-shadow: 0 16px 36px rgba(0, 0, 0, .18);
 }
 
 .result-message-box.happiness {
-    background: linear-gradient(45deg, #f59e0b, #fbbf24);
+    background: linear-gradient(135deg, #fff6dd, #ffe9b4);
 }
 
 .result-message-box.sadness {
-    background: linear-gradient(45deg, #3b82f6, #60a5fa);
+    background: linear-gradient(135deg, #e7f0ff, #cfe2ff);
 }
 
 .result-message-box.anger {
-    background: linear-gradient(45deg, #ef4444, #f87171);
+    background: linear-gradient(135deg, #ffe4e2, #ffc9c5);
 }
 
 .result-message-box.anxiety {
-    background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(135deg, #eee7ff, #e2dbff);
 }
 
 .result-message-box.calmness {
-    background: linear-gradient(45deg, #10b981, #34d399);
+    background: linear-gradient(135deg, #dcffef, #c8ffe5);
 }
 
 .result-message-text {
     margin: 0;
+    color: #0b1020;
 }
 
-/* 모달 모드(옵션) */
+/* ========== 모달 ========== */
 .emotion-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .45);
+    z-index: 50;
     display: grid;
     place-items: center;
-    z-index: 50;
+    background: rgba(6, 9, 20, .55);
+    backdrop-filter: blur(6px);
 }
 
 .emotion-modal-content {
-    width: min(920px, calc(100vw - 40px));
-    max-height: calc(100vh - 80px);
+    width: min(880px, calc(100vw - 32px));
+    max-height: calc(100vh - 64px);
     overflow: auto;
+    border-radius: var(--radius);
 }
 
 #emotion-modal-close-btn {
     position: absolute;
-    right: 12px;
+    right: 10px;
     top: 8px;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 10px;
     border: 0;
-    background: var(--surface-alt, #fafafa);
-    color: var(--text, #374151);
-    font-size: 22px;
-    line-height: 1;
+    background: rgba(255, 255, 255, .85);
+    color: #0b1020;
+    font-size: 20px;
     cursor: pointer;
+    transition: transform .06s ease, filter var(--speed);
 }
 
-/* 반응형 */
-@media (max-width: 768px) {
+#emotion-modal-close-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+}
+
+#emotion-modal-close-btn:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--brand-2) 45%, transparent);
+    outline-offset: 2px;
+}
+
+/* ========== 스크롤바(웹킷) ========== */
+.emotion-page ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.emotion-page ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .15));
+    border-radius: 999px;
+    border: 2px solid transparent;
+}
+
+/* ========== 반응형 ========== */
+@media(max-width: 768px) {
     .emotion-page {
-        margin: 24px auto;
-        padding: 0 16px;
+        margin: 18px auto;
+        padding: 0 12px;
     }
 
     .analysis-card {
-        padding: 18px;
+        padding: 14px;
+        border-radius: 14px;
     }
 
     .analysis-textarea {
-        min-height: 160px;
+        min-height: 120px;
+    }
+}
+
+/* ========== 라이트 모드 (원하면 유지) ========== */
+@media (prefers-color-scheme: light) {
+    :root {
+        --text: #111827;
+        --text-weak: #6b7280;
+        --surface: rgba(255, 255, 255, .85);
+        --surface-strong: rgba(255, 255, 255, .95);
+        --border: rgba(17, 24, 39, .08);
+    }
+
+    .emotion-page {
+        color: var(--text);
+    }
+
+    .analysis-card {
+        background: rgba(255, 255, 255, .72);
+    }
+
+    .analysis-textarea {
+        color: var(--text);
+    }
+
+    .progress-bar-label {
+        color: var(--text);
+    }
+
+    .result-message-text {
+        color: #0b1020;
+    }
+}
+
+/* ========== 모션 선호도 ========== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
     }
 }
