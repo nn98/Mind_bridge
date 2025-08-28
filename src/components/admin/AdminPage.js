@@ -11,10 +11,12 @@ import EmotionStatus from "./components/EmotionStatus";
 import PostsPanel from "./components/PostsPanel";
 
 import { getAdminStats } from "./services/adminApi";
+import { useAuth } from "../../AuthContext";
 
-export default function AdminPage({ currentUser }) {
+export default function AdminPage() {
     const [search, setSearch] = useState("");
     const [date, setDate] = useState(dayjs());
+    const { profile } = useAuth();
 
     // 총 유저 / 총 게시글 / 유저 정보 배열
     const [stats, setStats] = useState({
@@ -46,7 +48,7 @@ export default function AdminPage({ currentUser }) {
     };
 
     // 권한 체크
-    if (!currentUser || currentUser.role !== "ADMIN") {
+    if (!profile || profile.role !== "ADMIN") {
         return <div className="admin-no-access">접근 권한이 없습니다.</div>;
     }
 
