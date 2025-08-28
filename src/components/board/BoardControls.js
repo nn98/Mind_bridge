@@ -5,8 +5,8 @@ const BoardControls = ({
     onChangeSort,
     searchQuery,
     onChangeSearch,
-    canWrite,
     onClickWrite,
+    profile,
 }) => {
     return (
         <div className="board-controls">
@@ -29,7 +29,7 @@ const BoardControls = ({
                     value={searchQuery}
                     onChange={(e) => onChangeSearch(e.target.value)}
                 />
-                {canWrite && <button onClick={onClickWrite}>작성하기</button>}
+                {profile && <button onClick={onClickWrite}>작성하기</button>}
             </div>
         </div>
     );

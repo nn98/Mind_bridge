@@ -4,9 +4,11 @@ import BoardControls from "./BoardControls";
 import WriteForm from "./WriteForm";
 import PostCard from "./PostCard";
 import '../../css/board.css';
+import { useAuth } from "../../AuthContext";
 
-const BoardSection = ({ user }) => {
-    const { posts, loading, error, addPost, editPost, removePost } = usePosts(user);
+const BoardSection = () => {
+    const { posts, loading, error, addPost, editPost, removePost } = usePosts();
+    const { profile } = useAuth();
   console.log(`posts: ${JSON.stringify(posts)}`);
 
     const [selectedBoard, setSelectedBoard] = useState("general");
@@ -48,8 +50,8 @@ const BoardSection = ({ user }) => {
                 onChangeSort={setSortOrder}
                 searchQuery={searchQuery}
                 onChangeSearch={setSearchQuery}
-                canWrite={!!user}
                 onClickWrite={() => setShowForm(true)}
+                profile={profile}
             />
 
             {showForm && (
@@ -72,7 +74,7 @@ const BoardSection = ({ user }) => {
                         <PostCard
                             key={post.id}
                             post={post}
-                            user={user}
+                            user={profile.email}
                             onEdit={editPost}
                             onDelete={removePost}
                         />
