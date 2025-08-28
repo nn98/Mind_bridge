@@ -6,8 +6,25 @@ import useKoreanHolidays from "../hooks/useKoreanHolidays";
 import HolidayPickersDay from "./HolidayPickersDay";
 
 const CalendarPanel = ({ date, setDate }) => {
-    const year = (date ? date.year() : dayjs().year());
+    const today = dayjs();
+    const safeDate = date && dayjs.isDayjs(date) ? date : today;
+
+    const year = safeDate.year();
     const { getHolidayName } = useKoreanHolidays(year);
+
+    // 각 날짜별 메타(공휴일/주말/타이틀) 계산 함수
+    const getMetaForDay = (d) => {
+        const jsDate = d.toDate();
+        const holidayName = getHolidayName(jsDate);
+        const isHolidayKR = !!holidayName;
+        const dow = d.day(); // 0: 일, 6: 토
+        return {
+            isHolidayKR,
+            isSunday: dow === 0,
+            isSaturday: dow === 6,
+            title: holidayName || undefined,
+        };
+    };
 
     return (
         <div className="section-container">
@@ -15,42 +32,17 @@ const CalendarPanel = ({ date, setDate }) => {
             <div className="section-wrapper">
                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                     <DateCalendar
-                        value={date}
+                        value={safeDate}
                         onChange={(newDate) => {
-                            setDate(newDate);
+                            setDate?.(newDate);
                             if (newDate?.isValid?.()) {
                                 console.log("선택된 날짜:", newDate.format("YYYY-MM-DD"));
                             }
                         }}
                         showDaysOutsideCurrentMonth
-                        renderDay={(day, _selectedDates, pickersDayProps) => {
-                            const d = day;
-                            const jsDate = d.toDate();
-                            const holidayName = getHolidayName(jsDate);
-                            const isHolidayKR = !!holidayName;
-                            const dow = d.day(); // 0: 일, 6: 토
-                            const isSunday = dow === 0;
-                            const isSaturday = dow === 6;
-
-                            if (pickersDayProps.outsideCurrentMonth) {
-                                return (
-                                    <HolidayPickersDay
-                                        {...pickersDayProps}
-                                        sx={{ color: "#bbb", opacity: 0.5 }}
-                                    />
-                                );
-                            }
-
-                            return (
-                                <HolidayPickersDay
-                                    {...pickersDayProps}
-                                    isHolidayKR={isHolidayKR}
-                                    isSunday={isSunday}
-                                    isSaturday={isSaturday}
-                                    title={holidayName || undefined}
-                                />
-                            );
-                        }}
+                        // 🔁 renderDay 대신 slots/slotProps 사용
+                        slots={{ day: HolidayPickersDay }}
+                        slotProps={{ day: { getMetaForDay } }}
                         sx={{
                             width: "100%",
                             height: "100%",
