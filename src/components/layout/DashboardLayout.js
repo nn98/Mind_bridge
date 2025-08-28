@@ -58,7 +58,7 @@ export default function DashboardLayout() {
       <div className="dash-wrap nav-open">
         <aside className="dash-sidebar">
           <div className="brand">
-            <img src="/img/로고1.png" alt="Mind Bridge 로고" className="avatar" />
+            <img src="/img/로고3.png" alt="Mind Bridge 로고" className="avatar" />
             <div className="brand-text"><div className="title">MindBridge</div></div>
           </div>
           {sections.map((sec) => (

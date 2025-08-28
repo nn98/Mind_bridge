@@ -23,7 +23,6 @@
 
 /* 좌측 사이드 + 우측 본문을 상단부터 나란히 배치 */
 .library-layout {
-    display: grid;
     grid-template-columns: 200px minmax(0, 1fr);
     gap: 32px;
     align-items: start;
@@ -57,14 +56,15 @@
     align-items: center;
     overflow-x: auto;
     /* 항목이 많아지면 가로 스크롤 */
-    border-bottom: 1px solid #eee;
     background: inherit;
     z-index: 5;
 }
 
 /* === [변경] 버튼을 알약형 가로 탭으로 === */
 .sidebar-button {
+    min-width: 80px;
     width: auto;
+    height: 44px;
     /* 가로 길이 자동(세로형의 100% 오버라이드) */
     padding: 10px 16px;
     margin: 0;
@@ -80,18 +80,19 @@
     /* 줄바꿈 방지 */
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    box-shadow: none;
 }
 
 .sidebar-button:hover {
     background-color: #eee9ff;
     border-color: #cfc3ff;
+    box-shadow: none;
 }
 
 .sidebar-button.active {
     background-color: #805dd1;
     color: #fff;
     border-color: #805dd1;
-    box-shadow: 0 2px 8px rgba(128, 93, 209, .25);
 }
 
 /* 본문 영역 */

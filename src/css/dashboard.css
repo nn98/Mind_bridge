@@ -110,13 +110,13 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #203150;
+
     color: var(--sidebar-icon);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, .08);
+
 }
 
 .brand-text .title {

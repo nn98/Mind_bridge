@@ -19,24 +19,6 @@ const FloatingSidebar = ({ mapVisible, setMapVisible, faqVisible, setFaqVisible 
   return (
     <>
       <div className="floating-sidebar">
-        {/* ✅ Q 버튼 (FAQ 박스) */}
-        <div className="floating-button1" onClick={handleFaqClick}>
-          {faqVisible ? (
-            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
-          ) : (
-            <img src="/img/qna.png" alt="자주묻는질문" style={{ width: '60px', height: '60px' }} />
-          )}
-        </div>
-
-        {/* 🗺 지도 버튼 */}
-        <div className="floating-button1" onClick={handleMapClick}>
-          {mapVisible ? (
-            <span style={{ fontSize: '32px', fontWeight: '900', color: 'white' }}>X</span>
-          ) : (
-            <img src="/img/map.png" alt="지도" style={{ width: '60px', height: '60px' }} />
-          )}
-        </div>
-
         {/* ⬆ 위로 버튼 */}
         <div className="floating-button2" onClick={handleScrollToTop}>
           <img src="/img/up.png" alt="맨 위" style={{ width: '60px', height: '60px' }} />
