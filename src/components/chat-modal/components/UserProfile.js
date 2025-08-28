@@ -12,15 +12,31 @@ const UserProfile = () => {
     const isLoggedIn = !!profile;
 
     const [userInfo, setUserInfo] = useState({
-        age: '',
-        gender: '',
+        fullName: '',
+        nickname: '',
         email: '',
         phoneNumber: '',
+        gender: '',
+        age: '',
         mentalState: '',
-        nickname: '',
-        chatGoal: '',
-        fullName: '',            // 추가
+        chatGoal: '',         // 추가
     });
+
+    // 프로필 완성 여부 판별용
+    const REQUIRED_FIELDS = ["fullName", "nickname", "email", "phoneNumber", "gender", "age", "mentalState", ];
+    const isEmpty = (v) => v === null || v === undefined || (typeof v === "string" && v.trim() === "");
+    function findMissingFields(obj, requiredKeys = REQUIRED_FIELDS) {
+        return requiredKeys.filter((k) => isEmpty(obj?.[k]));
+    }
+    const FIELD_LABELS = {
+        email: "이메일",
+        nickname: "닉네임",
+        age: "나이",
+        gender: "성별",
+        phoneNumber: "전화번호",
+        mentalState: "나의 상태",
+        fullName: "이름",
+    };
 
     const [editedInfo, setEditedInfo] = useState({ ...userInfo });
     const [isEditing, setIsEditing] = useState(false);
@@ -100,10 +116,33 @@ const UserProfile = () => {
                 fullName: profile?.fullName || '',  // 추가
             };
             try {
+                console.log(`cancel: ${cancel}`);
                 const normalized = normalizeUser(profile, fallbackFromProfile);
                 if (!cancel) {
                     setUserInfo(normalized);
                     setEditedInfo(normalized);
+
+                    // 누락 필드 수집
+                    const missing = findMissingFields(normalized);
+                    if (missing.length > 0) {
+                        // 요약 토스트 1건
+                        console.log(`missing: ${missing}`);
+                        const list = missing.map((k) => FIELD_LABELS[k] ?? k).join(", ");
+                        toast.info("회원 정보를 완성해주세요.", { containerId: "welcome", autoClose: 5000, });
+                        toast.warn(`${list}`, {
+                            containerId: "welcome",
+                            autoClose: 5000,
+                            closeOnClick: true,
+                        }); // [2][5]
+
+                        // 첫 누락 필드로 포커스 이동(선택)
+                        setIsEditing(true);
+                        const first = missing;
+                        requestAnimationFrame(() => {
+                            const el = document.querySelector(`[name="${first}"]`);
+                            if (el && typeof el.focus === "function") el.focus();
+                        });
+                    }
                 }
             } catch (e) {
                 console.error('프로필 초기화 실패:', e);

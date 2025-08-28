@@ -7,7 +7,6 @@ const BACKEND_API_URL = "http://localhost:8080/api/auth/social/kakao/callback";
 
 
 function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
-  const [fetchProfile] = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -16,6 +15,8 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
 
   // useRef로 중복 실행 제어용 플래그
   const hasProcessedRef = useRef(false);
+
+  const { fetchProfile } = useAuth();
 
   useEffect(() => {
     const code = searchParams.get('code');
