@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await axios.get(`${BACKEND_URL}/api/users/profile`, { withCredentials: true });
             const data = res?.data?.data ?? null;
+            console.log(data);
             if (!mountedRef.current) return null;
 
             dispatch({ type: types.LOAD_PROFILE_SUCCESS, payload: data });
