@@ -28,23 +28,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
-    // ★ 토큰 검사 제외 경로 (패턴 지원)
+    // 완전 제외(ignoring) 대상은 최소화
     private static final List<String> EXCLUDE_PATTERNS = List.of(
-        "/api/auth/login",
-        "/api/auth/refresh",
-        "/api/auth/social/kakao/login",
-        "/api/auth/social/google/login",
-        "/api/auth/social/google/callback",
-        "/api/auth/reset-password", // 임시비번 발급
-        "/api/users/find-id",
-        "/api/users/register",
-        "/api/users/check-email",
-        "/api/users/find-password",
         "/actuator/health",
         "/error",
         "/favicon.ico"
     );
-
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private boolean isExcluded(@NonNull String uri) {
@@ -54,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return false;
     }
 
-    // ★ OPTIONS(프리플라이트) + 화이트리스트는 아예 필터 스킵
     @Override
     protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
@@ -65,8 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
         @Nonnull HttpServletRequest request,
         @Nonnull HttpServletResponse response,
-        @Nonnull FilterChain filterChain)
-        throws ServletException, IOException {
+        @Nonnull FilterChain filterChain
+    ) throws ServletException, IOException {
 
         final String path = request.getRequestURI();
         final String authHeader = request.getHeader("Authorization");
@@ -74,38 +62,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = null;
 
-        // 1) Authorization Bearer 토큰 우선 추출
+        // 1) Authorization Bearer
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             log.debug("[JWT] Bearer token extracted");
-        } else {
-            // 2) 쿠키에서 jwt 토큰 보조 추출
-            if (request.getCookies() != null) {
-                for (var cookie : request.getCookies()) {
-                    if ("jwt".equals(cookie.getName())) {
-                        token = cookie.getValue();
-                        log.debug("[JWT] Cookie token extracted");
-                        break;
-                    }
+        } else if (request.getCookies() != null) {
+            // 2) Cookie fallback
+            for (var cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    log.debug("[JWT] Cookie token extracted");
+                    break;
                 }
             }
         }
 
-        // ★ 보호 경로인데 토큰이 전혀 없으면 401
+        // 토큰이 아예 없으면: 공개/비공개 구분은 Authorization 단계에 맡기고 그냥 패스
         if (token == null || token.isBlank()) {
-            log.warn("[JWT] No token for protected resource → 401");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            // 3) 토큰 유효성 검사
             if (!jwtUtil.validateToken(token)) {
                 log.warn("[JWT] Token validation failed → 401");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-
             final String email = jwtUtil.getEmailFromToken(token);
             if (email == null || email.isBlank()) {
                 log.warn("[JWT] Email missing in token → 401");
@@ -113,7 +96,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // 4) 사용자 로드 & SecurityContext 설정
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
             if (userDetails == null) {
                 log.warn("[JWT] UserDetails not found: {}", email);
@@ -127,9 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("[JWT] Auth success for {}", email);
-
             filterChain.doFilter(request, response);
-
         } catch (Exception e) {
             log.warn("[JWT] Exception: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
