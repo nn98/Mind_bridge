@@ -130,7 +130,7 @@ const AuthSection = ({
   setIsCustomLoggedIn,
   setCustomUser,
 }) => {
-  const { applyProfileUpdate, logoutSuccess } = useAuth();
+  const { applyProfileUpdate, logoutSuccess, fetchProfile } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -184,7 +184,7 @@ const AuthSection = ({
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
         window.Kakao.init(KAKAO_REST_API_KEY);
-        // console.log("Kakao SDK initialized:", window.Kakao.isInitialized());
+        console.log("Kakao SDK initialized:", window.Kakao.isInitialized());
       }
     };
 
@@ -215,6 +215,8 @@ const AuthSection = ({
 
         const nickname = user?.nickname || "사용자";
         toast.success(`${nickname}님 환영합니다!`, { containerId: "welcome" });
+
+        fetchProfile();
 
         // 쿼리 제거 후 홈 이동
         window.history.replaceState({}, "", "/login");
@@ -251,10 +253,7 @@ const AuthSection = ({
           // 실패해도 UI 초기화는 진행
         })
         .finally(() => {
-          try { logoutSuccess?.(); } catch { }
-          try { setIsCustomLoggedIn?.(false); } catch { }
-          try { setCustomUser?.(null); } catch { }
-          localStorage.removeItem("token");
+          try { logoutSuccess?.(); } catch {}
           delete axios.defaults.headers.common['Authorization'];
           setTimeout(() => navigate('/', { replace: true }), 500);
         });

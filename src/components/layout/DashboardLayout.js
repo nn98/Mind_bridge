@@ -11,15 +11,7 @@ export default function DashboardLayout() {
   const isAdmin = role === "ADMIN";
 
   const handleLogout = async (e) => {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-    try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
-    } catch {}
-    finally {
-      try { logoutSuccess?.(); } catch {}
-      setTimeout(() => navigate("/login", { replace: true }), 50);
-    }
+    navigate("/logout");
   };
 
   const menu = [

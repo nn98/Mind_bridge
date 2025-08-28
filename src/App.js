@@ -122,6 +122,7 @@ const App = () => {
 
                 {/* 인증/공용 라우트 */}
                 <Route path="/login" element={<AuthSection type="login" />} />
+                <Route path="/logout" element={<AuthSection type="logout" />} />
                 <Route path="/signup" element={<AuthSection type="signup" />} />
                 <Route path="/find-id" element={<AuthSection type="find-id" />} />
                 <Route path="/find-password" element={<AuthSection type="find-password" />} />
