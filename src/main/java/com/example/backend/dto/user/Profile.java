@@ -3,7 +3,7 @@ package com.example.backend.dto.user;
 import java.time.LocalDateTime;
 import lombok.*;
 
-@Getter @Setter @ToString
+@Getter @Setter @ToString @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class Profile {
     private Long id;
@@ -19,4 +19,5 @@ public class Profile {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String provider;
+
 }
