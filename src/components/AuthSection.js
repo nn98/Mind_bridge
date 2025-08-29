@@ -26,7 +26,7 @@ import { createRoot } from "react-dom/client";
 
 const KAKAO_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
 const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 // 전역 Toast 컨테이너(한 번만 마운트)
 if (typeof window !== "undefined" && !window.__WELCOME_TOAST_MOUNTED__) {
@@ -131,6 +131,8 @@ const AuthSection = ({
   setCustomUser,
 }) => {
   const { applyProfileUpdate, logoutSuccess, fetchProfile } = useAuth();
+
+  // ---------- state ----------
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -142,10 +144,11 @@ const AuthSection = ({
     age: "",
     gender: "",
   });
+
   const [errors, setErrors] = useState({});
   const [emailCheck, setEmailCheck] = useState({
     isChecking: false,
-    isAvailable: false,
+    isAvailable: null,
     message: "",
   });
 
@@ -155,21 +158,32 @@ const AuthSection = ({
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [foundId, setFoundId] = useState("");
   const [isIdModalOpen, setIsIdModalOpen] = useState(false);
-
   const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const logoutExecuted = useRef(false);
 
-  // 인증 정보 영속화(공통): 토큰 응답이 있으면 저장, 없으면 쿠키 세션 마커 저장
+  // ---------- validators ----------
+  const emailRegex =
+    /^[0-9a-zA-Z]([._-]?[0-9a-zA-Z])*@[0-9a-zA-Z]([._-]?[0-9a-zA-Z])*\.[a-zA-Z]{2,}$/;
+
+  const passwordRegex =
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+  const isPwOk = passwordRegex.test(formData.password);
+  const isPwMatch =
+    formData.password.length > 0 &&
+    formData.passwordConfirm.length > 0 &&
+    formData.password === formData.passwordConfirm;
+
+  // ---------- helpers ----------
   const persistAuth = (payload) => {
     const token = payload?.token || payload?.accessToken || null;
     if (token) {
       localStorage.setItem("token", token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      // 쿠키 세션 환경에서도 라우터-가드 통과용 마커
-      localStorage.setItem("token", "LOGIN");
+      localStorage.setItem("token", "LOGIN"); // 쿠키 세션 환경
     }
   };
 
@@ -180,7 +194,6 @@ const AuthSection = ({
     script.async = true;
 
     document.body.appendChild(script);
-
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
         window.Kakao.init(KAKAO_REST_API_KEY);
@@ -202,12 +215,9 @@ const AuthSection = ({
           { provider, code },
           { withCredentials: true }
         );
-
-        // 서버 포맷 방어적으로 처리 (data.data 또는 data)
         const payload = response.data?.data || response.data || {};
         const user = payload?.user || payload?.profile || {};
-
-        persistAuth(payload); // ✅ 토큰/마커 저장
+        persistAuth(payload);
 
         applyProfileUpdate?.(user);
         setCustomUser?.(user);
@@ -217,8 +227,6 @@ const AuthSection = ({
         toast.success(`${nickname}님 환영합니다!`, { containerId: "welcome" });
 
         fetchProfile();
-
-        // 쿼리 제거 후 홈 이동
         window.history.replaceState({}, "", "/login");
         navigate("/", { replace: true });
       } catch (err) {
@@ -244,21 +252,47 @@ const AuthSection = ({
   useEffect(() => {
     if (type === "logout" && !logoutExecuted.current) {
       logoutExecuted.current = true;
-
       axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true })
         .then(() => {
           toast.info("로그아웃 되었습니다!", { containerId: "welcome" });
         })
-        .catch(() => {
-          // 실패해도 UI 초기화는 진행
-        })
+        .catch(() => { })
         .finally(() => {
-          try { logoutSuccess?.(); } catch {}
+          try { logoutSuccess?.(); } catch { }
           delete axios.defaults.headers.common['Authorization'];
           setTimeout(() => navigate('/', { replace: true }), 500);
         });
     }
   }, [type, navigate, logoutSuccess, setIsCustomLoggedIn, setCustomUser]);
+
+  // ---------- field handlers ----------
+  const validateField = (name, value, currentData) => {
+    const newErrors = { ...errors };
+
+    if (name === "password" || name === "passwordConfirm") {
+      const { password, passwordConfirm } = currentData;
+      if (!passwordRegex.test(password || "")) {
+        newErrors.password = "8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.";
+      } else {
+        delete newErrors.password;
+      }
+      if (passwordConfirm && password !== passwordConfirm) {
+        newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+      } else {
+        delete newErrors.passwordConfirm;
+      }
+    }
+
+    if (name === "email") {
+      if (!emailRegex.test((value || "").trim())) {
+        newErrors.email = "올바른 이메일 형식이 아닙니다.";
+      } else {
+        delete newErrors.email;
+      }
+    }
+
+    setErrors(newErrors);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -270,8 +304,10 @@ const AuthSection = ({
       validateField(name, value, newData);
       return newData;
     });
+
     if (name === "email") {
-      setEmailCheck({ isChecking: false, isAvailable: false, message: "" });
+      // 이메일 변경 시 중복검사 상태 초기화
+      setEmailCheck({ isChecking: false, isAvailable: null, message: "" });
     }
   };
 
@@ -281,59 +317,59 @@ const AuthSection = ({
     }
   };
 
-  const validateField = (name, value, currentData) => {
-    const newErrors = { ...errors };
-    if (name === "password" || name === "passwordConfirm") {
-      const { password, passwordConfirm } = currentData;
-      if (passwordConfirm && password !== passwordConfirm) {
-        newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
-      } else {
-        delete newErrors.passwordConfirm;
-      }
-    }
-    if (name === "password") {
-      const passwordRegex =
-        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-      if (!passwordRegex.test(value)) {
-        newErrors.password =
-          "8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.";
-      } else {
-        delete newErrors.password;
-      }
-    }
-    setErrors(newErrors);
-  };
-
   const handleCheckEmail = async () => {
-    if (!formData.email) {
+    const email = (formData.email || "").trim();
+
+    if (!email) {
       setErrors((prev) => ({ ...prev, email: "이메일을 입력해주세요." }));
+      setEmailCheck({ isChecking: false, isAvailable: null, message: "" });
       return;
     }
-    setEmailCheck({ isChecking: true, isAvailable: false, message: "" });
+
+    if (!emailRegex.test(email)) {
+      setEmailCheck({
+        isChecking: false,
+        isAvailable: false,
+        message: "올바른 이메일 형식이 아닙니다.",
+      });
+      return;
+    }
+
+    setEmailCheck({ isChecking: true, isAvailable: null, message: "확인 중..." });
+
     try {
       const response = await axios.get(`${BACKEND_URL}/api/users/check-email`, {
-        params: { email: formData.email },
-        withCredentials: true
+        params: { email },
+        withCredentials: true,
       });
-      if (response.data.data.isAvailable) {
-        setEmailCheck({
-          isChecking: false,
-          isAvailable: true,
-          message: "사용 가능한 이메일입니다.",
-        });
-      } else {
+
+      // 응답 스키마 유연 처리: {available} 또는 {data:{isAvailable}}
+      let available = true;
+      if (typeof response.data?.available === "boolean") {
+        available = response.data.available;
+      } else if (typeof response.data?.data?.isAvailable === "boolean") {
+        available = response.data.data.isAvailable;
+      }
+
+      setEmailCheck({
+        isChecking: false,
+        isAvailable: available,
+        message: available ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.",
+      });
+    } catch (err) {
+      if (err?.response?.status === 409) {
         setEmailCheck({
           isChecking: false,
           isAvailable: false,
           message: "이미 사용 중인 이메일입니다.",
         });
+      } else {
+        setEmailCheck({
+          isChecking: false,
+          isAvailable: null,
+          message: "확인 중 오류가 발생했습니다.",
+        });
       }
-    } catch (err) {
-      setEmailCheck({
-        isChecking: false,
-        isAvailable: false,
-        message: "확인 중 오류가 발생했습니다.",
-      });
     }
   };
 
@@ -352,57 +388,68 @@ const AuthSection = ({
           { withCredentials: true }
         );
 
-        console.log("✅ loginResponse.data:", loginResponse.data);
-
         const payload = loginResponse.data?.data || loginResponse.data || {};
-        console.log("✅ payload:", payload);
-
         const user = payload?.profile || payload?.user || {};
-        console.log("✅ user:", user);
-
-        // ✅ 토큰/마커 저장 (쿠키 세션 환경 대응)
         persistAuth(payload);
 
-        // 상태 갱신
         applyProfileUpdate?.(user);
         setCustomUser?.(user);
         setIsCustomLoggedIn?.(true);
 
         toast.success(`${user?.nickname || "사용자"}님 환영합니다!`);
-
-        // 안전한 전환
         navigate("/", { replace: true });
         setSubmitting(false);
+        return;
+      }
 
-      } else if (type === "signup") {
-        if (
-          Object.keys(errors).length > 0 ||
-          !emailCheck.isAvailable ||
-          !formData.termsAgreed
-        ) {
-          let alertMessage = "입력 정보를 다시 확인해주세요.";
-          if (!emailCheck.isAvailable) {
-            alertMessage = "이메일 중복 확인을 완료해주세요.";
-          } else if (!formData.termsAgreed) {
-            alertMessage = "서비스 이용약관에 동의해야 합니다.";
-          }
-          alert(alertMessage);
+      if (type === "signup") {
+        const email = (formData.email || "").trim();
+
+        if (!emailRegex.test(email)) {
+          alert("올바른 이메일 형식이 아닙니다.");
           return;
         }
-        await axios.post(`${BACKEND_URL}/api/users/register`, {
-          email: formData.email,
-          password: formData.password,
-          nickname: formData.nickname,
-          phoneNumber: formData.phoneNumber,
-          mentalState: formData.mentalState,
-          age: formData.age,
-          gender: formData.gender,
-        }, { withCredentials: true });
+        if (emailCheck.isAvailable !== true) {
+          alert("이메일 중복 확인을 먼저 완료해주세요.");
+          return;
+        }
+        if (!passwordRegex.test(formData.password)) {
+          alert("비밀번호는 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.");
+          return;
+        }
+        if (formData.password !== formData.passwordConfirm) {
+          alert("비밀번호가 일치하지 않습니다.");
+          return;
+        }
+        if (!formData.termsAgreed) {
+          alert("서비스 이용약관에 동의해야 합니다.");
+          return;
+        }
+        if (Object.keys(errors).length > 0) {
+          alert("입력 정보를 다시 확인해주세요.");
+          return;
+        }
+
+        await axios.post(
+          `${BACKEND_URL}/api/users/register`,
+          {
+            email: email,
+            password: formData.password,
+            nickname: formData.nickname,
+            phoneNumber: formData.phoneNumber,
+            mentalState: formData.mentalState,
+            age: formData.age,
+            gender: formData.gender,
+          },
+          { withCredentials: true }
+        );
 
         alert("회원가입이 완료되었습니다. 로그인 해주세요.");
         navigate("/login", { replace: true });
+        return;
+      }
 
-      } else if (type === "find-id") {
+      if (type === "find-id") {
         const response = await axios.post(`${BACKEND_URL}/api/auth/find-id`, {
           phoneNumber: formData.phoneNumber,
           nickname: formData.nickname,
@@ -414,8 +461,10 @@ const AuthSection = ({
         } else {
           alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
         }
+        return;
+      }
 
-      } else if (type === "find-password") {
+      if (type === "find-password") {
         const response = await axios.post(`${BACKEND_URL}/api/auth/reset-password`, {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
@@ -427,6 +476,7 @@ const AuthSection = ({
         } else {
           alert("임시 비밀번호 발급에 실패했습니다.");
         }
+        return;
       }
     } catch (err) {
       setSubmitting(false);
@@ -448,19 +498,7 @@ const AuthSection = ({
 
   const handleKakaoLogin = () => {
     window.location.href = BACKEND_URL + '/api/auth/social/kakao/login';
-    // if (!KAKAO_REST_API_KEY) {
-    //   alert("카카오 로그인 설정이 올바르지 않습니다.");
-    //   return;
-    // }
-    // window.Kakao.Auth.authorize({
-    //   redirectUri: KAKAO_REDIRECT_URI,
-    //   scope: "account_email,profile_nickname",
-    // });
-    // 필요 시 직접 리디렉트 URL:
-    // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
-    // window.location.href = authUrl;
   };
-
   const handleGoogleLogin = () => {
     window.location.href = BACKEND_URL + '/api/auth/social/google/login';
   };
@@ -624,6 +662,7 @@ const AuthSection = ({
                 <Typography variant="h5" component="h2" gutterBottom>
                   회원가입
                 </Typography>
+
                 <TextField
                   className="input-wrapper"
                   margin="normal"
@@ -636,6 +675,7 @@ const AuthSection = ({
                   error={!!errors.nickname}
                   helperText={errors.nickname}
                 />
+
                 <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                   <TextField
                     className="input-wrapper"
@@ -650,6 +690,7 @@ const AuthSection = ({
                     sx={{ flex: 1 }}
                   />
                 </Box>
+
                 <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
                   <TextField
                     className="input-wrapper"
@@ -660,9 +701,20 @@ const AuthSection = ({
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    error={!!errors.email || (emailCheck.message && !emailCheck.isAvailable)}
-                    helperText={errors.email || emailCheck.message}
-                    sx={{ "& .MuiFormHelperText-root": { color: emailCheck.isAvailable ? "green" : undefined } }}
+                    error={
+                      !!errors.email ||
+                      (emailCheck.message && emailCheck.isAvailable === false)
+                    }
+                    helperText={
+                      errors.email ||
+                      (emailCheck.message || "중복 확인을 진행해주세요.")
+                    }
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        color:
+                          emailCheck.isAvailable ? "green" : undefined,
+                      },
+                    }}
                   />
                   <Button
                     className="auth-button"
@@ -681,6 +733,7 @@ const AuthSection = ({
                     {emailCheck.isChecking ? <CircularProgress size={24} /> : "중복확인"}
                   </Button>
                 </Box>
+
                 <TextField
                   className="input-wrapper"
                   margin="normal"
@@ -690,6 +743,7 @@ const AuthSection = ({
                   value={formData.phoneNumber}
                   onChange={handleChange}
                 />
+
                 <TextField
                   className="input-wrapper"
                   margin="normal"
@@ -707,6 +761,7 @@ const AuthSection = ({
                   }}
                   helperText={errors.password || "8자 이상, 영문, 숫자, 특수문자를 포함해주세요."}
                 />
+
                 <TextField
                   className="input-wrapper"
                   margin="normal"
@@ -718,9 +773,15 @@ const AuthSection = ({
                   value={formData.passwordConfirm}
                   onChange={handleChange}
                   error={!!errors.passwordConfirm}
-                  helperText={errors.passwordConfirm}
+                  helperText={
+                    errors.passwordConfirm ||
+                    (formData.passwordConfirm && isPwMatch
+                      ? "비밀번호가 일치합니다."
+                      : "")
+                  }
                   sx={{ backgroundColor: "#ffffffff" }}
                 />
+
                 <FormControl component="fieldset" margin="normal" sx={{ flex: 2 }}>
                   <FormLabel component="legend" sx={{ mb: 1, fontSize: "0.8rem" }}>
                     성별
@@ -736,6 +797,7 @@ const AuthSection = ({
                     <ToggleButton value="female" aria-label="female">여성</ToggleButton>
                   </ToggleButtonGroup>
                 </FormControl>
+
                 <Button
                   className="login-button"
                   fullWidth
@@ -745,12 +807,14 @@ const AuthSection = ({
                 >
                   가입하기
                 </Button>
+
                 <Box className="form-links">
                   <RouterLink to="/login" className="form-link">
                     이미 계정이 있으신가요? 로그인
                   </RouterLink>
                 </Box>
               </Box>
+
               <Box className="form-right-legend">
                 <FormControl component="fieldset" margin="normal" error={!!errors.mentalState}>
                   <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
@@ -772,6 +836,7 @@ const AuthSection = ({
                   </RadioGroup>
                   {errors.mentalState && <FormHelperText>{errors.mentalState}</FormHelperText>}
                 </FormControl>
+
                 <Box>
                   <FormControlLabel
                     control={
