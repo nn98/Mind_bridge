@@ -148,7 +148,7 @@ const AuthSection = ({
   const [errors, setErrors] = useState({});
   const [emailCheck, setEmailCheck] = useState({
     isChecking: false,
-    isAvailable: null, // true | false | null
+    isAvailable: null,
     message: "",
   });
 
@@ -317,7 +317,6 @@ const AuthSection = ({
     }
   };
 
-  // ---------- email duplicate check ----------
   const handleCheckEmail = async () => {
     const email = (formData.email || "").trim();
 
@@ -374,7 +373,6 @@ const AuthSection = ({
     }
   };
 
-  // ---------- submit ----------
   const handleSubmit = async () => {
     try {
       if (type === "login") {
@@ -405,7 +403,6 @@ const AuthSection = ({
       }
 
       if (type === "signup") {
-        // ---- 강력한 프론트 방어 로직 ----
         const email = (formData.email || "").trim();
 
         if (!emailRegex.test(email)) {
@@ -488,7 +485,6 @@ const AuthSection = ({
     }
   };
 
-  // ---------- terms modal ----------
   const handleOpenTermsModal = () => setIsTermsModalOpen(true);
   const handleCloseTermsModal = () => {
     setIsTermsModalOpen(false);
@@ -500,7 +496,6 @@ const AuthSection = ({
     setFormData((prev) => ({ ...prev, termsAgreed: true }));
   };
 
-  // ---------- social ----------
   const handleKakaoLogin = () => {
     window.location.href = BACKEND_URL + '/api/auth/social/kakao/login';
   };
@@ -508,7 +503,6 @@ const AuthSection = ({
     window.location.href = BACKEND_URL + '/api/auth/social/google/login';
   };
 
-  // ---------- terms content ----------
   const termsContent = `
 제1조 (목적)
 본 약관은 마인드브릿지(이하 '회사')가 제공하는 AI 테라피 솔루션 관련 제반 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
@@ -540,7 +534,6 @@ const AuthSection = ({
 2. 회원은 본 약관에서 규정하는 사항과 서비스 이용안내 또는 주의사항 등 회사가 공지하는 사항을 준수하여야 합니다.
 `;
 
-  // ---------- views ----------
   const renderForm = () => {
     switch (type) {
       case "logout":
