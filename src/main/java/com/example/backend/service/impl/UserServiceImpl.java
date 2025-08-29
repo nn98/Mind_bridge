@@ -102,32 +102,18 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public UserEntity findOrCreateSocialUser(String email, String nickname) {
-		Optional<UserEntity> userOpt = userRepository.findByEmail(email);
-		if (userOpt.isPresent()) return userOpt.get();
-		UserEntity u = new UserEntity();
-		u.setEmail(email);
-		u.setFullName(nickname != null ? nickname : "Social User");
-		u.setNickname(generateUniqueNickname(nickname));
-		u.setRole("USER");
-		u.setPassword("");
-		u.setAge(0);
-		u.setGender("unspecified");
-		return userRepository.save(u);
-	}
-
-	@Override
-	@Transactional
-	public UserEntity findOrCreateGoogleUser(String email, String nickname) {
-		return userRepository.findByEmail(email)
-			.orElseGet(() -> userRepository.save(createGoogleUser(email, nickname)));
-	}
-
-	@Override
-	@Transactional
-	public UserEntity findOrCreateKakaoUser(String email, String nickname) {
-		return userRepository.findByEmail(email)
-			.orElseGet(() -> userRepository.save(createKakaoUser(email, nickname)));
+	public UserEntity findOrCreateSocialUser(String email, String nickname, String provider) {
+		return userRepository.findByEmail(email).orElseGet(() -> {
+			UserEntity u = new UserEntity();
+			u.setEmail(email);
+			u.setFullName(nickname != null && !nickname.isBlank() ? nickname : provider + " User");
+			u.setNickname(generateUniqueNickname(nickname, provider));
+			u.setRole("USER");
+			u.setPassword("");            // 소셜 로그인 계정은 로컬 패스워드 미사용
+			u.setAge(0);
+			u.setGender("OTHER");
+			return userRepository.save(u);
+		});
 	}
 
 	private UserEntity createUserEntity(RegistrationRequest request) {
