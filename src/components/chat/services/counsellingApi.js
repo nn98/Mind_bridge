@@ -1,6 +1,7 @@
 const BACKEND_URL = "http://localhost:8080";
 
-export async function saveCounselling({ email, 상태, 상담받고싶은내용 }) {
+export async function saveCounselling({ email, chatHistory }) {
+
     const response = await fetch(`${BACKEND_URL}/api/chat/session/save`, {
         method: "POST",
         headers: {
@@ -10,9 +11,7 @@ export async function saveCounselling({ email, 상태, 상담받고싶은내용 
         credentials: 'include', // 쿠키 자동 전송
         body: JSON.stringify({
             email: email || "",
-            userCounsellingSummation: 상태 || "",
-            userCounsellingEmotion: 상담받고싶은내용 || "",
-            counselorSummation: "",
+            userChatSummary: JSON.stringify(chatHistory), //상담내용 전문
         }),
     });
 
