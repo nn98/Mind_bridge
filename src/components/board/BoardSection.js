@@ -74,7 +74,7 @@ const BoardSection = () => {
                         <PostCard
                             key={post.id}
                             post={post}
-                            user={profile.email}
+                            user={post.email}
                             onEdit={editPost}
                             onDelete={removePost}
                         />
