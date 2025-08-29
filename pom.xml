@@ -153,6 +153,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 선택: 메타데이터 생성용 프로세서. 런타임 필수는 아님 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
     <build>

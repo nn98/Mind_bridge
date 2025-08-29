@@ -16,7 +16,5 @@ public interface UserService {
     void deleteUser(String email);
     boolean isEmailAvailable(String email);
     boolean isNicknameAvailable(String nickname);
-    UserEntity findOrCreateSocialUser(String email, String nickname);
-    UserEntity findOrCreateGoogleUser(String email, String nickname);
-    UserEntity findOrCreateKakaoUser(String email, String nickname);
+    UserEntity findOrCreateSocialUser(String email, String nickname, String provider);
 }
