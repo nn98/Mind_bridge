@@ -128,12 +128,24 @@ const UserProfile = () => {
                         // 요약 토스트 1건
                         console.log(`missing: ${missing}`);
                         const list = missing.map((k) => FIELD_LABELS[k] ?? k).join(", ");
-                        toast.info("회원 정보를 완성해주세요.", { containerId: "welcome", autoClose: 5000, });
-                        toast.warn(`${list}`, {
-                            containerId: "welcome",
-                            autoClose: 5000,
-                            closeOnClick: true,
-                        }); // [2][5]
+                        toast.warn(
+                            <div style={{ marginLeft: 10 }}>
+                                <div style={{ fontWeight: 600, marginBottom: 0 }}>
+                                    원활한 서비스 이용을 위해
+                                </div>
+                                <div style={{ fontWeight: 600, marginBottom: 5 }}>
+                                    회원 정보를 완성해주세요!
+                                </div>
+                                <div style={{ fontWeight: 1000, color: '#8b5cf6', marginBottom: 10 }}>
+                                    {list}
+                                </div>
+                            </div>, { containerId: "welcome", autoClose: 5000, }
+                        );
+                        // toast.warn(`${list}`, {
+                        //     containerId: "welcome",
+                        //     autoClose: 5000,
+                        //     closeOnClick: true,
+                        // }); // [2][5]
 
                         // 첫 누락 필드로 포커스 이동(선택)
                         setIsEditing(true);
@@ -228,7 +240,7 @@ const UserProfile = () => {
                                 });
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
-                                handleLogout();
+                                await handleLogout();
                             } catch (error) {
                                 printAxiosError(error, '회원 탈퇴 처리 중 오류 발생');
                                 toast.dismiss(toastId);
