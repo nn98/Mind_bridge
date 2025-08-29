@@ -29,6 +29,8 @@
     font-size: 14px;
     border-radius: 6px;
     border: 1px solid #aaa;
+    background: #fff;
+    color: black;
 }
 
 .hospital-list {

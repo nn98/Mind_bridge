@@ -23,10 +23,12 @@ export default function Modal({ title, onClose, content = "" }) {
 
     return content.split('\n').map((line, i) => {
       const t = line.trim();
-      if (t.startsWith('### **')) {
+      console.log(t);
+      
+      if (t.startsWith('###')) {
         return (
           <h3 key={i} style={{ marginTop: '2em', marginBottom: '1em' }}>
-            {t.replace('### **', '').replace('**', '')}
+            {t.replace('###', '').replace('**', '')}
           </h3>
         );
       }

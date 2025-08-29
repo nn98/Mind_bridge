@@ -102,6 +102,7 @@
   resize: none;
   outline: none;
   transition: border 0.2s ease;
+  background: white;
 }
 
 .contact-form input:focus,
