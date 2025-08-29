@@ -447,14 +447,15 @@ const AuthSection = ({
   };
 
   const handleKakaoLogin = () => {
-    if (!KAKAO_REST_API_KEY) {
-      alert("카카오 로그인 설정이 올바르지 않습니다.");
-      return;
-    }
-    window.Kakao.Auth.authorize({
-      redirectUri: KAKAO_REDIRECT_URI,
-      scope: "account_email,profile_nickname",
-    });
+    window.location.href = BACKEND_URL + '/api/auth/social/kakao/login';
+    // if (!KAKAO_REST_API_KEY) {
+    //   alert("카카오 로그인 설정이 올바르지 않습니다.");
+    //   return;
+    // }
+    // window.Kakao.Auth.authorize({
+    //   redirectUri: KAKAO_REDIRECT_URI,
+    //   scope: "account_email,profile_nickname",
+    // });
     // 필요 시 직접 리디렉트 URL:
     // const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&state=kakao`;
     // window.location.href = authUrl;
