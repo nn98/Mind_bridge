@@ -24,9 +24,8 @@ import AboutSection from "./components/about/AboutSection/AboutSectionMain";
 import { BoardSection } from "./components/board/BoardSectionmain";
 import AuthSection from "./components/authSection/AuthSection/index";
 import FloatingSidebar from "./components/FloatingSidebar";
-import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
-import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
+import EmotionAnalysisPage from "./components/emotion/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/admin/AdminPage";
 import KakaoWaitPage from "./components/KakaoWaitPage";
@@ -71,7 +70,6 @@ const App = () => {
                     <FloatingSidebar scrollTargetSelector=".dash-content" />
                 </>
             )}
-            {faqVisible && !hideShell && <Faq />}
             {mapVisible && !hideShell && (
                 <div
                     style={{
