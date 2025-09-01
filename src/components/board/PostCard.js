@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { isOwner } from "./utils/auth";
 import { visibilityToLabel } from "./utils/visibility";
+import {useAuth} from "../../AuthContext";
 
 const PostCard = ({ post, user, onEdit, onDelete }) => {
+    const { profile } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(post.content);
     const [saving, setSaving] = useState(false);
 
-    const canEdit = isOwner(post, user)||
-    (user?.role && user.role.toUpperCase() === "ADMIN"); //관리자 권한이면 패스
+    const canEdit = isOwner(post, user) || (user?.role && user.role.toUpperCase() === "ADMIN"); //관리자 권한이면 패스
 
     const save = async () => {
         if (!editingContent.trim()) {
