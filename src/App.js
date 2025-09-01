@@ -18,7 +18,7 @@ import "./css/theme.css";
 
 // Pages & Layout
 import Map from "./components/map/Map";
-import Picture from "./components/Picture";
+import Picture from "./components/email/EmailComposer";
 import SelfTest from "./components/SelfTest";
 import AboutSection from "./components/about/AboutSection/AboutSectionMain";
 import { BoardSection } from "./components/board/BoardSectionmain";
