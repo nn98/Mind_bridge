@@ -172,7 +172,7 @@ export function useChatFlow({
             // 전체 수집 완료 → 상담 호출 진행
         }
 
-        //본격 상담 호출 (quick/질문지 공통)
+        //본격 상담 호출 (quick/질문지 공통) 
         try {
             setIsTyping(true);
 
@@ -194,7 +194,6 @@ export function useChatFlow({
             // 저장(실패해도 UX 영향 없도록)
             try {
                 await saveCounselling({
-                    token: localStorage.getItem("token"),
                     email: customUser?.email,
                     상태: finalForm["상태"],
                     상담받고싶은내용: finalForm["상담받고싶은내용"],
@@ -229,13 +228,23 @@ export function useChatFlow({
         enforceGreeting,
     ]);
 
-    const handleEndChat = useCallback(() => {
+    const handleEndChat = useCallback( async () => {
         setIsChatEnded(true);
         setChatHistory((prev) => [
             ...prev,
             { sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜" },
         ]);
-    }, []);
+        try {
+            await saveCounselling({
+                email: customUser?.email,
+                chatHistory: chatHistory, // 상담 대화 전문
+                종료여부: true, // 종료 플래그를 추가 (백엔드에서 처리할 수 있도록)
+                종료시간: new Date().toISOString(),
+            });
+        } catch (e) {
+            console.warn("상담 종료 저장 실패:", e);
+        }
+    }, [customUser, form]);
 
     const handleRestartChat = useCallback(() => {
         setIsChatEnded(false);

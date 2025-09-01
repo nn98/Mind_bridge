@@ -22,18 +22,17 @@ import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
 import AboutSection from "./components/about/AboutSection/AboutSectionMain";
 import { BoardSection } from "./components/board/BoardSectionmain";
-import AuthSection from "./components/AuthSection";
+import AuthSection from "./components/authSection/AuthSection/index";
 import FloatingSidebar from "./components/FloatingSidebar";
-import Faq from "./components/Faq";
 import HospitalRegionPage from "./components/HospitalRegionPage";
-import EmotionAnalysisPage from "./components/EmotionAnalysisPage";
+import EmotionAnalysisPage from "./components/emotion/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/admin/AdminPage";
 import KakaoWaitPage from "./components/KakaoWaitPage";
 import UserProfile from "./components/chat-modal/components/UserProfile";
 import HelpPage from "./components/HelpPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
-import AuthLoadingPage from "./components/AuthLoadingPage";
+import AuthLoadingPage from "./components/auth/AuthLoadingPage";
 import ChatConsult from "./components/dashboard/ChatConsult";
 
 // Route Guards
@@ -71,7 +70,6 @@ const App = () => {
                     <FloatingSidebar scrollTargetSelector=".dash-content" />
                 </>
             )}
-            {faqVisible && !hideShell && <Faq />}
             {mapVisible && !hideShell && (
                 <div
                     style={{
