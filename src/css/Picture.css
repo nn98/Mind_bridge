@@ -2,8 +2,6 @@
 
 /* =======================
    ✅ 항상 라이트 모드 강제
-   - OS/브라우저 다크모드 무시
-   - 폼/스크롤바까지 라이트로
 ======================= */
 :root,
 html,
@@ -31,20 +29,18 @@ body {
     --brand-3: #34d399;
     /* 그린 */
 
-    /* 보조 버튼 컬러 */
+    /* 보조 버튼 */
     --accent-1: #10b981;
-    /* 초록 */
     --accent-2: #34d399;
 
     --glow: 0 20px 60px rgba(139, 92, 246, .22);
 
     --radius: 18px;
     --radius-sm: 12px;
-
     --speed: .18s;
 }
 
-/* 전역 폰트/가독성 */
+/* 전역 폰트/배경 */
 html,
 body {
     -webkit-font-smoothing: antialiased;
@@ -57,20 +53,36 @@ body {
 }
 
 /* =========================
-   Composer — 글래스 카드
-   ========================= */
+   Composer — 글래스 카드 (우하단 고정 + 슬라이드)
+========================= */
 .composer-container {
-    position: relative;
-    max-width: 896px;
-    margin: 40px auto;
+    position: fixed;
+    right: 150px;
+    /* 필요시 조절 */
+    bottom: 0;
+    /* 필요시 32px 등으로 */
+    margin: 0 !important;
+
+    max-width: 420px;
+    width: min(420px, calc(100vw - 64px));
+    max-height: calc(100vh - 64px);
+
     background: rgba(255, 255, 255, .72);
-    /* 글래스 톤 */
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 0;
     box-shadow: var(--glow), 0 10px 28px rgba(0, 0, 0, .06);
     overflow: hidden;
     isolation: isolate;
+
+    /* 애니메이션 */
+    transform: translateY(0);
+    transition:
+        transform .25s cubic-bezier(.2, .7, .2, 1),
+        width .2s ease,
+        height .2s ease,
+        box-shadow .2s ease;
+    will-change: transform, width, height;
+    z-index: 1000;
 }
 
 /* 상단 그라데이션 라인 */
@@ -82,26 +94,73 @@ body {
     background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
     opacity: .9;
     z-index: 2;
-    /* 콘텐츠 위, ::after 아래 */
     border-radius: var(--radius) var(--radius) 0 0;
 }
 
-/* 뒤쪽 은은한 블러/하이라이트 */
+/* 뒤쪽 은은한 블러 */
 .composer-container::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 0;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .16), transparent 60%);
-    z-index: 0;
 }
 
-/* 내부는 블러 위 레이어 */
+/* 내부는 블러 위 */
 .composer-container>* {
     position: relative;
     z-index: 1;
+}
+
+/* ▼ 상태: 아래로 숨김 */
+.composer-container.is-hidden {
+    transform: translateY(calc(100% + 32px));
+    pointer-events: none;
+}
+
+/* ▼ 상태: 헤더만 보이게 접기 */
+.composer-container.is-collapsed {
+    height: 56px;
+    overflow: hidden;
+}
+
+/* ▼ 상태: 팝아웃(확대) */
+.composer-container.is-expanded {
+    /* 우하단 고정값 무시하고 화면 중앙으로 */
+    left: 50%;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+
+    /* 크기 크게 */
+    width: min(920px, calc(100vw - 64px));
+    height: min(80vh, calc(100vh - 64px));
+    max-height: none;
+
+    /* 가운데 정렬 */
+    transform: translate(-50%, -50%);
+
+    /* 더 강한 그림자 */
+    box-shadow: 0 24px 80px rgba(124, 58, 237, .18), 0 10px 24px rgba(0, 0, 0, .08);
+    border-radius: 20px;
+}
+
+/* 팝아웃용 배경 딤 */
+.composer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    opacity: 0;
+    transition: opacity .2s ease;
+    z-index: 999;
+    /* 창(1000) 바로 아래 */
+}
+
+.composer-backdrop.show {
+    opacity: 1;
 }
 
 /* 상단 버튼 바 */
@@ -112,6 +171,66 @@ body {
     padding: 16px 20px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+    min-height: 56px;
+    /* 접힘 높이 */
+}
+
+/* Gmail 스타일 윈도 버튼 그룹 */
+.composer-header .win-group {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+}
+
+.win-btn {
+    height: 30px;
+    min-width: 30px;
+    border-radius: 8px;
+    background: #eef2ff;
+    border: 1px solid rgba(0, 0, 0, .06);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background .15s ease, transform .06s ease, box-shadow .15s ease;
+}
+
+.win-btn:hover {
+    background: #e5eaff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.win-btn:active {
+    transform: translateY(1px);
+}
+
+.win-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: #374151;
+}
+
+/* 다시 올리는 FAB(숨김 상태) */
+.composer-fab {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6 55%, #22d3ee);
+    box-shadow: 0 10px 24px rgba(99, 102, 241, .25);
+    font-weight: 800;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.composer-fab.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 /* 버튼 */
@@ -134,20 +253,21 @@ body {
     cursor: not-allowed;
 }
 
-/* 보내기: 보라→민트 그라데이션 */
+/* 보내기(파랑) */
 .send-button {
     background: #0d6efd;
-    box-shadow: 0 10px 26px rgba(139, 92, 246, .22);
-    border-color: rgba(139, 92, 246, .25);
+    box-shadow: 0 10px 26px rgba(13, 110, 253, .22);
+    border-color: rgba(13, 110, 253, .25);
+    
 }
 
 .send-button:hover:not(:disabled) {
     transform: translateY(-1px);
     filter: brightness(1.02);
-    box-shadow: 0 14px 34px rgba(34, 211, 238, .28);
+    box-shadow: 0 14px 34px rgba(13, 110, 253, .32);
 }
 
-/* 이미지 생성: 초록 그라데이션 */
+/* 이미지 생성(초록) */
 .generate-button {
     background: #198754;
     box-shadow: 0 10px 26px rgba(16, 185, 129, .22);
@@ -164,7 +284,6 @@ body {
 .field-row {
     display: grid;
     grid-template-columns: 120px 1fr;
-    /* 라벨/값 비율 */
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
@@ -225,7 +344,7 @@ body {
 
 /* =========================
    Toast
-   ========================= */
+========================= */
 .toast-message {
     position: fixed;
     left: 50%;
@@ -254,7 +373,7 @@ body {
 
 /* =========================
    Modal (접미사 3)
-   ========================= */
+========================= */
 .modal-overlay3 {
     position: fixed;
     inset: 0;
@@ -350,7 +469,7 @@ body {
 
 /* =========================
    접근성 & 반응형
-   ========================= */
+========================= */
 .composer-button:focus-visible,
 .modal-close-button3:focus-visible,
 .modal-textarea3:focus-visible {
@@ -358,9 +477,17 @@ body {
     outline: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width:768px) {
     .composer-container {
-        margin: 24px 12px;
+        right: 16px;
+        bottom: 16px;
+        width: calc(100vw - 32px);
+        max-height: calc(100vh - 32px);
+    }
+
+    .composer-fab {
+        right: 16px;
+        bottom: 16px;
     }
 
     .composer-header {
@@ -382,7 +509,7 @@ body {
     }
 }
 
-/* ========== 모션 선호도 ========== */
+/* 모션 민감 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation: none !important;
@@ -390,4 +517,29 @@ body {
     }
 }
 
-/* ✅ 다크모드 반응 제거됐으므로, (prefers-color-scheme: light/dark) 관련 블록 없음 */
+/* 팝아웃(확대) 상태 - 가로폭 제한 해제 + 에디터도 키우기 */
+.composer-container.is-expanded {
+    left: 50%;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+
+    /* ✅ 가로폭 제한 해제 */
+    max-width: none;
+    /* ← 이 줄이 핵심 */
+    width: min(920px, calc(100vw - 64px));
+
+    /* 세로도 키우기 */
+    max-height: none;
+    height: min(80vh, calc(100vh - 64px));
+
+    transform: translate(-50%, -50%);
+    box-shadow: 0 24px 80px rgba(124, 58, 237, .18), 0 10px 24px rgba(0, 0, 0, .08);
+    border-radius: 20px;
+}
+
+/* 팝아웃 시 본문 에디터 높이도 확대 (오프셋은 필요에 따라 조절) */
+.composer-container.is-expanded .composer-textarea {
+    height: calc(80vh - 220px);
+    /* 헤더+필드 3줄 합친 높이만큼 빼기 */
+}
