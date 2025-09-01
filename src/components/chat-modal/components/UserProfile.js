@@ -282,7 +282,7 @@ const UserProfile = () => {
         <>
             <div className="tab-content user-profile">
                 <div className="profile-section">
-                    <h3>회원 정보</h3>
+                    <h3>{profile.role.toUpperCase() === 'ADMIN' ? '관리자' : '회원'} 정보</h3>
 
                     {/* 성명 */}
                     <div className="profile-field">

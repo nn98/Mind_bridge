@@ -26,8 +26,7 @@ export default function DashboardLayout() {
     { label: "지도", to: "/map", section: "서비스" },
 
     // 계정 관련
-    !isAdmin &&
-      isLoggedIn && { label: "회원정보", to: "/profile", section: "계정" },
+    isLoggedIn && { label: "회원정보", to: "/profile", section: "계정" },
     !isAdmin && { label: "도움말/문의하기", to: "/help", section: "계정" },
     isAdmin &&
       isLoggedIn && {

@@ -74,7 +74,6 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
 
         // AuthSection과 동일하게 withCredentials 사용
         const res = await axios.get(`${BACKEND_URL}/api/users/profile`, {
-          headers: { Authorization: bearer },
           withCredentials: true,
         });
 

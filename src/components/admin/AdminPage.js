@@ -48,7 +48,7 @@ export default function AdminPage() {
     };
 
     // 권한 체크
-    if (!profile || profile.role !== "ADMIN") {
+    if (!profile || profile.role.toUpperCase() !== "ADMIN") {
         return <div className="admin-no-access">접근 권한이 없습니다.</div>;
     }
 
