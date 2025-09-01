@@ -8,7 +8,7 @@ import com.example.backend.entity.ChatMessageEntity;
 public interface ChatService {
 
     // OpenAI 호출 포함 메시지 처리(세션ID 포함)
-    MessageResponse processMessage(String systemPrompt, Long sessionId, String userMessage);
+    MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage);
 
     // 새로운 채팅 세션 생성
     Long createNewSession(String email);

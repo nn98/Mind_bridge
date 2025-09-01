@@ -47,31 +47,41 @@ public class ChatServiceImpl implements ChatService {
 	// OpenAI API 호출하여 메시지 처리 (세션ID 포함)
 	@Override
 	@Transactional
-	public MessageResponse processMessage(String systemPrompt, Long sessionId, String userMessage) {
-		try {
-			if (userMessage != null && !userMessage.trim().isEmpty()) {
-				saveUserMessage(sessionId, userMessage);
-			}
-			String openAiResponse = callOpenAiApi(systemPrompt, userMessage);
-			MessageResponse parsedResponse = parseOpenAiResponse(openAiResponse);
-			parsedResponse.setSessionId(sessionId != null ? sessionId.toString() : "unknown");
-			saveAiMessage(sessionId, parsedResponse);
-			return parsedResponse;
-		} catch (Exception e) {
-			log.error("OpenAI API 호출 중 오류 발생: {}", e.getMessage(), e);
-			return createErrorResponse("OpenAI 응답 오류", sessionId);
+	public MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage) {
+		// 1) 세션 신설
+		ChatSessionEntity session = new ChatSessionEntity();
+		session.setUserEmail(userEmail);
+		session.setSessionStatus("IN_PROGRESS");
+		// 필요한 초기 필드가 있으면 설정
+		session = chatSessionRepository.save(session); // DB insert, auto_increment 채워짐
+
+		Long sessionId = session.getSessionId(); // 여기서 생성된 키 확보
+
+		// 2) 사용자 메시지 저장
+		if (userMessage != null && !userMessage.isBlank()) {
+			saveUserMessage(sessionId, userMessage);
 		}
+
+		// 3) OpenAI 호출
+		String openAiResponse = callOpenAiApi(systemPrompt, userMessage);
+
+		// 4) 파싱 + AI 메시지 저장
+		MessageResponse parsed = parseOpenAiResponse(openAiResponse);
+		parsed.setSessionId(sessionId);
+		saveAiMessage(sessionId, parsed);
+
+		return parsed;
 	}
 
 	// 새로운 채팅 세션 생성
 	@Override
 	@Transactional
-	public Long createNewSession(String email) {
+	public Long createNewSession(String userEmail) {
 		ChatSessionEntity session = new ChatSessionEntity();
-		session.setEmail(email);
+		session.setUserEmail(userEmail);
 		session.setSessionStatus("IN_PROGRESS");
 		ChatSessionEntity savedSession = chatSessionRepository.save(session);
-		log.info("새 채팅 세션 생성 - ID: {}, 사용자: {}", savedSession.getSessionId(), email);
+		log.info("새 채팅 세션 생성 - ID: {}, 사용자: {}", savedSession.getSessionId(), userEmail);
 		return savedSession.getSessionId();
 	}
 
@@ -184,7 +194,7 @@ public class ChatServiceImpl implements ChatService {
 		errorResponse.setCounselorResponse(errorMessage);
 		errorResponse.setSummary("시스템 오류");
 		errorResponse.setSessionEnd(false);
-		errorResponse.setSessionId(sessionId != null ? sessionId.toString() : "unknown");
+		errorResponse.setSessionId(sessionId != null ? sessionId : -1);
 		return errorResponse;
 	}
 }
