@@ -1,5 +1,17 @@
 package com.example.backend.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.backend.dto.chat.MessageRequest;
 import com.example.backend.dto.chat.MessageResponse;
 import com.example.backend.dto.chat.SessionHistory;
@@ -7,13 +19,10 @@ import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.service.ChatService;
 import com.example.backend.service.ChatSessionService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 채팅 관련 REST API 컨트롤러
@@ -46,15 +55,16 @@ public class ChatController {
      * 메시지 전송 및 AI 응답 받기
      */
     @PostMapping("/message")
-    public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(@Valid @RequestBody MessageRequest request) {
+    public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(@Valid @RequestBody MessageRequest request, Authentication authentication) {
         try {
-            Long sessionId = Long.parseLong(request.getSessionId());
+            System.out.println("Request: " + request);
 
             MessageResponse response = chatService.processMessage(
                     request.getSystemPrompt(),
-                    sessionId,
+                    authentication.getName(),
                     request.getUserMessage()
             );
+            Long sessionId = response.getSessionId();
 
             log.info("메시지 처리 완료 - 세션ID: {}", sessionId);
             return ResponseEntity.ok(ApiResponse.success(response));
@@ -95,7 +105,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<SessionHistory>> saveSession(@Valid @RequestBody SessionRequest request) {
         try {
             SessionHistory savedSession = chatSessionService.saveSession(request);
-            log.info("채팅 세션 저장 완료 - 사용자: {}", request.getEmail());
+            log.info("채팅 세션 저장 완료 - 사용자: {}", request.getUserEmail());
             return ResponseEntity.ok(ApiResponse.success(savedSession));
         } catch (Exception e) {
             log.error("채팅 세션 저장 실패: {}", e.getMessage());
@@ -108,10 +118,10 @@ public class ChatController {
      * 사용자별 채팅 세션 목록 조회
      */
     @GetMapping("/sessions")
-    public ResponseEntity<ApiResponse<List<SessionHistory>>> getUserSessions(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<List<SessionHistory>>> getUserSessions(@RequestParam String userEmail) {
         try {
-            List<SessionHistory> sessions = chatSessionService.getSessionsByEmail(email);
-            log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", email, sessions.size());
+            List<SessionHistory> sessions = chatSessionService.getSessionsByUserEmail(userEmail);
+            log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", userEmail, sessions.size());
             return ResponseEntity.ok(ApiResponse.success(sessions));
         } catch (Exception e) {
             log.error("채팅 세션 조회 실패: {}", e.getMessage());

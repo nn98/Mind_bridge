@@ -29,27 +29,27 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 	public SessionHistory saveSession(SessionRequest request) {
 		ChatSessionEntity entity = createChatSessionEntity(request);
 		ChatSessionEntity savedEntity = chatSessionRepository.save(entity);
-		log.info("새 채팅 세션 저장 완료 - ID: {}, 사용자: {}", savedEntity.getSessionId(), savedEntity.getEmail());
+		log.info("새 채팅 세션 저장 완료 - ID: {}, 사용자: {}", savedEntity.getSessionId(), savedEntity.getUserEmail());
 		return mapToSessionHistory(savedEntity);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<SessionHistory> getSessionsByEmail(String email) {
-		List<ChatSessionEntity> sessions = chatSessionRepository.findByEmailOrderByCreatedAtDesc(email);
+	public List<SessionHistory> getSessionsByUserEmail(String userEmail) {
+		List<ChatSessionEntity> sessions = chatSessionRepository.findByUserEmailOrderByCreatedAtDesc(userEmail);
 		return sessions.stream().map(this::mapToSessionHistory).collect(Collectors.toList());
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public long getCompletedSessionCount(String email) {
-		return chatSessionRepository.countCompletedSessionsByEmail(email);
+	public long getCompletedSessionCount(String userEmail) {
+		return chatSessionRepository.countCompletedSessionsByUserEmail(userEmail);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<SessionHistory> getActiveSession(String email) {
-		return chatSessionRepository.findByEmailAndSessionStatus(email, "IN_PROGRESS")
+	public Optional<SessionHistory> getActiveSession(String userEmail) {
+		return chatSessionRepository.findByUserEmailAndSessionStatus(userEmail, "IN_PROGRESS")
 			.map(this::mapToSessionHistory);
 	}
 
@@ -57,7 +57,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 
 	private ChatSessionEntity createChatSessionEntity(SessionRequest request) {
 		ChatSessionEntity entity = new ChatSessionEntity();
-		entity.setEmail(request.getEmail());
+		entity.setUserEmail(request.getUserEmail());
 		entity.setUserChatSummary(request.getUserChatSummary());
 		entity.setUserEmotionAnalysis(request.getUserEmotionAnalysis());
 		entity.setAiResponseSummary(request.getAiResponseSummary());
@@ -69,7 +69,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 	private SessionHistory mapToSessionHistory(ChatSessionEntity entity) {
 		return new SessionHistory(
 			entity.getSessionId(),
-			entity.getEmail(),
+			entity.getUserEmail(),
 			entity.getUserChatSummary(),
 			entity.getUserEmotionAnalysis(),
 			entity.getAiResponseSummary(),
