@@ -17,7 +17,7 @@ import "./css/dashboard.css";
 import "./css/theme.css";
 
 // Pages & Layout
-import Map from "./components/Map";
+import Map from "./components/map/Map";
 import Picture from "./components/Picture";
 import SelfTest from "./components/SelfTest";
 import AboutSection from "./components/about/AboutSection/AboutSectionMain";
