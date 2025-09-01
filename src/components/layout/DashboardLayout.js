@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
-import axios from "axios";
+import { Link } from "react-router-dom";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -87,13 +87,15 @@ export default function DashboardLayout() {
 
   return (
     <div className="dash-wrap nav-open">
-      <aside className="dash-sidebar">
-        <div className="brand">
+    <aside className="dash-sidebar">
+      <div className="brand">
+        <Link to="/" className="brand" aria-label="챗 상담으로 이동">
           <img src="/img/로고3.png" alt="Mind Bridge 로고" className="avatar" />
           <div className="brand-text">
             <div className="title">MindBridge</div>
           </div>
-        </div>
+        </Link>
+      </div>
 
         {/* 위쪽 메뉴들: '계정'과 '로그인' 제외 (탐색/서비스 등만) */}
         <div className="sidebar-top">
