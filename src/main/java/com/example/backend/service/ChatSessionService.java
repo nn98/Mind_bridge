@@ -9,7 +9,7 @@ import com.example.backend.dto.chat.SessionRequest;
 
 public interface ChatSessionService {
     SessionHistory saveSession(SessionRequest request);
-    List<SessionHistory> getSessionsByEmail(String email);
-    long getCompletedSessionCount(String email);
-    Optional<SessionHistory> getActiveSession(String email);
+    List<SessionHistory> getSessionsByUserEmail(String userEmail);
+    long getCompletedSessionCount(String userEmail);
+    Optional<SessionHistory> getActiveSession(String userEmail);
 }
