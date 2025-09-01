@@ -82,11 +82,6 @@ button {
   color: white;
 }
 
-button:hover {
-  background-color: #805dd1;
-  color: white;
-}
-
 /* 작성 폼 */
 .write-form {
   background: #f8f9fc;
