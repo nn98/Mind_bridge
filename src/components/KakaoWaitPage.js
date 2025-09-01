@@ -59,7 +59,7 @@ function KakaoWaitPage({ setCustomUser, setIsCustomLoggedIn }) {
     loginProcess();
 
     // Cleanup 함수 필요 없으므로 생략
-  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn]);
+  }, [searchParams, navigate, setCustomUser, setIsCustomLoggedIn, fetchProfile]);
 
   return (
       <div>

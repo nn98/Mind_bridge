@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import {toast} from "react-toastify";
 
 const AuthContext = createContext(null);
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
