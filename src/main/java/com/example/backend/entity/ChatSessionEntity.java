@@ -1,13 +1,20 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 채팅 세션 엔티티 (세션 전체 정보)
@@ -24,8 +31,8 @@ public class ChatSessionEntity {
     @Column(name = "session_id")  // DB 컬럼명과 정확히 매핑
     private Long sessionId;
 
-    @Column(nullable = false, length = 255)
-    private String email;
+    @Column(name = "user_email", nullable = false, length = 255)
+    private String userEmail;
 
     @Column(name = "user_chat_summary", columnDefinition = "TEXT")
     private String userChatSummary;

@@ -4,9 +4,11 @@ package com.example.backend.dto.chat;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class MessageRequest {
 
     @NotBlank(message = "시스템 프롬프트는 필수입니다")

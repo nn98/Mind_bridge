@@ -15,7 +15,7 @@ public class SessionRequest {
 
     @NotBlank(message = "이메일은 필수입니다")
     @Email(message = "올바른 이메일 형식이 아닙니다")
-    private String email;
+    private String userEmail;
 
     @Size(max = 1000, message = "사용자 대화 요약은 1000자 이내로 입력해주세요")
     private String userChatSummary; // userCounsellingSummation → userChatSummary
