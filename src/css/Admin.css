@@ -1,3 +1,26 @@
+/* =======================
+   ✅ 항상 라이트 모드 강제
+   - OS/브라우저 다크모드 무시
+   - 폼/스크롤바까지 라이트로
+======================= */
+:root,
+html,
+body {
+    color-scheme: light !important;
+}
+
+/* 라이트 모드 기본 토큰 (var() 사용처에 적용) */
+:root {
+    --mb-bg: #ffffff;
+    --mb-fg: #111111;
+    --mb-card: #ffffff;
+    --mb-head: #f7f8fa;
+    --mb-head-fg: #333333;
+    --mb-border: #e3e5e8;
+    --mb-row-border: #eef0f3;
+    --mb-hover: #f5f7ff;
+}
+
 /* 관리자 대시보드 공통 레이아웃 */
 .admin-header {
     display: flex;
@@ -95,7 +118,7 @@
 
 /* ✅ 테이블 스크롤 전용 박스 */
 .table-scroll {
-    max-height: 420px;
+    max-height: 94.5%;
     /* 원하는 높이로 조절 */
     overflow-y: auto;
     /* 세로 스크롤 */
@@ -136,6 +159,29 @@
 
 .admin-user tr:hover {
     background-color: #f9f9f9;
+}
+
+/* ============================
+   닉네임 열(첫 번째 열) 너비 축소
+   - 길면 … 처리, 줄바꿈 방지
+============================ */
+.admin-user th:first-child,
+.admin-user td:first-child {
+    width: 120px;
+    /* 필요시 90~140px 사이로 조절 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* (선택) 이메일/전화번호는 자동 확장 + 말줄임 */
+.admin-user th:nth-child(2),
+.admin-user td:nth-child(2),
+.admin-user th:nth-child(3),
+.admin-user td:nth-child(3) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .admin-logo-link {
@@ -393,8 +439,6 @@
     white-space: nowrap;
 }
 
-/* 작성일 등 줄바꿈 금지 */
-
 /* 링크/버튼 */
 .posts-table .btn-link {
     background: transparent;
@@ -457,35 +501,5 @@
     text-align: center;
 }
 
-/* 다크모드 변수 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --mb-bg: #1b1b1f;
-        --mb-fg: #e8e8ea;
-        --mb-card: #202127;
-        --mb-head: #2a2c33;
-        --mb-head-fg: #e8e8ea;
-        --mb-border: #363844;
-        --mb-row-border: #2e3040;
-        --mb-hover: #23283a;
-    }
-}
-
-/* 반응형: 좁은 화면에서 이메일/작성일 점진적 축소 (옵션) */
-@media (max-width: 880px) {
-    .posts-table colgroup col:nth-child(3) {
-        width: 200px !important;
-    }
-
-    /* 이메일 */
-}
-
-@media (max-width: 720px) {
-    .posts-table colgroup col:nth-child(3) {
-        width: 150px !important;
-    }
-
-    .posts-table colgroup col:nth-child(4) {
-        width: 150px !important;
-    }
-}
+/* ✅ 다크모드 반응 제거했으므로 미디어쿼리 없음 */
+/* (prefers-color-scheme: dark) 블록 삭제 */

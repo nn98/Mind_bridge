@@ -1,29 +1,226 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+/***** EmailComposer.css — Aurora Glass Theme (Light Forced) *****/
 
-/* =========================
-   공통 토큰 (없으면 기본값 사용)
-   ========================= */
-:root {
-    --bg: #ffffff;
-    --text: #212529;
-    --muted: #6c757d;
-    --line: #e9ecef;
-    --panel: #f8f9fa;
-    --brand: #0d6efd;
-    --brand-d: #0b5ed7;
-    --accent: #198754;
-    --accent-d: #157347;
-    --shadow: 0 8px 30px rgba(0, 0, 0, .08);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --ring: 0 0 0 3px rgba(13, 110, 253, .18);
-}
-
-/* 시스템 폰트 설정 */
+/* =======================
+   ✅ 항상 라이트 모드 강제
+   - OS/브라우저 다크모드 무시
+   - 폼/스크롤바까지 라이트로
+======================= */
+:root,
 html,
 body {
-    font-family: 'Pretendard', system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, 'Noto Sans KR', sans-serif;
+    color-scheme: light !important;
+}
+
+/* ========== 기본 컬러 토큰(라이트 고정) ========== */
+:root {
+    --bg: #ffffff;
+    --bg-2: #f7f9fc;
+
+    --surface: rgba(255, 255, 255, .85);
+    --surface-strong: rgba(255, 255, 255, .95);
+    --border: rgba(17, 24, 39, .08);
+
+    --text: #111827;
+    --text-weak: #6b7280;
+
+    /* 상단 라인/프라이머리 그라데이션 */
+    --brand-1: #8b5cf6;
+    /* 보라 */
+    --brand-2: #22d3ee;
+    /* 민트 */
+    --brand-3: #34d399;
+    /* 그린 */
+
+    /* 보조 버튼 컬러 */
+    --accent-1: #10b981;
+    /* 초록 */
+    --accent-2: #34d399;
+
+    --glow: 0 20px 60px rgba(139, 92, 246, .22);
+
+    --radius: 18px;
+    --radius-sm: 12px;
+
+    --speed: .18s;
+}
+
+/* 전역 폰트/가독성 */
+html,
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-optical-sizing: auto;
+    background: var(--bg-2);
     color: var(--text);
+    font-family: 'Pretendard', system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, 'Noto Sans KR', sans-serif;
+}
+
+/* =========================
+   Composer — 글래스 카드
+   ========================= */
+.composer-container {
+    position: relative;
+    max-width: 896px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, .72);
+    /* 글래스 톤 */
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    box-shadow: var(--glow), 0 10px 28px rgba(0, 0, 0, .06);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* 상단 그라데이션 라인 */
+.composer-container::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+    opacity: .9;
+    z-index: 2;
+    /* 콘텐츠 위, ::after 아래 */
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+/* 뒤쪽 은은한 블러/하이라이트 */
+.composer-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .16), transparent 60%);
+    z-index: 0;
+}
+
+/* 내부는 블러 위 레이어 */
+.composer-container>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* 상단 버튼 바 */
+.composer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+/* 버튼 */
+.composer-button {
+    border: 1px solid transparent;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform .06s ease, box-shadow var(--speed), filter var(--speed), opacity var(--speed);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.composer-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* 보내기: 보라→민트 그라데이션 */
+.send-button {
+    background: #0d6efd;
+    box-shadow: 0 10px 26px rgba(139, 92, 246, .22);
+    border-color: rgba(139, 92, 246, .25);
+}
+
+.send-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+    box-shadow: 0 14px 34px rgba(34, 211, 238, .28);
+}
+
+/* 이미지 생성: 초록 그라데이션 */
+.generate-button {
+    background: #198754;
+    box-shadow: 0 10px 26px rgba(16, 185, 129, .22);
+    border-color: rgba(16, 185, 129, .25);
+}
+
+.generate-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+    box-shadow: 0 14px 34px rgba(16, 185, 129, .30);
+}
+
+/* 필드 행 (라벨/값) */
+.field-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    /* 라벨/값 비율 */
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+}
+
+.field-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #374151;
+}
+
+.field-value {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.field-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    padding: 8px 0;
+    color: var(--text);
+}
+
+/* 본문 입력 영역 */
+.composer-textarea {
+    width: 100%;
+    height: 420px;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 18px 20px;
+    font-size: 15px;
+    line-height: 1.7;
+    background: linear-gradient(180deg, var(--surface-strong), var(--surface));
+}
+
+.composer-textarea::placeholder {
+    color: #9fb0cc;
+}
+
+/* 스크롤바(웹킷) */
+.composer-textarea::-webkit-scrollbar {
+    width: 10px;
+}
+
+.composer-textarea::-webkit-scrollbar-thumb {
+    background: #cfd4da;
+    border-radius: 8px;
+}
+
+.composer-textarea::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* =========================
@@ -47,7 +244,7 @@ body {
     font-weight: 600;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .24s ease, visibility .24s ease;
+    transition: opacity var(--speed), visibility var(--speed);
 }
 
 .toast-message.show {
@@ -56,135 +253,7 @@ body {
 }
 
 /* =========================
-   Composer
-   ========================= */
-.composer-container {
-    max-width: 896px;
-    margin: 40px auto;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.composer-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--line);
-}
-
-.composer-button {
-    border: 1px solid transparent;
-    padding: 10px 18px;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform .06s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.composer-button:disabled {
-    opacity: .6;
-    cursor: not-allowed
-}
-
-.send-button {
-    background: var(--brand);
-    color: #fff;
-    border-color: rgba(13, 110, 253, .2);
-    box-shadow: 0 6px 16px rgba(13, 110, 253, .18);
-}
-
-.send-button:hover:not(:disabled) {
-    background: var(--brand-d);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 26px rgba(13, 110, 253, .28);
-}
-
-.generate-button {
-    background: var(--accent);
-    color: #fff;
-    border-color: rgba(25, 135, 84, .2);
-    box-shadow: 0 6px 16px rgba(25, 135, 84, .18);
-}
-
-.generate-button:hover:not(:disabled) {
-    background: var(--accent-d);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 26px rgba(25, 135, 84, .26);
-}
-
-/* 필드 행 */
-.field-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--line);
-    background: white;
-}
-
-.field-label {
-    width: 104px;
-    min-width: 104px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #495057;
-}
-
-.field-value {
-    font-size: 14px;
-    color: var(--text);
-}
-
-.field-input {
-    flex: 1 1 auto;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 14px;
-    padding: 8px 0;
-}
-
-/* 본문 에디터 */
-.composer-textarea {
-    width: 100%;
-    height: 420px;
-    border: none;
-    outline: none;
-    resize: none;
-    padding: 18px 20px;
-    font-size: 15px;
-    line-height: 1.7;
-    background: white;
-}
-
-.composer-textarea::placeholder {
-    color: #adb5bd;
-}
-
-/* 스크롤바 살짝 정리 (지원 브라우저만) */
-.composer-textarea::-webkit-scrollbar {
-    width: 10px;
-}
-
-.composer-textarea::-webkit-scrollbar-thumb {
-    background: #cfd4da;
-    border-radius: 8px;
-}
-
-.composer-textarea::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* =========================
-   Modal (접미사 3 일관화 & 오타 수정)
+   Modal (접미사 3)
    ========================= */
 .modal-overlay3 {
     position: fixed;
@@ -203,7 +272,7 @@ body {
     background: #fff;
     border-radius: var(--radius);
     box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
-    border: 1px solid var(--line);
+    border: 1px solid var(--border);
     overflow: hidden;
 }
 
@@ -212,8 +281,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 18px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
 }
 
 .modal-title3 {
@@ -234,7 +303,7 @@ body {
     cursor: pointer;
     display: grid;
     place-items: center;
-    transition: background .2s ease, color .2s ease;
+    transition: background var(--speed), color var(--speed);
 }
 
 .modal-close-button3:hover {
@@ -255,7 +324,7 @@ body {
 
 .modal-textarea3 {
     width: 100%;
-    padding: 12px 12px;
+    padding: 12px;
     font-size: 14px;
     border: 1px solid #ced4da;
     border-radius: var(--radius-sm);
@@ -266,8 +335,8 @@ body {
 
 .modal-textarea3:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(25, 135, 84, .15);
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, .15);
 }
 
 .modal-footer3 {
@@ -275,8 +344,8 @@ body {
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 20px;
-    background: var(--panel);
-    border-top: 1px solid var(--line);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
 }
 
 /* =========================
@@ -285,7 +354,7 @@ body {
 .composer-button:focus-visible,
 .modal-close-button3:focus-visible,
 .modal-textarea3:focus-visible {
-    box-shadow: var(--ring);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, .22);
     outline: none;
 }
 
@@ -294,8 +363,13 @@ body {
         margin: 24px 12px;
     }
 
+    .composer-header {
+        gap: 8px;
+    }
+
     .field-row {
         padding: 12px 16px;
+        grid-template-columns: 104px 1fr;
     }
 
     .composer-textarea {
@@ -308,10 +382,12 @@ body {
     }
 }
 
-/* 모션 민감 사용자 배려 */
+/* ========== 모션 선호도 ========== */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation: none !important;
         transition: none !important;
     }
 }
+
+/* ✅ 다크모드 반응 제거됐으므로, (prefers-color-scheme: light/dark) 관련 블록 없음 */

@@ -343,10 +343,10 @@ export default function HelpPage() {
 
 // 그대로 사용 (FAQ 인라인 스타일)
 const detailsStyle = {
-  border: "1px solid var(--line, #1e2a3c)",
+  border: "1px solid #d2d2d2ff",
   borderRadius: 10,
   padding: "10px 12px",
   margin: "10px 0",
 };
 const sumStyle = { cursor: "pointer", fontWeight: 700 };
-const ansStyle = { marginTop: 8, color: "var(--muted, #b1bcc8)" };
+const ansStyle = { marginTop: 8, color: "#646464ff" };

@@ -1,17 +1,26 @@
-/***** EmotionAnalysisPage.css — Aurora Glass Theme *****/
+/***** EmotionAnalysisPage.css — Aurora Glass Theme (Light Forced) *****/
 
-/* ========== 기본 컬러 토큰 ========== */
+/* =======================
+   ✅ 항상 라이트 모드 강제
+   - OS/브라우저 다크모드 무시
+   - 폼/스크롤바까지 라이트로
+======================= */
+:root,
+html,
+body {
+    color-scheme: light !important;
+}
+
+/* ========== 기본 컬러 토큰(라이트 고정) ========== */
 :root {
-    color-scheme: dark;
+    --bg: #ffffff;
+    --bg-2: #f7f9fc;
 
-    --bg: #0a0f1f;
-    --bg-2: #0d1326;
+    --surface: rgba(255, 255, 255, .85);
+    --surface-strong: rgba(255, 255, 255, .95);
+    --border: rgba(17, 24, 39, .08);
 
-    --surface: rgba(255, 255, 255, .08);
-    --surface-strong: rgba(255, 255, 255, .12);
-    --border: rgba(255, 255, 255, .18);
-
-    --text: #000000;
+    --text: #111827;
     --text-weak: #6b7280;
 
     --brand-1: #8b5cf6;
@@ -49,6 +58,8 @@ body,
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-optical-sizing: auto;
+    background: var(--bg);
+    color: var(--text);
 }
 
 /* ========== 페이지 배경 ========== */
@@ -58,6 +69,7 @@ body,
     margin: 28px auto;
     padding: 0 18px;
     isolation: isolate;
+    background: none;
 }
 
 /* ========== 글래스 카드 ========== */
@@ -66,7 +78,8 @@ body,
     width: 100%;
     /* [FIX] 본체 blur 제거: 텍스트 AA 보존 */
     /* backdrop-filter: blur(14px); */
-    background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .06));
+    background: rgba(255, 255, 255, .72);
+    /* 라이트 고정 */
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 18px;
@@ -199,7 +212,8 @@ body,
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, .18);
+    border: 2px solid rgba(17, 24, 39, .12);
+    /* 라이트 톤으로 조정 */
     border-top-color: var(--brand-2);
     animation: spin .9s linear infinite;
 }
@@ -214,7 +228,7 @@ body,
 .results-section {
     margin-top: 16px;
     padding-top: 12px;
-    border-top: 1px dashed rgba(255, 255, 255, .15);
+    border-top: 1px dashed rgba(17, 24, 39, .15);
 }
 
 .results-title {
@@ -224,7 +238,7 @@ body,
 }
 
 /* 넓은 화면: 좌 그래프 / 우 메시지 */
-@media(min-width: 900px) {
+@media (min-width: 900px) {
     .results-section {
         display: grid;
         grid-template-columns: 1.15fr .85fr;
@@ -266,8 +280,8 @@ body,
     width: 100%;
     height: 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .06);
-    border: 1px solid rgba(255, 255, 255, .18);
+    background: rgba(17, 24, 39, .06);
+    border: 1px solid rgba(17, 24, 39, .12);
     overflow: hidden;
 }
 
@@ -320,9 +334,9 @@ body,
     font-size: 14px;
     border-radius: 14px;
     color: #0a0f1f;
-    border: 1px solid rgba(255, 255, 255, .28);
+    border: 1px solid rgba(17, 24, 39, .12);
     background: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .78));
-    box-shadow: 0 16px 36px rgba(0, 0, 0, .18);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, .08);
 }
 
 .result-message-box.happiness {
@@ -357,7 +371,8 @@ body,
     z-index: 50;
     display: grid;
     place-items: center;
-    background: rgba(6, 9, 20, .55);
+    background: rgba(6, 9, 20, .40);
+    /* 라이트 톤으로 살짝 완화 */
     /* [FIX] 본체 blur 제거 */
     /* backdrop-filter: blur(6px); */
 }
@@ -390,7 +405,7 @@ body,
     height: 32px;
     border-radius: 10px;
     border: 0;
-    background: rgba(255, 255, 255, .85);
+    background: rgba(255, 255, 255, .92);
     color: #0b1020;
     font-size: 20px;
     cursor: pointer;
@@ -414,13 +429,13 @@ body,
 }
 
 .emotion-page ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .15));
+    background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .08));
     border-radius: 999px;
     border: 2px solid transparent;
 }
 
 /* ========== 반응형 ========== */
-@media(max-width: 768px) {
+@media (max-width: 768px) {
     .emotion-page {
         margin: 18px auto;
         padding: 0 12px;
@@ -436,39 +451,6 @@ body,
     }
 }
 
-/* ========== 라이트 모드 (원하면 유지) ========== */
-@media (prefers-color-scheme: light) {
-    :root {
-        color-scheme: light;
-        --text: #111827;
-        --text-weak: #6b7280;
-        --surface: rgba(255, 255, 255, .85);
-        --surface-strong: rgba(255, 255, 255, .95);
-        --border: rgba(17, 24, 39, .08);
-    }
-
-    .emotion-page {
-        color: var(--text);
-    }
-
-    .analysis-card {
-        background: rgba(255, 255, 255, .72);
-        /* light에서도 본체 blur는 유지하지 않음 (선명도 우선) */
-    }
-
-    .analysis-textarea {
-        color: var(--text);
-    }
-
-    .progress-bar-label {
-        color: var(--text);
-    }
-
-    .result-message-text {
-        color: #0b1020;
-    }
-}
-
 /* ========== 모션 선호도 ========== */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -476,3 +458,5 @@ body,
         transition: none !important;
     }
 }
+
+/* ✅ 다크모드 반응 제거됐으므로, (prefers-color-scheme: light/dark) 관련 블록 없음 */
