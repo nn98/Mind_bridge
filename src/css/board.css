@@ -1,3 +1,4 @@
+/* ===== 레이아웃 기본 ===== */
 .board-section {
   max-width: 1100px;
   margin: 60px auto;
@@ -24,7 +25,7 @@
   margin-top: 8px;
 }
 
-/* 컨트롤 영역 */
+/* ===== 컨트롤 영역 ===== */
 .board-controls {
   display: flex;
   justify-content: space-between;
@@ -47,7 +48,7 @@
   border-radius: 8px;
   background-color: #fff;
   transition: border-color 0.2s ease;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03)
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .left-controls select {
@@ -57,10 +58,10 @@
   background-color: #fff;
   transition: border-color 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
-  color: black;
+  color: #111;
 }
 
-/* 로그인 input 클릭 시 테두리 색 */
+/* MUI 포커스 색상 */
 .input-wrapper .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: #805dd1 !important;
 }
@@ -69,7 +70,7 @@
   color: #805dd1 !important;
 }
 
-/* 공통 버튼 */
+/* ===== 공통 버튼(기본) ===== */
 button {
   padding: 8px 16px;
   background-color: #a18cd1;
@@ -87,7 +88,7 @@ button:hover {
   color: white;
 }
 
-/* 작성 폼 */
+/* ===== 작성 폼 ===== */
 .write-form {
   background: #f8f9fc;
   padding: 20px;
@@ -106,7 +107,7 @@ button:hover {
   resize: vertical;
   font-family: inherit;
   margin-bottom: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .write-form label {
@@ -129,69 +130,13 @@ button:hover {
   color: white;
 }
 
-/* 게시글 리스트 */
+/* ===== 게시글 리스트 ===== */
 .post-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
-.post-card {
-  background-color: #fff;
-  padding: 20px 22px;
-  border-radius: 12px;
-  border: 1px solid #ebedf1;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
-}
-
-.post-card p {
-  font-size: 15px;
-  color: #2e2e2e;
-  margin-bottom: 12px;
-  line-height: 1.6;
-  word-break: break-word;
-}
-
-.post-card span {
-  display: block;
-  font-size: 13px;
-  color: #888;
-  margin-top: 8px;
-}
-
-/* 삭제 버튼 */
-.post-card button {
-  position: absolute;
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 23px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.post-delete {
-  top: 5px;
-  right: 5px;
-}
-
-.post-edit {
-  bottom: 5px;
-  right: 5px;
-}
-
-.post-card button:hover {
-  color: #805dd1;
-}
-
-/* 글이 없을 때 */
 .post-list p {
   grid-column: 1 / -1;
   text-align: center;
@@ -200,16 +145,123 @@ button:hover {
   padding: 40px 0;
 }
 
+/* ===== 카드 ===== */
+.post-card {
+  background-color: #fff;
+  padding: 20px 22px;
+  border-radius: 12px;
+  border: 1px solid #ebedf1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* 아래에 절대배치된 '수정/삭제'와 겹치지 않도록 충분한 여백 확보 */
+  padding-bottom: 76px;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* 본문(요약 표시) */
+.post-card p {
+  font-size: 15px;
+  color: #2e2e2e;
+  margin: 0 0 10px 0;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+/* 본문 4줄 클램프 + 페이드 */
+.post-content {
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, #000 72%, rgba(0, 0, 0, 0));
+}
+
+/* ===== 텍스트형 '더보기' — 본문 아래, 메타 위, '수정'보다 위 ===== */
+.post-more-link {
+  position: static !important;
+  /* 어떤 전역 absolute 규칙도 무시 */
+  display: inline-block;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  /* 아래 메타/수정과 간격 */
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b56a8;
+  /* 브랜드 보라 */
+  cursor: pointer;
+}
+
+.post-more-link:hover {
+  text-decoration: underline;
+}
+
+/* 메타(날짜/공개범위/작성자) */
+.post-card span {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-top: 6px;
+}
+
+/* ===== 카드 내 '삭제/수정' 절대배치 ===== */
+/* (중요) 더 이상 .post-card button 전체에 absolute를 적용하지 않음 */
+.post-card .post-delete,
+.post-card .post-edit,
+.post-card .post-edit1,
+.post-card .post-delete1 {
+  position: absolute;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 22px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 2;
+  /* 본문/텍스트 위로 */
+}
+
+.post-card .post-delete:hover,
+.post-card .post-edit:hover,
+.post-card .post-edit1:hover,
+.post-card .post-delete1:hover {
+  color: #805dd1;
+}
+
+.post-delete {
+  top: 6px;
+  right: 6px;
+}
+
+.post-edit {
+  bottom: 10px;
+  right: 10px;
+}
+
 .post-edit1 {
-  bottom: 5px;
-  right: 55px;
+  bottom: 10px;
+  right: 66px;
 }
 
 .post-delete1 {
-  bottom: 5px;
-  right: 5px;
+  bottom: 10px;
+  right: 10px;
 }
 
+/* 수정 모드 텍스트에어리어 */
 .edit-form {
   width: 100%;
   height: 134px;
@@ -222,4 +274,66 @@ button:hover {
   line-height: 1.6;
   background-color: #fff;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ===== 상단 Featured 영역(확대 보기) ===== */
+.board-featured-wrap {
+  margin: 8px 0 28px;
+}
+
+.featured-post {
+  background-color: #fff;
+  padding: 20px 22px;
+  border-radius: 12px;
+  border: 1px solid #ebedf1;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.featured-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.featured-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.featured-close {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.featured-close:hover {
+  color: #805dd1;
+}
+
+.featured-meta {
+  margin-top: 6px;
+  display: flex;
+  gap: 16px;
+  color: #888;
+  font-size: 13px;
+}
+
+.featured-body {
+  margin-top: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.8;
+  font-size: 15.5px;
+  color: #2a2a2a;
+}
+
+.featured-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
 }

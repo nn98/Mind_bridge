@@ -31,3 +31,11 @@ export const apiResetPassword = (payload) =>
 // 소셜 로그인(코드 교환)
 export const apiSocialLogin = (provider, code) =>
     axios.post(`${BACKEND_URL}/api/auth/social-login`, { provider, code }, { withCredentials: true });
+
+// 닉네임 중복확인
+export const apiCheckNickname = (nickname) =>
+    axios.get(`${BACKEND_URL}/api/users/check-nickname`, {
+        params: { nickname },
+        withCredentials: true,
+    });
+
