@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,12 +50,12 @@ public class UserController {
             Profile profile = userService.register(request);
             log.info("회원가입 완료: {}", request.getEmail());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success(profile));
+                .body(ApiResponse.success(profile));
 
         } catch (RuntimeException e) {
             log.error("회원가입 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage(), null));
+                .body(ApiResponse.error(e.getMessage(), null));
         }
     }
 
@@ -65,16 +66,15 @@ public class UserController {
      */
     @GetMapping("/check-email")
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam("email") String email) {
-        System.out.println("C-E: " + email);
         try {
             boolean isAvailable = userService.isEmailAvailable(email);
             return ResponseEntity.ok(
-                    ApiResponse.success(Map.of("isAvailable", isAvailable))
+                ApiResponse.success(Map.of("isAvailable", isAvailable))
             );
         } catch (Exception e) {
             log.error("이메일 중복 확인 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("이메일 중복 확인에 실패했습니다.", e.getMessage()));
+                .body(ApiResponse.error("이메일 중복 확인에 실패했습니다.", e.getMessage()));
         }
     }
 
@@ -83,17 +83,15 @@ public class UserController {
      * @param nickname 확인할 닉네임
      * @return 사용 가능 여부
      */
-    @GetMapping("/check-nickname")
-    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkNickname(@RequestParam String nickname) {
+    @GetMapping("/{nickname}")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkNickname(@PathVariable String nickname) {
         try {
             boolean isAvailable = userService.isNicknameAvailable(nickname);
-            return ResponseEntity.ok(
-                    ApiResponse.success(Map.of("isAvailable", isAvailable))
-            );
+            return ResponseEntity.ok(ApiResponse.success(Map.of("isAvailable", isAvailable)));
         } catch (Exception e) {
             log.error("닉네임 중복 확인 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("닉네임 중복 확인에 실패했습니다.", e.getMessage()));
+                .body(ApiResponse.error("닉네임 중복 확인에 실패했습니다.", e.getMessage()));
         }
     }
 
@@ -133,14 +131,14 @@ public class UserController {
     public ResponseEntity<ApiResponse<Summary>> getUserSummary(@RequestParam String nickname) {
         try {
             return userService.getUserByNickname(nickname)
-                    .map(summary -> ResponseEntity.ok(ApiResponse.success(summary)))
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
+                .map(summary -> ResponseEntity.ok(ApiResponse.success(summary)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
 
         } catch (Exception e) {
             log.error("사용자 요약 정보 조회 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
+                .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
         }
     }
 
@@ -182,15 +180,15 @@ public class UserController {
      */
     @PutMapping("/password")
     public ResponseEntity<ApiResponse<String>> changePassword(
-            @RequestBody Map<String, String> request,
-            Authentication authentication) {
+        @RequestBody Map<String, String> request,
+        Authentication authentication) {
         try {
             String email = authentication.getName();
             String newPassword = request.get("newPassword");
 
             if (newPassword == null || newPassword.isBlank()) {
                 return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("새 비밀번호가 비어 있습니다.", null));
+                    .body(ApiResponse.error("새 비밀번호가 비어 있습니다.", null));
             }
 
             userService.changePassword(email, newPassword);
@@ -201,7 +199,7 @@ public class UserController {
         } catch (RuntimeException e) {
             log.error("비밀번호 변경 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage(), null));
+                .body(ApiResponse.error(e.getMessage(), null));
         }
     }
 
@@ -222,7 +220,7 @@ public class UserController {
         } catch (RuntimeException e) {
             log.error("회원 탈퇴 실패: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage(), null));
+                .body(ApiResponse.error(e.getMessage(), null));
         }
     }
 }
