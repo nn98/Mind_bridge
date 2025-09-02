@@ -240,6 +240,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
             // 백엔드: GET /api/users/check-nickname?nickname=...
             const res = await apiCheckNickname(nickname);
             // ApiResponse<{isAvailable:boolean}>
+            console.log(res);
             const available = !!(res?.data?.data?.isAvailable);
             setNickCheck({
                 isChecking: false,

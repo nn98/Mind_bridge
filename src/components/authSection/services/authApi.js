@@ -34,8 +34,5 @@ export const apiSocialLogin = (provider, code) =>
 
 // 닉네임 중복확인
 export const apiCheckNickname = (nickname) =>
-    axios.get(`${BACKEND_URL}/api/users/check-nickname`, {
-        params: { nickname },
-        withCredentials: true,
-    });
+    axios.get(`${BACKEND_URL}/api/users/${nickname}`, { withCredentials: true });
 
