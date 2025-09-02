@@ -10,8 +10,10 @@ export async function saveCounselling({ email, chatHistory }) {
         },
         credentials: 'include', // 쿠키 자동 전송
         body: JSON.stringify({
-            email: email || "",
+            userEmail: email || "", //유저 이메일
             userChatSummary: JSON.stringify(chatHistory), //상담내용 전문
+
+            
         }),
     });
 

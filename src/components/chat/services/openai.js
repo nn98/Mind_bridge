@@ -1,7 +1,7 @@
 // 백엔드 API 주소로 변경 (OpenAI API 대신 자체 백엔드 API)
 const backendApiAddress = process.env.REACT_APP_BACKEND_API_URL || "http://localhost:8080";
 
-export async function requestCounselling(systemPrompt) {
+export async function requestCounselling(systemPrompt, sessionId, userMessage) {
     const res = await fetch(`${backendApiAddress}/api/chat/message`, {
         method: "POST",
         headers: {
@@ -10,7 +10,9 @@ export async function requestCounselling(systemPrompt) {
         },
         credentials: 'include', // 쿠키 포함 (인증이 필요한 경우)
         body: JSON.stringify({
-            systemPrompt: systemPrompt // 백엔드 DTO에 맞춰 필드명 변경
+            systemPrompt: systemPrompt , 
+            sessionId: sessionId,       // 세션 관리용 ID
+            userMessage: userMessage    // 유저가 입력한 메세지
         }),
     });
 
