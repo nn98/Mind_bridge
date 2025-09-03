@@ -233,14 +233,13 @@ const UserProfile = () => {
                     <button
                         onClick={async () => {
                             try {
-                                const payload = { email: userInfo.email };
+                                await handleLogout();
                                 await axios.delete(`${BACKEND_URL}/api/users/account`, {
                                     withCredentials: true,
                                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
-                                await handleLogout();
                             } catch (error) {
                                 printAxiosError(error, '회원 탈퇴 처리 중 오류 발생');
                                 toast.dismiss(toastId);
