@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +16,7 @@ import com.example.backend.dto.auth.LoginRequest;
 import com.example.backend.dto.auth.LoginResponse;
 import com.example.backend.dto.auth.ResetPasswordRequest;
 import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.security.JwtUtil;
 import com.example.backend.service.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     /**
      * 사용자 로그인 - HTTP 처리만 담당
@@ -47,7 +48,7 @@ public class AuthController {
             LoginResponse loginResponse = authService.login(request);
 
             // 쿠키 설정만 Controller에서
-            setJwtCookie(response, loginResponse.getAccessToken());
+            jwtUtil.setJwtCookie(response, loginResponse.getAccessToken());
 
             authService.updateLastLogin(request);
 
@@ -65,7 +66,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
         System.out.println("Logout Called");
-        clearJwtCookie(response);
+        jwtUtil.clearJwtCookie(response);
         return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다."));
     }
 
@@ -115,31 +116,5 @@ public class AuthController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("비밀번호 재설정에 실패했습니다.", e.getMessage()));
         }
-    }
-
-    // 로그인 시 쿠키 설정
-    private void setJwtCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-            .httpOnly(true)
-            .secure(true)               // SameSite=None이면 필수
-            .path("/")
-            .maxAge(3600)
-            .sameSite("None")           // 크로스 도메인이라면 명시
-            // .domain("your.domain.com") // 필요 시 생성/삭제 모두 동일하게
-            .build();
-        response.addHeader("Set-Cookie", cookie.toString());
-    }
-
-    // 로그아웃 시 쿠키 삭제
-    private void clearJwtCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
-            .httpOnly(true)
-            .secure(true)               // 생성 시와 동일
-            .path("/")
-            .maxAge(0)                  // 즉시 만료
-            .sameSite("None")           // 생성 시와 동일
-            // .domain("your.domain.com") // 생성 시와 동일
-            .build();
-        response.addHeader("Set-Cookie", cookie.toString());
     }
 }

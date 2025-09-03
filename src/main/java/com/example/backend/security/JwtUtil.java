@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -15,6 +16,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -82,5 +84,45 @@ public class JwtUtil {
 
         return null;
     }
+    @Value("${jwt.cookie.name:jwt}")
+    private String jwtCookieName;
 
+    @Value("${jwt.cookie.secure:true}")
+    private boolean cookieSecure;
+
+    @Value("${jwt.cookie.samesite:None}")
+    private String cookieSameSite;
+
+    @Value("${jwt.cookie.path:/}")
+    private String cookiePath;
+
+    @Value("${jwt.cookie.domain:}") // 필요 시 설정
+    private String cookieDomain;
+
+    @Value("${jwt.cookie.max-age-seconds:3600}")
+    private long cookieMaxAgeSeconds;
+
+    public void setJwtCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+            .httpOnly(true)
+            .secure(true)               // SameSite=None이면 필수
+            .path("/")
+            .maxAge(3600)
+            .sameSite("None")           // 크로스 도메인이라면 명시
+            // .domain("your.domain.com") // 필요 시 생성/삭제 모두 동일하게
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    public void clearJwtCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+            .httpOnly(true)
+            .secure(true)               // 생성 시와 동일
+            .path("/")
+            .maxAge(0)                  // 즉시 만료
+            .sameSite("None")           // 생성 시와 동일
+            // .domain("your.domain.com") // 생성 시와 동일
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 }

@@ -22,8 +22,10 @@ import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
+import com.example.backend.security.JwtUtil;
 import com.example.backend.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입
@@ -102,9 +105,10 @@ public class UserController {
      * @return 없음
      */
     @DeleteMapping("/account")
-    public ResponseEntity<Void> deleteAccount(Authentication authentication) {
+    public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
         String email = requirePrincipalEmail(authentication);
         userService.deleteUser(email);
+        jwtUtil.clearJwtCookie(response);
         return ResponseEntity.noContent().build();
     }
 
