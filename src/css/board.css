@@ -1,339 +1,399 @@
 /* ===== 레이아웃 기본 ===== */
 .board-section {
-  max-width: 1100px;
-  margin: 60px auto;
-  padding: 0 24px;
-  font-family: 'Pretendard', sans-serif;
-  color: #333;
+    max-width: 1100px;
+    margin: 60px auto;
+    padding: 0 24px;
+    font-family: 'Pretendard', sans-serif;
+    color: #333;
 }
 
 /* 상단 타이틀 */
 .banner-area {
-  text-align: center;
-  margin-bottom: 48px;
+    text-align: center;
+    margin-bottom: 48px;
 }
 
 .board-title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #2c2c2c;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c2c2c;
 }
 
 .board-subtitle {
-  font-size: 1.05rem;
-  color: #777;
-  margin-top: 8px;
+    font-size: 1.05rem;
+    color: #777;
+    margin-top: 8px;
 }
 
 /* ===== 컨트롤 영역 ===== */
 .board-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.left-controls,
-.right-controls {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.left-controls, .right-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .right-controls input {
-  padding: 17.5px;
-  font-size: 15px;
-  border-radius: 8px;
-  background-color: #fff;
-  transition: border-color 0.2s ease;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    padding: 17.5px;
+    font-size: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    border: none;
 }
 
 .left-controls select {
-  padding: 17.5px;
-  font-size: 15px;
-  border-radius: 8px;
-  background-color: #fff;
-  transition: border-color 0.2s ease;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
-  color: #111;
+    padding: 17.5px;
+    font-size: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    color: #111;
+    border: none;
 }
 
 /* MUI 포커스 색상 */
 .input-wrapper .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: #805dd1 !important;
+    border-color: #805dd1 !important;
 }
 
 .input-wrapper .MuiInputLabel-root.Mui-focused {
-  color: #805dd1 !important;
+    color: #805dd1 !important;
 }
 
 /* ===== 공통 버튼(기본) ===== */
 button {
-  padding: 8px 16px;
-  background-color: #a18cd1;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-  color: white;
+    padding: 8px 16px;
+    background-color: #a18cd1;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    color: #fff;
 }
 
 button:hover {
-  background-color: #805dd1;
-  color: white;
+    background-color: #805dd1;
+    color: #fff;
 }
 
-/* 작성 폼 */
+/* ===== 작성 폼 ===== */
 .write-form {
-  background: #f8f9fc;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 32px;
-  border: 1px solid #e3e7ed;
+    background: #f8f9fc;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    border: none;
 }
 
 .write-form textarea {
-  width: 100%;
-  height: 120px;
-  padding: 12px;
-  font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-  font-family: inherit;
-  margin-bottom: 16px;
-  line-height: 1.55;
+    width: 100%;
+    height: 120px;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ccd2db;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    margin-bottom: 16px;
+    line-height: 1.55;
+    outline: none;
+    background: #fff;
+}
+
+.write-form textarea:focus {
+    border-color: #805dd1;
+    box-shadow: 0 0 0 3px rgba(128, 93, 209, .12);
 }
 
 .write-form label {
-  margin-right: 20px;
-  font-size: 14px;
-  color: #444;
+    margin-right: 20px;
+    font-size: 14px;
+    color: #444;
 }
 
 .write-form input[type="radio"] {
-  margin-right: 6px;
+    margin-right: 6px;
 }
 
 .write-form button {
-  background-color: #a18cd1;
-  color: white;
+    background: #a18cd1;
 }
 
 .write-form button:hover {
-  background-color: #805dd1;
-  color: white;
+    background: #805dd1;
 }
 
 /* ===== 게시글 리스트 ===== */
 .post-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
 }
 
 .post-list p {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: #aaa;
-  font-size: 16px;
-  padding: 40px 0;
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #aaa;
+    font-size: 16px;
+    padding: 40px 0;
 }
 
 /* ===== 카드 ===== */
 .post-card {
-  background-color: #fff;
-  padding: 20px 22px;
-  border-radius: 12px;
-  border: 1px solid #ebedf1;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  /* 아래에 절대배치된 '수정/삭제'와 겹치지 않도록 충분한 여백 확보 */
-  padding-bottom: 76px;
+    background: #fff;
+    padding: 20px 22px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .04);
+    position: relative;
+    transition: transform .2s ease, box-shadow .2s ease;
+    padding-bottom: 76px;
+    height: 260px; /* 모든 카드 동일 높이 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .06);
 }
 
 /* 본문(요약 표시) */
 .post-card p {
-  font-size: 15px;
-  color: #2e2e2e;
-  margin: 0 0 10px 0;
-  line-height: 1.7;
-  word-break: break-word;
+    font-size: 15px;
+    color: #2e2e2e;
+    margin: 0 0 10px 0;
+    line-height: 1.7;
+    word-break: break-word;
 }
 
-/* 본문 4줄 클램프 + 페이드 */
+/* 본문 2줄 클램프 */
 .post-content {
-  position: relative;
-  white-space: pre-wrap;
-  word-break: break-word;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .line-clamp-4 {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  mask-image: linear-gradient(180deg, #000 72%, rgba(0, 0, 0, 0));
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, #000 72%, rgba(0, 0, 0, 0));
 }
 
-/* ===== 텍스트형 '더보기' — 본문 아래, 메타 위, '수정'보다 위 ===== */
-.post-more-link {
-  position: static !important;
-  /* 어떤 전역 absolute 규칙도 무시 */
-  display: inline-block;
-  margin-top: 6px;
-  margin-bottom: 10px;
-  /* 아래 메타/수정과 간격 */
-  background: none;
-  border: 0;
-  padding: 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: #6b56a8;
-  /* 브랜드 보라 */
-  cursor: pointer;
+/* ===== 텍스트형 '더보기' (모든 상탯값에서 박스/보더 금지) ===== */
+.post-more-link, button.post-more-link, a.post-more-link, span.post-more-link {
+    all: unset;
+    display: inline;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b56a8;
+    line-height: 1.4;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.post-more-link:hover {
-  text-decoration: underline;
+.post-more-link:hover,
+.post-more-link:focus,
+.post-more-link:active,
+.post-more-link:focus-visible {
+    background: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-decoration: underline;
 }
 
-/* 메타(날짜/공개범위/작성자) */
+/* 메타 */
 .post-card span {
-  display: block;
-  font-size: 13px;
-  color: #888;
-  margin-top: 6px;
+    display: block;
+    font-size: 13px;
+    color: #888;
+    margin-top: 6px;
 }
 
-/* ===== 카드 내 '삭제/수정' 절대배치 ===== */
-/* (중요) 더 이상 .post-card button 전체에 absolute를 적용하지 않음 */
+/* ===== 카드 내 버튼들 ===== */
+/* 공통 초기화 */
 .post-card .post-delete,
 .post-card .post-edit,
 .post-card .post-edit1,
 .post-card .post-delete1 {
-  position: absolute;
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 22px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  z-index: 2;
-  /* 본문/텍스트 위로 */
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.post-card .post-delete:hover,
-.post-card .post-edit:hover,
+/* X(삭제): 텍스트만 보이게 */
+.post-card .post-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+    background: none;
+    color: #aaa;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.post-card .post-delete:hover {
+    color: #805dd1;
+}
+
+/* 수정: 항상 보이도록 명확한 스타일 */
+.post-card .post-edit {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    background: #a18cd1;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.post-card .post-edit:hover {
+    background: #805dd1;
+}
+
+/* 저장/취소: 텍스트 링크(겹치지 않게 위치) */
+.post-card .post-edit1, /* 저장 */
+.post-card .post-delete1 /* 취소 */
+{
+    position: absolute;
+    bottom: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    background: none !important;
+    color: #6b56a8;
+    cursor: pointer;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.post-card .post-edit1 {
+    right: 56px;
+}
+
+.post-card .post-delete1 {
+    right: 10px;
+}
+
 .post-card .post-edit1:hover,
 .post-card .post-delete1:hover {
-  color: #805dd1;
+    text-decoration: underline;
 }
 
-.post-delete {
-  top: 6px;
-  right: 6px;
-}
-
-.post-edit {
-  bottom: 10px;
-  right: 10px;
-}
-
-.post-edit1 {
-  bottom: 10px;
-  right: 66px;
-}
-
-.post-delete1 {
-  bottom: 10px;
-  right: 10px;
-}
-
-/* 수정 모드 텍스트에어리어 */
+/* 수정 모드 텍스트에어리어(카드 내) */
 .edit-form {
-  width: 100%;
-  height: 134px;
-  resize: none;
-  box-sizing: border-box;
-  border-radius: 8px;
-  padding: 14px;
-  font-size: 15px;
-  font-family: inherit;
-  line-height: 1.6;
-  background-color: #fff;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+    width: 100%;
+    margin-top: 30px;
+    height: 134px;
+    resize: none;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.6;
+    background: #fff;
+    border: 1px solid #ccd2db;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
 }
 
-/* ===== 상단 Featured 영역(확대 보기) ===== */
+.edit-form:focus {
+    border-color: #805dd1;
+    box-shadow: 0 0 0 3px rgba(128, 93, 209, .12);
+}
+
+/* ===== 상단 Featured 영역 ===== */
 .board-featured-wrap {
-  margin: 8px 0 28px;
+    margin: 8px 0 28px;
 }
 
 .featured-post {
-  background-color: #fff;
-  padding: 20px 22px;
-  border-radius: 12px;
-  border: 1px solid #ebedf1;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+    background: #fff;
+    padding: 20px 22px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
 }
 
 .featured-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .featured-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #2c2c2c;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2c2c2c;
 }
 
 .featured-close {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 20px;
-  cursor: pointer;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 .featured-close:hover {
-  color: #805dd1;
+    color: #805dd1;
 }
 
 .featured-meta {
-  margin-top: 6px;
-  display: flex;
-  gap: 16px;
-  color: #888;
-  font-size: 13px;
+    margin-top: 6px;
+    display: flex;
+    gap: 16px;
+    color: #888;
+    font-size: 13px;
 }
 
 .featured-body {
-  margin-top: 12px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 1.8;
-  font-size: 15.5px;
-  color: #2a2a2a;
+    margin-top: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.8;
+    font-size: 15.5px;
+    color: #2a2a2a;
+    border: none;
+    outline: none;
 }
 
 .featured-actions {
-  margin-top: 12px;
-  display: flex;
-  gap: 8px;
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
 }

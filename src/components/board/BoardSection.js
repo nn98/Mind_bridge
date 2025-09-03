@@ -1,19 +1,13 @@
-// BoardSection.jsx — (한 파일 완성본)
-// - 상단 FeaturedPost(더보기 클릭 시 해당 글을 크게 표시)
-// - 카드 본문 4줄 클램프 + "더보기" 버튼
-// - 기존 usePosts / BoardControls / WriteForm 그대로 사용
-
-import React, { useMemo, useState } from "react";
-import { usePosts } from "./hooks/usePosts";
+// BoardSection.jsx
+import React, {useMemo, useState} from "react";
+import {usePosts} from "./hooks/usePosts";
 import BoardControls from "./BoardControls";
 import WriteForm from "./WriteForm";
 import "../../css/board.css";
-import { useAuth } from "../../AuthContext";
+import {useAuth} from "../../AuthContext";
 
-/* ---------------------------
-   FeaturedPost (상단 확대 보기)
----------------------------- */
-const FeaturedPost = ({ post, onClose, onEdit, onDelete, canEdit }) => {
+/* ---------- FeaturedPost ---------- */
+const FeaturedPost = ({post, onClose, onEdit, onDelete, canEdit}) => {
     if (!post) return null;
     const created = (post.createdAt || post.date || "").split("T")[0];
     const visibilityToLabel = (v) =>
@@ -33,9 +27,9 @@ const FeaturedPost = ({ post, onClose, onEdit, onDelete, canEdit }) => {
             </div>
 
             <div className="featured-meta">
-                <span>
-                    {created} | {visibilityToLabel(post.visibility)}
-                </span>
+        <span>
+          {created} | {visibilityToLabel(post.visibility)}
+        </span>
                 <span>작성자: {post.userNickname || "익명"}</span>
             </div>
 
@@ -43,17 +37,6 @@ const FeaturedPost = ({ post, onClose, onEdit, onDelete, canEdit }) => {
 
             {canEdit && (
                 <div className="featured-actions">
-                    <button
-                        className="post-edit"
-                        onClick={() =>
-                            onEdit?.(post.id, {
-                                content: post.content,
-                                visibility: post.visibility,
-                            })
-                        }
-                    >
-                        수정
-                    </button>
                     <button className="post-delete" onClick={() => onDelete?.(post.id)}>
                         삭제
                     </button>
@@ -63,22 +46,18 @@ const FeaturedPost = ({ post, onClose, onEdit, onDelete, canEdit }) => {
     );
 };
 
-/* ---------------------------
-   PostCard (4줄 클램프 + 더보기)
----------------------------- */
-const PostCard = ({ post, profile, onEdit, onDelete, onFeature }) => {
+/* ---------- PostCard (위 파일에서 import 해도 됨) ---------- */
+const PostCard = ({post, profile, onEdit, onDelete, onFeature}) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(post.content || "");
     const [saving, setSaving] = useState(false);
 
-    // 권한(작성자 또는 ADMIN)
     const role = profile?.role?.toUpperCase?.();
     const canEdit =
         role === "ADMIN" ||
         String(post?.userId || post?.authorId) === String(profile?.id);
 
-    // “길다” 판정(대략 4줄 기준으로 140자 전후)
-    const SHOW_MORE_THRESHOLD = 140;
+    const SHOW_MORE_THRESHOLD = 110;
     const isLong = (post?.content || "").trim().length > SHOW_MORE_THRESHOLD;
 
     const created = (post.createdAt || post.date || "").split("T")[0];
@@ -122,23 +101,18 @@ const PostCard = ({ post, profile, onEdit, onDelete, onFeature }) => {
     return (
         <div className="post-card">
             {canEdit && (
-                <>
-                    <button className="post-delete" onClick={remove} aria-label="삭제">
-                        x
-                    </button>
-                    <button className="post-edit" onClick={() => setIsEditing(true)}>
-                        수정
-                    </button>
-                </>
+                <button className="post-delete" onClick={remove} aria-label="삭제">
+                    x
+                </button>
             )}
 
             {isEditing ? (
                 <>
-                    <textarea
-                        className="edit-form"
-                        value={editingContent}
-                        onChange={(e) => setEditingContent(e.target.value)}
-                    />
+          <textarea
+              className="edit-form"
+              value={editingContent}
+              onChange={(e) => setEditingContent(e.target.value)}
+          />
                     <button className="post-edit1" disabled={saving} onClick={save}>
                         {saving ? "저장 중..." : "저장"}
                     </button>
@@ -148,46 +122,54 @@ const PostCard = ({ post, profile, onEdit, onDelete, onFeature }) => {
                 </>
             ) : (
                 <>
-                    {/* 본문 4줄까지만 보이기 */}
-                    <p className="post-content line-clamp-4">{post.content}</p>
+                    <p className="post-content line-clamp-2">{post.content}</p>
 
-                    {/* 길면 '더보기' 텍스트 링크 */}
                     {isLong && (
                         <button
                             className="post-more-link"
                             onClick={() => onFeature?.(post)}
                             aria-label="해당 게시글 더보기"
+                            type="button"
                         >
                             더보기
                         </button>
                     )}
 
                     <span>
-                        {created} | {visibilityToLabel(post.visibility)}
-                    </span>
+            {created} | {visibilityToLabel(post.visibility)}
+          </span>
                     <span>작성자: {post.userNickname || "익명"}</span>
+
+                    {canEdit && !isEditing && (
+                        <button className="post-edit" onClick={() => setIsEditing(true)}>
+                            수정
+                        </button>
+                    )}
                 </>
             )}
         </div>
     );
 };
 
-/* ---------------------------
-   BoardSection (부모)
----------------------------- */
+/* ---------- BoardSection (부모) ---------- */
 const BoardSection = () => {
-    const { posts, loading, error, addPost, editPost, removePost } = usePosts();
-    const { profile } = useAuth();
+    const {posts, loading, error, addPost, editPost, removePost} = usePosts();
+    const {profile} = useAuth();
 
     const [selectedBoard, setSelectedBoard] = useState("general");
     const [sortOrder, setSortOrder] = useState("newest");
     const [searchQuery, setSearchQuery] = useState("");
     const [showForm, setShowForm] = useState(false);
 
-    // 상단 Featured로 띄울 글
     const [featuredPost, setFeaturedPost] = useState(null);
 
-    // 필터링
+    // 삭제 래퍼: 삭제 성공 시 Featured 닫기
+    const handleDelete = async (id) => {
+        await removePost(id);
+        if (featuredPost?.id === id) setFeaturedPost(null);
+    };
+
+    // 필터
     const filtered = useMemo(() => {
         const matchBoard = (p) =>
             selectedBoard === "general"
@@ -231,22 +213,22 @@ const BoardSection = () => {
 
             {showForm && (
                 <WriteForm
-                    onSubmit={async ({ content, visibility }) => {
-                        await addPost({ content, visibility });
+                    onSubmit={async ({content, visibility}) => {
+                        await addPost({content, visibility});
                         setShowForm(false);
                     }}
                     onCancel={() => setShowForm(false)}
                 />
             )}
 
-            {/* ▶ 상단 Featured 영역 */}
+            {/* 상단 Featured */}
             {featuredPost && (
                 <div className="board-featured-wrap">
                     <FeaturedPost
                         post={featuredPost}
                         onClose={() => setFeaturedPost(null)}
                         onEdit={editPost}
-                        onDelete={removePost}
+                        onDelete={handleDelete}  // ← 여기!
                         canEdit={
                             profile?.role?.toUpperCase?.() === "ADMIN" ||
                             String(featuredPost?.userId || featuredPost?.authorId) ===
@@ -260,9 +242,7 @@ const BoardSection = () => {
             <div className="post-list">
                 {loading && <p>불러오는 중...</p>}
                 {error && <p className="error">{error}</p>}
-                {!loading && !error && sorted.length === 0 && (
-                    <p>게시글이 없습니다</p>
-                )}
+                {!loading && !error && sorted.length === 0 && <p>게시글이 없습니다</p>}
                 {!loading &&
                     !error &&
                     sorted.map((post) => (
@@ -271,14 +251,13 @@ const BoardSection = () => {
                             post={post}
                             profile={profile}
                             onEdit={editPost}
-                            onDelete={removePost}
+                            onDelete={handleDelete}   // ← 여기!
                             onFeature={(p) => {
                                 setFeaturedPost(p);
-                                // 상단으로 스크롤(UX)
                                 requestAnimationFrame(() => {
                                     document
                                         .querySelector(".board-featured-wrap")
-                                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                        ?.scrollIntoView({behavior: "smooth", block: "start"});
                                 });
                             }}
                         />
