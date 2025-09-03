@@ -287,11 +287,6 @@ export default function HelpPage() {
         </details>
       </div>
 
-      {/* 3. 고객센터 */}
-      <div className="analysis-card help-center">
-        <h2 className="results-title">고객센터</h2>
-      </div>
-
       {/* 4. 문의하기 폼 */}
       <div className="analysis-card help-contact">
         <h2 className="results-title">문의하기</h2>
