@@ -226,13 +226,13 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     setEmailCheck({ isChecking: true, isAvailable: null, message: "확인 중..." });
     try {
       const res = await apiCheckEmail(email);
-      const available = !!(res?.data?.data?.isAvailable);
+      const isAvailable = !!(res?.data?.isAvailable);
       setEmailCheck({
         isChecking: false,
-        isAvailable: available,
-        message: available ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.",
+        isAvailable: isAvailable,
+        message: isAvailable ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.",
       });
-      if (available) setErrors((p) => { const n = { ...p }; delete n.email; return n; });
+      if (isAvailable) setErrors((p) => { const n = { ...p }; delete n.email; return n; });
     } catch (err) {
       if (err?.response?.status === 409) {
         setEmailCheck({ isChecking: false, isAvailable: false, message: "이미 사용 중인 이메일입니다." });
@@ -249,13 +249,14 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     setNickCheck({ isChecking: true, isAvailable: null, message: "확인 중..." });
     try {
       const res = await apiCheckNickname(nickname); // GET /api/users/check-nickname
-      const available = !!(res?.data?.data?.isAvailable);
+      const isAvailable = !!(res?.data?.isAvailable);
+      console.log(res);
       setNickCheck({
         isChecking: false,
-        isAvailable: available,
-        message: available ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다.",
+        isAvailable: isAvailable,
+        message: isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다.",
       });
-      if (available) setErrors((p) => { const n = { ...p }; delete n.nickname; return n; });
+      if (isAvailable) setErrors((p) => { const n = { ...p }; delete n.nickname; return n; });
     } catch (e) {
       if (e?.response?.status === 409) {
         setNickCheck({ isChecking: false, isAvailable: false, message: "이미 사용 중인 닉네임입니다." });
