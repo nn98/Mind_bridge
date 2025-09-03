@@ -17,12 +17,15 @@ export const apiRegister = async (payload) => {
     return res.data;
 };
 
+// 닉네임 중복확인
+export const apiCheckNickname = async (nickname) => {
+    const res = await AuthapiClient.get(`/api/users/availability`, {params: {type: "nickname", value: nickname},});
+    return res.data;
+};
+
 // 이메일 중복 체크
 export const apiCheckEmail = async (email) => {
-    const res = await AuthapiClient.get("/api/users/check-email", {
-        params: { email },
-        withCredentials: true,
-    });
+    const res = await AuthapiClient.get(`/api/users/availability`, {params: {type: "email", value: email},});
     return res.data;
 };
 
@@ -41,11 +44,5 @@ export const apiResetPassword = async (payload) => {
 // 소셜 로그인(코드 교환)
 export const apiSocialLogin = async (provider, code) => {
     const res = await AuthapiClient.post("/api/auth/social-login", { provider, code }, { withCredentials: true });
-    return res.data;
-};
-
-// 닉네임 중복확인
-export const apiCheckNickname = async (nickname) => {
-    const res = await AuthapiClient.get(`/api/users/${nickname}`, { withCredentials: true });
     return res.data;
 };
