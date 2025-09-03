@@ -1,20 +1,21 @@
 package com.example.backend.common.error;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.stream.Collectors;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class ProblemDetailsAdvice {
@@ -26,7 +27,7 @@ public class ProblemDetailsAdvice {
 		pd.setTitle("Validation Failed");
 		pd.setDetail("One or more fields are invalid");
 		pd.setInstance(URI.create(req.getRequestURI()));
-		Map<String, Object> errors = ex.getBindingResult().getFieldErrors().stream()
+		Map<String, List<String>> errors = ex.getBindingResult().getFieldErrors().stream()
 			.collect(Collectors.groupingBy(FieldError::getField,
 				Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())));
 		pd.setProperty("errors", errors);
