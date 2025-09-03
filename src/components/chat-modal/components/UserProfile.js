@@ -188,14 +188,14 @@ const UserProfile = () => {
         }
         try {
             const payload = buildUpdatePayload(userInfo, editedInfo);
-            await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+            await axios.patch(`${BACKEND_URL}/api/users/account`, payload, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
             setUserInfo((prev) => ({ ...prev, ...editedInfo }));
             applyProfileUpdate(payload);  // 전역 프로필 동기화
             setIsEditing(false);
-            toast.success('회원 정보가 저장되었습니다.');
+            toast.success('회원 정보가 저장되었습니다.', { containerId: "welcome" });
         } catch (error) {
             printAxiosError(error, '정보 업데이트 실패');
         }
@@ -233,14 +233,13 @@ const UserProfile = () => {
                     <button
                         onClick={async () => {
                             try {
-                                const payload = { email: userInfo.email };
+                                await handleLogout();
                                 await axios.delete(`${BACKEND_URL}/api/users/account`, {
                                     withCredentials: true,
                                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                                 });
                                 toast.dismiss(toastId);
                                 toast.success('회원 탈퇴가 완료되었습니다.');
-                                await handleLogout();
                             } catch (error) {
                                 printAxiosError(error, '회원 탈퇴 처리 중 오류 발생');
                                 toast.dismiss(toastId);
@@ -450,8 +449,8 @@ const UserProfile = () => {
                         return;
                     }
                     try {
-                        const payload = { newPassword: pwd };
-                        await axios.put(`${BACKEND_URL}/api/users/password`, payload, {
+                        const payload = { password: pwd };
+                        await axios.patch(`${BACKEND_URL}/api/users/account/password`, payload, {
                             withCredentials: true,
                             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                         });

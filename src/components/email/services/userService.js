@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BACKEND_URL } from '../constants';
 
 export async function fetchMyProfile() {
-    const res = await axios.get(`${BACKEND_URL}/api/users/profile`, {
+    const res = await axios.get(`${BACKEND_URL}/api/users/account`, {
         withCredentials: true,
     });
     const raw = res?.data;

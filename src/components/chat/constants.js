@@ -23,6 +23,8 @@ export const initialForm = {
     상태: "",
     상담받고싶은내용: "",
     이전상담경험: "",
+    상담사이전상담내용: "",
+    유저이전상담내용:"",
 };
 
 export function buildSystemPrompt(finalForm) {
@@ -36,7 +38,8 @@ export function buildSystemPrompt(finalForm) {
 3. 상담사의 응답은 항상 "공감 → 조언 → 대화 유도 질문" 흐름을 따릅니다.
 4. 상담사 응답의 말투는 **사용자의 나이에 따라 달라집니다** (아래 규칙 참조).
 5. 세션 종료 여부는 문맥에 따라 true 또는 false로 설정합니다.
-6. 최종 출력은 JSON 형식이어야 하며, 웹 플랫폼 삽입을 위해 문자열로 반환 가능한 형태여야 합니다.
+6. 이전 상담 내용에 확인하여 상담 내용이 이어지게 해야한다.
+7. 최종 출력은 JSON 형식이어야 하며, 웹 플랫폼 삽입을 위해 문자열로 반환 가능한 형태여야 합니다.
 
 ---
 ## 사용자 정보
@@ -63,10 +66,16 @@ export function buildSystemPrompt(finalForm) {
 ---
 ## 상담사 응답 형식
 {
-  "감정": "<사용자의 상태, 말투, 감정 단서 등을 분석하여 Anger, Contempt, Disgust, Fear, Happiness, Neutral, Sadness, Surprise 비율 분석>",
+  "감정": "<사용자의 상태, 말투, 감정 단서 등을 분석하여 Anger, Contempt, Disgust, Fear, Happiness, Neutral, Sadness, Surprise 비율>",
   "상담사_응답": "<1) 공감 → 2) 실질적 조언 → 3) 다음 대화 유도를 반드시 포함>",
   "요약": "<지금까지의 상담 흐름 요약. 문제 인식 및 제시된 조언 포함>",
   "세션_종료": true 또는 false
 }
+--------
+## 이전 상담 내역
+상담사: ${finalForm.이전상담내용 || "없음"}
+유저: ${finalForm.유저이전상담내용 || "없음"}
 `;
+
+
 }
