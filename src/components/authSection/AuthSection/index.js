@@ -380,6 +380,20 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
         }
     };
 
+    useEffect(() => {
+        if (type !== "login") return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [type, formData.email, formData.password]);
+
     const handleOpenTermsModal = () => setIsTermsModalOpen(true);
     const handleCloseTermsModal = () => {
         setIsTermsModalOpen(false);
