@@ -226,7 +226,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     setEmailCheck({ isChecking: true, isAvailable: null, message: "확인 중..." });
     try {
       const res = await apiCheckEmail(email);
-      const isAvailable = !!(res?.data?.isAvailable);
+      const isAvailable = !!(res?.isAvailable);
       setEmailCheck({
         isChecking: false,
         isAvailable: isAvailable,
@@ -249,7 +249,7 @@ const AuthSection = ({ type, setIsCustomLoggedIn, setCustomUser }) => {
     setNickCheck({ isChecking: true, isAvailable: null, message: "확인 중..." });
     try {
       const res = await apiCheckNickname(nickname); // GET /api/users/check-nickname
-      const isAvailable = !!(res?.data?.isAvailable);
+      const isAvailable = !!(res?.isAvailable);
       console.log(res);
       setNickCheck({
         isChecking: false,
