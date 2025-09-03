@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.common.error.NotFoundException;
-import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
@@ -98,37 +97,28 @@ public class UserController {
     }
 
     /**
+     * 회원 탈퇴
+     * @param authentication 인증 정보
+     * @return 없음
+     */
+    @DeleteMapping("/account")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication) {
+        String email = requirePrincipalEmail(authentication);
+        userService.deleteUser(email);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * 비밀번호 변경
      * @param request 새 비밀번호 정보
      * @param authentication 인증 정보
-     * @return 수정된 사용자 프로필
+     * @return 없음
      */
     @PatchMapping("/account/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
         String email = requirePrincipalEmail(authentication);
         userService.changePassword(email, request.getPassword());
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * 회원 탈퇴
-     * @param authentication 인증 정보
-     * @return 탈퇴 결과
-     */
-    @DeleteMapping("/account")
-    public ResponseEntity<ApiResponse<String>> deleteUser(Authentication authentication) {
-        try {
-            String email = authentication.getName();
-            userService.deleteUser(email);
-
-            log.info("회원 탈퇴 완료: {}", email);
-            return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다."));
-
-        } catch (RuntimeException e) {
-            log.error("회원 탈퇴 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error(e.getMessage(), null));
-        }
     }
 
     /**
