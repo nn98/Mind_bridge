@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,39 +51,19 @@ public class UserController {
     }
 
     /**
-     * 이메일 중복 확인
-     * @param email 확인할 이메일
+     * 닉네임, 이메일 중복 확인
+     * @param type 확인 종류
+     * @param value 확인 값
      * @return 사용 가능 여부
      */
-    @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam("email") String email) {
-        try {
-            boolean isAvailable = userService.isEmailAvailable(email);
-            return ResponseEntity.ok(
-                ApiResponse.success(Map.of("isAvailable", isAvailable))
-            );
-        } catch (Exception e) {
-            log.error("이메일 중복 확인 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("이메일 중복 확인에 실패했습니다.", e.getMessage()));
-        }
-    }
-
-    /**
-     * 닉네임 중복 확인
-     * @param nickname 확인할 닉네임
-     * @return 사용 가능 여부
-     */
-    @GetMapping("/{nickname}")
-    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkNickname(@PathVariable String nickname) {
-        try {
-            boolean isAvailable = userService.isNicknameAvailable(nickname);
-            return ResponseEntity.ok(ApiResponse.success(Map.of("isAvailable", isAvailable)));
-        } catch (Exception e) {
-            log.error("닉네임 중복 확인 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("닉네임 중복 확인에 실패했습니다.", e.getMessage()));
-        }
+    @GetMapping("/availability")
+    public ResponseEntity<Map<String, Boolean>> availability(@RequestParam String type, @RequestParam String value) {
+        boolean isAvailable = switch (type) {
+            case "nickname" -> userService.isNicknameAvailable(value);
+            case "email"    -> userService.isEmailAvailable(value);
+            default -> throw new IllegalArgumentException("type must be nickname or email");
+        };
+        return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
 
     /**
