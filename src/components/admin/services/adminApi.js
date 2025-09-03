@@ -254,7 +254,7 @@ export const checkNickname = async (nickname) => {
 
 /** 현재 로그인 사용자 프로필 (민감 캐시 금지 헤더는 서버에서 처리) */
 export const getUserProfile = async () => {
-  const res = await api.get(joinPath("/api/users/profile"));
+  const res = await api.get(joinPath("/api/users/account"));
   return res.data?.data ?? res.data; // Profile
 };
 

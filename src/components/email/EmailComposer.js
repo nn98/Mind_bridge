@@ -58,7 +58,7 @@ function EmailComposer({ customUser, isCustomLoggedIn }) {
       return;
     }
 
-    // 2) 부모 props 없으면 토큰 읽어와 /api/users/profile 호출
+    // 2) 부모 props 없으면 토큰 읽어와 /api/users/account 호출
     let mounted = true;
     (async () => {
       try {
