@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import java.net.URI;
 import java.util.Map;
 
 import org.springframework.http.CacheControl;
@@ -45,18 +46,9 @@ public class UserController {
      * @return 생성된 사용자 프로필
      */
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Profile>> register(@Valid @RequestBody RegistrationRequest request) {
-        try {
-            Profile profile = userService.register(request);
-            log.info("회원가입 완료: {}", request.getEmail());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(profile));
-
-        } catch (RuntimeException e) {
-            log.error("회원가입 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error(e.getMessage(), null));
-        }
+    public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
+        Profile profile = userService.register(request);
+        return ResponseEntity.created(URI.create("/api/users/" + profile.getNickname())).body(profile);
     }
 
     /**
@@ -130,6 +122,7 @@ public class UserController {
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<Summary>> getUserSummary(@RequestParam String nickname) {
         try {
+            log.info(userService.getUserByNickname(nickname).toString());
             return userService.getUserByNickname(nickname)
                 .map(summary -> ResponseEntity.ok(ApiResponse.success(summary)))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
