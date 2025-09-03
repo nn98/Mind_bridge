@@ -69,31 +69,10 @@ public class UserController {
 
     /**
      * 현재 사용자 정보 조회
+     * 프로필 = 민감 정보이므로 no-store 권장
      * @param authentication 인증 정보
      * @return 사용자 프로필
      */
-    // 프로필 조회: 민감 정보이므로 no-store 권장
-    @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<Profile>> getUserProfile(Authentication authentication) {
-        try {
-            String email = authentication.getName();
-            Profile profile = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-            return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
-                .header("Pragma", "no-cache")
-                .header("Expires", "0")
-                .body(ApiResponse.success(profile));
-        } catch (Exception e) {
-            log.error("사용자 정보 조회 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .cacheControl(CacheControl.noStore())
-                .header("Pragma", "no-cache")
-                .header("Expires", "0")
-                .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
-        }
-    }
-
     @GetMapping("/account")
     public ResponseEntity<Profile> getUserAccount(Authentication authentication) {
         String email = requirePrincipalEmail(authentication);
