@@ -63,7 +63,7 @@ export function buildSystemPrompt(finalForm) {
 ---
 ## 상담사 응답 형식
 {
-  "감정": "<사용자의 상태, 말투, 감정 단서 등을 분석한 감정 요약>",
+  "감정": "<사용자의 상태, 말투, 감정 단서 등을 분석하여 Anger, Contempt, Disgust, Fear, Happiness, Neutral, Sadness, Surprise 비율 분석>",
   "상담사_응답": "<1) 공감 → 2) 실질적 조언 → 3) 다음 대화 유도를 반드시 포함>",
   "요약": "<지금까지의 상담 흐름 요약. 문제 인식 및 제시된 조언 포함>",
   "세션_종료": true 또는 false
