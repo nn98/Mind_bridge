@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.Map;
 
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
@@ -93,25 +94,26 @@ public class UserController {
         }
     }
 
+    @GetMapping("/account")
+    public ResponseEntity<Profile> getUserAccount(Authentication authentication) {
+        String email = requirePrincipalEmail(authentication);
+        Profile profile = userService.getUserByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
+            .header("Pragma", "no-cache").header("Expires", "0")
+            .body(profile);
+    }
+
     /**
      * 닉네임으로 사용자 요약 정보 조회
      * @param nickname 조회할 닉네임
      * @return 사용자 요약 정보
      */
     @GetMapping("/summary")
-    public ResponseEntity<ApiResponse<Summary>> getUserSummary(@RequestParam String nickname) {
-        try {
-            log.info(userService.getUserByNickname(nickname).toString());
-            return userService.getUserByNickname(nickname)
-                .map(summary -> ResponseEntity.ok(ApiResponse.success(summary)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("사용자를 찾을 수 없습니다.", null)));
-
-        } catch (Exception e) {
-            log.error("사용자 요약 정보 조회 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("사용자 정보 조회에 실패했습니다.", e.getMessage()));
-        }
+    public ResponseEntity<Summary> summary(@RequestParam String nickname) {
+        return userService.getUserByNickname(nickname)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     /**
@@ -194,5 +196,16 @@ public class UserController {
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error(e.getMessage(), null));
         }
+    }
+
+    private String requirePrincipalEmail(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
+        }
+        // principal 캐스팅이 필요한 경우:
+        // Object principal = auth.getPrincipal();
+        // if (principal instanceof UserDetails u) return u.getUsername();
+        // else throw new AuthenticationCredentialsNotFoundException("Unsupported principal");
+        return authentication.getName();
     }
 }
