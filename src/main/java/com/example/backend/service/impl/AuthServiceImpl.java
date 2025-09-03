@@ -47,6 +47,14 @@ public class AuthServiceImpl implements AuthService {
 		return new LoginResponse(accessToken, profile);
 	}
 
+	@Override
+	@Transactional
+	public boolean updateLastLogin(LoginRequest request) {
+		UserEntity user = authenticateUser(request);
+		int result = userRepository.touchLastLogin(user.getEmail());
+		return result != 1;
+	}
+
 	// 아이디(이메일) 찾기 + 마스킹
 	@Override
 	@Transactional(readOnly = true)

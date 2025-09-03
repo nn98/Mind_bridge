@@ -11,6 +11,8 @@ public interface AuthService {
     // 로그인 (JWT 발급 + 프로필 포함 응답)
     LoginResponse login(LoginRequest request);
 
+    boolean updateLastLogin(LoginRequest request);
+
     // 아이디(이메일) 찾기 + 마스킹
     String findAndMaskUserEmail(FindIdRequest request);
 

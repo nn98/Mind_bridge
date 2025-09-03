@@ -49,6 +49,8 @@ public class AuthController {
             // 쿠키 설정만 Controller에서
             setJwtCookie(response, loginResponse.getAccessToken());
 
+            authService.updateLastLogin(request);
+
             return ResponseEntity.ok(ApiResponse.success(loginResponse));
 
         } catch (AuthenticationException e) {
