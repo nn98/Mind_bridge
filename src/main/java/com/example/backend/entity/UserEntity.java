@@ -73,6 +73,9 @@ public class UserEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     @PrePersist
     void onCreate() {
         createdAt = LocalDateTime.now();
