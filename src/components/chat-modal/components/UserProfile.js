@@ -188,14 +188,14 @@ const UserProfile = () => {
         }
         try {
             const payload = buildUpdatePayload(userInfo, editedInfo);
-            await axios.put(`${BACKEND_URL}/api/users/update`, payload, {
+            await axios.patch(`${BACKEND_URL}/api/users/account`, payload, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             });
             setUserInfo((prev) => ({ ...prev, ...editedInfo }));
             applyProfileUpdate(payload);  // 전역 프로필 동기화
             setIsEditing(false);
-            toast.success('회원 정보가 저장되었습니다.');
+            toast.success('회원 정보가 저장되었습니다.', { containerId: "welcome" });
         } catch (error) {
             printAxiosError(error, '정보 업데이트 실패');
         }
