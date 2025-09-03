@@ -69,8 +69,8 @@ export const AuthProvider = ({ children }) => {
     const fetchProfile = useCallback(async () => {
         dispatch({ type: types.INIT_BOOT });
         try {
-            const res = await axios.get(`${BACKEND_URL}/api/users/profile`, { withCredentials: true });
-            const data = res?.data?.data ?? null;
+            const res = await axios.get(`${BACKEND_URL}/api/users/account`, { withCredentials: true });
+            const data = res?.data ?? null;
             console.log(data);
             if (!mountedRef.current) return null;
 
