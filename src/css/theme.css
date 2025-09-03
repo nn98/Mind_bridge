@@ -82,7 +82,6 @@ input:focus,
 textarea:focus,
 select:focus {
     border-color: var(--brand-400);
-    box-shadow: 0 0 0 3px var(--ring);
 }
 
 /* 카드/컨테이너 */
