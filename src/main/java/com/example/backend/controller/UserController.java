@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,13 +75,20 @@ public class UserController {
      * @return 사용자 프로필
      */
     @GetMapping("/account")
-    public ResponseEntity<Profile> getUserAccount(Authentication authentication) {
+    public ResponseEntity<Profile> getAccount(Authentication authentication) {
         String email = requirePrincipalEmail(authentication);
         Profile profile = userService.getUserByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")
             .body(profile);
+    }
+
+    @PatchMapping("/account")
+    public ResponseEntity<Void> patchAccount(@Valid @RequestBody UpdateRequest updateRequest, Authentication authentication) {
+        String email = requirePrincipalEmail(authentication);
+        userService.updateUser(email, updateRequest);
+        return ResponseEntity.noContent().build();
     }
 
     /**
