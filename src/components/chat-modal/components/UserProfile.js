@@ -450,8 +450,8 @@ const UserProfile = () => {
                         return;
                     }
                     try {
-                        const payload = { newPassword: pwd };
-                        await axios.put(`${BACKEND_URL}/api/users/password`, payload, {
+                        const payload = { password: pwd };
+                        await axios.patch(`${BACKEND_URL}/api/users/account/password`, payload, {
                             withCredentials: true,
                             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                         });
