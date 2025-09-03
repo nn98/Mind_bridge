@@ -2,6 +2,11 @@ package com.example.backend.dto.user;
 
 import com.example.backend.entity.UserEntity;
 
+import lombok.Getter;
+import lombok.ToString;
+
+@Getter
+@ToString
 public class Summary {
     private Long id;
     private String nickname;
