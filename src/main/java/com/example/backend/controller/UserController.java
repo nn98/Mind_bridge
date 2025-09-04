@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +22,7 @@ import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +42,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final SecurityUtil securityUtil;
 
     /**
      * 회원가입
@@ -78,7 +79,7 @@ public class UserController {
      */
     @GetMapping("/account")
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
-        String email = requirePrincipalEmail(authentication);
+        String email = securityUtil.requirePrincipalEmail(authentication);
         Profile profile = userService.getUserByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
@@ -94,7 +95,7 @@ public class UserController {
      */
     @PatchMapping("/account")
     public ResponseEntity<Void> patchAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
-        String email = requirePrincipalEmail(authentication);
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.updateUser(email, request);
         return ResponseEntity.noContent().build();
     }
@@ -106,7 +107,7 @@ public class UserController {
      */
     @DeleteMapping("/account")
     public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
-        String email = requirePrincipalEmail(authentication);
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.deleteUser(email);
         jwtUtil.clearJwtCookie(response);
         return ResponseEntity.noContent().build();
@@ -120,7 +121,7 @@ public class UserController {
      */
     @PatchMapping("/account/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
-        String email = requirePrincipalEmail(authentication);
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePassword(email, request.getPassword());
         return ResponseEntity.noContent().build();
     }
@@ -135,16 +136,5 @@ public class UserController {
         return userService.getUserByNickname(nickname)
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new NotFoundException("User not found"));
-    }
-
-    private String requirePrincipalEmail(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-            throw new AuthenticationCredentialsNotFoundException("Authentication required");
-        }
-        // principal 캐스팅이 필요한 경우:
-        // Object principal = auth.getPrincipal();
-        // if (principal instanceof UserDetails u) return u.getUsername();
-        // else throw new AuthenticationCredentialsNotFoundException("Unsupported principal");
-        return authentication.getName();
     }
 }
