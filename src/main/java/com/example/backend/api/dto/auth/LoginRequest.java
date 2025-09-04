@@ -1,5 +1,5 @@
 // dto/auth/LoginRequest.java
-package com.example.backend.dto.auth;
+package com.example.backend.api.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

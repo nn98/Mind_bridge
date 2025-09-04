@@ -1,5 +1,5 @@
 // service/impl/ChatSessionServiceImpl.java
-package com.example.backend.service.impl;
+package com.example.backend.application.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.api.dto.chat.SessionHistory;
 import com.example.backend.api.dto.chat.SessionRequest;
-import com.example.backend.entity.ChatSessionEntity;
-import com.example.backend.repository.ChatSessionRepository;
-import com.example.backend.service.ChatSessionService;
+import com.example.backend.infrastructure.persistence.entity.ChatSessionEntity;
+import com.example.backend.domain.chat.ChatSessionRepository;
+import com.example.backend.application.service.ChatSessionService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

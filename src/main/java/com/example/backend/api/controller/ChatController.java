@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +25,8 @@ import com.example.backend.api.dto.chat.MessageResponse;
 import com.example.backend.api.dto.chat.SessionHistory;
 import com.example.backend.api.dto.chat.SessionRequest;
 import com.example.backend.api.dto.common.ApiResponse;
-import com.example.backend.service.ChatService;
-import com.example.backend.service.ChatSessionService;
+import com.example.backend.application.service.ChatService;
+import com.example.backend.application.service.ChatSessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

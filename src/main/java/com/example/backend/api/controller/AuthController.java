@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +16,8 @@ import com.example.backend.api.dto.auth.LoginRequest;
 import com.example.backend.api.dto.auth.LoginResponse;
 import com.example.backend.api.dto.auth.ResetPasswordRequest;
 import com.example.backend.api.dto.common.ApiResponse;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.AuthService;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.application.service.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

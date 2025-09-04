@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.net.URI;
 import java.util.Map;
@@ -21,9 +21,9 @@ import com.example.backend.api.dto.user.Profile;
 import com.example.backend.api.dto.user.RegistrationRequest;
 import com.example.backend.api.dto.user.Summary;
 import com.example.backend.api.dto.user.UpdateRequest;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.security.SecurityUtil;
-import com.example.backend.service.UserService;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.infrastructure.security.SecurityUtil;
+import com.example.backend.application.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

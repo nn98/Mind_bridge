@@ -1,5 +1,5 @@
 // service/impl/AuthServiceImpl.java
-package com.example.backend.service.impl;
+package com.example.backend.application.impl;
 
 import java.util.Optional;
 import java.util.Random;
@@ -17,11 +17,11 @@ import com.example.backend.api.dto.auth.LoginRequest;
 import com.example.backend.api.dto.auth.LoginResponse;
 import com.example.backend.api.dto.auth.ResetPasswordRequest;
 import com.example.backend.api.dto.user.Profile;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.mapper.UserMapper;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.AuthService;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.infrastructure.mapper.UserMapper;
+import com.example.backend.domain.user.UserRepository;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.application.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 // dto/auth/LoginResponse.java
-package com.example.backend.dto.auth;
+package com.example.backend.api.dto.auth;
 
-import com.example.backend.dto.user.Profile;
+import com.example.backend.api.dto.user.Profile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

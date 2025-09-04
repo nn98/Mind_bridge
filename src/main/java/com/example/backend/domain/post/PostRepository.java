@@ -1,4 +1,4 @@
-package com.example.backend.repository;
+package com.example.backend.domain.post;
 
 import com.example.backend.infrastructure.persistence.entity.PostEntity;
 import org.springframework.data.domain.Page;

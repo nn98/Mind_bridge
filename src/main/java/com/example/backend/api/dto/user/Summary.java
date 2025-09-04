@@ -1,6 +1,6 @@
-package com.example.backend.dto.user;
+package com.example.backend.api.dto.user;
 
-import com.example.backend.entity.UserEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
 
 import lombok.Getter;
 import lombok.ToString;

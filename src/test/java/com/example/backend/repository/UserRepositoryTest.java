@@ -1,7 +1,8 @@
 // src/test/java/com/example/backend/repository/UserRepositoryTest.java
 package com.example.backend.repository;
 
-import com.example.backend.entity.UserEntity;
+import com.example.backend.domain.user.UserRepository;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

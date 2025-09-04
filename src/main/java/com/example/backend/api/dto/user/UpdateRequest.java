@@ -1,5 +1,5 @@
 // dto/user/UpdateRequest.java
-package com.example.backend.dto.user;
+package com.example.backend.api.dto.user;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

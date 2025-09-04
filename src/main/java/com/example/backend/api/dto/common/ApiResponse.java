@@ -1,4 +1,4 @@
-package com.example.backend.dto.common;
+package com.example.backend.api.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

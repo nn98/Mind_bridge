@@ -1,16 +1,17 @@
 // src/test/java/com/example/backend/controller/AuthControllerTest.java
 package com.example.backend.controller;
 
+import com.example.backend.api.controller.AuthController;
 import com.example.backend.config.TestConfig;
-import com.example.backend.dto.auth.FindIdRequest;
-import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
-import com.example.backend.dto.auth.ResetPasswordRequest;
-import com.example.backend.dto.user.Profile;
-import com.example.backend.security.CustomUserDetailsService;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.security.TestMailConfig;
-import com.example.backend.service.AuthService;
+import com.example.backend.api.dto.auth.FindIdRequest;
+import com.example.backend.api.dto.auth.LoginRequest;
+import com.example.backend.api.dto.auth.LoginResponse;
+import com.example.backend.api.dto.auth.ResetPasswordRequest;
+import com.example.backend.api.dto.user.Profile;
+import com.example.backend.infrastructure.security.CustomUserDetailsService;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.infrastructure.security.TestMailConfig;
+import com.example.backend.application.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,14 +1,15 @@
 // src/test/java/com/example/backend/controller/PostControllerTest.java
 package com.example.backend.controller;
 
+import com.example.backend.api.controller.PostController;
 import com.example.backend.config.TestConfig;
-import com.example.backend.dto.post.CreateRequest;
-import com.example.backend.dto.post.Detail;
-import com.example.backend.dto.post.UpdateRequest;
-import com.example.backend.security.CustomUserDetailsService;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.security.TestMailConfig;
-import com.example.backend.service.PostService;
+import com.example.backend.api.dto.post.CreateRequest;
+import com.example.backend.api.dto.post.Detail;
+import com.example.backend.api.dto.post.UpdateRequest;
+import com.example.backend.infrastructure.security.CustomUserDetailsService;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.infrastructure.security.TestMailConfig;
+import com.example.backend.application.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

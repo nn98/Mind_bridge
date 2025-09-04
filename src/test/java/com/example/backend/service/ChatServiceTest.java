@@ -1,12 +1,11 @@
 // src/test/java/com/example/backend/service/ChatServiceTest.java
 package com.example.backend.service;
 
-import com.example.backend.dto.chat.MessageResponse;
-import com.example.backend.entity.ChatMessageEntity;
-import com.example.backend.entity.ChatSessionEntity;
-import com.example.backend.repository.ChatMessageRepository;
-import com.example.backend.repository.ChatSessionRepository;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.example.backend.application.service.ChatService;
+import com.example.backend.infrastructure.persistence.entity.ChatMessageEntity;
+import com.example.backend.infrastructure.persistence.entity.ChatSessionEntity;
+import com.example.backend.domain.chat.ChatMessageRepository;
+import com.example.backend.domain.chat.ChatSessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,10 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;

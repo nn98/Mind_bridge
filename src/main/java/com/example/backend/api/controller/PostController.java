@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ import com.example.backend.api.dto.post.CreateRequest;
 import com.example.backend.api.dto.post.Detail;
 import com.example.backend.api.dto.post.Summary;
 import com.example.backend.api.dto.post.UpdateRequest;
-import com.example.backend.service.PostService;
+import com.example.backend.application.service.PostService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

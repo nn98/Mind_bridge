@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.util.Map;
 
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.entity.UserEntity;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.service.SocialOAuthService;
-import com.example.backend.service.SocialOAuthService.StandardUser;
-import com.example.backend.service.UserService;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.application.service.SocialOAuthService;
+import com.example.backend.application.service.SocialOAuthService.StandardUser;
+import com.example.backend.application.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

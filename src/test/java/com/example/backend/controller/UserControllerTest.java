@@ -1,14 +1,15 @@
 // src/test/java/com/example/backend/controller/UserControllerTest.java
 package com.example.backend.controller;
 
+import com.example.backend.api.controller.UserController;
 import com.example.backend.config.TestConfig;
-import com.example.backend.dto.user.Profile;
-import com.example.backend.dto.user.RegistrationRequest;
-import com.example.backend.dto.user.UpdateRequest;
-import com.example.backend.security.CustomUserDetailsService;
+import com.example.backend.api.dto.user.Profile;
+import com.example.backend.api.dto.user.RegistrationRequest;
+import com.example.backend.api.dto.user.UpdateRequest;
+import com.example.backend.infrastructure.security.CustomUserDetailsService;
 import com.example.backend.security.JwtUtilTest;
-import com.example.backend.security.TestMailConfig;
-import com.example.backend.service.UserService;
+import com.example.backend.infrastructure.security.TestMailConfig;
+import com.example.backend.application.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

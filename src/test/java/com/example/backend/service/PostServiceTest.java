@@ -1,14 +1,14 @@
 // src/test/java/com/example/backend/service/PostServiceTest.java
 package com.example.backend.service;
 
-import com.example.backend.dto.post.CreateRequest;
-import com.example.backend.dto.post.Detail;
-import com.example.backend.dto.post.Summary;
-import com.example.backend.dto.post.UpdateRequest;
-import com.example.backend.entity.PostEntity;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.PostRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.api.dto.post.CreateRequest;
+import com.example.backend.api.dto.post.Detail;
+import com.example.backend.api.dto.post.UpdateRequest;
+import com.example.backend.application.service.PostService;
+import com.example.backend.infrastructure.persistence.entity.PostEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.domain.post.PostRepository;
+import com.example.backend.domain.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

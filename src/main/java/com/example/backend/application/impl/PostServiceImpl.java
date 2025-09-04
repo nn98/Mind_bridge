@@ -1,5 +1,5 @@
 // service/impl/PostServiceImpl.java
-package com.example.backend.service.impl;
+package com.example.backend.application.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +13,11 @@ import com.example.backend.api.dto.post.CreateRequest;
 import com.example.backend.api.dto.post.Detail;
 import com.example.backend.api.dto.post.Summary;
 import com.example.backend.api.dto.post.UpdateRequest;
-import com.example.backend.entity.PostEntity;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.PostRepository;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.service.PostService;
+import com.example.backend.infrastructure.persistence.entity.PostEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.domain.post.PostRepository;
+import com.example.backend.domain.user.UserRepository;
+import com.example.backend.application.service.PostService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

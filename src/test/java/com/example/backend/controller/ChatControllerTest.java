@@ -2,7 +2,6 @@
 package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,16 +22,17 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.backend.api.controller.ChatController;
 import com.example.backend.config.TestConfig;
-import com.example.backend.dto.chat.MessageRequest;
-import com.example.backend.dto.chat.MessageResponse;
-import com.example.backend.dto.chat.SessionHistory;
-import com.example.backend.dto.chat.SessionRequest;
-import com.example.backend.security.CustomUserDetailsService;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.security.TestMailConfig;
-import com.example.backend.service.ChatService;
-import com.example.backend.service.ChatSessionService;
+import com.example.backend.api.dto.chat.MessageRequest;
+import com.example.backend.api.dto.chat.MessageResponse;
+import com.example.backend.api.dto.chat.SessionHistory;
+import com.example.backend.api.dto.chat.SessionRequest;
+import com.example.backend.infrastructure.security.CustomUserDetailsService;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.infrastructure.security.TestMailConfig;
+import com.example.backend.application.service.ChatService;
+import com.example.backend.application.service.ChatSessionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ChatController.class,

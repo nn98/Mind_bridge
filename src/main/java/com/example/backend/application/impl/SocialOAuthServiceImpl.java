@@ -1,4 +1,4 @@
-package com.example.backend.service.impl;
+package com.example.backend.application.impl;
 
 import java.util.Map;
 
@@ -14,7 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.backend.service.SocialOAuthService;
+import com.example.backend.application.service.SocialOAuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,5 +1,5 @@
 // dto/post/UpdateRequest.java
-package com.example.backend.dto.post;
+package com.example.backend.api.dto.post;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;

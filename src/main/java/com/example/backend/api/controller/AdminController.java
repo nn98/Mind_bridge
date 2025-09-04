@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.api.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.api.dto.user.Profile;
-import com.example.backend.repository.PostRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.domain.post.PostRepository;
+import com.example.backend.domain.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

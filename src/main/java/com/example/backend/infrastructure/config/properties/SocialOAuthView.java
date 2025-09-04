@@ -1,4 +1,4 @@
-package com.example.backend.config.properties;
+package com.example.backend.infrastructure.config.properties;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

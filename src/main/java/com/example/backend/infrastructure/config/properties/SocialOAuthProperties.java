@@ -1,4 +1,4 @@
-package com.example.backend.config.properties;
+package com.example.backend.infrastructure.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

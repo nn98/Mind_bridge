@@ -2,12 +2,12 @@
 package com.example.backend.controller;
 
 import com.example.backend.config.TestConfig;
-import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.user.RegistrationRequest;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
-import com.example.backend.security.TestMailConfig;
+import com.example.backend.api.dto.auth.LoginRequest;
+import com.example.backend.api.dto.user.RegistrationRequest;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.domain.user.UserRepository;
+import com.example.backend.infrastructure.security.JwtUtil;
+import com.example.backend.infrastructure.security.TestMailConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

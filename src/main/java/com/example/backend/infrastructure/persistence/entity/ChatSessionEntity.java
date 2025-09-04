@@ -1,4 +1,4 @@
-package com.example.backend.entity;
+package com.example.backend.infrastructure.persistence.entity;
 
 import java.time.LocalDateTime;
 

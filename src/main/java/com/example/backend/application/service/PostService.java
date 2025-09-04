@@ -1,5 +1,5 @@
 // service/PostService.java
-package com.example.backend.service;
+package com.example.backend.application.service;
 
 import java.util.List;
 import java.util.Optional;

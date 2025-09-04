@@ -1,13 +1,14 @@
 // src/test/java/com/example/backend/service/AuthServiceTest.java
 package com.example.backend.service;
 
-import com.example.backend.dto.auth.FindIdRequest;
-import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
-import com.example.backend.dto.auth.ResetPasswordRequest;
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
+import com.example.backend.api.dto.auth.FindIdRequest;
+import com.example.backend.api.dto.auth.LoginRequest;
+import com.example.backend.api.dto.auth.LoginResponse;
+import com.example.backend.api.dto.auth.ResetPasswordRequest;
+import com.example.backend.application.service.AuthService;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.domain.user.UserRepository;
+import com.example.backend.infrastructure.security.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,9 +1,9 @@
 // service/ChatService.java
-package com.example.backend.service;
+package com.example.backend.application.service;
 
 import java.util.List;
 import com.example.backend.api.dto.chat.MessageResponse;
-import com.example.backend.entity.ChatMessageEntity;
+import com.example.backend.infrastructure.persistence.entity.ChatMessageEntity;
 
 public interface ChatService {
 

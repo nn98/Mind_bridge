@@ -11,6 +11,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.example.backend.infrastructure.security.JwtUtil;
+
 @ExtendWith(MockitoExtension.class)
 public class JwtUtilTest {
 

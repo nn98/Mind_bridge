@@ -1,4 +1,4 @@
-package com.example.backend.repository;
+package com.example.backend.domain.chat;
 
 import java.util.List;
 import java.util.Optional;

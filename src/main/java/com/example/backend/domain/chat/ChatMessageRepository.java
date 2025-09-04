@@ -1,4 +1,4 @@
-package com.example.backend.repository;
+package com.example.backend.domain.chat;
 
 import com.example.backend.infrastructure.persistence.entity.ChatMessageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

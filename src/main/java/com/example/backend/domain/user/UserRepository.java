@@ -1,4 +1,4 @@
-package com.example.backend.repository;
+package com.example.backend.domain.user;
 
 import java.util.Optional;
 

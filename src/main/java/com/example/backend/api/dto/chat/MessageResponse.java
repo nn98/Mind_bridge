@@ -1,5 +1,5 @@
 // dto/chat/MessageResponse.java
-package com.example.backend.dto.chat;
+package com.example.backend.api.dto.chat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

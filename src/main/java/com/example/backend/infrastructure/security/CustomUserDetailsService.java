@@ -1,7 +1,7 @@
-package com.example.backend.security;
+package com.example.backend.infrastructure.security;
 
-import com.example.backend.entity.UserEntity;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
+import com.example.backend.domain.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

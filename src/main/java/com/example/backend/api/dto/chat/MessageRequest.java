@@ -1,5 +1,5 @@
 // dto/chat/MessageRequest.java
-package com.example.backend.dto.chat;
+package com.example.backend.api.dto.chat;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

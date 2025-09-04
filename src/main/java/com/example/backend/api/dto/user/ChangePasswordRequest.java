@@ -1,4 +1,4 @@
-package com.example.backend.dto.user;
+package com.example.backend.api.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

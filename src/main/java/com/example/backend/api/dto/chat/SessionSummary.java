@@ -1,5 +1,5 @@
 // dto/chat/SessionSummary.java
-package com.example.backend.dto.chat;
+package com.example.backend.api.dto.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.backend.security;
+package com.example.backend.infrastructure.security;
 
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;

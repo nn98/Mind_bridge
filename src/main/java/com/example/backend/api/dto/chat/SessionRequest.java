@@ -1,4 +1,4 @@
-package com.example.backend.dto.chat;
+package com.example.backend.api.dto.chat;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

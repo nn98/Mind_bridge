@@ -1,5 +1,5 @@
 // service/impl/ChatServiceImpl.java
-package com.example.backend.service.impl;
+package com.example.backend.application.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.backend.api.dto.chat.MessageResponse;
-import com.example.backend.entity.ChatMessageEntity;
-import com.example.backend.entity.ChatSessionEntity;
-import com.example.backend.repository.ChatMessageRepository;
-import com.example.backend.repository.ChatSessionRepository;
-import com.example.backend.service.ChatService;
+import com.example.backend.infrastructure.persistence.entity.ChatMessageEntity;
+import com.example.backend.infrastructure.persistence.entity.ChatSessionEntity;
+import com.example.backend.domain.chat.ChatMessageRepository;
+import com.example.backend.domain.chat.ChatSessionRepository;
+import com.example.backend.application.service.ChatService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -1,5 +1,5 @@
 // dto/post/CreateRequest.java
-package com.example.backend.dto.post;
+package com.example.backend.api.dto.post;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

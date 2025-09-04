@@ -1,8 +1,9 @@
 // src/test/java/com/example/backend/repository/PostRepositoryTest.java
 package com.example.backend.repository;
 
-import com.example.backend.entity.PostEntity;
-import com.example.backend.entity.UserEntity;
+import com.example.backend.domain.post.PostRepository;
+import com.example.backend.infrastructure.persistence.entity.PostEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

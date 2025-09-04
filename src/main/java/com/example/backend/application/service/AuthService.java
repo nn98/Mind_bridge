@@ -1,5 +1,5 @@
 // service/AuthService.java
-package com.example.backend.service;
+package com.example.backend.application.service;
 
 import com.example.backend.api.dto.auth.FindIdRequest;
 import com.example.backend.api.dto.auth.LoginRequest;

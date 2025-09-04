@@ -1,9 +1,9 @@
-package com.example.backend.mapper;
+package com.example.backend.infrastructure.mapper;
 
 import org.springframework.stereotype.Component;
 import com.example.backend.api.dto.user.Profile;
 import com.example.backend.api.dto.user.UpdateRequest;
-import com.example.backend.entity.UserEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
 
 @Component
 public class UserMapper {

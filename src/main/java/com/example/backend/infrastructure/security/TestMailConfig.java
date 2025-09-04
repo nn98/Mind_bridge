@@ -1,4 +1,4 @@
-package com.example.backend.security;
+package com.example.backend.infrastructure.security;
 
 import java.util.Arrays;
 

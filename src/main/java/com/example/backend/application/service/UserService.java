@@ -1,11 +1,11 @@
-package com.example.backend.service;
+package com.example.backend.application.service;
 
 import java.util.Optional;
 import com.example.backend.api.dto.user.Profile;
 import com.example.backend.api.dto.user.RegistrationRequest;
 import com.example.backend.api.dto.user.Summary;
 import com.example.backend.api.dto.user.UpdateRequest;
-import com.example.backend.entity.UserEntity;
+import com.example.backend.infrastructure.persistence.entity.UserEntity;
 
 public interface UserService {
     Profile register(RegistrationRequest request);
