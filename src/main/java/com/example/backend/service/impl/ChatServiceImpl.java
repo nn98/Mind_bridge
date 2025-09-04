@@ -47,15 +47,7 @@ public class ChatServiceImpl implements ChatService {
 	// OpenAI API 호출하여 메시지 처리 (세션ID 포함)
 	@Override
 	@Transactional
-	public MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage) {
-		// 1) 세션 신설
-		ChatSessionEntity session = new ChatSessionEntity();
-		session.setUserEmail(userEmail);
-		session.setSessionStatus("IN_PROGRESS");
-		// 필요한 초기 필드가 있으면 설정
-		session = chatSessionRepository.save(session); // DB insert, auto_increment 채워짐
-
-		Long sessionId = session.getSessionId(); // 여기서 생성된 키 확보
+	public MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage, Long sessionId) {
 
 		// 2) 사용자 메시지 저장
 		if (userMessage != null && !userMessage.isBlank()) {
@@ -75,7 +67,7 @@ public class ChatServiceImpl implements ChatService {
 
 	// 새로운 채팅 세션 생성
 	@Override
-	@Transactional
+	@Transactional 
 	public Long createNewSession(String userEmail) {
 		ChatSessionEntity session = new ChatSessionEntity();
 		session.setUserEmail(userEmail);

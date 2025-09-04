@@ -15,5 +15,5 @@ public class MessageRequest {
     private String systemPrompt;
 
     private String userMessage; // 사용자가 직접 입력한 메시지 (선택사항)
-    private String sessionId; // 세션 관리용
+    private Long sessionId; // 세션 관리용
 }
