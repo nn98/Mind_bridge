@@ -30,10 +30,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 사용자 관리 관련 REST API 컨트롤러
- * 회원가입, 정보 수정, 조회, 삭제 등의 기능 제공
- */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -44,25 +40,14 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final SecurityUtil securityUtil;
 
-    /**
-     * 회원가입
-     * @param request 회원가입 요청 정보
-     * @return 생성된 사용자 프로필
-     */
     @PostMapping("/register")
     public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
         Profile profile = userService.register(request);
         return ResponseEntity.created(URI.create("/api/users/" + profile.getNickname())).body(profile);
     }
 
-    /**
-     * 닉네임, 이메일 중복 확인
-     * @param type 확인 종류
-     * @param value 확인 값
-     * @return 사용 가능 여부
-     */
     @GetMapping("/availability")
-    public ResponseEntity<Map<String, Boolean>> availability(@RequestParam String type, @RequestParam String value) {
+    public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam String type, @RequestParam String value) {
         boolean isAvailable = switch (type) {
             case "nickname" -> userService.isNicknameAvailable(value);
             case "email"    -> userService.isEmailAvailable(value);
@@ -71,12 +56,6 @@ public class UserController {
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
 
-    /**
-     * 현재 사용자 정보 조회
-     * 프로필 = 민감 정보이므로 no-store 권장
-     * @param authentication 인증 정보
-     * @return 사용자 프로필
-     */
     @GetMapping("/account")
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
@@ -87,24 +66,13 @@ public class UserController {
             .body(profile);
     }
 
-    /**
-     * 사용자 정보 수정
-     * @param request 수정할 정보
-     * @param authentication 인증 정보
-     * @return 없음
-     */
     @PatchMapping("/account")
-    public ResponseEntity<Void> patchAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
+    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
         userService.updateUser(email, request);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 회원 탈퇴
-     * @param authentication 인증 정보
-     * @return 없음
-     */
     @DeleteMapping("/account")
     public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
         String email = securityUtil.requirePrincipalEmail(authentication);
@@ -113,12 +81,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 비밀번호 변경
-     * @param request 새 비밀번호 정보
-     * @param authentication 인증 정보
-     * @return 없음
-     */
+    /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
@@ -126,13 +89,8 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 닉네임으로 사용자 요약 정보 조회
-     * @param nickname 조회할 닉네임
-     * @return 사용자 요약 정보
-     */
     @GetMapping("/summary")
-    public ResponseEntity<Summary> summary(@RequestParam String nickname) {
+    public ResponseEntity<Summary> getSummary(@RequestParam String nickname) {
         return userService.getUserByNickname(nickname)
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new NotFoundException("User not found"));
