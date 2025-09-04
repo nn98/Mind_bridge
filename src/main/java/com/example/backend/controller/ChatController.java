@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatSessionService chatSessionService;
+    private final ChatSessionService chatSessionService; 
     private final ChatService chatService;
 
     /**
@@ -72,6 +72,7 @@ public class ChatController {
                     request.getSystemPrompt(),
                     authentication.getName(),
                     request.getUserMessage()
+                    , request.getSessionId()
             );
             Long sessionId = response.getSessionId();
 
