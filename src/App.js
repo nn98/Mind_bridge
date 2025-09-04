@@ -28,7 +28,6 @@ import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/emotion/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/admin/AdminPage";
-import KakaoWaitPage from "./components/KakaoWaitPage";
 import UserProfile from "./components/chat-modal/components/UserProfile";
 import HelpPage from "./components/HelpPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -119,7 +118,6 @@ const App = () => {
                 <Route path="/signup" element={<AuthSection type="signup" />} />
                 <Route path="/find-id" element={<AuthSection type="find-id" />} />
                 <Route path="/find-password" element={<AuthSection type="find-password" />} />
-                <Route path="/login/wait" element={<KakaoWaitPage />} />
                 <Route path="/auth/loading" element={<AuthLoadingPage />} />
 
                 {/* 레거시/기타 */}
