@@ -1,9 +1,12 @@
 package com.example.backend.service.impl;
 
 import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
@@ -11,7 +14,9 @@ import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.security.RecentAuthenticationService;
 import com.example.backend.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +28,7 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
+	private RecentAuthenticationService recentAuthenticationService;
 
 	@Override
 	@Transactional
@@ -177,5 +183,39 @@ public class UserServiceImpl implements UserService {
 			if (suffix > 100) { nickname = provider + "_" + System.currentTimeMillis(); break; }
 		}
 		return nickname;
+	}
+
+	@Override
+	@Transactional
+	public void changePasswordWithReauth(String email, String currentPassword, String newPassword) {
+		UserEntity user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		// 재인증 검증
+		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
+
+		// 기존 로직 + 토큰 무효화
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+
+		// 선택사항: 모든 세션 무효화
+		// sessionRegistry.getAllSessions(user.getEmail(), false).forEach(SessionInformation::expireNow);
+
+		log.info("Password changed successfully for user: {}", email);
+	}
+
+	@Override
+	@Transactional
+	public void deleteAccountWithReauth(String email, String currentPassword) {
+		UserEntity user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		// 재인증 검증
+		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
+
+		// 기존 삭제 로직
+		userRepository.delete(user);
+
+		log.info("Account deleted successfully for user: {}", email);
 	}
 }

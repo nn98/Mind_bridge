@@ -17,4 +17,6 @@ public interface UserService {
     boolean isEmailAvailable(String email);
     boolean isNicknameAvailable(String nickname);
     UserEntity findOrCreateSocialUser(String email, String nickname, String provider);
+    public void changePasswordWithReauth(String email, String currentPassword, String newPassword);
+    public void deleteAccountWithReauth(String email, String currentPassword);
 }
