@@ -6,7 +6,11 @@
     padding: 2.5rem;
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    box-shadow:
+            0 0 20px rgba(0, 0, 0, 0.05),
+                    0 0 50px rgba(139, 92, 246, 0.3),
+                    0 0 90px rgba(34, 211, 238, 0.20),
+                    0 0 140px rgba(139, 92, 246, 0.18);
     max-width: 400px;
     width: 100%;
     text-align: center;
@@ -22,7 +26,11 @@
     padding: 16px;
     background: #ffffff;
     border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    box-shadow:
+                0 0 20px rgba(0, 0, 0, 0.05),
+                        0 0 50px rgba(139, 92, 246, 0.3),
+                        0 0 90px rgba(34, 211, 238, 0.20),
+                        0 0 140px rgba(139, 92, 246, 0.18);
 
     /* 추가된 코드 */
     max-height: 100%; /* 화면 높이의 80%로 최대 높이를 제한 */
