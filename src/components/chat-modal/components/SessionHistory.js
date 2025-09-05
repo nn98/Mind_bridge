@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL""; // 백엔드 주소
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL; // 백엔드 주소
 
 const SessionHistory = ({ userEmail }) => {
     const [history, setHistory] = useState([]);

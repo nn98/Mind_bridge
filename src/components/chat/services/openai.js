@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // 백엔드 API 주소로 변경 (OpenAI API 대신 자체 백엔드 API)
-const backendApiAddress = process.env.REACT_APP_BACKEND_API_URL || process.env.REACT_APP_BACKEND_URL"";
+const backendApiAddress = process.env.REACT_APP_BACKEND_API_URL;
 
 export async function requestCounselling(systemPrompt, sessionId, userMessage) {
 
