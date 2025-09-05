@@ -3,50 +3,54 @@
 /* --- 폼 및 레이아웃 --- */
 
 .form-section {
-  padding: 2.5rem;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  max-width: 400px;
-  width: 100%;
-  text-align: center;
+    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
 }
 
 .form-section-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  max-width: 900px;
-  margin: 6rem auto;
-  padding: 16px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    max-width: 900px;
+    margin: 6rem auto;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+
+    /* 추가된 코드 */
+    max-height: 100%; /* 화면 높이의 80%로 최대 높이를 제한 */
+    overflow-y: auto; /* 내용이 넘칠 때만 수직 스크롤바가 생기도록 설정 */
 }
 
 .form-right-legend {
-  background: #ffffff;
-  padding: 3rem;
-  border-radius: 16px;
-  border: 1px solid rgb(197, 197, 197);
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.05);
-  width: 340px;
-  min-width: 350px;
-  margin-top: 150px;
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 16px;
+    border: 1px solid rgb(197, 197, 197);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.05);
+    width: 340px;
+    min-width: 350px;
+    margin-top: 150px;
 }
 
 .logo-login {
-  width: 200px;
-  margin-inline: -150px;
-  margin-bottom: 15px;
+    width: 200px;
+    margin-inline: -150px;
+    margin-bottom: 15px;
 }
 
 .logo-sign-up {
-  position: fixed;
-  width: 200px;
-  margin-left: 580px;
-  margin-top: 20px;
+    position: absolute;
+    width: 200px;
+    margin-left: 580px;
+    margin-top: 20px;
 }
 
 /* --- 버튼 스타일 --- */
@@ -54,188 +58,188 @@
 /* 일반 로그인/인증 버튼 (보라색) */
 .login-button,
 .auth-button {
-  background-color: #a18cd1 !important;
-  color: white !important;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 3px 6px rgba(161, 140, 209, 0.25);
+    background-color: #a18cd1 !important;
+    color: white !important;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 3px 6px rgba(161, 140, 209, 0.25);
 }
 
 .login-button:hover,
 .auth-button:hover {
-  background-color: #805dd1 !important;
+    background-color: #805dd1 !important;
 }
 
 /* 모든 소셜 버튼 공통 스타일 (색상 제외) */
 .social-button {
-  width: 100%;
-  padding: 10px 1rem !important;
-  font-size: 0.95rem !important;
-  font-weight: bold !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
-  text-transform: none !important;
-  /* 텍스트가 모두 대문자로 바뀌는 것 방지 */
-  cursor: pointer;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+    width: 100%;
+    padding: 10px 1rem !important;
+    font-size: 0.95rem !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    /* 텍스트가 모두 대문자로 바뀌는 것 방지 */
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* 카카오 로그인 버튼 (색상) */
 .kakao-login-button {
-  /*background-image: url("../../public/img/kakao_login_medium_wide.png");*/
-  background-color: #FEE500 !important;
-  color: #191919 !important;
-  border: none !important;
+    /*background-image: url("../../public/img/kakao_login_medium_wide.png");*/
+    background-color: #FEE500 !important;
+    color: #191919 !important;
+    border: none !important;
 }
 
 .kakao-login-button:hover {
-  background-color: #F8E000 !important;
+    background-color: #F8E000 !important;
 }
 
 /* 구글 로그인 버튼 (색상) */
 .google-login-button {
-  background-color: #FFFFFF !important;
-  color: #3C4043 !important;
-  border: 1px solid #DADCE0 !important;
+    background-color: #FFFFFF !important;
+    color: #3C4043 !important;
+    border: 1px solid #DADCE0 !important;
 }
 
 .google-login-button:hover {
-  background-color: #F8F9FA !important;
-  border-color: #C6C6C6 !important;
+    background-color: #F8F9FA !important;
+    border-color: #C6C6C6 !important;
 }
 
 /* --- 소셜 로그인 UI --- */
 
 .social-buttons {
-  width: 100%;
-  margin-top: 16px;
+    width: 100%;
+    margin-top: 16px;
 }
 
 .social-login-divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  color: #757575;
-  font-size: 0.875rem;
-  margin: 16px 0;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #757575;
+    font-size: 0.875rem;
+    margin: 16px 0;
 }
 
 .divider-line {
-  flex-grow: 1;
-  height: 1px;
-  background-color: #e0e0e0;
+    flex-grow: 1;
+    height: 1px;
+    background-color: #e0e0e0;
 }
 
 .divider-text {
-  margin: 0 16px;
+    margin: 0 16px;
 }
 
 .button-container1 {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* --- 기타 UI 요소 --- */
 
 .form-links {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    margin-top: 1rem;
 }
 
 .form-link {
-  color: #a18cd1;
-  text-decoration: none;
-  font-weight: 500;
+    color: #a18cd1;
+    text-decoration: none;
+    font-weight: 500;
 }
 
 .form-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* 모달 및 토스트 메시지 스타일 */
 .modal-backdrop-2 {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal-content-2 {
-  background-color: white;
-  padding: 2rem 2.5rem;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 85vh;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  color: #333;
+    background-color: white;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: #333;
 }
 
 .modal-close-btn-2 {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  font-weight: bold;
-  cursor: pointer;
-  color: #aaa;
-  line-height: 1;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+    line-height: 1;
 }
 
 .terms-text-content-2 {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-right: 15px;
-  line-height: 1.7;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+    line-height: 1.7;
 }
 
 .app-toast {
-  position: fixed;
-  left: 50%;
-  bottom: 36px;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  z-index: 2000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: toast-slide-down 0.4s ease-out;
+    position: fixed;
+    left: 50%;
+    bottom: 36px;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: toast-slide-down 0.4s ease-out;
 }
 
 .Toastify__toast-container {
-  z-index: 99999 !important;
+    z-index: 99999 !important;
 }
 
 @keyframes toast-slide-down {
-  from {
-    bottom: -50px;
-    opacity: 0;
-  }
+    from {
+        bottom: -50px;
+        opacity: 0;
+    }
 
-  to {
-    bottom: 36px;
-    opacity: 1;
-  }
+    to {
+        bottom: 36px;
+        opacity: 1;
+    }
 }

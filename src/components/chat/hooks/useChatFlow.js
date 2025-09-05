@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { questionOrder, fieldKeys, initialForm, buildSystemPrompt } from "../constants";
 import { prefillFromUser } from "../utils/prefillFromUser";
 import { requestCounselling } from "../services/openai";
-import { saveCounselling } from "../services/counsellingApi";
+import { saveCounselling, startNewSession, completeSession } from "../services/counsellingApi";
 import { toast } from "react-toastify";
 
 export function useChatFlow({
@@ -14,6 +14,7 @@ export function useChatFlow({
     autoStartFromProfile = true,
     askProfileIfMissing = true,
 } = {}) {
+    const [sessionId, setSessionId] = useState(null); // 세션 상태
     const questionnaireMode = !disableQuestionnaire;
     const quickMode = !!disableQuestionnaire;
 
@@ -45,6 +46,7 @@ export function useChatFlow({
 
     // 모드 전환 감지: 로그인/로그아웃 등으로 disableQuestionnaire 변경 시 리셋
     const prevModeRef = useRef({ quickMode, questionnaireMode });
+
     useEffect(() => {
         const prev = prevModeRef.current;
         if (prev.quickMode !== quickMode || prev.questionnaireMode !== questionnaireMode) {
@@ -52,6 +54,7 @@ export function useChatFlow({
             setForm(initialForm);
             setIsChatEnded(false);
             setIsTyping(false);
+            setSessionId(null);
 
             if (quickMode) {
                 // 바로 상담 모드: 인트로만
@@ -68,6 +71,7 @@ export function useChatFlow({
                 setChatHistory([]);
             }
             prevModeRef.current = { quickMode, questionnaireMode };
+
         }
     }, [quickMode, questionnaireMode, introMessage]);
 
@@ -105,8 +109,26 @@ export function useChatFlow({
                     (async () => {
                         try {
                             setIsTyping(true);
+
+                            // 세션이 없으면 생성
+                            let currentSessionId = sessionId;
+                            if (!currentSessionId) {
+                                if (!customUser?.email) {
+                                    toast.error("로그인 후 세션을 시작해주세요.");
+                                    return;
+                                }
+                                currentSessionId = await startNewSession(customUser.email);
+                                if (!currentSessionId) {
+                                    toast.error("자동 상담 세션 생성 실패");
+                                    return;
+                                }
+                                setSessionId(currentSessionId);
+                            }
+
                             const systemPrompt = buildSystemPrompt({ ...initialForm, ...prefill });
-                            const result = await requestCounselling(systemPrompt);
+
+                            const result = await requestCounselling(systemPrompt, currentSessionId, chatInput);
+
                             const displayName =
                                 customUser?.fullName || customUser?.nickname || customUser?.name || "고객";
                             const aiMsgRaw = result?.상담사_응답 || "상담 응답을 불러오지 못했습니다.";
@@ -127,108 +149,128 @@ export function useChatFlow({
     }, [customUser, questionnaireMode, autoStartFromProfile, askProfileIfMissing, enforceGreeting]);
 
     //제출 처리
-    const handleSubmit = useCallback(async () => {
-        if (isTyping || isChatEnded) return;
+    const handleSubmit =
+        useCallback(async () => {
+            if (isTyping || isChatEnded) return;
 
-        const input = chatInput.trim();
-        if (!input) {
-            inputRef.current?.focus();
-            return;
-        }
-
-        // 화면에 사용자 메시지 먼저 반영
-        setChatHistory((prev) => [...prev, { sender: "user", message: input }]);
-        setChatInput("");
-
-        //QUICK MODE: 최소 질문 수집(있는 경우에만)
-        if (quickMode && fieldsToAsk.length > 0 && step < fieldsToAsk.length) {
-            const key = fieldsToAsk[step];
-            setForm((prev) => ({ ...prev, [key]: input }));
-
-            const nextStep = step + 1;
-            setStep(nextStep);
-
-            if (nextStep < fieldsToAsk.length) {
-                const nextKey = fieldsToAsk[nextStep];
-                setChatHistory((prev) => [...prev, { sender: "ai", message: getQuestion(nextKey) }]);
-                return; // 아직 수집 진행 중
-            }
-            // 최소 질문 수집 완료 → 상담 호출 진행
-        }
-
-        //질문지 모드: 전체 수집
-        if (questionnaireMode && step < fieldKeys.length && askProfileIfMissing) {
-            const currentKey = fieldKeys[step];
-            setForm((prev) => ({ ...prev, [currentKey]: input }));
-
-            const nextStep = step + 1;
-            setStep(nextStep);
-
-            if (nextStep < fieldKeys.length) {
-                const nextQuestion = questionOrder[nextStep];
-                setChatHistory((prev) => [...prev, { sender: "ai", message: nextQuestion }]);
+            const input = chatInput.trim();
+            if (!input) {
+                inputRef.current?.focus();
                 return;
             }
-            // 전체 수집 완료 → 상담 호출 진행
-        }
 
-        //본격 상담 호출 (quick/질문지 공통) 
-        try {
-            setIsTyping(true);
+            // 화면에 사용자 메시지 먼저 반영
+            setChatHistory((prev) => [...prev, { sender: "user", message: input }]);
+            setChatInput("");
 
-            // 로그인 정보 보강
-            const nameFromLogin = customUser?.fullName || customUser?.nickname || customUser?.name || "";
-            const finalForm = {
-                ...form,
-                이름: form["이름"] || nameFromLogin,
-                성별: form["성별"] || customUser?.gender || form["성별"] || "",
-                나이: form["나이"] || customUser?.age || form["나이"] || "",
-                상태: form["상태"] || (quickMode ? input : form["상태"]) || "",
-                상담받고싶은내용:
-                    form["상담받고싶은내용"] || (quickMode ? input : form["상담받고싶은내용"]) || "",
-            };
+            //QUICK MODE: 최소 질문 수집(있는 경우에만)
+            if (quickMode && fieldsToAsk.length > 0 && step < fieldsToAsk.length) {
+                const key = fieldsToAsk[step];
+                setForm((prev) => ({ ...prev, [key]: input }));
 
-            const systemPrompt = buildSystemPrompt(finalForm);
-            const result = await requestCounselling(systemPrompt);
+                const nextStep = step + 1;
+                setStep(nextStep);
 
-            // 저장(실패해도 UX 영향 없도록)
-            try {
-                await saveCounselling({
-                    email: customUser?.email,
-                    상태: finalForm["상태"],
-                    상담받고싶은내용: finalForm["상담받고싶은내용"],
-                });
-            } catch (e) {
-                console.warn("상담 저장 실패:", e);
+                if (nextStep < fieldsToAsk.length) {
+                    const nextKey = fieldsToAsk[nextStep];
+                    setChatHistory((prev) => [...prev, { sender: "ai", message: getQuestion(nextKey) }]);
+                    return; // 아직 수집 진행 중
+                }
+                // 최소 질문 수집 완료 → 상담 호출 진행
             }
 
-            const displayName = nameFromLogin || "고객";
-            const aiMsgRaw = result?.상담사_응답 || "상담 응답을 불러오지 못했습니다.";
-            const aiMsg = enforceGreeting ? ensureGreeting(aiMsgRaw, displayName) : aiMsgRaw;
+            //질문지 모드: 전체 수집
+            if (questionnaireMode && step < fieldKeys.length && askProfileIfMissing) {
+                const currentKey = fieldKeys[step];
+                setForm((prev) => ({ ...prev, [currentKey]: input }));
 
-            setChatHistory((prev) => [...prev, { sender: "ai", message: aiMsg }]);
-            setIsChatEnded(!!result?.세션_종료);
-        } catch (error) {
-            console.error(error);
-            toast.error("상담 중 오류가 발생했습니다.");
-        } finally {
-            setIsTyping(false);
-        }
-    }, [
-        chatInput,
-        isChatEnded,
-        isTyping,
-        step,
-        quickMode,
-        fieldsToAsk,
-        questionnaireMode,
-        askProfileIfMissing,
-        form,
-        customUser,
-        enforceGreeting,
-    ]);
+                const nextStep = step + 1;
+                setStep(nextStep);
 
-    const handleEndChat = useCallback( async () => {
+                if (nextStep < fieldKeys.length) {
+                    const nextQuestion = questionOrder[nextStep];
+                    setChatHistory((prev) => [...prev, { sender: "ai", message: nextQuestion }]);
+                    return;
+                }
+                // 전체 수집 완료 → 상담 호출 진행
+            }
+
+            //본격 상담 호출 (quick/질문지 공통) 
+            try {
+                setIsTyping(true);
+                // 세션 없으면 백엔드에서 생성
+                let currentSessionId = sessionId;
+                if (!currentSessionId) {
+                    if (!customUser?.email) {
+                        toast.error("로그인 후 세션을 시작해주세요.");
+                        setIsTyping(false);
+                        return;
+                    }
+
+                    currentSessionId = await startNewSession(customUser.email);
+                    if (!currentSessionId) {
+                        toast.error("상담 세션 생성에 실패했습니다.");
+                        setIsTyping(false);
+                        return;
+                    }
+                    setSessionId(currentSessionId);
+                    console.log("백엔드에서 생성된 세션ID:", currentSessionId);
+                }
+
+
+                // 로그인 정보 보강
+                const nameFromLogin = customUser?.fullName || customUser?.nickname || customUser?.name || "";
+                const finalForm = {
+                    ...form,
+                    이름: form["이름"] || nameFromLogin,
+                    성별: form["성별"] || customUser?.gender || form["성별"] || "",
+                    나이: form["나이"] || customUser?.age || form["나이"] || "",
+                    상태: form["상태"] || (quickMode ? input : form["상태"]) || "",
+                    상담받고싶은내용:
+                        form["상담받고싶은내용"] || (quickMode ? input : form["상담받고싶은내용"]) || "",
+                };
+
+                const systemPrompt = buildSystemPrompt(finalForm);
+                const result = await requestCounselling(systemPrompt, currentSessionId, chatInput);
+
+                // 저장(실패해도 UX 영향 없도록)
+                try {
+                    await saveCounselling({
+                        email: customUser?.email,
+                        상태: finalForm["상태"],
+                        상담받고싶은내용: finalForm["상담받고싶은내용"],
+                    });
+                } catch (e) {
+                    console.warn("상담 저장 실패:", e);
+                }
+
+                const displayName = nameFromLogin || "고객";
+                const aiMsgRaw = result?.상담사_응답 || "상담 응답을 불러오지 못했습니다.";
+                const aiMsg = enforceGreeting ? ensureGreeting(aiMsgRaw, displayName) : aiMsgRaw;
+
+                setChatHistory((prev) => [...prev, { sender: "ai", message: aiMsg }]);
+                setIsChatEnded(!!result?.세션_종료);
+            } catch (error) {
+                console.error(error);
+                toast.error("상담 중 오류가 발생했습니다.");
+            } finally {
+                setIsTyping(false);
+            }
+        }, [
+            chatInput,
+            isChatEnded,
+            isTyping,
+            step,
+            quickMode,
+            fieldsToAsk,
+            questionnaireMode,
+            askProfileIfMissing,
+            form,
+            customUser,
+            enforceGreeting,
+        ]);
+
+    const handleEndChat = useCallback(async () => {
         setIsChatEnded(true);
         setChatHistory((prev) => [
             ...prev,
@@ -240,11 +282,20 @@ export function useChatFlow({
                 chatHistory: chatHistory, // 상담 대화 전문
                 종료여부: true, // 종료 플래그를 추가 (백엔드에서 처리할 수 있도록)
                 종료시간: new Date().toISOString(),
+                sessionId: sessionId, // 백엔드에서 세션 만료 처리용
             });
+            // 세션 종료 API 호출
+            const summaryText = chatHistory.map((m) => `${m.sender}: ${m.message}`).join("\n");
+            await completeSession(sessionId, summaryText);
+
+            // 세션 상태 초기화
+            setSessionId(null);
+
         } catch (e) {
             console.warn("상담 종료 저장 실패:", e);
         }
-    }, [customUser, form]);
+    }, [customUser, form, sessionId]);
+
 
     const handleRestartChat = useCallback(() => {
         setIsChatEnded(false);
