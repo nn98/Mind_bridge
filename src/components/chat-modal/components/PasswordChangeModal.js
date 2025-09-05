@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import Toast from './Toast';
+import axios from "axios";
+import {BACKEND_URL} from "../constants";
 
-const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
+const PasswordChangeModal = ({ isOpen, onClose, onLogout }) => {
+    const [currentPassword, setCurrentPassword] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [toast, setToast] = useState({ show: false, message: '' });
@@ -11,10 +14,11 @@ const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
         setTimeout(() => setToast({ show: false, message: '' }), 3000);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        console.log(`currentPassword: ${currentPassword}`);
         console.log(`password: ${password}`);
         console.log(`confirmPassword: ${confirmPassword}`);
-        if (!password || !confirmPassword) {
+        if (!currentPassword || !password || !confirmPassword) {
             showToast('비밀번호를 모두 입력해주세요.');
             return;
         }
@@ -35,7 +39,16 @@ const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
             showToast('비밀번호는 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.');
             return;
         }
-        onPasswordChange(password);
+        try {
+            const payload = { currentPassword: currentPassword, password: password, confirmPassword: confirmPassword };
+            await axios.patch(`${BACKEND_URL}/api/users/account/password`, payload, {
+                withCredentials: true,
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            })
+            onLogout();
+        } catch (error) {
+            console.log(error, '비밀번호 변경 실패');
+        }
     };
 
     if (!isOpen) return null;
@@ -45,7 +58,17 @@ const PasswordChangeModal = ({ isOpen, onClose, onPasswordChange }) => {
             <div className="pwd-change-container">
                 <h3>비밀번호 변경</h3>
                 <div className="pwd-input-group">
-                    <label htmlFor="password">새 비밀번호</label>
+                    <label htmlFor="password">기존 비밀번호</label>
+                    <input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="8~16자, 영문 대/소, 숫자, 특수문자 조합"
+                    />
+                </div>
+                <div className="pwd-input-group">
+                    <label htmlFor="password">신규 비밀번호</label>
                     <input
                         id="password"
                         type="password"

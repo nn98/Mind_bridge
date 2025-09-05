@@ -205,7 +205,7 @@ const UserProfile = () => {
         try {
             await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
             logoutSuccess();
-            window.location.href = '/login';
+            window.location.href = '/';
         } catch (err) {
             console.error('로그아웃 실패:', err);
             window.location.href = '/login';
@@ -439,27 +439,7 @@ const UserProfile = () => {
             <PasswordChangeModal
                 isOpen={isPasswordModalOpen}
                 onClose={() => setIsPasswordModalOpen(false)}
-                onPasswordChange={async (pwd) => {
-                    if (!isLoggedIn) {
-                        toast.error('로그인 상태가 아닙니다.');
-                        return;
-                    }
-                    if (!userInfo.email) {
-                        toast.error('이메일 정보가 없습니다.');
-                        return;
-                    }
-                    try {
-                        const payload = { password: pwd };
-                        await axios.patch(`${BACKEND_URL}/api/users/account/password`, payload, {
-                            withCredentials: true,
-                            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                        });
-                        toast.success('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
-                        await handleLogout();
-                    } catch (error) {
-                        printAxiosError(error, '비밀번호 변경 실패');
-                    }
-                }}
+                onLogout={handleLogout}
             />
             <ToastContainer position="top-center" closeButton={false} icon={false} />
         </>
