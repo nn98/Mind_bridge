@@ -10,7 +10,6 @@ import "./css/login.css";
 import "./css/map.css";
 import "./css/small_translate.css";
 import "./css/FloatingChatButton.css";
-import "./css/selfTest.css";
 import "./css/result.css";
 import "./css/HospitalRegionPage.css";
 import "./css/dashboard.css";

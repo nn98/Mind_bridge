@@ -1,219 +1,381 @@
-/* ===== 자료실 레이아웃 — 좌측 상단 정렬 버전 ===== */
+/* ============ Tokens ============ */
+:root {
+    --ink1: #14151c;
+    --ink2: #4b4e58;
+    --ink3: #888d98;
+    --brand1: #7c5cff;
+    --brand2: #a18cd1;
+    --brand3: #d7cff9;
+    --border: rgba(150, 160, 200, .28);
+    --card: #fff;
+    --glow: 0 10px 24px rgba(124, 92, 255, .25);
+}
 
-.resource-library-container {
-    /* 앱 사이드바(260px) 옆에 정확히 맞추기 */
+/* 루트: 좌측 앱 사이드바 260px 고려 */
+.rl-root {
     max-width: 1100px;
-    margin: 40px 24px 80px 260px;
-    /* top right bottom left */
-    padding: 0 24px;
-    font-family: 'Pretendard', sans-serif;
-    color: #333;
-
-    /* 탭(사이드 ul)을 컨테이너 기준으로 절대배치하기 위해 필요 */
-    position: relative;
+    margin: 32px 24px 96px 260px;
+    padding: 0;
+    font-family: "Pretendard", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+    color: var(--ink1);
 }
 
-/* 제목: 가운데 정렬 제거, 좌측 정렬 */
+/* ============ Header ============ */
+.library-header {
+    margin-bottom: 18px;
+}
+
 .library-title {
-    margin: 0 0 32px 0;
-    text-align: left;
-    font-size: 2.3rem;
-    color: #4a4a4a;
+    margin: 0 0 12px;
+    font-size: 2.1rem;
+    font-weight: 900;
+    letter-spacing: -.02em;
 }
 
-/* 좌측 사이드 + 우측 본문을 상단부터 나란히 배치 */
-.library-layout {
-    grid-template-columns: 200px minmax(0, 1fr);
-    gap: 32px;
-    align-items: start;
-    /* 위쪽 맞춤 */
-    justify-content: start;
-    /* 왼쪽 맞춤 */
-}
-
-.library-sidebar {
-    width: 200px;
-    /* 고정 폭 (레이아웃 구조는 유지) */
-}
-
-/* === [변경] 사이드 ul을 제목 아래 '가로 탭 바'로 띄우기 === */
-.library-sidebar ul {
-    list-style: none;
-    padding: 6px 0;
-    margin: 0;
-
-    /* 여기서부터 탭 바로 전환 */
-    position: absolute;
-    /* 컨테이너 기준 */
-    top: 56px;
-    /* 제목 아래 위치 (필요시 조정) */
-    left: 24px;
-    /* 컨테이너 padding과 맞춤 */
-    right: 24px;
-
+.topic-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    align-items: center;
-    overflow-x: auto;
-    /* 항목이 많아지면 가로 스크롤 */
-    background: inherit;
-    z-index: 5;
 }
 
-/* === [변경] 버튼을 알약형 가로 탭으로 === */
-.sidebar-button {
-    min-width: 80px;
-    width: auto;
-    height: 44px;
-    /* 가로 길이 자동(세로형의 100% 오버라이드) */
-    padding: 10px 16px;
-    margin: 0;
-    /* 세로형 간격 제거 */
-    border: 1px solid #ddd;
+.topic-tab {
+    padding: 10px 18px;
     border-radius: 9999px;
-    background-color: #f8f8ff;
-    color: #4a4a4a;
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 700;
-    white-space: nowrap;
-    /* 줄바꿈 방지 */
+    border: 1px solid var(--border);
+    background: #f7f7fb;
+    color: var(--ink2);
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: none;
+    transition: .16s;
 }
 
-.sidebar-button:hover {
-    background-color: #eee9ff;
-    border-color: #cfc3ff;
-    box-shadow: none;
+.topic-tab:hover {
+    transform: translateY(-1px);
+    background: #efeaff;
+    box-shadow: 0 6px 12px rgba(124, 92, 255, .14);
 }
 
-.sidebar-button.active {
-    background-color: #805dd1;
+.topic-tab.active {
+    border-color: transparent;
     color: #fff;
-    border-color: #805dd1;
+    background: linear-gradient(90deg, var(--brand1), var(--brand2));
+    box-shadow: var(--glow);
 }
 
-/* 본문 영역 */
-.library-content {
+/* ============ Content wrap ============ */
+/* 본문은 헤더의 왼쪽 시작점과 동일 x=0에서 시작 */
+.library-wrap {
+    position: relative; /* 사이드 네거티브 마진 기준 */
+}
+
+/* 사이드 탭: 콘텐츠 왼쪽 거터로 빼기 (내용 정렬에 영향 X) */
+.content-sidenav {
+    position: sticky;
+    top: 0; /* 🔥 기존 8px → 0으로 바꿔서 위에 딱 붙임 */
+    width: 170px;
+    margin-left: -190px; /* 왼쪽으로 빼기 */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: flex-start; /* 🔥 본문 상단에 정렬되도록 보정 */
+}
+
+.side-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--ink2);
+    font-weight: 900;
+    cursor: pointer;
+    transition: .16s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .03);
+}
+
+.side-tab:hover {
+    transform: translateX(2px);
+    background: #f4f1ff;
+    border-color: #d9d2ff;
+}
+
+.side-tab.active {
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(90deg, var(--brand1), var(--brand2));
+    box-shadow: var(--glow);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    background: #cfd3e6;
+}
+
+.dot.overview {
+    background: #8aa0ff;
+}
+
+.dot.selftest {
+    background: #ff8a8a;
+}
+
+.dot.rec {
+    background: #7c5cff;
+}
+
+/* 본문: 헤더 왼쪽과 정확히 일치 */
+.content-main {
     min-width: 0;
-    /* 긴 내용 줄바꿈 위해 */
-    padding-top: 64px;
-    /* === [추가] 떠있는 탭 높이만큼 여백 줘서 겹침 방지 === */
+    margin-left: 0;
 }
 
-.library-content h2 {
-    font-size: 1.9rem;
-    margin-top: 0;
-    padding-bottom: 14px;
-    border-bottom: 2px solid #a18cd1;
-    margin-bottom: 24px;
+.content-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -.01em;
+    margin: 6px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--brand2);
 }
 
-.content-section {
-    margin-bottom: 32px;
-}
-
-.content-section h3 {
-    font-size: 1.2rem;
+/* 카드 */
+.content-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
     margin-bottom: 12px;
-    color: #000;
+    box-shadow: 0 2px 10px rgba(16, 16, 40, .04);
 }
 
-.content-section p {
-    font-size: 1rem;
-    line-height: 1.8;
-    white-space: pre-wrap;
+.content-card h3 {
+    font-size: 1.12rem;
+    font-weight: 800;
+    margin: 0 0 8px;
 }
 
-/* 추천 섹션 */
-.recommendations-section {
-    margin-top: 48px;
-    padding-top: 24px;
-    border-top: 2px solid #eee;
+.content-card p {
+    color: var(--ink2);
+    line-height: 1.75;
+    margin: 0;
 }
 
-.recommendations-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 16px;
-    color: #4a4a4a;
-}
-
+/* 추천 카드 */
 .recommendations-list {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns:1fr;
+    gap: 12px;
 }
 
 .recommendation-card {
-    background-color: #f8faff;
-    border: 1px solid #ddd;
-    border-left: 5px solid #a18cd1;
-    border-radius: 8px;
-    padding: 18px;
-    transition: transform 0.3s ease;
+    background: #fbfbff;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--brand2);
+    border-radius: 14px;
+    padding: 16px;
+    transition: .18s;
 }
 
 .recommendation-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 1px 10px #a18cd1;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(124, 92, 255, .18);
 }
 
-.recommendation-card .rec-title {
-    font-weight: 700;
-    font-size: 1.05rem;
-    margin: 0 0 6px 0;
-    color: #333;
+.rec-title {
+    font-weight: 800;
+    margin: 0 0 6px;
 }
 
-.recommendation-card .rec-author {
-    font-style: italic;
-    color: #777;
-    margin: 0 0 8px 0;
-    font-size: 0.9rem;
+.rec-author {
+    color: var(--ink3);
+    font-size: .95rem;
+    margin: 0 0 8px;
 }
 
-.recommendation-card .rec-description {
-    font-size: 0.95rem;
-    line-height: 1.6;
+.rec-description {
+    color: var(--ink2);
     margin: 0;
+    line-height: 1.65;
 }
 
-/* ===== 반응형: 화면이 좁아질 때 좌측 여백/그리드 정리 ===== */
+/* ============ SelfTest (locked) ============ */
+.selftest-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .05);
+}
+
+.selftest-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.selftest-head h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.type-lock {
+    font-size: .9rem;
+    color: var(--ink3);
+}
+
+.selftest-meta h3 {
+    margin: 6px 0 4px;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.test-source, .test-guide {
+    color: var(--ink3);
+    font-size: .95rem;
+    margin: 2px 0;
+    line-height: 1.6;
+}
+
+.self-test-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.self-test-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.self-test-item .question {
+    font-weight: 800;
+    margin: 0 0 8px;
+}
+
+.self-option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.self-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    background: #f5f7ff;
+    cursor: pointer;
+    user-select: none;
+    transition: .14s;
+}
+
+.self-option:hover {
+    background: #edf0ff;
+    border-color: #d9d2ff;
+    transform: translateY(-1px);
+}
+
+.self-option input[type="radio"] {
+    accent-color: var(--brand1);
+}
+
+.self-button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.self-button {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--ink2);
+    transition: .14s;
+}
+
+.self-button.primary {
+    border-color: transparent;
+    color: #fff;
+    background: linear-gradient(90deg, var(--brand1), var(--brand2));
+    box-shadow: var(--glow);
+}
+
+.self-button.ghost:hover {
+    background: #f3f2ff;
+    border-color: #d9d2ff;
+}
+
+.result-card {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    background: #fbfbff;
+}
+
+.result-title {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.result-description {
+    color: var(--ink2);
+    line-height: 1.65;
+    margin: 0 0 6px;
+}
+
+.result-category-block + .result-category-block {
+    margin-top: 8px;
+}
+
+.result-category-title {
+    font-weight: 800;
+}
+
+.recommendation-list {
+    margin: 6px 0 0;
+    padding-left: 1rem;
+    color: var(--ink2);
+    line-height: 1.6;
+}
+
+/* ============ Responsive ============ */
 @media (max-width: 1280px) {
-    .resource-library-container {
+    .rl-root {
         margin-left: 240px;
     }
 }
 
 @media (max-width: 1024px) {
-    .resource-library-container {
-        margin: 24px 16px 60px 16px;
+    .rl-root {
+        margin: 20px 16px 64px 16px;
     }
 
-    .library-layout {
-        grid-template-columns: 1fr;
-        /* 사이드바를 위로 */
-        gap: 20px;
-    }
-
-    .library-sidebar {
-        width: auto;
-    }
-
-    /* 모바일에서는 떠있지 않고 일반 흐름으로(겹침 방지용 padding 제거) */
-    .library-sidebar ul {
+    .content-sidenav {
         position: static;
-        /* absolute 해제 */
-        padding: 6px 0;
-        border-bottom: 1px solid #eee;
-        overflow-x: auto;
-    }
-
-    .library-content {
-        padding-top: 0;
-        /* 상단 탭이 흐름에 있으므로 여백 제거 */
+        width: auto;
+        margin-left: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 }
-
