@@ -6,7 +6,7 @@ export async function fetchFootRoute(REST_API_KEY, startLatLng, endLatLng) {
 
     const res = await fetch(
         `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin}&destination=${destination}&profile=${profile}`,
-        { headers: { Authorization: `KakaoAK ${REST_API_KEY}` } }
+        {headers: {Authorization: `KakaoAK ${REST_API_KEY}`}}
     );
     if (!res.ok) throw new Error(`API 호출 실패: ${res.status}`);
     const data = await res.json();
@@ -22,5 +22,5 @@ export async function fetchFootRoute(REST_API_KEY, startLatLng, endLatLng) {
     );
 
     const durationMin = Math.round(section.duration / 60);
-    return { coords, durationMin };
+    return {coords, durationMin};
 }

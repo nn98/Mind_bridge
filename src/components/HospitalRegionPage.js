@@ -121,7 +121,6 @@ const HospitalRegionPage = () => {
                                 <>
                                     <p><strong>거리:</strong> {h.distance} km</p>
                                     <p><strong>차량 예상 시간:</strong> 약 {h.drivingTime}분</p>
-                                    <p><h5>예상 시간은 평균 시속 40km 기준입니다.</h5></p>
                                 </>
                             )}
                         </div>

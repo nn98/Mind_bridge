@@ -1,12 +1,19 @@
 // src/hooks/useHospitals.js
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import Papa from "papaparse";
-import { haversineDistance } from "../utils/geo";
+import {haversineDistance} from "../utils/geo";
 
 export default function useHospitals(mapInstanceRef, userLoc) {
     const markersRef = useRef([]);
     const infoWindowRef = useRef(null);
     const [selected, setSelected] = useState(null);
+
+    // ✅ 선택 해제(목록으로 복귀) 헬퍼
+    const clearSelection = () => {
+        if (infoWindowRef.current) infoWindowRef.current.close();
+        infoWindowRef.current = null;
+        setSelected(null);
+    };
 
     useEffect(() => {
         if (typeof userLoc === "undefined" || !window.kakao?.maps || !mapInstanceRef.current) return;
@@ -60,10 +67,10 @@ export default function useHospitals(mapInstanceRef, userLoc) {
 
                 hospitalsToShow.forEach((h) => {
                     const pos = new window.kakao.maps.LatLng(h.lat, h.lon);
-                    const marker = new window.kakao.maps.Marker({ position: pos, map, title: h.name });
+                    const marker = new window.kakao.maps.Marker({position: pos, map, title: h.name});
 
                     marker.addListener("click", () => {
-                        // 인포윈도우 닫기
+                        // 기존 인포윈도우 닫기
                         if (infoWindowRef.current) infoWindowRef.current.close();
 
                         const infoContent = `
@@ -77,16 +84,18 @@ export default function useHospitals(mapInstanceRef, userLoc) {
                 ${userLoc ? '<button id="routeBtn" style="margin-top:6px;padding:4px 8px;font-size:12px;">길찾기</button>' : ""}
               </div>
             `;
-                        const iw = new window.kakao.maps.InfoWindow({ content: infoContent, maxWidth: 260 });
+                        const iw = new window.kakao.maps.InfoWindow({content: infoContent, maxWidth: 260});
                         iw.open(map, marker);
                         infoWindowRef.current = iw;
 
-                        // 닫기 버튼
+                        // 닫기 버튼 + 선택 상태 업데이트
                         setTimeout(() => {
                             const close = document.getElementById("info-close");
-                            if (close) close.onclick = () => iw.close();
+                            if (close) close.onclick = () => {
+                                iw.close();
+                                setSelected(null);              // ← 패널 닫힘(목록으로)
+                            };
 
-                            // 선택 상태 업데이트
                             setSelected({
                                 name: h.name,
                                 address: h.address,
@@ -110,5 +119,5 @@ export default function useHospitals(mapInstanceRef, userLoc) {
         };
     }, [userLoc, mapInstanceRef]);
 
-    return { selected, setSelected, markersRef, infoWindowRef };
+    return {selected, setSelected, markersRef, infoWindowRef, clearSelection};
 }

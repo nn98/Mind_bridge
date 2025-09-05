@@ -1,5 +1,5 @@
 // src/components/map/HospitalInfoPanel.jsx
-export default function HospitalInfoPanel({ hospital }) {
+export default function HospitalInfoPanel({hospital}) {
     if (!hospital) return null;
     return (
         <div className="hospital-info-box">
