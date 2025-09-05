@@ -1,5 +1,6 @@
 package com.example.backend.common.error;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,23 +17,27 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ControllerAdvice
 public class ProblemDetailsAdvice {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
-		// ✅ 팩토리 사용
-		ProblemDetail pd = ProblemDetailFactory.createValidation("One or more fields are invalid", req);
+		log.error("Validation 실패: {}", ex.getMessage()); // 추가
 
-		// 기존 validation 특화 로직 유지
+		ProblemDetail pd = ProblemDetailFactory.createValidation("One or more fields are invalid", req);
 		Map<String, List<String>> errors = ex.getBindingResult().getFieldErrors().stream()
 			.collect(Collectors.groupingBy(FieldError::getField,
 				Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())));
-		pd.setProperty("errors", errors);
 
+		log.error("필드 에러들: {}", errors); // 추가
+
+		pd.setProperty("errors", errors);
 		return ResponseEntity.unprocessableEntity().body(pd);
 	}
+
 
 	@ExceptionHandler(ConflictException.class)
 	public ResponseEntity<ProblemDetail> handleConflict(ConflictException ex, HttpServletRequest req) {
@@ -91,5 +96,14 @@ public class ProblemDetailsAdvice {
 		ProblemDetail pd = ProblemDetailFactory.createInternalError(req);
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
+		ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		pd.setTitle("Bad Request");
+		pd.setDetail(ex.getMessage());
+		pd.setInstance(URI.create(req.getRequestURI()));
+		return ResponseEntity.badRequest().body(pd);
 	}
 }

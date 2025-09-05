@@ -1,12 +1,20 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 /**
  * 개별 채팅 메시지 엔티티
@@ -33,7 +41,7 @@ public class ChatMessageEntity {
     @Column(name = "message_type", nullable = false)
     private MessageType messageType;
 
-    @Column(length = 50)  // 감정 컬럼 추가
+    @Column(name = "emotion", columnDefinition = "TEXT", nullable = false)  // 감정 컬럼 추가
     private String emotion;
 
     @CreationTimestamp

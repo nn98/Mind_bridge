@@ -53,6 +53,12 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 			.map(this::mapToSessionHistory);
 	}
 
+	@Override
+	@Transactional
+	public List<SessionHistory> getSessions() {
+		return chatSessionRepository.findAll().stream().map(this::mapToSessionHistory).collect(Collectors.toList());
+	}
+
 	// ====== private helpers ======
 
 	private ChatSessionEntity createChatSessionEntity(SessionRequest request) {

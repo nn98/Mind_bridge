@@ -128,10 +128,10 @@ public class ChatController {
      * 사용자별 채팅 세션 목록 조회
      */
     @GetMapping("/sessions")
-    public ResponseEntity<ApiResponse<List<SessionHistory>>> getUserSessions(@RequestParam String userEmail) {
+    public ResponseEntity<ApiResponse<List<SessionHistory>>> getSessions() {
         try {
-            List<SessionHistory> sessions = chatSessionService.getSessionsByUserEmail(userEmail);
-            log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", userEmail, sessions.size());
+            List<SessionHistory> sessions = chatSessionService.getSessions();
+            log.info("채팅 세션 조회 완료 - 개수: {}", sessions.size());
             return ResponseEntity.ok(ApiResponse.success(sessions));
         } catch (Exception e) {
             log.error("채팅 세션 조회 실패: {}", e.getMessage());
@@ -139,6 +139,22 @@ public class ChatController {
                     .body(ApiResponse.error("채팅 세션 조회에 실패했습니다.", e.getMessage()));
         }
     }
+    //
+    // /**
+    //  * 사용자별 채팅 세션 목록 조회
+    //  */
+    // @GetMapping("/sessions")
+    // public ResponseEntity<ApiResponse<List<SessionHistory>>> getUserSessions(@RequestParam String userEmail) {
+    //     try {
+    //         List<SessionHistory> sessions = chatSessionService.getSessionsByUserEmail(userEmail);
+    //         log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", userEmail, sessions.size());
+    //         return ResponseEntity.ok(ApiResponse.success(sessions));
+    //     } catch (Exception e) {
+    //         log.error("채팅 세션 조회 실패: {}", e.getMessage());
+    //         return ResponseEntity.badRequest()
+    //                 .body(ApiResponse.error("채팅 세션 조회에 실패했습니다.", e.getMessage()));
+    //     }
+    // }
 
     /**
      * 완료된 세션 수 조회
