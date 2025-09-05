@@ -14,7 +14,7 @@
 /* 루트: 좌측 앱 사이드바 260px 고려 */
 .rl-root {
     max-width: 1100px;
-    margin: 32px 24px 96px 260px;
+    margin: 0 24px 96px 260px; /* 상단 여백 0 */
     padding: 0;
     font-family: "Pretendard", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
     color: var(--ink1);
@@ -22,7 +22,7 @@
 
 /* ============ Header ============ */
 .library-header {
-    margin-bottom: 18px;
+    margin-bottom: 0;
 }
 
 .library-title {
@@ -62,22 +62,26 @@
     box-shadow: var(--glow);
 }
 
-/* ============ Content wrap ============ */
-/* 본문은 헤더의 왼쪽 시작점과 동일 x=0에서 시작 */
-.library-wrap {
-    position: relative; /* 사이드 네거티브 마진 기준 */
+/* ============ Content wrap (핵심) ============ */
+/* 겹치기 레이아웃: aside가 높이를 밀지 않도록 같은 셀 위에 overlay */
+.library-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr; /* 한 셀에 겹친다 */
 }
 
-/* 사이드 탭: 콘텐츠 왼쪽 거터로 빼기 (내용 정렬에 영향 X) */
+/* 왼쪽 사이드 탭 */
 .content-sidenav {
+    grid-area: 1 / 1; /* 본문과 같은 셀 */
+    z-index: 2;
     position: sticky;
-    top: 0; /* 🔥 기존 8px → 0으로 바꿔서 위에 딱 붙임 */
+    top: 0;
     width: 170px;
-    margin-left: -190px; /* 왼쪽으로 빼기 */
+    margin-left: -190px; /* 왼쪽 거터로 빼기 */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    align-self: flex-start; /* 🔥 본문 상단에 정렬되도록 보정 */
+    align-self: start;
 }
 
 .side-tab {
@@ -128,18 +132,21 @@
     background: #7c5cff;
 }
 
-/* 본문: 헤더 왼쪽과 정확히 일치 */
+/* 본문 */
 .content-main {
+    grid-area: 1 / 1; /* 사이드탭과 동일 셀(겹치기) */
+    z-index: 1; /* 사이드탭 아래 */
     min-width: 0;
-    margin-left: 0;
+    margin: 0;
+    padding-top: 0;
 }
 
 .content-title {
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: -.01em;
-    margin: 6px 0 12px;
-    padding-bottom: 8px;
+    margin: 0 0 12px; /* top 0 */
+    padding-top: 23px;
     border-bottom: 2px solid var(--brand2);
 }
 
@@ -148,20 +155,20 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
     box-shadow: 0 2px 10px rgba(16, 16, 40, .04);
 }
 
 .content-card h3 {
     font-size: 1.12rem;
     font-weight: 800;
-    margin: 0 0 8px;
+    margin: 0 0 12px;
 }
 
 .content-card p {
     color: var(--ink2);
-    line-height: 1.75;
+    line-height: 1.85;
     margin: 0;
 }
 
@@ -370,6 +377,11 @@
         margin: 20px 16px 64px 16px;
     }
 
+    /* 모바일에서는 겹치기 해제하고 자연스럽게 흐르게 */
+    .library-grid {
+        display: block;
+    }
+
     .content-sidenav {
         position: static;
         width: auto;
@@ -377,5 +389,7 @@
         flex-direction: row;
         flex-wrap: wrap;
         gap: 8px;
+        z-index: auto;
+        margin-top: 16px;
     }
 }
