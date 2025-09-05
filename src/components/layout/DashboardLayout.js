@@ -20,10 +20,9 @@ export default function DashboardLayout() {
     { label: "감성", to: "/emotion", section: "탐색" },
     { label: "이메일", to: "/img", section: "탐색" },
     { label: "게시판", to: "/board", section: "탐색" },
-
-    { label: "병원", to: "/hospital-region", section: "서비스" },
+      
+    { label: "병원 목록", to: "/map", section: "서비스" },
     { label: "자료실", to: "/library", section: "서비스" },
-    { label: "지도", to: "/map", section: "서비스" },
 
     // 계정 관련
     isLoggedIn && { label: "회원정보", to: "/profile", section: "계정" },

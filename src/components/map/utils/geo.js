@@ -1,3 +1,4 @@
+// src/utils/geo.js
 export function haversineDistance(lat1, lon1, lat2, lon2) {
     const toRad = (x) => (x * Math.PI) / 180;
     const R = 6371;

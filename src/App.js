@@ -24,7 +24,6 @@ import AboutSection from "./components/about/AboutSection/AboutSectionMain";
 import { BoardSection } from "./components/board/BoardSectionmain";
 import AuthSection from "./components/authSection/AuthSection/index";
 import FloatingSidebar from "./components/FloatingSidebar";
-import HospitalRegionPage from "./components/HospitalRegionPage";
 import EmotionAnalysisPage from "./components/emotion/EmotionAnalysisPage";
 import ResourceLibrary from "./components/ResourceLibrary";
 import AdminPage from "./components/admin/AdminPage";
@@ -95,7 +94,6 @@ const App = () => {
                         <Route path="/emotion" element={<EmotionAnalysisPage mode="page" />} />
                         <Route path="/img" element={<Picture />} />
                         <Route path="/board" element={<BoardSection />} />
-                        <Route path="/hospital-region" element={<HospitalRegionPage />} />
                         <Route path="/library" element={<ResourceLibrary />} />
                         <Route path="/map" element={<Map />} />
                         <Route path="/help" element={<HelpPage />} />
