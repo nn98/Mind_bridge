@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,6 +40,7 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final SecurityUtil securityUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
@@ -84,8 +86,14 @@ public class UserController {
     /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
+        System.out.println("request : " + request);
         String email = securityUtil.requirePrincipalEmail(authentication);
-        userService.changePassword(email, request.getPassword());
+        userService.changePasswordWithCurrentCheck(
+            email,
+            request.currentPassword(),
+            request.password(),
+            request.confirmPassword()  // ✅ 추가!
+        );
         return ResponseEntity.noContent().build();
     }
 

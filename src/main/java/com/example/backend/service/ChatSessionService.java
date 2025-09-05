@@ -8,6 +8,7 @@ import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.dto.chat.SessionRequest;
 
 public interface ChatSessionService {
+    List<SessionHistory> getSessions();
     SessionHistory saveSession(SessionRequest request);
     List<SessionHistory> getSessionsByUserEmail(String userEmail);
     long getCompletedSessionCount(String userEmail);
