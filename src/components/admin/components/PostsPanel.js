@@ -421,50 +421,6 @@ const PostsPanel = () => {
                         검색
                     </button>
                 </form>
-
-                <div className="toolbar-right">
-                    <select
-                        value={sortKey}
-                        onChange={(e) => {
-                            setPage(0);
-                            setSortKey(e.target.value);
-                        }}
-                        className="select"
-                    >
-                        {SORT_KEYS.map(({ key, label }) => (
-                            <option key={key} value={key}>
-                                {label}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={sortDir}
-                        onChange={(e) => {
-                            setPage(0);
-                            setSortDir(e.target.value);
-                        }}
-                        className="select"
-                    >
-                        <option value="asc">오름차순</option>
-                        <option value="desc">내림차순</option>
-                    </select>
-
-                    <select
-                        value={size}
-                        onChange={(e) => {
-                            setPage(0);
-                            setSize(Number(e.target.value));
-                        }}
-                        className="select"
-                    >
-                        {PAGE_SIZE_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>
-                                {opt}개씩
-                            </option>
-                        ))}
-                    </select>
-                </div>
             </div>
 
             <div className="table-scroll">
