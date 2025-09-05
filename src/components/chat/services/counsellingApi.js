@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL"";
 
 // 상담 저장
 export async function saveCounselling({ email, chatHistory }) {
