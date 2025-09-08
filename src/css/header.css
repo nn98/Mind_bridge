@@ -11,8 +11,19 @@ body,
     color: #333;
 }
 
+/* 페이지 컨테이너 */
+.user-profile {
+    max-width: 800px; /* ✅ 요청: 창(컨테이너) 크기만 통일 */
+    margin: 0 auto; /* 가운데 정렬 */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 /* 상단 프로필 카드 */
 .profile-card {
+    width: 100%; /* 컨테이너 폭에 맞춤 */
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     border-radius: 12px;
     padding: 2rem;
@@ -20,7 +31,6 @@ body,
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
     box-shadow: 0 6px 16px rgba(161, 140, 209, 0.25);
 }
 
@@ -57,14 +67,53 @@ body,
     margin-right: 6px;
 }
 
-.profile-card .edit-btn {
+/* 배지 스타일 드롭다운(활동중/자리비움/숨김) */
+.status-badge {
+    position: relative;
+    display: inline-block;
+    margin-right: 6px; /* 기존 badge와 동일한 간격 */
+}
+
+.status-badge select {
+    display: inline-block;
+    padding: 4px 28px 4px 10px; /* 우측 화살표 공간 확보 */
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2); /* ✅ 기존 badge와 동일 배경 */
+    cursor: pointer;
+    appearance: none; /* 기본 화살표 제거 */
+    outline: none;
+}
+
+.status-badge::after {
+    content: "▼";
+    font-size: 0.6rem;
+    color: #fff;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-52%);
+    pointer-events: none;
+}
+
+/* 이름 + 수정 버튼 한 줄 */
+.name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 이름과 버튼 사이 간격 */
+}
+
+/* 수정 버튼 */
+.edit-btn {
     background: white;
     color: #a18cd1;
     border: none;
     border-radius: 8px;
-    padding: 6px 14px;
+    padding: 4px 10px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     transition: background 0.2s;
 }
@@ -75,17 +124,11 @@ body,
 
 /* 프로필 섹션 */
 .profile-section {
+    width: 100%; /* 카드와 동일 폭 */
     background: #fff;
     border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.user-profile {
-    max-width: 700px;      /* 화면 절반 정도로 제한 */
-    margin: 0 auto;        /* 가운데 정렬 */
-    padding: 20px;
 }
 
 .user-profile h3,
@@ -117,20 +160,23 @@ body,
 .profile-field p,
 .profile-field input,
 .profile-field select {
-    width: 60%;          /* 입력 칸 넓이 */
-    margin: 0 auto;      /* 가운데 배치 */
+    width: 60%; /* 입력 칸 넓이 */
+    margin: 0 auto; /* 가운데 배치 */
     padding: 8px 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 15px;
     background: #f9fafc;
-    text-align: center;  /* 글씨도 가운데 */
+    text-align: center; /* 글씨도 가운데 */
+    box-sizing: border-box; /* ✅ 크기 계산 일관 */
 }
 
+/* ✅ 보기모드(p)를 입력창과 '같은 크기'로 맞춤(디자인 변화 없음) */
 .profile-field p {
-    border: none;
-    background: transparent;
-    padding: 0;
+    border: 1px solid transparent; /* 눈에 안 보이는 동일 두께 보더 */
+    padding: 8px 10px; /* 입력과 동일 패딩 */
+    min-height: 38px; /* 입력과 동일 높이대 (필요시 40px로) */
+    background: #f9fafc; /* 입력과 동일 배경 (기존 느낌 유지) */
     color: #555;
 }
 
@@ -145,7 +191,7 @@ body,
     width: auto;
 }
 
-/* 버튼 */
+/* 저장/취소 버튼 */
 .profile-actions {
     display: flex;
     justify-content: flex-end;
@@ -174,7 +220,6 @@ body,
 
 .chat-button.save:hover {
     background: #a14fff;
-    color: white;
 }
 
 .chat-button.cancel {
@@ -184,6 +229,7 @@ body,
 
 /* 계정 관리 */
 .account-actions {
+    width: 100%; /* 동일 폭 */
     display: flex;
     gap: 12px;
     justify-content: center;
