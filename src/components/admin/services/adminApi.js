@@ -17,10 +17,8 @@ const isDev =
 /* ===============================
    BASE URL & AXIOS
 ================================ */
-const RAW_BACKEND_URL =
-    (typeof process !== "undefined" &&
-        process.env &&
-        process.env.REACT_APP_BACKEND_URL);
+
+const RAW_BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 // 경로 합성 유틸: // 제거, 앞/뒤 슬래시 정리
 const trimEndSlash = (s) => {
