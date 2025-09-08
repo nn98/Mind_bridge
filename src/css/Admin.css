@@ -1,7 +1,5 @@
 /* =======================
    ✅ 항상 라이트 모드 강제
-   - OS/브라우저 다크모드 무시
-   - 폼/스크롤바까지 라이트로
 ======================= */
 :root,
 html,
@@ -9,7 +7,7 @@ body {
     color-scheme: light !important;
 }
 
-/* 라이트 모드 기본 토큰 (var() 사용처에 적용) */
+/* 라이트 모드 기본 토큰 */
 :root {
     --mb-bg: #ffffff;
     --mb-fg: #111111;
@@ -21,7 +19,7 @@ body {
     --mb-hover: #f5f7ff;
 }
 
-/* 관리자 대시보드 공통 레이아웃 */
+/* 관리자 대시보드 공통 */
 .admin-header {
     display: flex;
     flex-direction: column;
@@ -45,7 +43,7 @@ body {
     background-color: #ffffff;
     border-radius: 12px;
     display: flex;
-    flex-direction: column; /* 세로 배치 */
+    flex-direction: column;
     gap: 20px;
 }
 
@@ -63,13 +61,17 @@ body {
     flex-wrap: wrap;
 }
 
+.admin{
+    background: linear-gradient(0deg, #f3e7ff, #ffffff);
+}
+
 .admin-card {
     flex: 1;
     min-width: 150px;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
     font-size: 1rem;
     text-align: center;
     font-weight: 500;
@@ -83,7 +85,7 @@ body {
     padding: 20px;
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
     justify-content: center;
     align-items: center;
     overflow: hidden;
@@ -95,7 +97,7 @@ body {
     width: 100%;
 }
 
-/* 오타여도 기존 클래스 유지 */
+/* 오타 유지 */
 .section-wraaper {
     width: 100%;
     height: 94%;
@@ -103,11 +105,9 @@ body {
     padding: 20px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    /* 기존: 가운데 정렬 → 패널 높이 줄어드는 문제 발생
-       수정: 상단 정렬 + 가로 꽉 채움 */
-    justify-content: flex-start;  /* 🔧 변경 */
-    align-items: stretch;          /* 🔧 변경 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    justify-content: flex-start;
+    align-items: stretch;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -119,45 +119,38 @@ body {
     color: #ffffff;
 }
 
-/* ✅ 테이블 스크롤 전용 박스 (높이 고정으로 박스 유지) */
+/* 테이블 스크롤 박스 */
 .table-scroll {
-    /* 기존: max-height → 내용 적으면 줄어듦
-       수정: height로 박스 고정(반응형) */
-    height: 43.4%;  /* 🔧 핵심: 고정/반응형 높이 */
+    height: 43.4%;
     flex: 1;
-    overflow-y: auto;       /* 세로 스크롤 */
-    overflow-x: auto;       /* 가로 스크롤 필요시 */
+    overflow-y: auto;
+    overflow-x: auto;
     background: #fff;
     border-radius: 8px;
     scrollbar-width: none;
 }
 
-/* 테이블 기본 */
+/* 테이블 */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;    /* 컬럼 너비 안정화 */
+    table-layout: fixed;
     background-color: white;
     border-radius: 8px;
 }
 
-/* ❌ (중요) table 자체엔 고정 height/overflow 주지 않음 */
-/* 기존 css의 .admin-table { height: 500px; overflow: auto; } 제거됨 */
-
-.admin-user th,
-.admin-user td {
+.admin-user th, .admin-user td {
     padding: 5px 16px;
     border-bottom: 1px solid #eee;
     text-align: center;
 }
 
 .admin-user .empty-cell {
-  text-align: center;
-  padding: 24px 0;
-  color: #666;
+    text-align: center;
+    padding: 24px 0;
+    color: #666;
 }
 
-/* ✅ 헤더 고정 */
 .table-scroll thead th {
     position: sticky;
     top: 0;
@@ -171,24 +164,15 @@ body {
     background-color: #f9f9f9;
 }
 
-/* ============================
-   닉네임 열(첫 번째 열) 너비 축소
-   - 길면 … 처리, 줄바꿈 방지
-============================ */
-.admin-user th:first-child,
-.admin-user td:first-child {
-    width: 150px; /* 필요시 90~140px 사이로 조절 */
+.admin-user th:first-child, .admin-user td:first-child {
+    width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: left;
 }
 
-/* (선택) 이메일/전화번호는 자동 확장 + 말줄임 */
-.admin-user th:nth-child(2),
-.admin-user td:nth-child(2),
-.admin-user th:nth-child(3),
-.admin-user td:nth-child(3) {
+.admin-user th:nth-child(2), .admin-user td:nth-child(2), .admin-user th:nth-child(3), .admin-user td:nth-child(3) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -213,7 +197,6 @@ body {
     z-index: 1001;
 }
 
-/* 기존 단일 input 스타일 (아래 .admin-search input이 더 구체적이라 자동 override) */
 .admin-header input {
     width: 500px;
     padding: 10px 50px 10px 15px;
@@ -227,24 +210,20 @@ body {
     border-color: #4c00ff;
     outline: none;
     box-shadow: 0 0 5px #4c00ff;
-    transition: border-color 0.3s ease;
+    transition: border-color .3s ease;
 }
 
-/* ==============================
-   🔎 자동완성 드롭다운 (레이아웃 미침범)
-   - input 바로 아래 겹쳐 뜸
-   - 상위 레이아웃을 밀지 않음
-============================== */
+/* 검색/자동완성 */
 .admin-search {
-    position: relative;       /* dropdown 기준점 */
-    display: inline-block;    /* flex 확장 방지 */
+    position: relative;
+    display: inline-block;
     margin: 12px 0 20px;
 }
 
 .admin-search input {
-    width: 500px;             /* 기존과 동일 폭 */
+    width: 500px;
     height: 42px;
-    padding: 0 44px 0 16px;   /* 오른쪽 클리어 버튼 영역 확보 */
+    padding: 0 44px 0 16px;
     border-radius: 30px;
     border: 1px solid #a18cd1;
     background: #fff;
@@ -257,7 +236,6 @@ body {
     box-shadow: 0 0 5px #4c00ff;
 }
 
-/* 지우기 버튼 (입력 오른쪽 내부) */
 .admin-search .clear-btn {
     position: absolute;
     top: 50%;
@@ -270,20 +248,19 @@ body {
     opacity: .6;
 }
 
-/* 제안 드롭다운 */
 .suggest-list {
     position: absolute;
-    top: calc(100% + 6px);    /* input 바로 아래 */
+    top: calc(100% + 6px);
     left: 0;
-    width: 100%;              /* input과 동일 폭 */
+    width: 100%;
     max-height: 320px;
     overflow-y: auto;
-    background: rgba(255,255,255,.98);
-    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255, 255, 255, .98);
+    border: 1px solid rgba(0, 0, 0, .08);
     border-radius: 14px;
-    box-shadow: 0 10px 32px rgba(0,0,0,.14);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, .14);
     padding: 6px 0;
-    z-index: 9999;            /* 위로 띄우기 */
+    z-index: 9999;
 }
 
 .suggest-item {
@@ -295,9 +272,8 @@ body {
     font-size: 14px;
 }
 
-.suggest-item:hover,
-.suggest-item.active {
-    background: linear-gradient(90deg, rgba(140,105,255,.12), rgba(120,208,255,.12));
+.suggest-item:hover, .suggest-item.active {
+    background: linear-gradient(90deg, rgba(140, 105, 255, .12), rgba(120, 208, 255, .12));
 }
 
 .suggest-icon {
@@ -317,13 +293,13 @@ body {
     opacity: .8;
 }
 
-/* 📅 MUI DateCalendar 커스텀 스타일 */
+/* 📅 MUI DateCalendar */
 .MuiDateCalendar-root {
     border: none;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
     padding: 10px;
-    width: 450px !important;
+    width: 450px !important; /* 기본값(아래에서 이 카드 안에서는 100%로 오버라이드) */
     max-height: 450px !important;
     font-family: 'Pretendard', sans-serif;
     text-align: center;
@@ -337,7 +313,6 @@ body {
     overflow: hidden !important;
 }
 
-/* 날짜 셀 */
 .MuiPickersDay-root {
     padding: 8px 6px;
     border-radius: 6px !important;
@@ -347,16 +322,15 @@ body {
     min-height: 45px;
 }
 
-/* 요일 라벨 */
 .MuiDayCalendar-weekDayLabel {
     font-size: 1.2rem !important;
     margin: 0 9px !important;
 }
 
-/* 요일 라벨 색상 */
 .MuiDayCalendar-weekDayLabel:nth-child(1) {
     color: red;
 }
+
 .MuiDayCalendar-weekDayLabel:nth-child(7) {
     color: blue;
 }
@@ -364,47 +338,36 @@ body {
 .css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(1) {
     color: red;
 }
+
 .css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root:nth-child(7) {
     color: blue;
 }
 
-/* 저번달, 이번달 요일 숫자 색상 */
 .MuiPickersDay-dayOutsideMonth:nth-child(1) {
     color: red;
-    opacity: 0.4;
-}
-.MuiPickersDay-dayOutsideMonth:nth-child(7) {
-    color: blue;
-    opacity: 0.4;
-}
-.MuiPickersDay-dayOutsideMonth {
-    opacity: 0.4;
+    opacity: .4;
 }
 
-/* 오늘 날짜 */
+.MuiPickersDay-dayOutsideMonth:nth-child(7) {
+    color: blue;
+    opacity: .4;
+}
+
+.MuiPickersDay-dayOutsideMonth {
+    opacity: .4;
+}
+
 .MuiPickersDay-today {
     background: #bda1ff !important;
     border-radius: 6px;
 }
 
-/* 선택된 날짜 */
 .MuiPickersDay-root.Mui-selected {
     background: #e591ff !important;
     color: #ffffff !important;
 }
 
-/* ⚠️ 아래 규칙은 모든 날짜 셀을 보라색으로 칠해버려 위 설정을 덮습니다.
-      의도된 게 아니면 주석/삭제하세요. */
-/* .MuiPickersDay-root {
-    background-color: #4c00ff;
-} */
-
-/* ===========================
-   PostsPanel 전용 스타일
-   (.posts-panel 범위로 한정)
-=========================== */
-
-/* 툴바 */
+/* PostsPanel */
 .posts-panel .toolbar {
     display: flex;
     gap: 8px;
@@ -412,39 +375,44 @@ body {
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
+
 .posts-panel .toolbar-form {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
+
 .posts-panel .toolbar-right {
     margin-left: auto;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
-.posts-panel .input,
-.posts-panel .select,
-.posts-panel .btn {
+
+.posts-panel .input, .posts-panel .select, .posts-panel .btn {
     height: 36px;
     border-radius: 8px;
     border: 1px solid var(--mb-border, #e3e5e8);
     background: var(--mb-bg, #fff);
     color: #111;
 }
+
 .posts-panel .input {
     padding: 0 10px;
     min-width: 240px;
     outline: none;
 }
+
 .posts-panel .input:focus {
     border-color: #4f8cff;
-    box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(79, 140, 255, .15);
 }
+
 .posts-panel .select {
     padding: 0 10px;
     cursor: pointer;
 }
+
 .posts-panel .btn {
     padding: 0 12px;
     border: 1px solid transparent;
@@ -453,28 +421,27 @@ body {
     font-weight: 600;
     cursor: pointer;
 }
+
 .posts-panel .btn:disabled {
-    opacity: 0.6;
+    opacity: .6;
     cursor: not-allowed;
 }
 
-/* 스크롤 가능한 테이블 래퍼 */
 .posts-panel .table-scroll {
-    max-height: 520px; /* 필요시 높이 조절 */
+    max-height: 520px;
     overflow-y: auto;
     border-radius: 12px;
 }
 
-/* 테이블 기본 */
 .posts-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* 말줄임/너비 고정에 필요 */
+    table-layout: fixed;
     background: var(--mb-card, #fff);
     color: var(--mb-fg, #111);
     border: 1px solid var(--mb-border, #e3e5e8);
     border-radius: 12px;
-    overflow: hidden; /* radius 적용 */
+    overflow: hidden;
 }
 
 .posts-table thead th {
@@ -489,6 +456,7 @@ body {
     z-index: 1;
     user-select: none;
 }
+
 .posts-table thead th[role="button"] {
     cursor: pointer;
 }
@@ -498,27 +466,28 @@ body {
     border-bottom: 1px solid var(--mb-row-border, #eef0f3);
     vertical-align: middle;
 }
+
 .posts-table tbody tr:hover {
     background: var(--mb-hover, #f5f7ff);
 }
 
-/* 말줄임/줄바꿈 제어 */
 .posts-table .ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
 .posts-table .ellipsis-email {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap; /* 긴 이메일 겹침 방지: 말줄임 */
+    white-space: nowrap;
 }
+
 .posts-table .nowrap {
     white-space: nowrap;
 }
 
-/* 링크/버튼 */
 .posts-table .btn-link {
     background: transparent;
     border: none;
@@ -527,9 +496,11 @@ body {
     font-weight: 600;
     cursor: pointer;
 }
+
 .posts-table .btn-link:hover {
     text-decoration: underline;
 }
+
 .posts-table .btn-danger {
     padding: 6px 10px;
     border-radius: 8px;
@@ -538,41 +509,192 @@ body {
     color: #bd2d2d;
     cursor: pointer;
 }
+
 .posts-table .btn-danger:hover {
     background: #ffe3e3;
 }
 
-/* 상태 셀 */
-.posts-table .loading,
-.posts-table .error,
-.posts-table .empty {
+.posts-table .loading, .posts-table .error, .posts-table .empty {
     text-align: center;
     padding: 20px;
 }
 
-/* 펼침(보기) 행 */
 .posts-panel .detail-row .post-content {
-    white-space: pre-wrap; /* 개행 유지 */
+    white-space: pre-wrap;
     line-height: 1.6;
     padding: 12px 14px;
 }
 
-/* 페이지네이션 */
 .posts-panel .pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 12px;
 }
+
 .posts-panel .pager {
     display: flex;
     gap: 8px;
     align-items: center;
 }
+
 .posts-panel .page-indicator {
     min-width: 90px;
     text-align: center;
 }
 
-/* ✅ 다크모드 반응 제거했으므로 미디어쿼리 없음 */
-/* (prefers-color-scheme: dark) 블록 삭제 */
+/* ======= 캘린더 패널 그리드 ======= */
+.calendar-panel {
+    display: grid;
+    grid-template-columns:460px 1fr;
+    grid-template-areas:
+    "cal stat"
+    "chart chart";
+    gap: 16px;
+    align-items: start;
+}
+
+.calendar-card {
+    grid-area: cal;
+}
+
+.counselling-stats {
+    grid-area: stat;
+}
+
+.counselling-chart {
+    grid-area: chart;
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+}
+
+.counselling-stats {
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.counselling-stats h3, .counselling-chart h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: #6b4fd3;
+}
+
+.counselling-stats .selected-date {
+    margin: 0;
+    font-size: .9rem;
+    color: #666;
+}
+
+.count-badge {
+    display: inline-block;
+    align-self: flex-start;
+    background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+    color: #fff;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .calendar-panel {
+        grid-template-columns:1fr;
+        grid-template-areas:
+      "cal"
+      "stat"
+      "chart";
+    }
+}
+
+/* =========================
+   ⬇ 추가 오버라이드 (그래프 렌더 보장)
+========================= */
+
+/* (1) 상세보기 내부 스크롤 */
+.posts-panel .detail-row .post-content {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: thin;
+}
+
+.posts-panel .detail-row .post-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.posts-panel .detail-row .post-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, .2);
+    border-radius: 6px;
+}
+
+.posts-panel .detail-row .post-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .06);
+    border-radius: 6px;
+}
+
+/* (2) 게시글 표 최소 높이 보장 */
+.posts-panel .table-scroll {
+    min-height: 520px;
+}
+
+/* (3) 차트 부모 높이 — ✨그래프 안 나오던 원인 해결 */
+.counselling-chart .chart-frame {
+    width: 100%;
+    height: 240px;
+    overflow: visible;
+}
+
+/* (4) 이 패널 안에서는 달력 폭 100% */
+.calendar-panel .MuiDateCalendar-root {
+    width: 100% !important;
+}
+
+/* 상담 카드 하위 라인 */
+.counselling-stats .divider {
+    height: 1px;
+    background: #eee;
+    margin: 10px 0;
+}
+
+.counselling-stats .subline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.counselling-stats .subline-label {
+    font-size: 0.95rem;
+    color: #6b4fd3;
+    font-weight: 600;
+}
+
+.sub-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f2edff;
+    color: #6b4fd3;
+    font-weight: 700;
+}
+
+/* 차트 부모 고정 높이 (그래프 항상 보이게) */
+.counselling-chart .chart-frame {
+    width: 100%;
+    height: 260px; /* 필요하면 220~300으로 조절 */
+    overflow: visible;
+}
+
+/* 이 패널 안에서는 달력 폭 100% (레이아웃 안정) */
+.calendar-panel .MuiDateCalendar-root {
+    width: 100% !important;
+}
