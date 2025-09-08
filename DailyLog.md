@@ -160,3 +160,15 @@
 |     `Back`     | `Coupling`                   |
 |   `Coupling`   | 클래스간의 결합을 느슨하게, 중복 책임 제거     |
 | `Verification` | 비밀번호 입력값 검증 / 서버 단에서도 재검증-변경 |
+
+|      `구분`      | `내용`                          |
+|:--------------:|:------------------------------|
+|      `작성`      | `김윤서`                         |
+|      `날짜`      | `2025-09-05`                  |
+|      `주제`      | `Front` `Back`                |
+|    `Front`     | `Verification` / `Validation` |
+| `Verification` | 비밀번호 변경 및 그 사후처리 로직 구현        |
+|  `Validation`  | 데이터 valid 대응, 1차 검증           |
+|     `Back`     | `Validation` / `Deployment`   |
+|  `Validation`  | 어노테이션으로 빠르고 간단하게 입력값 확인       |
+|  `Deployment`  | 백엔드 서버 배포 및 로드밸런싱, 리버스프록시 설정  |
