@@ -19,5 +19,4 @@ public class Profile {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String provider;
-
 }
