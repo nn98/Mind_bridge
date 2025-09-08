@@ -20,9 +20,9 @@
 class UserControllerSliceTest {
 
 	@Autowired MockMvc mvc;
-	@MockBean UserService userService;
-	@MockBean JwtUtil jwtUtil; // 컨트롤러 직접 의존만 목킹
-	@MockBean PasswordEncoder encoder;
+	@MockitoBean UserService userService;
+	@MockitoBean JwtUtil jwtUtil; // 컨트롤러 직접 의존만 목킹
+	@MockitoBean PasswordEncoder encoder;
 
 	@Test
 	void register_created_201() throws Exception {
