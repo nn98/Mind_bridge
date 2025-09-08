@@ -18,7 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +32,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper om) throws Exception {
         // CORS는 등록된 CorsConfigurationSource를 사용하여 프리플라이트/본요청 헤더를 처리한다. [12][7]
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 기존 빈 사용 [12]
@@ -45,15 +46,14 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
             .formLogin(formLogin -> formLogin.disable())
             .exceptionHandling(ex -> ex
-                // 인증 필요 경로에서 인증이 비어있는 경우(향후 authenticated() 사용 시) 401을 일관되게 반환 [12]
-                .authenticationEntryPoint((req, res, ex1) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                // 권한 부족 시 403 반환 [12]
-                .accessDeniedHandler((req, res, ex2) -> res.sendError(HttpServletResponse.SC_FORBIDDEN))
+                // 인증 실패(미인증 접근) → 401 + ProblemDetail(JSON)
+                .authenticationEntryPoint(JsonAuthHandlers.authenticationEntryPoint(om))
+                // 인가 실패(권한 부족) → 403 + ProblemDetail(JSON)
+                .accessDeniedHandler(JsonAuthHandlers.accessDeniedHandler(om))
             );
 
         // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치 (기존 동작 유지) [12]
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

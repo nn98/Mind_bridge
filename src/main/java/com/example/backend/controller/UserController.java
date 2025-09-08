@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.common.error.NotFoundException;
+import com.example.backend.dto.user.AvailabilityType;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
@@ -49,10 +50,10 @@ public class UserController {
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam String type, @RequestParam String value) {
+    public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam AvailabilityType type, @RequestParam String value) {
         boolean isAvailable = switch (type) {
-            case "nickname" -> userService.isNicknameAvailable(value);
-            case "email"    -> userService.isEmailAvailable(value);
+            case NICKNAME -> userService.isNicknameAvailable(value);
+            case EMAIL    -> userService.isEmailAvailable(value);
             default -> throw new IllegalArgumentException("type must be nickname or email");
         };
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
@@ -86,7 +87,7 @@ public class UserController {
     /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
-        System.out.println("request : " + request);
+        log.info("request : {}", request);
         String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
             email,
