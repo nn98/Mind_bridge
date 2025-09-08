@@ -63,43 +63,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void changePasswordWithCurrentCheck(String email, String currentPassword, String newPassword) {
-		// 사용자 조회
-		UserEntity user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
-
-		System.out.println(user);
-
-		// 현재 비밀번호 확인
-		if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
-		}
-
-		System.out.println("현재 비밀번호 일치");
-
-		// ✅ @ValidPassword 어노테이션이 이미 복잡도 검증을 수행했으므로
-		// 여기서는 추가적인 비즈니스 규칙만 검증
-
-		// 새 비밀번호가 현재 비밀번호와 동일한지 확인
-		if (passwordEncoder.matches(newPassword, user.getPassword())) {
-			throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다");
-		}
-
-		System.out.println("새 비밀번호 - 현재 비밀번호 다름");
-
-		// 선택사항: 최근 사용한 비밀번호와 중복 체크
-		// validatePasswordHistory(user, newPassword);
-
-		// 비밀번호 변경 및 저장
-		System.out.println("비밀번호 변경 저장");
-		user.setPassword(passwordEncoder.encode(newPassword));
-		// user.setPasswordChangedAt(LocalDateTime.now()); // 변경 시점 기록
-		userRepository.save(user);
-
-		log.info("비밀번호 변경 완료. 사용자: {}", email);
-	}
-
-	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserByEmail(String email) {
 		return userRepository.findByEmail(email).map(userMapper::toProfile);
@@ -213,7 +176,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public void changePasswordWithReauth(String email, String currentPassword, String newPassword) {
+	public void changePasswordWithReAuth(String email, String currentPassword, String newPassword) {
 		UserEntity user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -232,7 +195,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public void deleteAccountWithReauth(String email, String currentPassword) {
+	public void deleteAccountWithReAuth(String email, String currentPassword) {
 		UserEntity user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
