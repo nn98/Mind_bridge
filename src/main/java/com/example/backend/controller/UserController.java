@@ -5,8 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,7 +23,6 @@ import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
-import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,8 +38,6 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final SecurityUtil securityUtil;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
@@ -55,31 +51,29 @@ public class UserController {
         boolean isAvailable = switch (type) {
             case NICKNAME -> userService.isNicknameAvailable(value);
             case EMAIL    -> userService.isEmailAvailable(value);
-            default -> throw new IllegalArgumentException("type must be nickname or email");
         };
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
 
     @GetMapping("/account")
-    public ResponseEntity<Profile> getAccount(Authentication authentication) {
-        String email = securityUtil.requirePrincipalEmail(authentication);
+    public ResponseEntity<Profile> getAccount(@AuthenticationPrincipal(expression = "username") String email) {
+        // String email = securityUtil.requirePrincipalEmail(authentication);
+        log.info("Get account for email {}", email);
         Profile profile = userService.getUserByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")
-            .body(profile);
+            .header("Vary", "Cookie").body(profile);
     }
 
     @PatchMapping("/account")
-    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
-        String email = securityUtil.requirePrincipalEmail(authentication);
+    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, @AuthenticationPrincipal(expression = "username") String email) {
         userService.updateUser(email, request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/account")
-    public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
-        String email = securityUtil.requirePrincipalEmail(authentication);
+    public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal(expression = "username") String email, HttpServletResponse response) {
         userService.deleteUser(email);
         jwtUtil.clearJwtCookie(response);
         return ResponseEntity.noContent().build();
@@ -87,16 +81,23 @@ public class UserController {
 
     /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
+        @AuthenticationPrincipal(expression = "username") String email, HttpServletResponse httpRes) {
         log.info("request : {}", request);
-        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
             email,
             request.currentPassword(),
             request.password(),
             request.confirmPassword()  // ✅ 추가!
         );
-        return ResponseEntity.noContent().build();
+
+        jwtUtil.clearJwtCookie(httpRes);                         // 전송 계층 책임(쿠키 삭제)
+        return ResponseEntity.status(303)
+            .header("Location", "/")
+            .header("Cache-Control", "no-store")
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .build();
     }
 
     @GetMapping("/summary")

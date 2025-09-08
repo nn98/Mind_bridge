@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Mind Bridge BE API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/users/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        '409':
+          description: Conflict
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/ProblemDetail" }
+        '422':
+          description: Validation
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/ProblemDetail" }
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseLoginResponse"
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/ProblemDetail" }
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      additionalProperties: true
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+    RegistrationRequest:
+      type: object
+      required: [age, email, password, nickname, gender, phoneNumber, termsAccepted]
+      properties:
+        age: { type: integer, minimum: 1, maximum: 150 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        fullName: { type: string }
+        nickname: { type: string, minLength: 2, maxLength: 20 }
+        gender: { type: string }
+        phoneNumber: { type: string }
+        mentalState: { type: string }
+        termsAccepted: { type: boolean, enum: [true] }
+    Profile:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string }
+        fullName: { type: string }
+        nickname: { type: string }
+        gender: { type: string }
+        age: { type: integer }
+        phoneNumber: { type: string }
+        mentalState: { type: string }
+        chatGoal: { type: string }
+        role: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        provider: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+        code: { type: string }
+    LoginResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string }
+        expiresIn: { type: integer }
+        profile: { $ref: "#/components/schemas/Profile" }
+    ApiResponseLoginResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data: { $ref: "#/components/schemas/LoginResponse" }
+        error: {}
+        timestamp: { type: string, format: date-time }

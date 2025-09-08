@@ -60,20 +60,15 @@ public class ChatController {
         }
     }
 
-    @RestController
-    @RequestMapping("/api/chat/analysis")
-    public class ChatAnalysisController {
+    @PostMapping("/analysis/save")
+    public ResponseEntity<Map<String, Object>> receiveAnalysis(@RequestBody Map<String, Object> payload) {
+        System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
+        System.out.println("summary: " + payload.get("summary"));
+        System.out.println("riskFactors: " + payload.get("riskFactors"));
+        System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
+        System.out.println("-----------------------------------------------------");
 
-        @PostMapping("/save")
-        public ResponseEntity<Map<String, Object>> receiveAnalysis(@RequestBody Map<String, Object> payload) {
-            System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
-            System.out.println("summary: " + payload.get("summary"));
-            System.out.println("riskFactors: " + payload.get("riskFactors"));
-            System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
-            System.out.println("-----------------------------------------------------");
-
-            return ResponseEntity.ok(payload); // 확인용 응답
-        }
+        return ResponseEntity.ok(payload); // 확인용 응답
     }
 
     /**
