@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatSessionService chatSessionService; 
+    private final ChatSessionService chatSessionService;
     private final ChatService chatService;
 
     /**
@@ -60,20 +60,35 @@ public class ChatController {
         }
     }
 
+    @RestController
+    @RequestMapping("/api/chat/analysis")
+    public class ChatAnalysisController {
+
+        @PostMapping("/save")
+        public ResponseEntity<Map<String, Object>> receiveAnalysis(@RequestBody Map<String, Object> payload) {
+            System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
+            System.out.println("summary: " + payload.get("summary"));
+            System.out.println("riskFactors: " + payload.get("riskFactors"));
+            System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
+            System.out.println("-----------------------------------------------------");
+
+            return ResponseEntity.ok(payload); // 확인용 응답
+        }
+    }
+
     /**
      * 메시지 전송 및 AI 응답 받기
      */
     @PostMapping("/message")
-    public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(@Valid @RequestBody MessageRequest request, Authentication authentication) {
+    public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(@Valid @RequestBody MessageRequest request,
+            Authentication authentication) {
         try {
             System.out.println("Request: " + request);
 
             MessageResponse response = chatService.processMessage(
                     request.getSystemPrompt(),
                     authentication.getName(),
-                    request.getUserMessage()
-                    , request.getSessionId()
-            );
+                    request.getUserMessage(), request.getSessionId());
             Long sessionId = response.getSessionId();
 
             log.info("메시지 처리 완료 - 세션ID: {}", sessionId);
@@ -141,19 +156,21 @@ public class ChatController {
     }
     //
     // /**
-    //  * 사용자별 채팅 세션 목록 조회
-    //  */
+    // * 사용자별 채팅 세션 목록 조회
+    // */
     // @GetMapping("/sessions")
-    // public ResponseEntity<ApiResponse<List<SessionHistory>>> getUserSessions(@RequestParam String userEmail) {
-    //     try {
-    //         List<SessionHistory> sessions = chatSessionService.getSessionsByUserEmail(userEmail);
-    //         log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", userEmail, sessions.size());
-    //         return ResponseEntity.ok(ApiResponse.success(sessions));
-    //     } catch (Exception e) {
-    //         log.error("채팅 세션 조회 실패: {}", e.getMessage());
-    //         return ResponseEntity.badRequest()
-    //                 .body(ApiResponse.error("채팅 세션 조회에 실패했습니다.", e.getMessage()));
-    //     }
+    // public ResponseEntity<ApiResponse<List<SessionHistory>>>
+    // getUserSessions(@RequestParam String userEmail) {
+    // try {
+    // List<SessionHistory> sessions =
+    // chatSessionService.getSessionsByUserEmail(userEmail);
+    // log.info("채팅 세션 조회 완료 - 사용자: {}, 개수: {}", userEmail, sessions.size());
+    // return ResponseEntity.ok(ApiResponse.success(sessions));
+    // } catch (Exception e) {
+    // log.error("채팅 세션 조회 실패: {}", e.getMessage());
+    // return ResponseEntity.badRequest()
+    // .body(ApiResponse.error("채팅 세션 조회에 실패했습니다.", e.getMessage()));
+    // }
     // }
 
     /**
@@ -170,7 +187,7 @@ public class ChatController {
                     .body(ApiResponse.error("세션 수 조회에 실패했습니다.", e.getMessage()));
         }
     }
-    
+
     /**
      * 신규 채팅 모델 테스트용
      */
@@ -179,7 +196,8 @@ public class ChatController {
     @GetMapping("/test/new")
     public ResponseEntity<Object> getNewModelResult(HttpServletRequest request) {
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("text", "상담사: 안녕하세요, 오늘은 어떤 어려움이 있으신가요?\n내담자: 최근에 회사에서 성과를 내지 못해 불안해요.\n상담사: 구체적으로 어떤 상황이었나요?\n내담자: 보고서를 제때 제출하지 못해서 상사에게 크게 혼났습니다.\n상담사: 그 이후로 어떤 변화가 있었나요?\n내담자: 계속 눈치 보게 되고, 동료들과도 말하기가 힘들어졌어요.\n상담사: 대인관계가 위축되신 거군요. 수면은 어떠신가요?\n내담자: 잘 못 자요. 잠들기도 어렵고, 새벽에 자주 깨요.\n상담사: 수면 부족이 일상에 영향을 주고 있나요?\n내담자: 네, 집중이 안 되고 작은 실수도 자주 합니다.\n상담사: 혹시 위험한 생각까지 이어진 적이 있나요?\n내담자: 솔직히 그냥 다 포기하고 싶다는 생각이 든 적 있어요.\n상담사: 그런 생각이 드실 때 스스로 어떻게 대처하시나요?\n내담자: 운동을 하거나 음악을 듣습니다. 그러면 조금 나아집니다.\n상담사: 좋은 방법이네요. 최근에 기분이 나아졌던 순간도 있나요?\n내담자: 지난주에 친구와 산책했을 때 잠깐 편안했어요.\n상담사: 아주 좋은 경험이에요. 이런 활동을 조금씩 늘려가면 도움이 될 수 있습니다.\n내담자: 네, 앞으로도 친구들과 더 자주 만나려고 해요");
+        payload.put("text",
+                "상담사: 안녕하세요, 오늘은 어떤 어려움이 있으신가요?\n내담자: 최근에 회사에서 성과를 내지 못해 불안해요.\n상담사: 구체적으로 어떤 상황이었나요?\n내담자: 보고서를 제때 제출하지 못해서 상사에게 크게 혼났습니다.\n상담사: 그 이후로 어떤 변화가 있었나요?\n내담자: 계속 눈치 보게 되고, 동료들과도 말하기가 힘들어졌어요.\n상담사: 대인관계가 위축되신 거군요. 수면은 어떠신가요?\n내담자: 잘 못 자요. 잠들기도 어렵고, 새벽에 자주 깨요.\n상담사: 수면 부족이 일상에 영향을 주고 있나요?\n내담자: 네, 집중이 안 되고 작은 실수도 자주 합니다.\n상담사: 혹시 위험한 생각까지 이어진 적이 있나요?\n내담자: 솔직히 그냥 다 포기하고 싶다는 생각이 든 적 있어요.\n상담사: 그런 생각이 드실 때 스스로 어떻게 대처하시나요?\n내담자: 운동을 하거나 음악을 듣습니다. 그러면 조금 나아집니다.\n상담사: 좋은 방법이네요. 최근에 기분이 나아졌던 순간도 있나요?\n내담자: 지난주에 친구와 산책했을 때 잠깐 편안했어요.\n상담사: 아주 좋은 경험이에요. 이런 활동을 조금씩 늘려가면 도움이 될 수 있습니다.\n내담자: 네, 앞으로도 친구들과 더 자주 만나려고 해요");
         payload.put("max_new_tokens", 512);
         String url = "http://121.78.130.209:8111/full_analyze";
         HttpHeaders headers = new HttpHeaders();
@@ -188,7 +206,7 @@ public class ChatController {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
         try {
             ResponseEntity<String> resp = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
+                    url, HttpMethod.POST, entity, String.class);
 
             // 외부 응답을 그대로 전달(JSON)
             MediaType contentType = MediaType.APPLICATION_JSON;
