@@ -73,11 +73,9 @@ body {
     overflow: hidden;
     isolation: isolate;
 
-    /* 레이아웃: 수직 스택 (헤더/필드/본문/버튼) */
     display: flex;
     flex-direction: column;
 
-    /* 애니메이션 */
     transform: translateY(0);
     transition: transform .25s cubic-bezier(.2, .7, .2, 1),
     width .2s ease,
@@ -131,24 +129,18 @@ body {
 
 /* ▼ 상태: 팝아웃(확대) */
 .composer-container.is-expanded {
-    /* 우하단 고정값 무시하고 화면 중앙으로 */
     left: 50%;
     top: 50%;
     right: auto;
     bottom: auto;
 
-    /* 가로폭 제한 해제 + 확대 */
     max-width: none;
     width: min(920px, calc(100vw - 64px));
 
-    /* 세로도 키우기 */
     max-height: none;
     height: min(80vh, calc(100vh - 64px));
 
-    /* 가운데 정렬 */
     transform: translate(-50%, -50%);
-
-    /* 더 강한 그림자 */
     box-shadow: 0 24px 80px rgba(124, 58, 237, .18), 0 10px 24px rgba(0, 0, 0, .08);
     border-radius: 20px;
 }
@@ -563,4 +555,394 @@ body {
     transform: none !important; /* 스태킹 컨텍스트 해제 */
     filter: none !important;
     perspective: none !important;
+}
+
+/* =========================================================
+   ▼▼▼ 이메일 작업공간 (Workspace) — 클래스 분리 ▼▼▼
+   (기존 인라인 스타일 전부 클래스화)
+========================================================= */
+
+.email-workspace-lite {
+    min-height: 100vh;
+    padding: 24px 24px 120px;
+    background: radial-gradient(1200px 600px at 70% 20%, rgba(161, 140, 209, .25), transparent 60%),
+    radial-gradient(900px 500px at 30% 80%, rgba(194, 178, 255, .25), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f6f3ff 100%);
+}
+
+.ews-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* 왼쪽 패널 */
+.ews-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 카드 공통 */
+.ews-card {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 10px 30px rgba(126, 87, 194, .12);
+    backdrop-filter: blur(8px);
+}
+
+.ews-card-head {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ews-card-head.with-action {
+    justify-content: space-between;
+}
+
+.ews-templates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* 템플릿 버튼(검정 텍스트) */
+.ews-chip {
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 8px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #111; /* 요구사항: 템플릿 버튼 검정 텍스트 */
+}
+
+.ews-chip:hover {
+    background: #faf7ff;
+    border-color: rgba(126, 87, 194, .35);
+}
+
+/* 최근 수신자 */
+.ews-list {
+    display: grid;
+    gap: 6px;
+}
+
+.ews-list-item {
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+    color: #111; /* 요구사항: 최근 수신자 버튼 검정 텍스트 */
+}
+
+.ews-list-item:hover {
+    background: #fafafa;
+}
+
+.ews-empty {
+    color: var(--text-weak);
+    font-size: 13px;
+}
+
+/* 임시저장 */
+.ews-drafts {
+    display: grid;
+    gap: 8px;
+}
+
+.ews-draft-row {
+    display: flex;
+    gap: 8px;
+}
+
+.ews-draft-load {
+    flex: 1;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+}
+
+.ews-draft-del {
+    border: none;
+    border-radius: 10px;
+    background: #fee;
+    color: #b00;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.ews-dim {
+    color: var(--text-weak);
+    font-weight: 400;
+}
+
+/* 서명 */
+.ews-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.ews-signature-preview {
+    margin-top: 10px;
+    background: #fff;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    white-space: pre-wrap;
+    color: var(--text-weak);
+}
+
+/* 중앙 패널 */
+.ews-center {
+    display: grid;
+    gap: 16px;
+}
+
+.ews-hero {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(126, 87, 194, .12);
+}
+
+.ews-hero h2 {
+    margin: 0;
+}
+
+.ews-hero p {
+    margin: 6px 0 0 0;
+    color: var(--text-weak);
+}
+
+.ews-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ews-primary {
+    border: none;
+    background: #7e57c2;
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.ews-file input {
+    display: none;
+}
+
+.ews-input {
+    flex: 1;
+    min-width: 200px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+/* 드롭존 & 첨부 목록 */
+.ews-dropzone {
+    border: 2px dashed rgba(126, 87, 194, .35);
+    background: #fff;
+    border-radius: 16px;
+    min-height: 140px;
+    display: grid;
+    align-items: center;
+    padding: 12px;
+}
+
+.ews-drop-text {
+    text-align: center;
+    color: var(--text-weak);
+}
+
+.ews-attach-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ews-attach-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+}
+
+.ews-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ews-size {
+    color: var(--text-weak);
+    font-size: 13px;
+}
+
+.ews-x {
+    border: none;
+    background: #eee;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+/* 통계 */
+.ews-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ews-stat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.ews-stat-label {
+    color: var(--text-weak);
+    font-size: 12px;
+}
+
+.ews-stat-value {
+    font-weight: 800;
+    font-size: 20px;
+    margin-top: 4px;
+}
+
+.ews-stat-value.small {
+    font-size: 16px;
+    word-break: break-all;
+}
+
+/* ---- Workspace 확장: 스니펫/토글/Undo/링크검사 ---- */
+.ews-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.mt-8 {
+    margin-top: 8px;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.ews-primary.outline {
+    background: transparent;
+    color: #7e57c2;
+    border: 1px solid rgba(126, 87, 194, .5);
+}
+
+.ews-primary.outline:hover {
+    background: rgba(126, 87, 194, .06);
+}
+
+.ews-snippet-chip {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.ews-snippet-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-weak);
+}
+
+.ews-undo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff8e1;
+    color: #8a6d3b;
+    border-top: 1px solid rgba(17, 24, 39, .08);
+    border-bottom: 1px solid rgba(17, 24, 39, .08);
+}
+
+.ews-mini.danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+.ews-stats .links .ews-links {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.ews-stats .links .ok {
+    color: #14532d;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.ews-stats .links .warn {
+    color: #7c2d12;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+/* 입력 폭 */
+.ews-actions .ews-input.w-100 {
+    max-width: 120px;
+}
+
+.ews-draft-load {
+    color: #111 !important; /* 제목(버튼 텍스트) 검은색 */
+    font-weight: 600; /* 선택: 조금 더 진하게 */
+}
+
+/* 날짜/보조 정보는 흐리게 */
+.ews-draft-load .ews-dim {
+    color: var(--text-weak) !important;
+    font-weight: 400;
+}
+
+/* 호버 시 배경만 살짝 */
+.ews-draft-load:hover {
+    background: #fafafa;
+    border-color: rgba(17, 24, 39, .15);
+}
+
+/* 반응형 */
+@media (max-width: 960px) {
+    .ews-grid {
+        grid-template-columns: 1fr;
+    }
 }
