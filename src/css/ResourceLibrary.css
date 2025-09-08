@@ -75,13 +75,13 @@
     grid-area: 1 / 1; /* 본문과 같은 셀 */
     z-index: 2;
     position: sticky;
-    top: 0;
     width: 170px;
     margin-left: -190px; /* 왼쪽 거터로 빼기 */
     display: flex;
     flex-direction: column;
     gap: 8px;
     align-self: start;
+    margin-top: 27px;
 }
 
 .side-tab {

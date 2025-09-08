@@ -264,6 +264,7 @@ body {
     transform: translateY(-1px);
     filter: brightness(1.02);
     box-shadow: 0 14px 34px rgba(13, 110, 253, .32);
+    background-color: #0b5ed7;
 }
 
 /* 이미지 생성(초록) */
@@ -277,6 +278,7 @@ body {
     transform: translateY(-1px);
     filter: brightness(1.02);
     box-shadow: 0 14px 34px rgba(16, 185, 129, .30);
+    background-color: #157347 ;
 }
 
 /* 필드 행 (라벨/값) */

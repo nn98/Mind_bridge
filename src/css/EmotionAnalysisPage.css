@@ -149,7 +149,8 @@ body,
     border-radius: var(--radius-sm);
     padding: 12px 14px;
     line-height: 1.55;
-    font-size: 14px;
+    font-size: 16px;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
     outline: none;
     transition: border-color var(--speed), box-shadow var(--speed), background var(--speed);
 }
