@@ -116,7 +116,7 @@ const UserProfile = () => {
                     <div className="info">
                         <h2>{userInfo.fullName || '이름 없음'}</h2>
                         <p>{userInfo.email}</p>
-                        <span className="badge">활동중 </span>
+                        <span className="badge">활동중 🟢</span>
                         <span className="badge">{userInfo.age ? `${userInfo.age}세` : '나이 미입력'}</span>
                     </div>
                     <button className="edit-btn" onClick={handleEdit}>✏ 수정</button>
