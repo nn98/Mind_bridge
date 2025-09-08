@@ -1,71 +1,62 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const FASTAPI_URL = process.env.REACT_APP_FASTAPI_API_URL || "http://localhost:8222";
 
-// 상담 저장
-export async function saveCounselling({ email, chatHistory }) {
-    try {
-        const response = await axios.post(
-            `${BACKEND_URL}/api/chat/session/save`,
-            {
-                userEmail: email || "",
-                userChatSummary: JSON.stringify(chatHistory),
-            },
-            {
-                withCredentials: true, // 쿠키 포함
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-
-        if (response.status !== 200) throw new Error("DB 저장 실패");
-        return true;
-    } catch (e) {
-        console.error("상담 저장 중 오류:", e);
-        return false;
-    }
-}
-
-// 새 상담 세션 생성
+// === 상담 세션 생성 ===
 export async function startNewSession(email) {
-    try {
-        const params = new URLSearchParams({ email });
-        const response = await axios.post(
-            `${BACKEND_URL}/api/chat/session/start?${params.toString()}`,
-            null, // 바디 없음
-            {
-                withCredentials: true,
-                headers: { "Content-Type": "application/json" },
-            }
-        );
+  try {
+    const response = await axios.post(
+      `${FASTAPI_URL}/api/chat/session/start?email=${email}`,
+      null,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return response.data?.data || null;
+  } catch (err) {
+    console.error("세션 생성 실패:", err);
+    return null;
+  }
+}
 
-        const data = response.data;
+// === 메시지 전송 ===
+export async function sendMessage(sessionId, userMessage) {
+  console.log("🚀 sendMessage body:", { sessionId, userMessage }); // ✅ 디버깅용
+  try {
+    const response = await axios.post(
+      `${FASTAPI_URL}/api/chat/message`,
+      { sessionId, userMessage },   // ✅ 수정 (text → userMessage)
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-        if (response.status === 200 && data.success) {
-            const sessionId = data.data;
-            console.log("새 세션 생성 완료, 세션ID:", sessionId);
-            return sessionId;
-        } else {
-            console.error("세션 생성 실패:", data.message);
-            return null;
-        }
-    } catch (error) {
-        console.error("세션 생성 중 오류:", error);
-        return null;
-    }
+    const data = response.data;
+
+    // ✅ FastAPI는 그대로 한국어 키 반환
+    return {
+      상담사_응답: data["상담사_응답"] || "응답 없음",
+      감정: data["감정"] || "감정 분석 실패",
+      세션_종료: data["세션_종료"] || false,
+    };
+  } catch (err) {
+    console.error("메시지 전송 실패:", err);
+    return null;
+  }
 }
 
 
-// 상담 세션 종료
-export async function completeSession(sessionId, summary = "", emotion = "", aiSummary = "", score = null) {
-    if (!sessionId) return;
-    try {
-        await axios.post(`${BACKEND_URL}/api/chat/session/${sessionId}/complete`, null, {
-            params: { summary, emotion, aiSummary, score },
-            withCredentials: true,
-        });
-    } catch (e) {
-        console.warn("세션 완료 처리 실패:", e);
-    }
+// === 세션 종료 ===
+export async function completeSession(sessionId) {
+  try {
+    const response = await axios.post(
+      `${FASTAPI_URL}/api/chat/session/${sessionId}/complete`,
+      null,
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    // ✅ 세션 종료 후 분석 결과 콘솔에 찍기
+    console.log("세션 종료 분석 결과:", response.data);
+
+    return response.data;
+  } catch (err) {
+    console.error("세션 종료 실패:", err);
+    return null;
+  }
 }
