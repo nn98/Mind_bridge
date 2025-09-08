@@ -1,5 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: DemoApplication.java
-Class-Path: D:\Dev\_Soldesk\Mind_Bridge_BE\src\main\java\com\example\bac
- kend
-
+Main-Class: com.example.backend.DemoApplication
