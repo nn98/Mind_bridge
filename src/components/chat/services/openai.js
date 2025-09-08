@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// FastAPI 주소 (기본 8222번 포트)
+// FastAPI 주소
 const backendApiAddress =
-  process.env.REACT_APP_BACKEND_API_URL || "http://121.78.130.209";
+  process.env.REACT_APP_BACKEND_API_URL;
 
 // 상담 요청 (systemPrompt 제거)
 export async function requestCounselling(sessionId, userMessage) {
