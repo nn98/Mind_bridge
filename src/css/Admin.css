@@ -1,39 +1,40 @@
-:root {
-    --brand-purple: #6c63ff;
-    --brand-purple-light: #a18cd1;
-    --brand-pink: #fbc2eb;
-
-    --mb-bg: #f9f9ff;
-    --mb-card: #fff;
-    --mb-border: #e3e5f0;
-    --mb-hover: #f5f0ff;
-}
-
+/* =======================
+   ✅ Always Light Mode
+======================= */
+:root,
+html,
 body {
-    margin: 0;
-    padding: 0;
-    background: var(--mb-bg);
-    font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    color-scheme: light !important;
+}
+
+/* 기본 색상 토큰 */
+:root {
+    --mb-bg: #ffffff;
+    --mb-fg: #111111;
+    --mb-card: #ffffff;
+    --mb-head: #f7f8fa;
+    --mb-head-fg: #333333;
+    --mb-border: #e3e5e8;
+    --mb-row-border: #eef0f3;
+    --mb-hover: #f5f7ff;
+    --mb-brand: #9b59b6;
+    --mb-brand-dark: #8e44ad;
+    --mb-danger: #e74c3c;
+    --mb-success: #27ae60;
+    --mb-warning: #f39c12;
 }
 
 /* =======================
-   헤더
+   Layout
 ======================= */
-.admin-header {
-    text-align: center;
-    padding: 30px 20px 10px;
+.admin {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: "Noto Sans KR", sans-serif;
 }
 
-.admin-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--brand-purple);
-    margin-bottom: 16px;
-}
-
-/* =======================
-   로고
-======================= */
 .admin-logo-link {
     display: inline-block;
     margin: 16px;
@@ -45,170 +46,453 @@ body {
 }
 
 /* =======================
-   검색창 & 자동완성
+   Header
+======================= */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--mb-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin: 0 16px 24px;
+}
+
+.admin-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--mb-fg);
+}
+
+/* =======================
+   Search
 ======================= */
 .admin-search {
     position: relative;
-    display: inline-block;
+    width: 300px;
 }
 
 .admin-search input {
-    width: 480px;
-    max-width: 90%;
-    height: 42px;
-    padding: 0 16px;
-    border-radius: 30px;
-    border: 1.5px solid var(--brand-purple-light);
-    font-size: 15px;
-    outline: none;
-    transition: all 0.2s;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--mb-border);
+    border-radius: 8px;
+    font-size: 14px;
 }
 
-.admin-search input:focus {
-    border-color: var(--brand-purple);
-    box-shadow: 0 0 8px rgba(108, 99, 255, 0.3);
-}
-
-/* 자동완성 드롭다운 */
 .suggest-list {
     position: absolute;
-    top: 46px;
+    top: 110%;
     left: 0;
     width: 100%;
     background: var(--mb-card);
     border: 1px solid var(--mb-border);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
     max-height: 240px;
     overflow-y: auto;
-    z-index: 20;
-    list-style: none;
-    margin: 0;
-    padding: 4px 0;
 }
 
 .suggest-item {
-    padding: 8px 14px;
+    padding: 8px 12px;
     cursor: pointer;
-    font-size: 14px;
-    color: #333;
 }
 
 .suggest-item:hover,
 .suggest-item.active {
     background: var(--mb-hover);
-    color: var(--brand-purple);
-    font-weight: 600;
 }
 
 /* =======================
-   통계 카드
-======================= */
-.stats-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin: 20px 0;
-}
-
-.stat-card {
-    flex: 1;
-    min-width: 200px;
-    background: linear-gradient(135deg, var(--brand-purple-light), var(--brand-pink));
-    color: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
-}
-
-.stat-card h3 {
-    margin-bottom: 8px;
-    font-size: 1rem;
-}
-
-.stat-card p {
-    font-size: 1.3rem;
-}
-
-/* =======================
-   2컬럼 레이아웃 (유저+감정 / 캘린더+게시글)
+   Grid Layout
 ======================= */
 .admin-grid-2col {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* ✅ 두 컬럼 */
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 0 16px 32px;
 }
 
-.admin-grid-2col .col {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* 반응형 - 모바일에서는 1컬럼 */
-@media (max-width: 1024px) {
-    .admin-grid-2col {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* =======================
-   카드 공통
-======================= */
-.card {
+.col .card {
     background: var(--mb-card);
-    border: 1px solid var(--mb-border);
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* =======================
+   Stats
+======================= */
+.admin-stats {
+    display: flex;
+    gap: 16px;
+    margin: 0 16px 24px;
+}
+
+.admin-card {
+    flex: 1;
+    background: var(--mb-card);
+    border-left: 5px solid var(--mb-brand);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 500;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-    height: auto;
-    overflow: visible;
+}
+
+.admin-card strong {
+    font-size: 20px;
+    color: var(--mb-brand-dark);
 }
 
 /* =======================
-   테이블
+   Section
 ======================= */
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--mb-border);
-    text-align: center;
-}
-
-.admin-table thead th {
-    background: var(--mb-hover);
-    color: var(--brand-purple);
-    font-weight: 600;
-}
-
-.admin-table tr:hover {
-    background: #faf7ff;
-}
-
-/* =======================
-   캘린더 카드
-======================= */
-.calendar-card {
+.section-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* =======================
-   접근 권한 없음
-======================= */
-.admin-no-access {
-    margin-top: 80px;
-    text-align: center;
-    font-size: 1.3rem;
+.admin-section-title {
+    font-size: 18px;
     font-weight: 600;
-    color: #999;
+    margin-bottom: 12px;
+}
+
+/* =======================
+   Tables
+======================= */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--mb-row-border);
+    text-align: left;
+}
+
+.admin-table th {
+    background: var(--mb-head);
+    color: var(--mb-head-fg);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-table tr:hover {
+    background: var(--mb-hover);
+}
+
+.admin-table .empty {
+    text-align: center;
+    color: #777;
+    padding: 24px;
+}
+
+/* =======================
+   Users
+======================= */
+.table-scroll {
+    overflow-x: auto;
+}
+
+.ellipsis {
+    max-width: 140px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.ellipsis-email {
+    display: inline-block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =======================
+   Badges
+======================= */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-public {
+    background: #e8f5e9;
+    color: var(--mb-success);
+}
+
+.badge-private {
+    background: #fff3e0;
+    color: var(--mb-warning);
+}
+
+.badge-admin {
+    background: #fce4ec;
+    color: var(--mb-brand);
+}
+
+/* =======================
+   Calendar
+======================= */
+.calendar-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: flex-start; /* 각 셀이 위에 붙고 높이 자동 확장 */
+    gap: 16px;
+}
+
+.calendar-card {
+    height: 420px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+}
+
+/* ================================
+   📅 MUI DateCalendar 커스터마이징
+================================ */
+
+/* 달력 wrapper (월 전환 애니메이션 컨테이너) */
+.MuiPickersSlideTransition-root {
+    min-height: 420px !important; /* 최소 높이 확보 → 잘림 방지 */
+    height: auto !important;
+    overflow: visible !important; /* 스크롤 제거 */
+}
+
+/* 달력 한 달치 컨테이너 */
+.MuiDayCalendar-monthContainer {
+    height: auto !important;
+}
+
+/* 요일 헤더 (일~토) */
+.MuiDayCalendar-weekDayLabel {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #555;
+}
+
+/* 날짜 기본 스타일 */
+.MuiPickersDay-root {
+    width: 48px !important; /* 날짜 버튼 크기 */
+    height: 48px !important;
+    margin: 3px !important; /* 날짜 간격 */
+    font-size: 1rem !important;
+    font-weight: 500;
+    border-radius: 50% !important; /* 동그라미 */
+    transition: all 0.2s ease;
+}
+
+/* hover 시 효과 */
+.MuiPickersDay-root:hover {
+    background-color: rgba(161, 140, 209, 0.15) !important; /* 보라색 은은한 hover */
+}
+
+/* 오늘 날짜 */
+.MuiPickersDay-today {
+    border: 2px solid #a18cd1 !important;
+    font-weight: 700 !important;
+}
+
+/* 선택된 날짜 */
+.Mui-selected {
+    background-color: #a18cd1 !important; /* 브랜드 보라색 */
+    color: #fff !important;
+    font-weight: bold !important;
+}
+
+.css-17f9e7e-MuiTypography-root-MuiDayCalendar-weekDayLabel{
+    font-size: 18px !important;
+    margin: 0 9px !important;
+}
+/* 주말 색상 */
+.MuiDayCalendar-weekDayLabel:nth-of-type(1),
+.MuiPickersDay-root[aria-label*="일요일"] {
+    color: red !important;
+}
+
+.MuiDayCalendar-weekDayLabel:nth-of-type(7),
+.MuiPickersDay-root[aria-label*="토요일"] {
+    color: blue !important;
+}
+
+.css-19bcpwc-MuiDateCalendar-root{
+    height: 400px !important;
+}
+
+.admin-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.counselling-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.selected-date {
+    font-size: 14px;
+    color: #666;
+}
+
+.count-badge {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--mb-brand-dark);
+}
+
+.divider {
+    height: 1px;
+    background: var(--mb-border);
+    margin: 8px 0;
+}
+
+.subline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sub-badge {
+    font-weight: 600;
+    color: var(--mb-success);
+}
+
+.counselling-chart {
+    grid-column: 1 / span 2;
+}
+
+.chart-frame {
+    width: 100%;
+    height: 240px;
+}
+
+/* =======================
+   Posts
+======================= */
+.posts-panel .toolbar {
+    margin-bottom: 12px;
+}
+
+.toolbar-form {
+    display: flex;
+    gap: 8px;
+}
+
+.input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--mb-border);
+    border-radius: 8px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--mb-brand);
+    color: #fff;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--mb-brand-dark);
+}
+
+.btn-danger {
+    background: var(--mb-danger);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.btn-link {
+    background: none;
+    color: var(--mb-brand);
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* 레이아웃 */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* 사이드바 */
+.admin-sidebar {
+    width: 220px;
+    background: #2c3e50;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    gap: 10px;
+}
+
+.side-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 15px;
+    padding: 12px 16px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.side-btn:hover {
+    background: #34495e;
+}
+
+.side-btn.active {
+    background: #9b59b6;
+}
+
+/* 메인 */
+.admin-main {
+    flex: 1;
+    padding: 20px;
+}
+
+.admin-section {
+    margin-top: 20px;
+}
+
+/* =======================
+   Responsive
+======================= */
+@media (max-width: 1024px) {
+    .admin-grid-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-panel {
+        grid-template-columns: 1fr;
+    }
 }

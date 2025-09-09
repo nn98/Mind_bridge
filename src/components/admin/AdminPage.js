@@ -1,3 +1,4 @@
+// src/components/admin/services/AdminPage.js
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 import dayjs from "dayjs";
@@ -24,10 +25,8 @@ export default function AdminPage() {
         users: [],
     });
 
-    const [open, setOpen] = useState(false);
-    const [activeIdx, setActiveIdx] = useState(-1);
-    const searchWrapRef = useRef(null);
-    const inputRef = useRef(null);
+    // 🔥 기본 섹션은 "users"
+    const [section, setSection] = useState("users");
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -42,79 +41,58 @@ export default function AdminPage() {
         fetchStats();
     }, []);
 
+    // 🔥 유저 검색 필터 (닉네임 기준)
     const filteredUsers = useMemo(() => {
         const q = search.trim().toLowerCase();
         if (!q) return stats.users;
         return stats.users.filter((u) =>
-            [u?.nickname, u?.email, u?.phone]
-                .filter(Boolean)
-                .some((v) => String(v).toLowerCase().includes(q))
+            String(u?.nickname || "")
+                .toLowerCase()
+                .includes(q)
         );
     }, [stats.users, search]);
 
-    const suggestions = useMemo(() => {
-        const q = search.trim().toLowerCase();
-        if (!q) return [];
-        const pool = new Set();
-        for (const u of stats.users) {
-            if (u?.nickname) pool.add(String(u.nickname));
-            if (u?.email) {
-                const mail = String(u.email);
-                pool.add(mail);
-                const [local, domain] = mail.split("@");
-                if (local) pool.add(local);
-                if (domain) pool.add(domain);
-            }
-            if (u?.phone) pool.add(String(u.phone));
-        }
-        const arr = Array.from(pool);
-        const starts = [];
-        const contains = [];
-        for (const v of arr) {
-            const low = v.toLowerCase();
-            if (low.startsWith(q)) starts.push(v);
-            else if (low.includes(q)) contains.push(v);
-        }
-        const sortByQuality = (a, b) => {
-            const la = a.length, lb = b.length;
-            if (la !== lb) return la - lb;
-            return a.localeCompare(b, "ko");
-        };
-        starts.sort(sortByQuality);
-        contains.sort(sortByQuality);
-        return [...starts, ...contains].slice(0, 8);
-    }, [stats.users, search]);
+    // 🔥 현재 선택된 섹션에 따라 화면 결정
+    const renderSection = () => {
+        switch (section) {
+            case "users":
+                return (
+                    <>
+                        <AdminStats
+                            totalUsers={stats.totalUsers}
+                            totalPosts={stats.totalPosts}
+                        />
 
-    useEffect(() => {
-        const onDocClick = (e) => {
-            if (!searchWrapRef.current) return;
-            if (!searchWrapRef.current.contains(e.target)) setOpen(false);
-        };
-        document.addEventListener("mousedown", onDocClick);
-        return () => document.removeEventListener("mousedown", onDocClick);
-    }, []);
+                        {/* ✅ 유저 닉네임 검색창 */}
+                        <div className="user-search-bar">
+                            <input
+                                type="text"
+                                placeholder="닉네임 검색"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
 
-    const onKeyDown = (e) => {
-        if (!open || suggestions.length === 0) return;
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setActiveIdx((prev) => (prev + 1) % suggestions.length);
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setActiveIdx((prev) =>
-                prev <= 0 ? suggestions.length - 1 : prev - 1
-            );
-        } else if (e.key === "Enter") {
-            if (activeIdx >= 0 && activeIdx < suggestions.length) {
-                e.preventDefault();
-                setSearch(suggestions[activeIdx]);
-                setOpen(false);
-                setActiveIdx(-1);
-            }
-        } else if (e.key === "Escape") {
-            setOpen(false);
-            setActiveIdx(-1);
-            inputRef.current?.blur();
+                        <UsersTable users={filteredUsers}/>
+                    </>
+                );
+            case "emotion":
+                return <EmotionStatus/>;
+            case "calendar":
+                return <CalendarPanel date={date} setDate={setDate}/>;
+            case "posts":
+                // ✅ PostsPanel 은 내부에서 자체적으로 검색 처리
+                return <PostsPanel/>;
+            default:
+                return (
+                    <>
+                        <AdminStats
+                            totalUsers={stats.totalUsers}
+                            totalPosts={stats.totalPosts}
+                        />
+                        <UsersTable users={filteredUsers}/>
+                    </>
+                );
         }
     };
 
@@ -123,71 +101,51 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="admin">
-            <Link to="/" className="admin-logo-link">
-                <img src="/img/로고1.png" alt="Mind Bridge 로고" className="admin-logo"/>
-            </Link>
-
-            <header className="admin-header">
-                <h1>🧑‍💼 관리자 대시보드 👩‍💼</h1>
-
-                {/* 검색 */}
-                <div className="admin-search" ref={searchWrapRef}>
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setOpen(true);
-                            setActiveIdx(-1);
-                        }}
-                        onFocus={() => search && setOpen(true)}
-                        onKeyDown={onKeyDown}
-                        placeholder="고객명, 이메일, 전화번호 검색"
+        <div className="admin-layout">
+            {/* 🔥 사이드바 */}
+            <aside className="admin-sidebar">
+                <Link to="/" className="admin-logo-link">
+                    <img
+                        src="/img/로고1.png"
+                        alt="Mind Bridge 로고"
+                        className="admin-logo"
                     />
-                    {open && suggestions.length > 0 && (
-                        <ul className="suggest-list">
-                            {suggestions.map((s, idx) => (
-                                <li
-                                    key={s}
-                                    className={`suggest-item ${idx === activeIdx ? "active" : ""}`}
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        setSearch(s);
-                                        setOpen(false);
-                                    }}
-                                >
-                                    {s}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            </header>
+                </Link>
 
-            {/* 상단 통계 */}
-            <AdminStats totalUsers={stats.totalUsers} totalPosts={stats.totalPosts}/>
+                <button
+                    className={`side-btn ${section === "users" ? "active" : ""}`}
+                    onClick={() => setSection("users")}
+                >
+                    👥 유저 관리
+                </button>
+                <button
+                    className={`side-btn ${section === "emotion" ? "active" : ""}`}
+                    onClick={() => setSection("emotion")}
+                >
+                    😊 감정 상태
+                </button>
+                <button
+                    className={`side-btn ${section === "calendar" ? "active" : ""}`}
+                    onClick={() => setSection("calendar")}
+                >
+                    📅 캘린더
+                </button>
+                <button
+                    className={`side-btn ${section === "posts" ? "active" : ""}`}
+                    onClick={() => setSection("posts")}
+                >
+                    📝 게시글
+                </button>
+            </aside>
 
-            {/* 하단 패널 (왼쪽: 유저+감정 / 오른쪽: 캘린더+게시글) */}
-            <div className="admin-grid-2col">
-                <div className="col">
-                    <div className="card">
-                        <UsersTable users={filteredUsers} search={search}/>
-                    </div>
-                    <div className="card">
-                        <EmotionStatus/>
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="card calendar-card">
-                        <CalendarPanel date={date} setDate={setDate}/>
-                    </div>
-                    <div className="card">
-                        <PostsPanel/>
-                    </div>
-                </div>
-            </div>
+            {/* 🔥 메인 콘텐츠 */}
+            <main className="admin-main">
+                <header className="admin-header">
+                    <h1>🧑‍💼 관리자 대시보드 👩‍💼</h1>
+                </header>
+
+                <div className="admin-section">{renderSection()}</div>
+            </main>
         </div>
     );
 }
