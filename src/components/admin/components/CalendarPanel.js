@@ -63,11 +63,11 @@ const CalendarPanel = ({ date, setDate }) => {
         const fetchWeekly = async () => {
             // 1) 상담 주간
             const [{ data: csRes }, { data: vsRes }] = await Promise.all([
-                axios.get(`${BACKEND_URL}/api/counselling/stats`, {
+                axios.get(`${BACKEND_URL}/api/counselling/stats`, { //상담 횟수 엔드 포인트
                     params: { start: startStr, end: endStr },
                     withCredentials: true,
                 }),
-                axios.get(`${BACKEND_URL}/api/visitors/stats`, {
+                axios.get(`${BACKEND_URL}/api/visitors/stats`, { // 금일 접속자 수 엔드포인트
                     params: { start: startStr, end: endStr },
                     withCredentials: true,
                 }),
