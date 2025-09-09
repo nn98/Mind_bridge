@@ -50,7 +50,7 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	@Value("${oauth.kakao.client-id}")
 	private String kakaoClientId;
 
-	@Value("${kakao.client-secret}")
+	@Value("${oauth.kakao.client-secret}")
 	private String kakaoClientSecret;
 
 	@Value("${oauth.kakao.redirect-uri}")

@@ -137,6 +137,18 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(pd); // 502
 	}
 
+	/* ! 추가 - 스프링 시큐리티 크리덴셜 누락용 */
+	@ExceptionHandler(org.springframework.security.authentication.AuthenticationCredentialsNotFoundException.class)
+	public ResponseEntity<ProblemDetail> handleAuthCredentialsMissing(
+		org.springframework.security.authentication.AuthenticationCredentialsNotFoundException ex,
+		HttpServletRequest req) {
+		log.info("Unauthorized(credentials-missing): {}", ex.getMessage());
+		ProblemDetail pd = ProblemDetailFactory.createUnauthorized(
+			ex.getMessage() != null ? ex.getMessage() : "Authentication required", req);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd); // 401
+	}
+	/* ! 추가 - 인증 예외 있을 시 안전망 - 인데 방금 수정해서 불필요 */
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, HttpServletRequest req) {
 		log.error("Internal error", ex);
