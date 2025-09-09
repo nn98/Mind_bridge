@@ -1,0 +1,277 @@
+/* =========================
+   HelpPage 전용 CSS (단독 사용)
+   - 라이트 테마 고정
+   - Aurora 보라/민트 포인트
+========================= */
+:root {
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --text: #111827;
+    --text-weak: #6b7280;
+    --border: #e6e8ef;
+
+    --brand-1: #8b5cf6; /* purple */
+    --brand-2: #22d3ee; /* mint */
+    --brand-3: #34d399; /* green */
+    --glow: 0 16px 40px rgba(139, 92, 246, .25);
+    --radius: 16px;
+}
+
+/* 페이지 */
+.help-page {
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 0 20px;
+    color: var(--text);
+    background: radial-gradient(80% 60% at 70% 0%, rgba(139, 92, 246, 0.06), transparent 60%),
+    radial-gradient(70% 50% at 10% 20%, rgba(34, 211, 238, 0.05), transparent 60%),
+    var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* 카드 공통 */
+.help-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 0 auto 18px;
+    box-shadow: var(--glow);
+}
+
+/* 카드 상단 그라데이션 라인 */
+.help-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+    border-radius: var(--radius) var(--radius) 0 0;
+    opacity: .95;
+}
+
+/* Hero */
+.hero .help-title {
+    margin: 4px 0 6px;
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0a0f1f;
+}
+
+.hero .help-subtitle {
+    margin: 0 0 12px;
+    color: var(--text-weak);
+    font-size: 14px;
+}
+
+/* 액션 버튼 */
+.help-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    gap: 10px;
+    width: min(720px, 100%);
+}
+
+.help-btn {
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, .6);
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-1) 55%, var(--brand-2));
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(34, 211, 238, .26);
+    transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.help-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+}
+
+.help-btn:active {
+    transform: translateY(0);
+}
+
+/* 섹션 타이틀 */
+.help-section-title {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+/* FAQ details */
+.help-details {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    background: #fff;
+}
+
+.help-details summary {
+    cursor: pointer;
+    font-weight: 800;
+    list-style: none;
+}
+
+.help-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.help-details[open] summary {
+    color: var(--brand-1);
+}
+
+.help-details div {
+    margin-top: 8px;
+    color: var(--text-weak);
+    line-height: 1.65;
+    font-size: 14px;
+}
+
+/* 문의하기 레이아웃 */
+.help-contact {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.help-contact-form,
+.help-contact-info {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .04);
+}
+
+/* 연락처 카드 */
+.help-contact-info h3 {
+    margin: 0 0 10px;
+}
+
+.info-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.bold-text {
+    margin: 0;
+    font-weight: 800;
+}
+
+.sub-text {
+    margin: 0;
+    color: var(--text-weak);
+    font-size: 13px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.social-icons img {
+    width: 28px;
+    height: 28px;
+}
+
+/* ─────────────── 모달 ─────────────── */
+.hp-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background: rgba(10, 15, 31, 0.45);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+.hp-modal {
+    width: min(900px, calc(100vw - 40px));
+    max-height: calc(100vh - 80px);
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .25);
+    overflow: hidden;
+    position: relative;
+}
+
+.hp-modal::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+}
+
+.hp-modal-title {
+    margin: 14px 56px 0 16px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.hp-modal-close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    color: #111827;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+
+.hp-modal-content {
+    padding: 12px 16px 18px;
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+}
+
+.hp-pre {
+    margin: 0;
+    white-space: pre-wrap; /* 줄바꿈 보존 + 자동 줄바꿈 */
+    word-break: break-word;
+    line-height: 1.7;
+    font-size: 14px;
+    color: #222;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .help-contact {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .help-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .hp-modal-title {
+        margin-right: 48px;
+    }
+}
