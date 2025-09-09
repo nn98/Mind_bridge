@@ -1,19 +1,10 @@
 // src/components/admin/components/PostsPanel.js
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import { getAllPosts, deletePostById } from "../services/adminApi";
-import { toast, ToastContainer } from "react-toastify";
+import {getAllPosts, deletePostById} from "../services/adminApi";
+import {toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-const SORT_KEYS = [
-    { key: "createdAt", label: "작성일" },
-    { key: "id", label: "ID" },
-    { key: "nickname", label: "작성자" },
-    { key: "email", label: "이메일" },
-];
 
 /** 안전 접근 키 선택 */
 const pick = (obj, keys) =>
@@ -70,7 +61,7 @@ function getVisibilityInfo(row) {
     let isPublic = false;
     if (typeof v === "string") isPublic = v.toLowerCase() === "public";
     else if (typeof v === "boolean") isPublic = v;
-    return { isPublic, label: isPublic ? "공개" : "비공개" };
+    return {isPublic, label: isPublic ? "공개" : "비공개"};
 }
 
 /** 작성자 관리자 여부 추정 */
@@ -105,12 +96,7 @@ function isAdminAuthor(row) {
 }
 
 /** 서버 응답 포맷 표준화 */
-function normalizePostsResponse(result, { size }) {
-    // 지원 형태:
-    // A) { data: { content, totalPages, totalElements } }
-    // B) { content, totalPages, totalElements }
-    // C) { data: [...] }
-    // D) [...]
+function normalizePostsResponse(result, {size}) {
     let content = [];
     let totalPages = 0;
     let totalElements = 0;
@@ -131,13 +117,12 @@ function normalizePostsResponse(result, { size }) {
         content = result;
     }
 
-    // 페이지 정보가 없으면 클라 사이드 계산
     if (!totalPages || !Number.isFinite(totalPages)) {
         totalElements = content.length;
         totalPages = Math.max(1, Math.ceil(totalElements / Math.max(1, size)));
     }
 
-    return { content, totalPages, totalElements };
+    return {content, totalPages, totalElements};
 }
 
 const PostsPanel = () => {
@@ -165,12 +150,11 @@ const PostsPanel = () => {
             setLoading(true);
             setError("");
 
-            // 쿠키/토큰 자동 부착은 adminApi axios 인스턴서에서 처리
-            const raw = await getAllPosts({ page, size, search, sort: sortParam });
+            const raw = await getAllPosts({page, size, search, sort: sortParam});
 
-            const { content, totalPages, totalElements } = normalizePostsResponse(
+            const {content, totalPages, totalElements} = normalizePostsResponse(
                 raw,
-                { size }
+                {size}
             );
 
             setPosts(Array.isArray(content) ? content : []);
@@ -199,16 +183,23 @@ const PostsPanel = () => {
     };
 
     const onKeyDown = (e) => {
-        if (e.key === "Enter") onSearchSubmit(e);
-    };
+              // IME(한글) 조합 중 Enter는 무시
+                 if (e.isComposing) return;
+              if (e.key === "Enter") {
+                      // 기본 제출 방지 후, 표준 submit 트리거
+                          e.preventDefault();
+                     // 가장 가까운 form을 찾아 안전하게 제출 (버튼 클릭과 동일 라우팅)
+                          e.currentTarget.form?.requestSubmit?.();
+                  }
+          };
 
     const onDelete = (postId) => {
         const toastId = toast.info(
             <div>
-                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                <div style={{fontWeight: 600, marginBottom: 8}}>
                     정말 이 게시글을 삭제하시겠습니까?
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{display: "flex", gap: 8}}>
                     <button
                         onClick={async () => {
                             try {
@@ -274,21 +265,55 @@ const PostsPanel = () => {
     const sortIndicator = (key) =>
         sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "";
 
+    // ✅ 검색엔진 (프론트단 필터링)
+    const filteredPosts = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return posts;
+
+        return posts.filter((p) => {
+            const nickname =
+                p?.nickname ??
+                p?.authorNickname ??
+                p?.userNickname ??
+                p?.user?.nickname ??
+                p?.author?.nickname ??
+                "";
+
+            const email =
+                p?.email ??
+                p?.authorEmail ??
+                p?.userEmail ??
+                p?.user?.email ??
+                p?.author?.email ??
+                "";
+
+            const content = p?.content ?? "";
+            const title = p?.title ?? "";
+
+            return (
+                String(nickname).toLowerCase().includes(q) ||
+                String(email).toLowerCase().includes(q) ||
+                String(content).toLowerCase().includes(q) ||
+                String(title).toLowerCase().includes(q)
+            );
+        });
+    }, [posts, search]);
+
     const displayRows = useMemo(() => {
-        const arr = Array.isArray(posts) ? [...posts] : [];
+        const arr = Array.isArray(filteredPosts) ? [...filteredPosts] : [];
         return arr
-            .map((row, idx) => ({ row, idx }))
+            .map((row, idx) => ({row, idx}))
             .sort((a, b) => {
                 const av = getSortValue(a.row, sortKey);
                 const bv = getSortValue(b.row, sortKey);
                 let comp = 0;
                 if (typeof av === "number" && typeof bv === "number") comp = av - bv;
-                else comp = String(av).localeCompare(String(bv), "ko", { numeric: true });
+                else comp = String(av).localeCompare(String(bv), "ko", {numeric: true});
                 if (comp === 0) comp = a.idx - b.idx;
                 return sortDir === "asc" ? comp : -comp;
             })
-            .map(({ row }) => row);
-    }, [posts, sortKey, sortDir]);
+            .map(({row}) => row);
+    }, [filteredPosts, sortKey, sortDir]);
 
     const renderRows = () => {
         if (!displayRows || displayRows.length === 0) {
@@ -335,7 +360,7 @@ const PostsPanel = () => {
                     : "─";
 
             const content = p?.content ?? "";
-            const { isPublic, label: visLabel } = getVisibilityInfo(p);
+            const {isPublic, label: visLabel} = getVisibilityInfo(p);
             const admin = isAdminAuthor(p);
 
             return (
@@ -344,18 +369,17 @@ const PostsPanel = () => {
                         <td>{id ?? "─"}</td>
                         <td className="ellipsis">{nick}</td>
                         <td>
-                            <span className="ellipsis-email" title={email}>
-                                {email}
-                            </span>
+              <span className="ellipsis-email" title={email}>
+                {email}
+              </span>
                         </td>
 
                         <td className="nowrap">
-                            <span
-                                className={`badge ${isPublic ? "badge-public" : "badge-private"
-                                    }`}
-                            >
-                                {visLabel}
-                            </span>
+              <span
+                  className={`badge ${isPublic ? "badge-public" : "badge-private"}`}
+              >
+                {visLabel}
+              </span>
                             {admin && (
                                 <>
                                     {" "}
@@ -405,7 +429,7 @@ const PostsPanel = () => {
 
     return (
         <div className="section-container posts-panel">
-            <h2 className="admin-section-title">📋 게시글</h2>
+            <h2 className="admin-section-header">📋 게시글</h2>
 
             <div className="toolbar">
                 <form onSubmit={onSearchSubmit} className="toolbar-form">
@@ -414,7 +438,7 @@ const PostsPanel = () => {
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         onKeyDown={onKeyDown}
-                        placeholder="제목/작성자 검색"
+                        placeholder="제목/작성자/이메일/내용 검색"
                         className="input"
                     />
                     <button type="submit" className="btn">
@@ -426,48 +450,48 @@ const PostsPanel = () => {
             <div className="table-scroll">
                 <table className="admin-table posts-table">
                     <colgroup>
-                        <col style={{ width: 80 }} />
-                        <col style={{ width: 160 }} />
-                        <col />
-                        <col style={{ width: 140 }} />
-                        <col style={{ width: 120 }} />
-                        <col style={{ width: 120 }} />
+                        <col style={{width: 80}}/>
+                        <col style={{width: 160}}/>
+                        <col/>
+                        <col style={{width: 140}}/>
+                        <col style={{width: 120}}/>
+                        <col style={{width: 120}}/>
                     </colgroup>
 
                     <thead>
-                        <tr>
-                            <th onClick={() => handleHeaderSort("id")} role="button">
-                                ID{sortIndicator("id")}
-                            </th>
-                            <th onClick={() => handleHeaderSort("nickname")} role="button">
-                                작성자{sortIndicator("nickname")}
-                            </th>
-                            <th onClick={() => handleHeaderSort("email")} role="button">
-                                이메일{sortIndicator("email")}
-                            </th>
-                            <th>유형</th>
-                            <th onClick={() => handleHeaderSort("createdAt")} role="button">
-                                작성일{sortIndicator("createdAt")}
-                            </th>
-                            <th></th>
-                        </tr>
+                    <tr>
+                        <th onClick={() => handleHeaderSort("id")} role="button">
+                            ID{sortIndicator("id")}
+                        </th>
+                        <th onClick={() => handleHeaderSort("nickname")} role="button">
+                            작성자{sortIndicator("nickname")}
+                        </th>
+                        <th onClick={() => handleHeaderSort("email")} role="button">
+                            이메일{sortIndicator("email")}
+                        </th>
+                        <th>유형</th>
+                        <th onClick={() => handleHeaderSort("createdAt")} role="button">
+                            작성일{sortIndicator("createdAt")}
+                        </th>
+                        <th></th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="6" className="loading">
-                                    불러오는 중…
-                                </td>
-                            </tr>
-                        ) : error ? (
-                            <tr>
-                                <td colSpan="6" className="error">
-                                    {error}
-                                </td>
-                            </tr>
-                        ) : (
-                            renderRows()
-                        )}
+                    {loading ? (
+                        <tr>
+                            <td colSpan="6" className="loading">
+                                불러오는 중…
+                            </td>
+                        </tr>
+                    ) : error ? (
+                        <tr>
+                            <td colSpan="6" className="error">
+                                {error}
+                            </td>
+                        </tr>
+                    ) : (
+                        renderRows()
+                    )}
                     </tbody>
                 </table>
             </div>
@@ -483,8 +507,8 @@ const PostsPanel = () => {
                         이전
                     </button>
                     <span className="page-indicator">
-                        {page + 1} / {Math.max(totalPages, 1)}
-                    </span>
+            {page + 1} / {Math.max(totalPages, 1)}
+          </span>
                     <button
                         className="btn"
                         disabled={page >= totalPages - 1}
@@ -499,7 +523,7 @@ const PostsPanel = () => {
                 </div>
             </div>
 
-            <ToastContainer position="top-center" closeButton={false} icon={false} />
+            <ToastContainer position="top-center" closeButton={false} icon={false}/>
         </div>
     );
 };

@@ -46,7 +46,7 @@ const SNIPPET_PREFIX = "mb_snippets_v1";
 function EmailComposer({customUser, isCustomLoggedIn}) {
     const form = useRef(null);
 
-    // 🔐 DashboardLayout과 동일하게 auth 사용
+    // 🔐 auth
     const {profile} = useAuth();
     const isLoggedIn = !!profile;
     const role = String(profile?.role || "").toUpperCase();
@@ -79,11 +79,6 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
     const [userInfo, setUserInfo] = useState({id: "", name: "", email: ""});
     const [isLoading, setIsLoading] = useState(true);
 
-    // 창 상태
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [isHidden, setIsHidden] = useState(false);
-
     // contentEditable 바인딩
     const {bind} = useContentEditable(message, setMessage);
 
@@ -96,7 +91,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
     const DRAFT_KEY = useMemo(() => `${DRAFT_PREFIX}:${userKey}`, [userKey]);
     const SNIPPET_KEY = useMemo(() => `${SNIPPET_PREFIX}:${userKey}`, [userKey]);
 
-    // 최근 수신자/임시저장/스니펫 (사용자별)
+    // 최근 수신자/임시저장/스니펫
     const [recentRecipients, setRecentRecipients] = useState([]);
     const [drafts, setDrafts] = useState([]);
     const [snippets, setSnippets] = useState([]);
@@ -158,31 +153,58 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         }
     }, [RECENTS_KEY, DRAFT_KEY, SNIPPET_KEY]);
 
-    /* ───── 전송 로직 ───── */
+    /* ───── 서명 포함 메시지 구성 (관리자만) ───── */
+    const [useSignature, setUseSignature] = useState(true);
+    const buildMessageWithSignature = () => {
+        // 관리자 & 토글 ON 일 때만 서명 삽입
+        if (!(isAdmin && useSignature)) return message;
+
+        const sigHtml = DEFAULT_SIGNATURE(userInfo).replace(/\n/g, "<br/>");
+
+        // 단순 중복 방지(원하면 더 정교하게 개선 가능)
+        const lower = (message || "").toLowerCase();
+        const hasSignature =
+            lower.includes("--") &&
+            (lower.includes("mindbridge") || lower.includes(userInfo?.email?.toLowerCase() || ""));
+
+        return hasSignature ? message : `${message || ""}<br/><br/>${sigHtml}`;
+    };
+
+    /* ───── 전송 로직 (원본 방식 유지) ───── */
     const doSend = async (override = null) => {
         try {
             setIsSending(true);
 
+            // 관리자만 서명 포함
+            const msgToSend = buildMessageWithSignature();
+
             if (override) {
+                // override 경로는 FormData를 새로 만들고 message 덮어씌움
                 const fd = new FormData(form.current);
                 if (override.to) fd.set("to", override.to);
                 if (override.cc !== undefined) fd.set("cc", override.cc);
                 if (override.bcc !== undefined) fd.set("bcc", override.bcc);
+                fd.set("message", msgToSend); // ✅ 서명 반영
                 await sendEmailForm(fd);
             } else {
-                await sendEmailForm(form.current);
+                // ✅ 기존 로직 유지: form.current를 그대로 전달
+                // 다만 전달 직전 hidden textarea(name="message")만 잠시 서명 포함값으로 바꿨다가 복원
+                const formEl = form.current;
+                const msgEl = formEl?.querySelector('textarea[name="message"]');
+                const original = msgEl ? msgEl.value : "";
+
+                if (msgEl) msgEl.value = msgToSend;
+                await sendEmailForm(formEl);
+                if (msgEl) msgEl.value = original; // 복원
             }
 
-            // 통계 + 최근 수신자(사용자별)
+            // 통계 + 최근 수신자
             const todayKey = `mb_sent_${new Date().toDateString()}:${userKey}`;
             const sentToday = Number(localStorage.getItem(todayKey) || "0") + 1;
             localStorage.setItem(todayKey, String(sentToday));
 
             if (toEmail?.trim()) {
-                const next = [
-                    toEmail.trim(),
-                    ...recentRecipients.filter((e) => e !== toEmail.trim()),
-                ].slice(0, 12);
+                const next = [toEmail.trim(), ...recentRecipients.filter((e) => e !== toEmail.trim())].slice(0, 12);
                 setRecentRecipients(next);
                 localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
             }
@@ -190,11 +212,11 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
             displayToast("메일이 성공적으로 전송되었습니다!");
             setSubject("");
             setMessage("");
+            setToEmail("");
+            setCc("");
+            setBcc("");
         } catch (error) {
-            displayToast(
-                "메일 전송에 실패했습니다: " +
-                (error?.text || error?.message || "Unknown error")
-            );
+            displayToast("메일 전송에 실패했습니다: " + (error?.text || error?.message || "Unknown error"));
         } finally {
             setIsSending(false);
         }
@@ -202,31 +224,23 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        // contentEditable의 플레인 텍스트 기준 검증
-        const plainText = document
-            .getElementById("message-editor")
-            ?.textContent?.trim();
-        if (!subject.trim() || !plainText) {
-            displayToast("제목과 내용을 모두 입력해주세요.");
+        const plainText = document.getElementById("message-editor")?.textContent?.trim();
+        if (!toEmail.trim() || !subject.trim() || !plainText) {
+            displayToast("받는 사람, 제목, 내용을 모두 입력해주세요.");
             return;
         }
 
         if (undoEnabled && undoSeconds > 0) {
-            // 지연 전송 모드
             setPending(true);
             setPendingLeft(undoSeconds);
 
-            // 카운트다운
             pendingIntervalRef.current = setInterval(() => {
                 setPendingLeft((n) => {
-                    if (n <= 1) {
-                        clearInterval(pendingIntervalRef.current);
-                    }
+                    if (n <= 1) clearInterval(pendingIntervalRef.current);
                     return Math.max(0, n - 1);
                 });
             }, 1000);
 
-            // 실제 전송 예약
             undoTimerRef.current = setTimeout(async () => {
                 setPending(false);
                 await doSend();
@@ -235,7 +249,6 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
             return;
         }
 
-        // 즉시 전송
         await doSend();
     };
 
@@ -272,70 +285,10 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         }
     };
 
-    /* ───── 창 컨트롤 ───── */
-    const onMinimize = () => setIsCollapsed((v) => !v);
-    const onExpand = () => {
-        setIsHidden(false);
-        setIsCollapsed(false);
-        setIsExpanded((v) => !v);
-    };
-    const onClose = (e) => {
-        e?.stopPropagation?.();
-        setIsExpanded(false);
-        setIsCollapsed(false);
-        setIsHidden(true);
-    };
-
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.key === "Escape") {
-                setIsExpanded(false);
-                setIsCollapsed(false);
-                setIsHidden(true);
-                cancelPendingSend();
-            }
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, []);
-
-    useEffect(() => {
-        if (!isExpanded) return;
-        const prev = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = prev;
-        };
-    }, [isExpanded]);
-
-    /* ───── 작업공간 로직(사용자별 저장) ───── */
-    const [useSignature, setUseSignature] = useState(true);
-
-    const applyTemplate = (tpl) => {
-        if (!(isAdmin && isLoggedIn)) return; // 🔐 어드민 전용
-        setSubject(tpl.subject);
-        const baseBody = tpl.body.replace(/\n/g, "<br/>");
-        const withSig = useSignature
-            ? `${baseBody}<br/><br/>${DEFAULT_SIGNATURE(userInfo).replace(
-                /\n/g,
-                "<br/>"
-            )}`
-            : baseBody;
-        setMessage(withSig);
-    };
-
+    /* ───── 임시저장/스니펫 로직 ───── */
     const saveDraft = () => {
-        const id =
-            (crypto?.randomUUID && crypto.randomUUID()) ||
-            `d_${Date.now()}_${Math.random()}`;
-        const draft = {
-            id,
-            owner: userKey,
-            toEmail,
-            subject,
-            html: message,
-            savedAt: Date.now(),
-        };
+        const id = (crypto?.randomUUID && crypto.randomUUID()) || `d_${Date.now()}_${Math.random()}`;
+        const draft = {id, owner: userKey, toEmail, subject, html: message, savedAt: Date.now()};
         const next = [draft, ...drafts].slice(0, 50);
         setDrafts(next);
         localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
@@ -355,24 +308,10 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
     };
 
-    const pushRecent = (mail) => {
-        setToEmail(mail);
-        const next = [mail, ...recentRecipients.filter((m) => m !== mail)].slice(
-            0,
-            12
-        );
-        setRecentRecipients(next);
-        localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
-    };
-
     const addSnippet = () => {
         const t = newSnippet.trim();
         if (!t) return;
-        const item =
-            (crypto?.randomUUID && {id: crypto.randomUUID(), text: t}) || {
-                id: `s_${Date.now()}`,
-                text: t,
-            };
+        const item = (crypto?.randomUUID && {id: crypto.randomUUID(), text: t}) || {id: `s_${Date.now()}`, text: t};
         const next = [item, ...snippets].slice(0, 50);
         setSnippets(next);
         localStorage.setItem(SNIPPET_KEY, JSON.stringify(next));
@@ -386,32 +325,24 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
     };
 
     const insertSnippet = (text) => {
-        setMessage((prev) =>
-            prev ? `${prev}<br/>${text.replace(/\n/g, "<br/>")}` : text.replace(/\n/g, "<br/>")
-        );
+        setMessage((prev) => (prev ? `${prev}<br/>${text.replace(/\n/g, "<br/>")}` : text.replace(/\n/g, "<br/>")));
     };
 
-    // 오늘 통계 (사용자별 키)
+    // 오늘 통계
     const stats = useMemo(() => {
         const todayKey = `mb_sent_${new Date().toDateString()}:${userKey}`;
         const sentToday = Number(localStorage.getItem(todayKey) || "0");
-        const plainText =
-            document.getElementById("message-editor")?.textContent || "";
-        const wordCount = plainText.trim()
-            ? plainText.trim().split(/\s+/).length
-            : 0;
+        const plainText = document.getElementById("message-editor")?.textContent || "";
+        const wordCount = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
         const readMin = Math.max(1, Math.ceil(wordCount / 200));
-        // 링크 간단 검사
         const links = message.match(/https?:\/\/[^\s"<]+/g) || [];
-        const suspicious = (message.match(/\bwww\.[^\s"<]+/g) || []).filter(
-            (u) => !/^https?:\/\//.test(u)
-        );
+        const suspicious = (message.match(/\bwww\.[^\s"<]+/g) || []).filter((u) => !/^https?:\/\//.test(u));
         return {sentToday, draftsCount: drafts.length, wordCount, readMin, links, suspicious};
     }, [drafts, message, userKey]);
 
     return (
         <>
-            {/* ───── 배경 작업공간 (관리자 전용 템플릿 + 사용자별 기능) ───── */}
+            {/* ───── 배경 작업공간 ───── */}
             <div className="email-workspace-lite">
                 <div className="ews-grid">
                     {/* 왼쪽 패널 */}
@@ -422,11 +353,15 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                                 <div className="ews-card-head">템플릿 (관리자 전용)</div>
                                 <div className="ews-templates">
                                     {TEMPLATES.map((tpl) => (
-                                        <button
-                                            key={tpl.id}
-                                            className="ews-chip"
-                                            onClick={() => applyTemplate(tpl)}
-                                        >
+                                        <button key={tpl.id} className="ews-chip" onClick={() => {
+                                            // 템플릿 적용도 관리자일 때만 서명 반영
+                                            setSubject(tpl.subject);
+                                            const baseBody = tpl.body.replace(/\n/g, "<br/>");
+                                            const withSig = isAdmin && useSignature
+                                                ? `${baseBody}<br/><br/>${DEFAULT_SIGNATURE(userInfo).replace(/\n/g, "<br/>")}`
+                                                : baseBody;
+                                            setMessage(withSig);
+                                        }}>
                                             {tpl.title}
                                         </button>
                                     ))}
@@ -439,11 +374,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                             <div className="ews-card-head">최근 수신자</div>
                             <div className="ews-list">
                                 {recentRecipients.map((mail) => (
-                                    <button
-                                        key={mail}
-                                        className="ews-list-item"
-                                        onClick={() => pushRecent(mail)}
-                                    >
+                                    <button key={mail} className="ews-list-item" onClick={() => setToEmail(mail)}>
                                         {mail}
                                     </button>
                                 ))}
@@ -457,60 +388,48 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                         <section className="ews-card">
                             <div className="ews-card-head with-action">
                                 <span>임시 저장</span>
-                                <button className="ews-mini" onClick={saveDraft}>
-                                    저장
-                                </button>
+                                <button className="ews-mini" onClick={saveDraft}>저장</button>
                             </div>
                             <div className="ews-drafts">
-                                {drafts.length === 0 && (
-                                    <div className="ews-empty">아직 저장된 임시 메일이 없어요.</div>
-                                )}
+                                {drafts.length === 0 && <div className="ews-empty">아직 저장된 임시 메일이 없어요.</div>}
                                 {drafts.map((d) => (
                                     <div key={d.id} className="ews-draft-row">
                                         <button className="ews-draft-load" onClick={() => loadDraft(d)}>
                                             {d.subject || "(제목 없음)"}{" "}
-                                            <span className="ews-dim">
-                        • {new Date(d.savedAt).toLocaleString()}
-                      </span>
+                                            <span className="ews-dim">• {new Date(d.savedAt).toLocaleString()}</span>
                                         </button>
-                                        <button
-                                            className="ews-draft-del"
-                                            onClick={() => deleteDraft(d.id)}
-                                        >
-                                            삭제
-                                        </button>
+                                        <button className="ews-draft-del" onClick={() => deleteDraft(d.id)}>삭제</button>
                                     </div>
                                 ))}
                             </div>
                         </section>
 
-                        {/* 서명 토글 */}
-                        <section className="ews-card">
-                            <div className="ews-card-head">서명</div>
-                            <label className="ews-toggle">
-                                <input
-                                    type="checkbox"
-                                    checked={useSignature}
-                                    onChange={(e) => setUseSignature(e.target.checked)}
-                                />
-                                <span>메일 하단에 기본 서명 자동 추가</span>
-                            </label>
-                            {useSignature && (
-                                <pre className="ews-signature-preview">
-                  {DEFAULT_SIGNATURE(userInfo)}
-                </pre>
-                            )}
-                        </section>
+                        {/* 서명 토글/미리보기 (관리자만 노출) */}
+                        {isAdmin && isLoggedIn && (
+                            <section className="ews-card">
+                                <div className="ews-card-head">서명</div>
+                                <label className="ews-toggle">
+                                    <input
+                                        type="checkbox"
+                                        checked={useSignature}
+                                        onChange={(e) => setUseSignature(e.target.checked)}
+                                    />
+                                    <span>템플릿/전송 시 서명 삽입</span>
+                                </label>
+                                {useSignature &&
+                                    <pre className="ews-signature-preview">{DEFAULT_SIGNATURE(userInfo)}</pre>}
+                            </section>
+                        )}
                     </aside>
 
                     {/* 중앙 패널 */}
                     <main className="ews-center">
+                        {/* 히어로 + 상단 받는사람/CC/BCC */}
                         <section className="ews-hero">
                             <h2>이메일 작업공간</h2>
-                            <h4>CC/BCC, 보내기 취소, 테스트 발송, 스니펫을 사용할 수 있어요.</h4>
-                            <p>mindbridge2020@gmail.com 해당 메일은 문의 전용 메일입니다 보내고 싶은 메일을 입력해주세요.</p>
+                            <h4>보내는 사람/받는 사람은 아래 메일창에서도 확인 및 수정할 수 있어요.</h4>
+                            <p>mindbridge2020@gmail.com 해당 메일은 문의 전용 메일입니다. 보내고 싶은 메일을 입력해주세요.</p>
 
-                            {/* CC/BCC & 액션 */}
                             <div className="ews-actions">
                                 <input
                                     className="ews-input"
@@ -536,36 +455,12 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                             </div>
 
                             <div className="ews-actions mt-8">
-                                <button className="ews-primary" onClick={saveDraft}>
-                                    현재 내용 임시저장
-                                </button>
-                                <button
-                                    className="ews-primary outline"
-                                    onClick={() => {
-                                        if (
-                                            !userInfo?.email ||
-                                            userInfo.email.includes("필요") ||
-                                            userInfo.email === "이메일 정보 없음"
-                                        ) {
-                                            displayToast("내 이메일 정보가 없어 테스트 발송이 불가합니다.");
-                                            return;
-                                        }
-                                        // 나에게 테스트 발송 (To만 내 메일로 override)
-                                        doSend({to: userInfo.email, cc: "", bcc: ""});
-                                    }}
-                                >
-                                    나에게 테스트 발송
-                                </button>
-
-                                <label className="ews-toggle ml-auto">
-                                    <input
-                                        type="checkbox"
-                                        checked={undoEnabled}
-                                        onChange={(e) => setUndoEnabled(e.target.checked)}
-                                    />
+                                <button className="ews-primary" onClick={saveDraft}>현재 내용 임시저장</button>
+                                <label className="ews-toggle" style={{marginLeft: "auto"}}>
+                                    <input type="checkbox" checked={undoEnabled}
+                                           onChange={(e) => setUndoEnabled(e.target.checked)}/>
                                     <span>보내기 취소 활성화</span>
                                 </label>
-
                                 <select
                                     className="ews-input w-100"
                                     value={undoSeconds}
@@ -591,27 +486,94 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                                         value={newSnippet}
                                         onChange={(e) => setNewSnippet(e.target.value)}
                                     />
-                                    <button className="ews-mini" onClick={addSnippet}>
-                                        추가
-                                    </button>
+                                    <button className="ews-mini" onClick={addSnippet}>추가</button>
                                 </div>
                             </div>
                             <div className="ews-templates">
                                 {snippets.map((s) => (
                                     <div key={s.id} className="ews-snippet-chip">
-                                        <button className="ews-chip" onClick={() => insertSnippet(s.text)}>
-                                            삽입
-                                        </button>
+                                        <button className="ews-chip" onClick={() => insertSnippet(s.text)}>삽입</button>
                                         <span className="ews-snippet-text">{s.text}</span>
-                                        <button className="ews-x" onClick={() => deleteSnippet(s.id)}>
-                                            삭제
-                                        </button>
+                                        <button className="ews-x" onClick={() => deleteSnippet(s.id)}>삭제</button>
                                     </div>
                                 ))}
-                                {snippets.length === 0 && (
-                                    <div className="ews-empty">등록된 스니펫이 없습니다.</div>
-                                )}
+                                {snippets.length === 0 && <div className="ews-empty">등록된 스니펫이 없습니다.</div>}
                             </div>
+                        </section>
+
+                        {/* ✅ 인라인 메일 작성 카드 — 보내는 사람 / 받는 사람 / 제목 / 본문 */}
+                        <section className="ews-card ews-composer-card">
+                            <form ref={form} onSubmit={onSubmit} className="composer-form">
+                                {/* 보내는 사람 */}
+                                <div className="field-row">
+                                    <label className="field-label">보내는 사람</label>
+                                    <span className="field-value">
+                    {isLoading ? "로딩 중..." : `${userInfo.name || "사용자"} <${userInfo.email || "-"}>`}
+                  </span>
+                                </div>
+
+                                {/* 받는 사람 */}
+                                <div className="field-row">
+                                    <label htmlFor="to" className="field-label">받는 사람</label>
+                                    <input
+                                        type="email"
+                                        id="to"
+                                        name="to"
+                                        placeholder="받는 사람 이메일 입력 (쉼표로 여러 명)"
+                                        className="field-input"
+                                        value={toEmail}
+                                        onChange={(e) => setToEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                {/* 제목 */}
+                                <div className="field-row">
+                                    <label htmlFor="title" className="field-label">제목</label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        name="title"
+                                        placeholder="제목을 입력하세요"
+                                        className="field-input"
+                                        value={subject}
+                                        onChange={(e) => setSubject(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                {/* 본문 에디터 */}
+                                <div id="message-editor" className="composer-textarea" {...bind} />
+
+                                {/* 보내기 취소 배너 */}
+                                {pending && (
+                                    <div className="ews-undo">
+                                        <span>전송까지 {pendingLeft}초…</span>
+                                        <button type="button" className="ews-mini danger"
+                                                onClick={cancelPendingSend}>취소
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* 하단 버튼 */}
+                                <div className="composer-bottom">
+                                    <button type="submit" className="composer-button send-button"
+                                            disabled={isSending || pending}>
+                                        {isSending ? "전송 중..." : "보내기"}
+                                    </button>
+                                    <button type="button" onClick={() => setIsModalOpen(true)}
+                                            className="composer-button generate-button">
+                                        이미지 생성
+                                    </button>
+                                </div>
+
+                                {/* 히든 필드 (히어로에서 입력한 CC/BCC를 함께 전송) */}
+                                <input type="hidden" name="cc" value={cc}/>
+                                <input type="hidden" name="bcc" value={bcc}/>
+                                <input type="hidden" name="name" value={userInfo.name || ""}/>
+                                <input type="hidden" name="email" value={userInfo.email || ""}/>
+                                <textarea name="message" value={message} readOnly style={{display: "none"}}/>
+                            </form>
                         </section>
 
                         {/* 사용자별 통계 + 링크 점검 */}
@@ -626,9 +588,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                             </div>
                             <div className="ews-stat-card">
                                 <div className="ews-stat-label">본문 길이</div>
-                                <div className="ews-stat-value">
-                                    {stats.wordCount}단어 • 약 {stats.readMin}분
-                                </div>
+                                <div className="ews-stat-value">{stats.wordCount}단어 • 약 {stats.readMin}분</div>
                             </div>
                             <div className="ews-stat-card links">
                                 <div className="ews-stat-label">링크 점검</div>
@@ -637,14 +597,10 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                                         <div className="ews-dim">감지된 링크 없음</div>
                                     )}
                                     {stats.links.map((u, i) => (
-                                        <div key={`ok-${i}`} className="ok">
-                                            {u}
-                                        </div>
+                                        <div key={`ok-${i}`} className="ok">{u}</div>
                                     ))}
                                     {stats.suspicious.map((u, i) => (
-                                        <div key={`warn-${i}`} className="warn">
-                                            프로토콜 누락: {u} → https://{u}
-                                        </div>
+                                        <div key={`warn-${i}`} className="warn">프로토콜 누락: {u} → https://{u}</div>
                                     ))}
                                 </div>
                             </div>
@@ -653,130 +609,8 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                 </div>
             </div>
 
-            {/* ───── 토스트 & 팝아웃 딤 ───── */}
+            {/* ───── 토스트 ───── */}
             <ToastMessage message={toastMessage} show={showToast}/>
-            {isExpanded && (
-                <div
-                    className="composer-backdrop show"
-                    onClick={() => setIsExpanded(false)}
-                    aria-hidden="true"
-                />
-            )}
-
-            {/* ───── 우하단 고정 컴포저 ───── */}
-            <form
-                ref={form}
-                onSubmit={onSubmit}
-                className={`composer-container ${isCollapsed ? "is-collapsed" : ""} ${
-                    isHidden ? "is-hidden" : ""
-                } ${isExpanded ? "is-expanded" : ""}`}
-            >
-                <div className="composer-header">
-                    <div className="win-group">
-                        <button type="button" className="win-btn" onClick={onMinimize} title="최소화">
-                            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" stroke="currentColor">
-                                <path d="M5 19h14"/>
-                            </svg>
-                        </button>
-                        <button
-                            type="button"
-                            className="win-btn"
-                            onClick={onExpand}
-                            title={isExpanded ? "원래 크기" : "팝아웃"}
-                        >
-                            {isExpanded ? (
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" stroke="currentColor">
-                                    <path d="M10 14L4 20M4 14v6h6"/>
-                                    <path d="M14 10l6-6M14 4h6v6"/>
-                                </svg>
-                            ) : (
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" stroke="currentColor">
-                                    <path d="M14 4h6v6"/>
-                                    <path d="M10 14l10-10"/>
-                                </svg>
-                            )}
-                        </button>
-                        <button type="button" className="win-btn" onClick={onClose} title="닫기">
-                            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" stroke="currentColor">
-                                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                {/* 정보 필드 */}
-                <div className="field-row">
-                    <label className="field-label">보내는 사람</label>
-                    <span className="field-value">
-            {isLoading
-                ? "로딩 중..."
-                : `${userInfo.name || "사용자"} <${userInfo.email || "-"}>`}
-          </span>
-                </div>
-
-                <div className="field-row">
-                    <label className="field-label">받는사람</label>
-                    <span className="field-value">{toEmail}</span>
-                </div>
-
-                <div className="field-row">
-                    <label htmlFor="title" className="field-label">
-                        제목
-                    </label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        placeholder="제목을 입력하세요"
-                        className="field-input"
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                        required
-                    />
-                </div>
-
-                {/* 본문 에디터 */}
-                <div id="message-editor" className="composer-textarea" {...bind} />
-
-                {/* 보내기 취소 배너 */}
-                {pending && (
-                    <div className="ews-undo">
-                        <span>전송까지 {pendingLeft}초…</span>
-                        <button type="button" className="ews-mini danger" onClick={cancelPendingSend}>
-                            취소
-                        </button>
-                    </div>
-                )}
-
-                {/* 하단 버튼 */}
-                <div className="composer-bottom">
-                    <button type="submit" className="composer-button send-button" disabled={isSending || pending}>
-                        {isSending ? "전송 중..." : "보내기"}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setIsModalOpen(true)}
-                        className="composer-button generate-button"
-                    >
-                        이미지 생성
-                    </button>
-                </div>
-
-                {/* 히든 필드 (EmailJS 템플릿 변수와 매칭) */}
-                {/* 템플릿에서 {{to}}, {{cc}}, {{bcc}}, {{subject}}, {{message}} 사용 권장 */}
-                <input type="hidden" name="to" value={toEmail}/>
-                <input type="hidden" name="cc" value={cc}/>
-                <input type="hidden" name="bcc" value={bcc}/>
-                <input type="hidden" name="name" value={userInfo.name || ""}/>
-                <input type="hidden" name="email" value={userInfo.email || ""}/>
-                <textarea name="message" value={message} readOnly style={{display: "none"}}/>
-            </form>
-
-            {/* FAB */}
-            <button type="button" className={`composer-fab ${isHidden ? "show" : ""}`}
-                    onClick={() => setIsHidden(false)}>
-                메일 작성
-            </button>
 
             {/* 이미지 생성 모달 */}
             <ImageModal

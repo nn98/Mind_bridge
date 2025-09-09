@@ -1,3 +1,4 @@
+// src/components/admin/components/AdminStats.js
 const AdminStats = ({ totalUsers, totalPosts }) => {
     return (
         <div className="admin-stats">
