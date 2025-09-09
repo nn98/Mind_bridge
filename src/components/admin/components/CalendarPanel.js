@@ -43,14 +43,14 @@ const CalendarPanel = ({date, setDate}) => {
     const [selectedDayCount, setSelectedDayCount] = useState(0);
     const [todayVisitors, setTodayVisitors] = useState(0);
 
-    // 주간 범위
+    // 📌 주간 범위 계산
     useEffect(() => {
         const start = safeDate.startOf("week");
         const end = start.add(6, "day");
         setWeekRange({start, end});
     }, [safeDate]);
 
-    // 주간 상담/접속 데이터
+    // 📌 주간 상담/접속 데이터
     useEffect(() => {
         if (!weekRange.start || !weekRange.end) return;
 
@@ -59,7 +59,6 @@ const CalendarPanel = ({date, setDate}) => {
         const selectedIso = safeDate.format("YYYY-MM-DD");
 
         const fetchWeekly = async () => {
-<<<<<<< HEAD
             const [{data: csRes}, {data: vsRes}] = await Promise.all([
                 axios.get(`${BACKEND_URL}/api/counselling/stats`, {
                     params: {start: startStr, end: endStr},
@@ -67,16 +66,6 @@ const CalendarPanel = ({date, setDate}) => {
                 }),
                 axios.get(`${BACKEND_URL}/api/visitors/stats`, {
                     params: {start: startStr, end: endStr},
-=======
-            // 1) 상담 주간
-            const [{ data: csRes }, { data: vsRes }] = await Promise.all([
-                axios.get(`${BACKEND_URL}/api/counselling/stats`, { //상담 횟수 엔드 포인트
-                    params: { start: startStr, end: endStr },
-                    withCredentials: true,
-                }),
-                axios.get(`${BACKEND_URL}/api/visitors/stats`, { // 금일 접속자 수 엔드포인트
-                    params: { start: startStr, end: endStr },
->>>>>>> b903e95bc9c412e3374632dab5c24a07bd35bd82
                     withCredentials: true,
                 }),
             ]);
@@ -118,15 +107,18 @@ const CalendarPanel = ({date, setDate}) => {
         });
     }, [weekRange, safeDate]);
 
-    // 오늘 접속자 수
+    // 📌 오늘 접속자 수
     useEffect(() => {
         const fetchToday = async () => {
             const iso = dayjs().format("YYYY-MM-DD");
             try {
-                const {data} = await axios.get(`${BACKEND_URL}/api/visitors/by-date`, {
-                    params: {date: iso},
-                    withCredentials: true,
-                });
+                const {data} = await axios.get(
+                    `${BACKEND_URL}/api/visitors/by-date`,
+                    {
+                        params: {date: iso},
+                        withCredentials: true,
+                    }
+                );
                 setTodayVisitors(Number(data?.count || 0));
             } catch (e) {
                 console.error("금일 접속자 로드 실패:", e);
@@ -148,7 +140,10 @@ const CalendarPanel = ({date, setDate}) => {
             <div className="calendar-panel">
                 {/* 📌 캘린더 박스 */}
                 <div className="admin-card calendar-card" aria-label="calendar">
-                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+                    <LocalizationProvider
+                        dateAdapter={AdapterDayjs}
+                        adapterLocale="ko"
+                    >
                         <DateCalendar
                             value={safeDate}
                             onChange={(newDate) => setDate?.(newDate)}
@@ -157,7 +152,7 @@ const CalendarPanel = ({date, setDate}) => {
                             slotProps={{
                                 day: (ownerState) => ({
                                     ...getMetaForDay(ownerState.day),
-                                    outsideCurrentMonth: ownerState.outsideCurrentMonth, // 📌 전달
+                                    outsideCurrentMonth: ownerState.outsideCurrentMonth,
                                 }),
                             }}
                             sx={{
