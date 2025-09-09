@@ -1,21 +1,29 @@
-// BoardSection.jsx
-import React, {useMemo, useState} from "react";
+// src/components/board/BoardSection.jsx
+import React, {useMemo, useState, useCallback} from "react";
 import {usePosts} from "./hooks/usePosts";
 import BoardControls from "./BoardControls";
 import WriteForm from "./WriteForm";
 import "../../css/board.css";
 import {useAuth} from "../../AuthContext";
 
+/* ---------- 공통 헬퍼 ---------- */
+const vis = (v) => (v || "").toUpperCase();
+const isAdmin = (profile) => (profile?.role || "").toUpperCase() === "ADMIN";
+const isOwner = (post, profile) =>
+    String(post?.userId || post?.authorId) === String(profile?.id);
+const canViewPost = (post, profile) =>
+    vis(post.visibility) === "PUBLIC" || isAdmin(profile) || isOwner(post, profile);
+const canEditPost = (post, profile) => isAdmin(profile) || isOwner(post, profile);
+const visibilityToLabel = (v) =>
+    vis(v) === "PRIVATE" ? "비공개" : vis(v) === "FRIENDS" ? "친구공개" : "공개";
+
 /* ---------- FeaturedPost ---------- */
-const FeaturedPost = ({post, onClose, onEdit, onDelete, canEdit}) => {
+const FeaturedPost = ({post, onClose, onEdit, onDelete, canEdit, canView}) => {
     if (!post) return null;
     const created = (post.createdAt || post.date || "").split("T")[0];
-    const visibilityToLabel = (v) =>
-        v === "private" || v === "PRIVATE"
-            ? "비공개"
-            : v === "friends" || v === "FRIENDS"
-                ? "친구공개"
-                : "공개";
+
+    // 열람권한 없는 경우 본문 마스킹
+    const body = canView ? post.content : "내용은 비공개입니다.";
 
     return (
         <div className="featured-post">
@@ -33,9 +41,9 @@ const FeaturedPost = ({post, onClose, onEdit, onDelete, canEdit}) => {
                 <span>작성자: {post.userNickname || "익명"}</span>
             </div>
 
-            <div className="featured-body">{post.content}</div>
+            <div className="featured-body">{body}</div>
 
-            {canEdit && (
+            {canEdit && canView && (
                 <div className="featured-actions">
                     <button className="post-delete" onClick={() => onDelete?.(post.id)}>
                         삭제
@@ -46,27 +54,19 @@ const FeaturedPost = ({post, onClose, onEdit, onDelete, canEdit}) => {
     );
 };
 
-/* ---------- PostCard (위 파일에서 import 해도 됨) ---------- */
+/* ---------- PostCard ---------- */
 const PostCard = ({post, profile, onEdit, onDelete, onFeature}) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(post.content || "");
     const [saving, setSaving] = useState(false);
 
-    const role = profile?.role?.toUpperCase?.();
-    const canEdit =
-        role === "ADMIN" ||
-        String(post?.userId || post?.authorId) === String(profile?.id);
+    const _canEdit = canEditPost(post, profile);
+    const _canView = canViewPost(post, profile);
 
     const SHOW_MORE_THRESHOLD = 110;
     const isLong = (post?.content || "").trim().length > SHOW_MORE_THRESHOLD;
 
     const created = (post.createdAt || post.date || "").split("T")[0];
-    const visibilityToLabel = (v) =>
-        v === "private" || v === "PRIVATE"
-            ? "비공개"
-            : v === "friends" || v === "FRIENDS"
-                ? "친구공개"
-                : "공개";
 
     const save = async () => {
         if (!editingContent.trim()) {
@@ -98,9 +98,12 @@ const PostCard = ({post, profile, onEdit, onDelete, onFeature}) => {
         }
     };
 
+    // 비공개 가드: 열람권한 없으면 본문은 마스킹, 더보기/수정/삭제 비활성
+    const maskedBody = _canView ? post.content : "내용은 비공개입니다.";
+
     return (
         <div className="post-card">
-            {canEdit && (
+            {_canEdit && _canView && (
                 <button className="post-delete" onClick={remove} aria-label="삭제">
                     x
                 </button>
@@ -122,9 +125,10 @@ const PostCard = ({post, profile, onEdit, onDelete, onFeature}) => {
                 </>
             ) : (
                 <>
-                    <p className="post-content line-clamp-2">{post.content}</p>
+                    <p className="post-content line-clamp-2">{maskedBody}</p>
 
-                    {isLong && (
+                    {/* 열람 권한 있는 경우에만 더보기 노출 */}
+                    {isLong && _canView && (
                         <button
                             className="post-more-link"
                             onClick={() => onFeature?.(post)}
@@ -140,7 +144,7 @@ const PostCard = ({post, profile, onEdit, onDelete, onFeature}) => {
           </span>
                     <span>작성자: {post.userNickname || "익명"}</span>
 
-                    {canEdit && !isEditing && (
+                    {_canEdit && _canView && !isEditing && (
                         <button className="post-edit" onClick={() => setIsEditing(true)}>
                             수정
                         </button>
@@ -164,17 +168,20 @@ const BoardSection = () => {
     const [featuredPost, setFeaturedPost] = useState(null);
 
     // 삭제 래퍼: 삭제 성공 시 Featured 닫기
-    const handleDelete = async (id) => {
-        await removePost(id);
-        if (featuredPost?.id === id) setFeaturedPost(null);
-    };
+    const handleDelete = useCallback(
+        async (id) => {
+            await removePost(id);
+            if (featuredPost?.id === id) setFeaturedPost(null);
+        },
+        [removePost, featuredPost]
+    );
 
-    // 필터
+    // 필터: 탭은 '공개/비공개' 분류지만, 비공개 탭에서도 권한 없는 글은 마스킹 처리(목록은 보여줌)
     const filtered = useMemo(() => {
         const matchBoard = (p) =>
             selectedBoard === "general"
-                ? p.visibility === "public" || p.visibility === "PUBLIC"
-                : p.visibility === "private" || p.visibility === "PRIVATE";
+                ? vis(p.visibility) === "PUBLIC"
+                : vis(p.visibility) === "PRIVATE"; // friends가 있다면 여기 로직 보완
         const matchSearch = (p) =>
             (p.content || "")
                 .toLowerCase()
@@ -221,19 +228,16 @@ const BoardSection = () => {
                 />
             )}
 
-            {/* 상단 Featured */}
+            {/* 상단 Featured: 권한 없는 경우 오픈 자체를 막기 보단, 본문 마스킹 */}
             {featuredPost && (
                 <div className="board-featured-wrap">
                     <FeaturedPost
                         post={featuredPost}
                         onClose={() => setFeaturedPost(null)}
                         onEdit={editPost}
-                        onDelete={handleDelete}  // ← 여기!
-                        canEdit={
-                            profile?.role?.toUpperCase?.() === "ADMIN" ||
-                            String(featuredPost?.userId || featuredPost?.authorId) ===
-                            String(profile?.id)
-                        }
+                        onDelete={handleDelete}
+                        canEdit={canEditPost(featuredPost, profile)}
+                        canView={canViewPost(featuredPost, profile)}
                     />
                 </div>
             )}
@@ -251,8 +255,13 @@ const BoardSection = () => {
                             post={post}
                             profile={profile}
                             onEdit={editPost}
-                            onDelete={handleDelete}   // ← 여기!
+                            onDelete={handleDelete}
                             onFeature={(p) => {
+                                // 열람 권한 없는 사용자가 더보기를 눌렀을 때 안내만
+                                if (!canViewPost(p, profile)) {
+                                    alert("비공개 글은 작성자와 관리자만 열람할 수 있습니다.");
+                                    return;
+                                }
                                 setFeaturedPost(p);
                                 requestAnimationFrame(() => {
                                     document
