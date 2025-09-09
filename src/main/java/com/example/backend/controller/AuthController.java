@@ -65,7 +65,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
-        System.out.println("Logout Called");
+        
         jwtUtil.clearJwtCookie(response);
         return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다."));
     }
