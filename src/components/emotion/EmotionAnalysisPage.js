@@ -23,8 +23,8 @@ export default function EmotionAnalysisPage({
         history: analysisHistory, clearHistory, removeHistoryItem, compareWithPrevious,
     } = useEmotionAnalysis();
 
-    // === 추가 기능들(전체화면/다크모드 제외) ===
-    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+    // === 추가 상태(로직 변경 없음) ===
+    const [showAdvancedOptions] = useState(true); // 고급 옵션은 항상 표시
     const [analysisDepth, setAnalysisDepth] = useState('standard'); // standard, deep, quick
     const [focusArea, setFocusArea] = useState('overall'); // overall, relationships, work, personal
     const [textLength, setTextLength] = useState(0);
@@ -72,189 +72,154 @@ export default function EmotionAnalysisPage({
         handleAnalyze(options);
     };
 
-    // 텍스트 통계 계산
+    // 텍스트 통계 계산(없어도 0으로 표시)
     const textStats = useMemo(() => {
         if (!text) return {words: 0, sentences: 0, avgWordsPerSentence: 0};
-        const words = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
         const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
         const avgWordsPerSentence = sentences > 0 ? Math.round(words / sentences) : 0;
         return {words, sentences, avgWordsPerSentence};
     }, [text]);
 
-    // 프리셋 칩
-    const PresetChips = useMemo(() => {
-        if (text || isLoading) return null;
-        return (
-            <div className="ea-presets">
-                {presets.map((p) => (
-                    <button
-                        key={p.label}
-                        type="button"
-                        className="ea-chip"
-                        onClick={() => setText(p.text)}
-                        aria-label={`${p.label} 예시 적용`}
-                    >
-                        {p.label}
-                    </button>
-                ))}
-            </div>
-        );
-    }, [presets, text, isLoading, setText]);
+    // 퍼센트 포맷(0~1 또는 0~100 입력 모두 대응, 필요 시 AnalysisCard에서 재사용 가능)
+    const fmtPct = (v) => {
+        if (v == null || isNaN(v)) return '0%';
+        const n = Number(v);
+        const pct = n <= 1 ? n * 100 : n;
+        const rounded = Math.round(pct * 10) / 10;
+        return `${rounded.toFixed(1)}%`;
+    };
 
-    // 고급 옵션 패널
-    const AdvancedOptionsPanel = useMemo(() => {
-        if (!showAdvancedOptions || isLoading) return null;
-        return (
-            <div className="ea-advanced-panel">
-                <div className="ea-option-group">
-                    <label className="ea-option-label">분석 깊이</label>
-                    <select
-                        value={analysisDepth}
-                        onChange={(e) => setAnalysisDepth(e.target.value)}
-                        className="ea-select"
-                    >
-                        <option value="quick">빠른 분석</option>
-                        <option value="standard">표준 분석</option>
-                        <option value="deep">심화 분석</option>
-                    </select>
-                </div>
-
-                <div className="ea-option-group">
-                    <label className="ea-option-label">분석 초점</label>
-                    <select
-                        value={focusArea}
-                        onChange={(e) => setFocusArea(e.target.value)}
-                        className="ea-select"
-                    >
-                        <option value="overall">전체적</option>
-                        <option value="relationships">인간관계</option>
-                        <option value="work">업무/학업</option>
-                        <option value="personal">개인적</option>
-                    </select>
-                </div>
-
-                <div className="ea-option-group">
-                    <label className="ea-checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={showWordCloud}
-                            onChange={(e) => setShowWordCloud(e.target.checked)}
-                            className="ea-checkbox"
-                        />
-                        워드클라우드 포함
-                    </label>
-                </div>
-            </div>
-        );
-    }, [showAdvancedOptions, isLoading, analysisDepth, focusArea, showWordCloud]);
-
-    // 텍스트 통계 패널
-    const TextStatsPanel = useMemo(() => {
-        if (!text) return null;
-        return (
-            <div className="ea-stats-panel">
-                <div className="ea-stats-item">
-                    <span className="ea-stats-label">글자수</span>
-                    <span className="ea-stats-value">{textLength}</span>
-                </div>
-                <div className="ea-stats-item">
-                    <span className="ea-stats-label">단어수</span>
-                    <span className="ea-stats-value">{textStats.words}</span>
-                </div>
-                <div className="ea-stats-item">
-                    <span className="ea-stats-label">문장수</span>
-                    <span className="ea-stats-value">{textStats.sentences}</span>
-                </div>
-                <div className="ea-stats-item">
-                    <span className="ea-stats-label">평균 단어/문장</span>
-                    <span className="ea-stats-value">{textStats.avgWordsPerSentence}</span>
-                </div>
-            </div>
-        );
-    }, [text, textLength, textStats]);
-
-    // 툴바 (다크모드/전체화면 버튼 제거)
-    const Toolbar = useMemo(() => (
-        <div className="ea-toolbar">
-            <div className="ea-toolbar-group">
+    // 프리셋 칩(사이드바)
+    const PresetChips = useMemo(() => (
+        <div className="ea-presets">
+            {presets.map((p) => (
                 <button
+                    key={p.label}
                     type="button"
-                    className={`ea-toolbar-btn ${showAdvancedOptions ? 'active' : ''}`}
-                    onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                    title="고급 옵션"
-                >
-                    ⚙️
-                </button>
-
-                <button
-                    type="button"
-                    className="ea-toolbar-btn"
-                    onClick={reset}
-                    title="초기화"
+                    className="ea-chip"
+                    onClick={() => setText(p.text)}
+                    aria-label={`${p.label} 예시 적용`}
                     disabled={isLoading}
                 >
-                    🔄
+                    {p.label}
                 </button>
+            ))}
+        </div>
+    ), [presets, isLoading, setText]);
+
+    // 고급 옵션 패널(오른쪽 하단에 텍스트 링크 "초기화")
+    const AdvancedOptionsPanel = useMemo(() => (
+        <div className={`ea-advanced-panel ${showAdvancedOptions ? '' : 'is-collapsed'}`}>
+            <div className="ea-option-group">
+                <label className="ea-option-label">분석 깊이</label>
+                <select
+                    value={analysisDepth}
+                    onChange={(e) => setAnalysisDepth(e.target.value)}
+                    className="ea-select"
+                    disabled={isLoading}
+                >
+                    <option value="quick">빠른 분석</option>
+                    <option value="standard">표준 분석</option>
+                    <option value="deep">심화 분석</option>
+                </select>
             </div>
 
-            {result && (
-                <div className="ea-toolbar-group">
-                    <button
-                        type="button"
-                        className="ea-toolbar-btn"
-                        onClick={() => navigator.clipboard.writeText(JSON.stringify(result, null, 2))}
-                        title="결과 복사"
-                    >
-                        📋
-                    </button>
+            <div className="ea-option-group">
+                <label className="ea-option-label">분석 초점</label>
+                <select
+                    value={focusArea}
+                    onChange={(e) => setFocusArea(e.target.value)}
+                    className="ea-select"
+                    disabled={isLoading}
+                >
+                    <option value="overall">전체적</option>
+                    <option value="relationships">인간관계</option>
+                    <option value="work">업무/학업</option>
+                    <option value="personal">개인적</option>
+                </select>
+            </div>
 
-                    <button
-                        type="button"
-                        className="ea-toolbar-btn"
-                        onClick={() => {
-                            const data = new Blob([JSON.stringify(result, null, 2)], {type: 'application/json'});
-                            const url = URL.createObjectURL(data);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = `emotion-analysis-${new Date().toISOString().slice(0, 10)}.json`;
-                            link.click();
-                            URL.revokeObjectURL(url);
-                        }}
-                        title="결과 다운로드"
-                    >
-                        💾
-                    </button>
-                </div>
-            )}
+            <div className="ea-option-group">
+                <label className="ea-checkbox-label">
+                    <input
+                        type="checkbox"
+                        checked={showWordCloud}
+                        onChange={(e) => setShowWordCloud(e.target.checked)}
+                        className="ea-checkbox"
+                        disabled={isLoading}
+                    />
+                    워드클라우드 포함
+                </label>
+            </div>
+
+            {/* 오른쪽 하단 "초기화" 텍스트 링크 */}
+            <div className="ea-inline-reset">
+                <button
+                    type="button"
+                    className="ea-reset-link"
+                    onClick={reset}
+                    disabled={isLoading}
+                    aria-label="설정과 입력을 초기화"
+                >
+                    초기화
+                </button>
+            </div>
         </div>
-    ), [showAdvancedOptions, isLoading, result, reset]);
+    ), [showAdvancedOptions, isLoading, analysisDepth, focusArea, showWordCloud, reset]);
 
-    // 모달 표시 여부
+    // 텍스트 통계 패널(항상 표시)
+    const TextStatsPanel = useMemo(() => (
+        <div className="ea-stats-panel">
+            <div className="ea-stats-item">
+                <span className="ea-stats-label">글자수</span>
+                <span className="ea-stats-value">{textLength}</span>
+            </div>
+            <div className="ea-stats-item">
+                <span className="ea-stats-label">단어수</span>
+                <span className="ea-stats-value">{textStats.words}</span>
+            </div>
+            <div className="ea-stats-item">
+                <span className="ea-stats-label">문장수</span>
+                <span className="ea-stats-value">{textStats.sentences}</span>
+            </div>
+            <div className="ea-stats-item">
+                <span className="ea-stats-label">평균 단어/문장</span>
+                <span className="ea-stats-value">{textStats.avgWordsPerSentence}</span>
+            </div>
+        </div>
+    ), [textLength, textStats]);
+
     const isModal = mode === 'modal';
     const isVisible = isModal ? !!isOpen : true;
     if (!isVisible) return null;
 
     const content = (
         <div className="emotion-container" aria-live="polite">
-            {Toolbar}
-            {PresetChips}
-            {AdvancedOptionsPanel}
-            {TextStatsPanel}
+            {/* 왼쪽 사이드바 */}
+            <aside className="ea-sidebar" aria-label="설정 및 통계 사이드바">
+                {PresetChips}
+                {AdvancedOptionsPanel}
+                {TextStatsPanel}
+            </aside>
 
-            <AnalysisCard
-                text={text}
-                setText={setText}
-                isLoading={isLoading}
-                onAnalyze={showAdvancedOptions ? handleEnhancedAnalyze : handleAnalyze}
-                result={result}
-                onClose={handleClose}
-                showCloseButton={isModal}
-                analyzeDisabled={analyzeDisabled}
-                history={analysisHistory}
-                onClearHistory={clearHistory}
-                onRemoveHistory={removeHistoryItem}
-                compareWithPrevious={compareWithPrevious}
-            />
+            {/* 오른쪽 메인: 분석기만 */}
+            <div className="ea-main">
+                <AnalysisCard
+                    text={text}
+                    setText={setText}
+                    isLoading={isLoading}
+                    onAnalyze={handleEnhancedAnalyze}
+                    result={result}
+                    onClose={handleClose}
+                    showCloseButton={isModal}
+                    analyzeDisabled={analyzeDisabled}
+                    history={analysisHistory}
+                    onClearHistory={clearHistory}
+                    onRemoveHistory={removeHistoryItem}
+                    compareWithPrevious={compareWithPrevious}
+                />
+            </div>
         </div>
     );
 

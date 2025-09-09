@@ -1,3 +1,4 @@
+// src/components/emotion/components/AnalysisCard.jsx
 import React, {useMemo, useState} from 'react';
 import ResultSection from './ResultSection';
 
@@ -29,11 +30,11 @@ export default function AnalysisCard({
 
     // 지배 감정 KPI를 위한 이모지/라벨 매핑
     const EMOJI = {
-        happiness: '😊',
-        sadness: '😢',
-        anger: '😡',
-        anxiety: '😟',
-        calmness: '😌',
+        happiness: '🟨',
+        sadness: '🟦',
+        anger: '🟥',
+        anxiety: '🟪',
+        calmness: '🟩',
     };
     const LABEL = {
         happiness: '행복',
@@ -43,11 +44,13 @@ export default function AnalysisCard({
         calmness: '평온',
     };
 
-    const diff = useMemo(() => (typeof compareWithPrevious === 'function' ? compareWithPrevious() : null), [compareWithPrevious]);
+    const diff = useMemo(
+        () => (typeof compareWithPrevious === 'function' ? compareWithPrevious() : null),
+        [compareWithPrevious]
+    );
 
-    const disabled = typeof analyzeDisabled === 'boolean'
-        ? analyzeDisabled
-        : (isLoading || !text?.trim());
+    const disabled =
+        typeof analyzeDisabled === 'boolean' ? analyzeDisabled : isLoading || !text?.trim();
 
     return (
         <div className="analysis-card">
@@ -77,11 +80,17 @@ export default function AnalysisCard({
                     className="analysis-button"
                     type="button"
                 >
-                    {isLoading ? <span className="typing-dots" aria-live="polite">AI 응답 생성 중</span> : '마음 분석하기'}
+                    {isLoading ? (
+                        <span className="typing-dots" aria-live="polite">
+              AI 응답 생성 중
+            </span>
+                    ) : (
+                        '마음 분석하기'
+                    )}
                 </button>
 
-                {/* 히스토리 토글(선택) */}
-                {history?.length > 0 && (
+                {/* 히스토리 토글: 열려 있거나 항목이 있을 때는 항상 보이도록 */}
+                {(openHistory || (history?.length ?? 0) > 0) && (
                     <button
                         type="button"
                         className="history-toggle"
@@ -100,11 +109,13 @@ export default function AnalysisCard({
                 </div>
             )}
 
-            {/* KPI 헤더 */}
+            {/* KPI 헤더: 가로 배치 */}
             {result && (
-                <div className="kpi-header" role="region" aria-label="분석 요약">
+                <div className="kpi-header kpi-horizontal" role="region" aria-label="분석 요약">
                     <div className="kpi-dominant">
-                        <span className="kpi-emoji" aria-hidden>{EMOJI[result.dominantEmotion] || '🧠'}</span>
+            <span className="kpi-emoji" aria-hidden>
+              {EMOJI[result.dominantEmotion] || '🧠'}
+            </span>
                         <div className="kpi-texts">
                             <div className="kpi-label">지배 감정</div>
                             <div className="kpi-value">
@@ -126,15 +137,18 @@ export default function AnalysisCard({
             {result && diff && (
                 <div className="diff-strip" role="region" aria-label="이전 결과와 비교">
                     {Object.entries(result.percentages).map(([k, v]) => {
-                        const d = diff[k] ?? 0;
+                        const dRaw = Number(diff[k] ?? 0);
+                        const d = Math.round(dRaw * 10) / 10;       // 소수 1자리
+                        const now = Math.round(Number(v) * 10) / 10; // 소수 1자리
                         const sign = d > 0 ? '+' : d < 0 ? '−' : '±';
                         return (
-                            <div className="diff-item" key={k}>
+                            <div className="diff-item" key={k} title={`${LABEL[k] || k} 변화`}>
                                 <span className="diff-key">{LABEL[k] || k}</span>
                                 <span className={`diff-val ${d > 0 ? 'up' : d < 0 ? 'down' : ''}`}>
-                  {sign}{Math.abs(d)}
-                </span>
-                                <span className="diff-now">{v}%</span>
+            {sign}{Math.abs(d)}%
+          </span>
+                                <span className="diff-sep">→</span>
+                                <span className="diff-now">{now}%</span>
                             </div>
                         );
                     })}
@@ -162,10 +176,13 @@ export default function AnalysisCard({
                         {history.map((h) => (
                             <li className="history-item" key={h.createdAt}>
                                 <div className="history-main">
-                                    <span className="history-emoji" aria-hidden>{EMOJI[h.dominantEmotion] || '🧠'}</span>
+                  <span className="history-emoji" aria-hidden>
+                    {EMOJI[h.dominantEmotion] || '🧠'}
+                  </span>
                                     <div className="history-texts">
                                         <div className="history-title">
-                                            {LABEL[h.dominantEmotion] || h.dominantEmotion} · {h.percentages?.[h.dominantEmotion] ?? 0}%
+                                            {LABEL[h.dominantEmotion] || h.dominantEmotion} ·{' '}
+                                            {h.percentages?.[h.dominantEmotion] ?? 0}%
                                         </div>
                                         <div className="history-sub">
                                             {new Date(h.createdAt).toLocaleString()} — {h.text?.slice(0, 36) || ''}

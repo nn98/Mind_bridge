@@ -153,20 +153,49 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         }
     }, [RECENTS_KEY, DRAFT_KEY, SNIPPET_KEY]);
 
+    /* ───── 서명 포함 메시지 구성 (관리자만) ───── */
+    const [useSignature, setUseSignature] = useState(true);
+    const buildMessageWithSignature = () => {
+        // 관리자 & 토글 ON 일 때만 서명 삽입
+        if (!(isAdmin && useSignature)) return message;
+
+        const sigHtml = DEFAULT_SIGNATURE(userInfo).replace(/\n/g, "<br/>");
+
+        // 단순 중복 방지(원하면 더 정교하게 개선 가능)
+        const lower = (message || "").toLowerCase();
+        const hasSignature =
+            lower.includes("--") &&
+            (lower.includes("mindbridge") || lower.includes(userInfo?.email?.toLowerCase() || ""));
+
+        return hasSignature ? message : `${message || ""}<br/><br/>${sigHtml}`;
+    };
+
     /* ───── 전송 로직 (원본 방식 유지) ───── */
     const doSend = async (override = null) => {
         try {
             setIsSending(true);
 
+            // 관리자만 서명 포함
+            const msgToSend = buildMessageWithSignature();
+
             if (override) {
+                // override 경로는 FormData를 새로 만들고 message 덮어씌움
                 const fd = new FormData(form.current);
                 if (override.to) fd.set("to", override.to);
                 if (override.cc !== undefined) fd.set("cc", override.cc);
                 if (override.bcc !== undefined) fd.set("bcc", override.bcc);
+                fd.set("message", msgToSend); // ✅ 서명 반영
                 await sendEmailForm(fd);
             } else {
-                // ✅ 원래 로직 그대로 유지
-                await sendEmailForm(form.current);
+                // ✅ 기존 로직 유지: form.current를 그대로 전달
+                // 다만 전달 직전 hidden textarea(name="message")만 잠시 서명 포함값으로 바꿨다가 복원
+                const formEl = form.current;
+                const msgEl = formEl?.querySelector('textarea[name="message"]');
+                const original = msgEl ? msgEl.value : "";
+
+                if (msgEl) msgEl.value = msgToSend;
+                await sendEmailForm(formEl);
+                if (msgEl) msgEl.value = original; // 복원
             }
 
             // 통계 + 최근 수신자
@@ -256,19 +285,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         }
     };
 
-    /* ───── 작업공간 로직(사용자별 저장) ───── */
-    const [useSignature, setUseSignature] = useState(true);
-
-    const applyTemplate = (tpl) => {
-        if (!(isAdmin && isLoggedIn)) return; // 🔐 어드민 전용
-        setSubject(tpl.subject);
-        const baseBody = tpl.body.replace(/\n/g, "<br/>");
-        const withSig = useSignature
-            ? `${baseBody}<br/><br/>${DEFAULT_SIGNATURE(userInfo).replace(/\n/g, "<br/>")}`
-            : baseBody;
-        setMessage(withSig);
-    };
-
+    /* ───── 임시저장/스니펫 로직 ───── */
     const saveDraft = () => {
         const id = (crypto?.randomUUID && crypto.randomUUID()) || `d_${Date.now()}_${Math.random()}`;
         const draft = {id, owner: userKey, toEmail, subject, html: message, savedAt: Date.now()};
@@ -289,13 +306,6 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
         const next = drafts.filter((x) => x.id !== id);
         setDrafts(next);
         localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
-    };
-
-    const pushRecent = (mail) => {
-        setToEmail(mail);
-        const next = [mail, ...recentRecipients.filter((m) => m !== mail)].slice(0, 12);
-        setRecentRecipients(next);
-        localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
     };
 
     const addSnippet = () => {
@@ -343,7 +353,15 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                                 <div className="ews-card-head">템플릿 (관리자 전용)</div>
                                 <div className="ews-templates">
                                     {TEMPLATES.map((tpl) => (
-                                        <button key={tpl.id} className="ews-chip" onClick={() => applyTemplate(tpl)}>
+                                        <button key={tpl.id} className="ews-chip" onClick={() => {
+                                            // 템플릿 적용도 관리자일 때만 서명 반영
+                                            setSubject(tpl.subject);
+                                            const baseBody = tpl.body.replace(/\n/g, "<br/>");
+                                            const withSig = isAdmin && useSignature
+                                                ? `${baseBody}<br/><br/>${DEFAULT_SIGNATURE(userInfo).replace(/\n/g, "<br/>")}`
+                                                : baseBody;
+                                            setMessage(withSig);
+                                        }}>
                                             {tpl.title}
                                         </button>
                                     ))}
@@ -356,7 +374,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                             <div className="ews-card-head">최근 수신자</div>
                             <div className="ews-list">
                                 {recentRecipients.map((mail) => (
-                                    <button key={mail} className="ews-list-item" onClick={() => pushRecent(mail)}>
+                                    <button key={mail} className="ews-list-item" onClick={() => setToEmail(mail)}>
                                         {mail}
                                     </button>
                                 ))}
@@ -377,8 +395,8 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                                 {drafts.map((d) => (
                                     <div key={d.id} className="ews-draft-row">
                                         <button className="ews-draft-load" onClick={() => loadDraft(d)}>
-                                            {d.subject || "(제목 없음)"} <span
-                                            className="ews-dim">• {new Date(d.savedAt).toLocaleString()}</span>
+                                            {d.subject || "(제목 없음)"}{" "}
+                                            <span className="ews-dim">• {new Date(d.savedAt).toLocaleString()}</span>
                                         </button>
                                         <button className="ews-draft-del" onClick={() => deleteDraft(d.id)}>삭제</button>
                                     </div>
@@ -386,27 +404,32 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                             </div>
                         </section>
 
-                        {/* 서명 토글 */}
-                        <section className="ews-card">
-                            <div className="ews-card-head">서명</div>
-                            <label className="ews-toggle">
-                                <input type="checkbox" checked={useSignature}
-                                       onChange={(e) => setUseSignature(e.target.checked)}/>
-                                <span>템플릿 적용 시 서명 본문에 삽입</span>
-                            </label>
-                            {useSignature && <pre className="ews-signature-preview">{DEFAULT_SIGNATURE(userInfo)}</pre>}
-                        </section>
+                        {/* 서명 토글/미리보기 (관리자만 노출) */}
+                        {isAdmin && isLoggedIn && (
+                            <section className="ews-card">
+                                <div className="ews-card-head">서명</div>
+                                <label className="ews-toggle">
+                                    <input
+                                        type="checkbox"
+                                        checked={useSignature}
+                                        onChange={(e) => setUseSignature(e.target.checked)}
+                                    />
+                                    <span>템플릿/전송 시 서명 삽입</span>
+                                </label>
+                                {useSignature &&
+                                    <pre className="ews-signature-preview">{DEFAULT_SIGNATURE(userInfo)}</pre>}
+                            </section>
+                        )}
                     </aside>
 
                     {/* 중앙 패널 */}
                     <main className="ews-center">
-                        {/* 히어로: 안내 + 위쪽 받는사람/CC/BCC + Undo 옵션 */}
+                        {/* 히어로 + 상단 받는사람/CC/BCC */}
                         <section className="ews-hero">
                             <h2>이메일 작업공간</h2>
                             <h4>보내는 사람/받는 사람은 아래 메일창에서도 확인 및 수정할 수 있어요.</h4>
                             <p>mindbridge2020@gmail.com 해당 메일은 문의 전용 메일입니다. 보내고 싶은 메일을 입력해주세요.</p>
 
-                            {/* 상단 입력들: 받는 사람 / CC / BCC */}
                             <div className="ews-actions">
                                 <input
                                     className="ews-input"
@@ -489,7 +512,7 @@ function EmailComposer({customUser, isCustomLoggedIn}) {
                   </span>
                                 </div>
 
-                                {/* 받는 사람 (인라인에서도 입력 가능 — toEmail과 동기화) */}
+                                {/* 받는 사람 */}
                                 <div className="field-row">
                                     <label htmlFor="to" className="field-label">받는 사람</label>
                                     <input

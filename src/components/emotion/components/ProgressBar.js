@@ -19,11 +19,11 @@ export default function ProgressBar({emotion, value}) {
         calmness: '#22c55e',  // 초록
     };
     const EMOJI = {
-        happiness: '😊',
-        sadness: '😢',
-        anger: '😡',
-        anxiety: '😟',
-        calmness: '😌',
+        happiness: '🟨',
+        sadness: '🟦',
+        anger: '🟥',
+        anxiety: '🟪',
+        calmness: '🟩',
     };
 
     return (

@@ -226,6 +226,7 @@ body {
     padding: 10px;
     white-space: pre-wrap;
     color: var(--text-weak);
+    font-family: 'pretendard', 'sans-serif';
 }
 
 /* 중앙 패널 */

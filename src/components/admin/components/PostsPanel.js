@@ -183,8 +183,15 @@ const PostsPanel = () => {
     };
 
     const onKeyDown = (e) => {
-        if (e.key === "Enter") onSearchSubmit(e);
-    };
+              // IME(한글) 조합 중 Enter는 무시
+                 if (e.isComposing) return;
+              if (e.key === "Enter") {
+                      // 기본 제출 방지 후, 표준 submit 트리거
+                          e.preventDefault();
+                     // 가장 가까운 form을 찾아 안전하게 제출 (버튼 클릭과 동일 라우팅)
+                          e.currentTarget.form?.requestSubmit?.();
+                  }
+          };
 
     const onDelete = (postId) => {
         const toastId = toast.info(
