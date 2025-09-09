@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,8 +26,10 @@ import com.example.backend.dto.chat.MessageResponse;
 import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.entity.CounsellingEntity;
 import com.example.backend.service.ChatService;
 import com.example.backend.service.ChatSessionService;
+import com.example.backend.service.CounsellingService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -41,6 +44,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatController {
+
+    @Autowired
+    private CounsellingService counsellingService;
 
     private final ChatSessionService chatSessionService;
     private final ChatService chatService;
@@ -61,17 +67,19 @@ public class ChatController {
     }
 
     @PostMapping("/analysis/save")
-    public ResponseEntity<Map<String, Object>> receiveAnalysis(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<CounsellingEntity>receiveAnalysis(@RequestBody Map<String, Object> payload) {
         System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
         System.out.println("user_name: " + payload.get("name"));
         System.out.println("depression: " + payload.get("email"));
         System.out.println("summary: " + payload.get("summary"));
         System.out.println("riskFactors: " + payload.get("riskFactors"));
         System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
-        System.out.println("clientEmotion: " + payload.get("clientEmotion"));
+        System.out.println("summary_emotion: " + payload.get("clientEmotion"));
         System.out.println("-----------------------------------------------------");
 
-        return ResponseEntity.ok(payload); // 확인용 응답
+        CounsellingEntity saved = counsellingService.saveAnalysis(payload);
+
+        return ResponseEntity.ok(saved);
     }
 
     /**
@@ -120,7 +128,6 @@ public class ChatController {
     }
 
     // 기존 세션 관련 엔드포인트들...
-
     /**
      * 채팅 세션 저장 (기존 방식 유지)
      */
@@ -193,7 +200,7 @@ public class ChatController {
 
     @GetMapping("/test/new")
     public ResponseEntity<Object> getNewModelResult(HttpServletRequest request) {
-            Map<String, Object> payload = new LinkedHashMap<>();
+        Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("text",
                 "상담사: 안녕하세요, 오늘은 어떤 어려움이 있으신가요?\n내담자: 최근에 회사에서 성과를 내지 못해 불안해요.\n상담사: 구체적으로 어떤 상황이었나요?\n내담자: 보고서를 제때 제출하지 못해서 상사에게 크게 혼났습니다.\n상담사: 그 이후로 어떤 변화가 있었나요?\n내담자: 계속 눈치 보게 되고, 동료들과도 말하기가 힘들어졌어요.\n상담사: 대인관계가 위축되신 거군요. 수면은 어떠신가요?\n내담자: 잘 못 자요. 잠들기도 어렵고, 새벽에 자주 깨요.\n상담사: 수면 부족이 일상에 영향을 주고 있나요?\n내담자: 네, 집중이 안 되고 작은 실수도 자주 합니다.\n상담사: 혹시 위험한 생각까지 이어진 적이 있나요?\n내담자: 솔직히 그냥 다 포기하고 싶다는 생각이 든 적 있어요.\n상담사: 그런 생각이 드실 때 스스로 어떻게 대처하시나요?\n내담자: 운동을 하거나 음악을 듣습니다. 그러면 조금 나아집니다.\n상담사: 좋은 방법이네요. 최근에 기분이 나아졌던 순간도 있나요?\n내담자: 지난주에 친구와 산책했을 때 잠깐 편안했어요.\n상담사: 아주 좋은 경험이에요. 이런 활동을 조금씩 늘려가면 도움이 될 수 있습니다.\n내담자: 네, 앞으로도 친구들과 더 자주 만나려고 해요");
         payload.put("max_new_tokens", 512);
