@@ -83,6 +83,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰이 아예 없으면 패스(보호/공개는 Security 매칭/메소드 보안에서 결정)
         if (token == null || token.isBlank()) {
+            if (log.isTraceEnabled()) {
+                log.trace("[JWT] No token present → pass through");
+            }
             filterChain.doFilter(request, response);
             return;
         }
