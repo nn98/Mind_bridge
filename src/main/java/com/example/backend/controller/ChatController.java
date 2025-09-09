@@ -63,9 +63,12 @@ public class ChatController {
     @PostMapping("/analysis/save")
     public ResponseEntity<Map<String, Object>> receiveAnalysis(@RequestBody Map<String, Object> payload) {
         System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
+        System.out.println("user_name: " + payload.get("name"));
+        System.out.println("depression: " + payload.get("email"));
         System.out.println("summary: " + payload.get("summary"));
         System.out.println("riskFactors: " + payload.get("riskFactors"));
         System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
+        System.out.println("clientEmotion: " + payload.get("clientEmotion"));
         System.out.println("-----------------------------------------------------");
 
         return ResponseEntity.ok(payload); // 확인용 응답
