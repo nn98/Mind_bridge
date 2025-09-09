@@ -568,7 +568,7 @@ body {
 .consult-end {
     height: 42px;
     padding: 0 14px;
-    background: #198754;
+    background: #a78bfa;
     color: white;
     border-radius: 12px;
     font-weight: 700;
@@ -577,7 +577,6 @@ body {
 }
 
 .consult-end:hover {
-    background: #157347;
     transform: translateY(-2px);
 }
 
