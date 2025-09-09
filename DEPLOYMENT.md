@@ -5,7 +5,7 @@
 - JWT: jwt.secret(Base64), jwt.expiration-ms
 - JWT 쿠키: jwt.cookie.name, secure, samesite(None), path(/), domain(옵션), max-age-seconds
 - OpenAI: openai.api.key, openai.api.url
-- OAuth: google.rest.api.key/secret/redirect.uri, kakao.rest.api.key/client-secret/redirect.uri
+- OAuth: oauth.google.client-id/secret/redirect.uri, oauth.kakao.client-id/client-secret/redirect.uri
 - 프런트 리다이렉트: app.front.success-url, app.front.error-url
 
 ## 런타임

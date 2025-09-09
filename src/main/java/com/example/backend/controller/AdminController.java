@@ -37,6 +37,8 @@ public class AdminController {
                 .nickname(u.getNickname())
                 .email(u.getEmail())
                 .phoneNumber(u.getPhoneNumber())
+                .gender(u.getGender())
+                .age(u.getAge())
                 .build()
             )
             .toList();

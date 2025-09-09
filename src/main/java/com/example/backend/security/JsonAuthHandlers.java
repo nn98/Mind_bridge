@@ -24,8 +24,9 @@ public class JsonAuthHandlers {
 		return (request, response, authException) -> {
 			ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
 			pd.setTitle("Unauthorized");
-			pd.setDetail(authException != null && authException.getMessage() != null
-				? authException.getMessage() : "Authentication required");
+			String detail = (authException != null && authException.getMessage() != null)
+				? authException.getMessage() : "Authentication required";
+			pd.setDetail(detail);
 			pd.setInstance(java.net.URI.create(request.getRequestURI()));
 			writeJson(response, om, pd, HttpStatus.UNAUTHORIZED.value());
 		};
@@ -36,17 +37,18 @@ public class JsonAuthHandlers {
 		return (request, response, accessDeniedException) -> {
 			ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
 			pd.setTitle("Forbidden");
-			pd.setDetail(accessDeniedException != null && accessDeniedException.getMessage() != null
-				? accessDeniedException.getMessage() : "Access denied");
+			String detail = (accessDeniedException != null && accessDeniedException.getMessage() != null)
+				? accessDeniedException.getMessage() : "Access denied";
+			pd.setDetail(detail);
 			pd.setInstance(java.net.URI.create(request.getRequestURI()));
 			writeJson(response, om, pd, HttpStatus.FORBIDDEN.value());
 		};
 	}
 
-	/** 공통 JSON 쓰기 유틸 */
-	private static void writeJson(HttpServletResponse res, ObjectMapper om, ProblemDetail pd, int status) throws IOException {
+	/** 공통 JSON 쓰기 유틸 - 공개(static)로 승격 */
+	public static void writeJson(HttpServletResponse res, ObjectMapper om, ProblemDetail pd, int status) throws IOException {
 		res.setStatus(status);
-		res.setContentType("application/problem+json"); // RFC 7807 권장 타입
+		res.setContentType("application/problem+json");
 		res.setCharacterEncoding("UTF-8");
 		om.writeValue(res.getWriter(), pd);
 	}

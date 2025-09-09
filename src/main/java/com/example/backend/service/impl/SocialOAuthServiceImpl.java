@@ -37,23 +37,23 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	private final RestTemplate restTemplate;
 
 	// ===== Google props =====
-	@Value("${google.rest.api.key}")
+	@Value("${oauth.google.client-id}")
 	private String googleClientId;
 
-	@Value("${google.redirect.uri}")
+	@Value("${oauth.google.redirect-uri}")
 	private String googleRedirectUri;
 
-	@Value("${google.rest.api.secret}")
+	@Value("${oauth.google.client-secret}")
 	private String googleClientSecret;
 
 	// ===== Kakao props =====
-	@Value("${kakao.rest.api.key}")
+	@Value("${oauth.kakao.client-id}")
 	private String kakaoClientId;
 
-	@Value("${kakao.client-secret:}")
+	@Value("${oauth.kakao.client-secret}")
 	private String kakaoClientSecret;
 
-	@Value("${kakao.redirect.uri}")
+	@Value("${oauth.kakao.redirect-uri}")
 	private String kakaoRedirectUri;
 
 	// ===== Google endpoints =====
