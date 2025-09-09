@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +48,6 @@ public class UserController {
 
     @GetMapping("/availability")
     public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam AvailabilityType type, @RequestParam String value) {
-        
         boolean isAvailable = switch (type) {
             case NICKNAME -> userService.isNicknameAvailable(value);
             case EMAIL    -> userService.isEmailAvailable(value);
@@ -56,10 +56,12 @@ public class UserController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<Profile> getAccount(@AuthenticationPrincipal(expression = "username") String email) {
-        // String email = securityUtil.requirePrincipalEmail(authentication);
-        log.info("Get account for email {}", email);
-        Profile profile = userService.getUserByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+    public ResponseEntity<Profile> getAccount(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException("Authentication required");
+        }
+        log.info("Get account for email {}", authentication.getName());
+        Profile profile = userService.getUserByEmail(authentication.getName()).orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")

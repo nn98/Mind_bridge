@@ -15,8 +15,8 @@
 - openai.api.url: 모델 엔드포인트 URL
 
 ## OAuth
-- google.rest.api.key / google.rest.api.secret / google.redirect.uri
-- kakao.rest.api.key / kakao.client-secret / kakao.redirect.uri
+- oauth.google.client-id / oauth.google.client-secret / oauth.google.redirect-uri
+- oauth.kakao.client-id / kakao.client-secret / oauth.kakao.redirect-uri
 
 ## CORS
 - 허용 Origin: http://localhost:3000, 운영 프런트 도메인

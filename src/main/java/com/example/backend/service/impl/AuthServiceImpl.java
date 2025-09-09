@@ -98,9 +98,9 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity authenticateUser(LoginRequest request) {
 		UserEntity user = userRepository.findByEmail(request.getEmail())
-			.orElseThrow(() -> new AuthService.AuthenticationException("이메일 또는 비밀번호가 잘못되었습니다."));
+			.orElseThrow(() -> new com.example.backend.common.error.UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다."));
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-			throw new AuthService.AuthenticationException("이메일 또는 비밀번호가 잘못되었습니다.");
+			throw new com.example.backend.common.error.UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
 		}
 		return user;
 	}

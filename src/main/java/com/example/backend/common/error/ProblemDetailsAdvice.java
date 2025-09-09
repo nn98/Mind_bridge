@@ -31,11 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class ProblemDetailsAdvice {
 
-	/**
-	 * @RequestBody Bean Validation 실패(필드 단위)
-	 * - 상태코드: 422 Unprocessable Entity
-	 * - errors: { fieldName: [message1, message2, ...] }
-	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
 		log.warn("Validation 실패: {}", ex.getMessage());
@@ -47,10 +42,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.unprocessableEntity().body(pd); // 422
 	}
 
-	/**
-	 * @RequestParam / @PathVariable 검증 실패(메서드 파라미터 수준)
-	 * - 상태코드: 400 Bad Request (팀 정책에 따라 422로 통일 가능)
-	 */
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
 		log.warn("ConstraintViolation: {}", ex.getMessage());
@@ -64,10 +55,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.badRequest().body(pd); // 400
 	}
 
-	/**
-	 * 바인딩 실패(@ModelAttribute 등)
-	 * - 상태코드: 400 Bad Request
-	 */
 	@ExceptionHandler(BindException.class)
 	public ResponseEntity<ProblemDetail> handleBind(BindException ex, HttpServletRequest req) {
 		log.warn("Bind 실패: {}", ex.getMessage());
@@ -79,10 +66,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.badRequest().body(pd); // 400
 	}
 
-	/**
-	 * 도메인 충돌(중복 등)
-	 * - 상태코드: 409 Conflict
-	 */
 	@ExceptionHandler(ConflictException.class)
 	public ResponseEntity<ProblemDetail> handleConflict(ConflictException ex, HttpServletRequest req) {
 		log.info("Conflict: {}", ex.getMessage());
@@ -92,10 +75,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(pd); // 409
 	}
 
-	/**
-	 * 리소스 미발견
-	 * - 상태코드: 404 Not Found
-	 */
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<ProblemDetail> handleNotFound(NotFoundException ex, HttpServletRequest req) {
 		log.info("NotFound: {}", ex.getMessage());
@@ -105,10 +84,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd); // 404
 	}
 
-	/**
-	 * 접근 금지(도메인 정책)
-	 * - 상태코드: 403 Forbidden
-	 */
 	@ExceptionHandler(ForbiddenException.class)
 	public ResponseEntity<ProblemDetail> handleForbidden(ForbiddenException ex, HttpServletRequest req) {
 		log.info("Forbidden: {}", ex.getMessage());
@@ -117,11 +92,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd); // 403
 	}
 
-	/**
-	 * 인증 실패(컨트롤러까지 전파된 경우)
-	 * - 상태코드: 401 Unauthorized
-	 * - 주의: Security Filter 단계에서 처리되면 본 핸들러까지 도달하지 않을 수 있음
-	 */
 	@ExceptionHandler({UnauthorizedException.class, AuthenticationException.class})
 	public ResponseEntity<ProblemDetail> handleUnauthorized(RuntimeException ex, HttpServletRequest req) {
 		log.info("Unauthorized: {}", ex.getMessage());
@@ -130,11 +100,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd); // 401
 	}
 
-	/**
-	 * 인가 실패(컨트롤러까지 전파된 경우)
-	 * - 상태코드: 403 Forbidden
-	 * - 주의: Security Filter 단계에서 처리되면 본 핸들러까지 도달하지 않을 수 있음
-	 */
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ProblemDetail> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
 		log.info("AccessDenied: {}", ex.getMessage());
@@ -143,10 +108,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd); // 403
 	}
 
-	/**
-	 * 잘못된 요청 파라미터/상태
-	 * - 상태코드: 400 Bad Request
-	 */
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
 		log.info("BadRequest: {}", ex.getMessage());
@@ -157,11 +118,37 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.badRequest().body(pd); // 400
 	}
 
-	/**
-	 * 최종 안전망
-	 * - 상태코드: 500 Internal Server Error
-	 * - 스택트레이스는 서버 로그에만 기록(민감정보 주의)
-	 */
+	/** 추가: 비즈니스 상태 충돌/불변 위반 등 */
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ProblemDetail> handleIllegalState(IllegalStateException ex, HttpServletRequest req) {
+		log.info("Conflict(IllegalState): {}", ex.getMessage());
+		ProblemDetail pd = ProblemDetailFactory.createConflict(ex.getMessage(), req);
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(pd); // 409
+	}
+
+	/** 추가: 외부 연동 실패(준비용, 실제 적용은 5단계에서 본격화) */
+	@ExceptionHandler(ExternalServiceException.class)
+	public ResponseEntity<ProblemDetail> handleExternal(ExternalServiceException ex, HttpServletRequest req) {
+		log.error("External service error: {}", ex.getMessage());
+		ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_GATEWAY);
+		pd.setTitle("Bad Gateway");
+		pd.setDetail(ex.getMessage());
+		pd.setInstance(URI.create(req.getRequestURI()));
+		return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(pd); // 502
+	}
+
+	/* ! 추가 - 스프링 시큐리티 크리덴셜 누락용 */
+	@ExceptionHandler(org.springframework.security.authentication.AuthenticationCredentialsNotFoundException.class)
+	public ResponseEntity<ProblemDetail> handleAuthCredentialsMissing(
+		org.springframework.security.authentication.AuthenticationCredentialsNotFoundException ex,
+		HttpServletRequest req) {
+		log.info("Unauthorized(credentials-missing): {}", ex.getMessage());
+		ProblemDetail pd = ProblemDetailFactory.createUnauthorized(
+			ex.getMessage() != null ? ex.getMessage() : "Authentication required", req);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd); // 401
+	}
+	/* ! 추가 - 인증 예외 있을 시 안전망 - 인데 방금 수정해서 불필요 */
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, HttpServletRequest req) {
 		log.error("Internal error", ex);
