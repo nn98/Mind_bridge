@@ -59,6 +59,7 @@ const CalendarPanel = ({date, setDate}) => {
         const selectedIso = safeDate.format("YYYY-MM-DD");
 
         const fetchWeekly = async () => {
+<<<<<<< HEAD
             const [{data: csRes}, {data: vsRes}] = await Promise.all([
                 axios.get(`${BACKEND_URL}/api/counselling/stats`, {
                     params: {start: startStr, end: endStr},
@@ -66,6 +67,16 @@ const CalendarPanel = ({date, setDate}) => {
                 }),
                 axios.get(`${BACKEND_URL}/api/visitors/stats`, {
                     params: {start: startStr, end: endStr},
+=======
+            // 1) 상담 주간
+            const [{ data: csRes }, { data: vsRes }] = await Promise.all([
+                axios.get(`${BACKEND_URL}/api/counselling/stats`, { //상담 횟수 엔드 포인트
+                    params: { start: startStr, end: endStr },
+                    withCredentials: true,
+                }),
+                axios.get(`${BACKEND_URL}/api/visitors/stats`, { // 금일 접속자 수 엔드포인트
+                    params: { start: startStr, end: endStr },
+>>>>>>> b903e95bc9c412e3374632dab5c24a07bd35bd82
                     withCredentials: true,
                 }),
             ]);

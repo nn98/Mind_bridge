@@ -117,16 +117,18 @@ export function useChatFlow({customUser}) {
             try {
                 setIsTyping(true);
 
-                let currentSessionId = sessionId;
-                if (!currentSessionId) {
-                    currentSessionId = await startNewSession(customUser?.email || "guest@example.com");
-                    if (!currentSessionId) {
-                        toast.error("세션 생성 실패");
-                        setIsTyping(false);
-                        return;
-                    }
-                    setSessionId(currentSessionId);
-                }
+      let currentSessionId = sessionId;
+      if (!currentSessionId) {
+        const email = customUser?.email || "guest@example.com";
+        const name = customUser?.fullName || customUser?.name || guestForm["이름"] || "게스트";
+
+        currentSessionId = await startNewSession(email, name);
+        if (!currentSessionId) {
+          toast.error("세션 생성 실패");
+          return;
+        }
+        setSessionId(currentSessionId);
+      }
 
                 const result = await sendMessage(currentSessionId, input);
 

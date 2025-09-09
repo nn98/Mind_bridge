@@ -673,11 +673,7 @@ html, body, .emotion-page {
     }
 }
 
-/* ✅ 다크모드 반응 제거됨 */
-
 /* ===== 버튼 Hover 전면 비활성화(Override) ===== */
-
-/* 공통: 버튼 류의 hover 시 변화 제거 */
 .analysis-button,
 .history-toggle,
 .back-btn,
@@ -688,7 +684,6 @@ html, body, .emotion-page {
     transition: none !important;
 }
 
-/* hover 상태에서 어떤 변화도 없음 */
 .analysis-button:hover,
 .analysis-button:hover:enabled,
 .history-toggle:hover,
@@ -704,7 +699,6 @@ html, body, .emotion-page {
     color: inherit !important;
 }
 
-/* 비활성 버튼은 그대로 유지 (가시성 보강은 유지) */
 .analysis-button:disabled {
     opacity: .55;
     cursor: not-allowed;
@@ -714,8 +708,7 @@ html, body, .emotion-page {
     border-color: transparent;
 }
 
-.history-toggle,
-.ea-chip {
+.history-toggle, .ea-chip {
     background: #ffffff !important;
     border: 1px solid #dbe2f2 !important;
     color: #374151 !important;
@@ -723,23 +716,334 @@ html, body, .emotion-page {
     font-weight: 600 !important;
 }
 
-/* hover/active/focus에서도 모양 고정 (색 안 바뀌고, 그림자/변형 없음) */
-.history-toggle:hover,
-.history-toggle:active,
-.history-toggle:focus,
-.ea-chip:hover,
-.ea-chip:active,
-.ea-chip:focus {
+.history-toggle:focus-visible, .ea-chip:focus-visible {
+    outline: 3px solid rgba(34, 211, 238, .35) !important;
+    outline-offset: 2px !important;
+}
+
+/* =======================
+   ✅ 여기부터: 확장 스타일 (툴바/고급옵션/통계)
+======================= */
+
+/* ========== 툴바 ========== */
+.ea-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+    position: relative;
+    overflow: clip;
+}
+
+.ea-toolbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .08), transparent 60%);
+    z-index: 0;
+}
+
+.ea-toolbar > * {
+    position: relative;
+    z-index: 2;
+}
+
+.ea-toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ea-toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+    transition: none !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.ea-toolbar-btn:hover, .ea-toolbar-btn:active, .ea-toolbar-btn:focus {
     background: #ffffff !important;
-    color: #374151 !important;
-    box-shadow: 0 1px 2px rgba(17, 24, 39, .04) !important;
+    color: var(--text) !important;
     transform: none !important;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .04) !important;
     filter: none !important;
 }
 
-/* 포커스 링만 살짝(접근성) — 원하면 제거 가능 */
-.history-toggle:focus-visible,
-.ea-chip:focus-visible {
-    outline: 3px solid rgba(34, 211, 238, .35) !important; /* brand-2 톤 */
+.ea-toolbar-btn.active {
+    background: linear-gradient(135deg, var(--brand-1) 50%, var(--brand-2));
+    color: white;
+    border-color: color-mix(in oklab, var(--brand-1) 70%, black 0%);
+}
+
+.ea-toolbar-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    background: #e5e7eb;
+    color: #6b7280;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.ea-toolbar-btn:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--brand-2) 35%, transparent) !important;
     outline-offset: 2px !important;
+}
+
+/* ========== 고급 옵션 패널 ========== */
+.ea-advanced-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+    position: relative;
+    overflow: clip;
+    animation: slideDown 0.3s ease;
+}
+
+.ea-advanced-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .08), transparent 60%);
+    z-index: 0;
+}
+
+.ea-advanced-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ea-option-group {
+    margin-bottom: 16px;
+}
+
+.ea-option-group:last-child {
+    margin-bottom: 0;
+}
+
+.ea-option-label {
+    display: block;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 14px;
+    letter-spacing: -.01em;
+}
+
+.ea-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-strong);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
+    outline: none;
+    transition: border-color var(--speed), box-shadow var(--speed), background var(--speed);
+}
+
+.ea-select:focus {
+    background: var(--surface-strong);
+    border-color: color-mix(in oklab, var(--brand-1) 55%, white 0%);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-1) 25%, transparent);
+}
+
+.ea-select:hover, .ea-checkbox-label:hover {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: inherit !important;
+}
+
+.ea-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.ea-checkbox {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--brand-1);
+}
+
+.ea-select:focus-visible, .ea-checkbox:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--brand-2) 35%, transparent) !important;
+    outline-offset: 2px !important;
+}
+
+/* ========== 텍스트 통계 패널 ========== */
+.ea-stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+    position: relative;
+    overflow: clip;
+}
+
+.ea-stats-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: radial-gradient(50% 40% at 50% 0%, rgba(255, 255, 255, .08), transparent 60%);
+    z-index: 0;
+}
+
+.ea-stats-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+.ea-stats-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 8px;
+}
+
+.ea-stats-label {
+    font-size: 12px;
+    color: var(--text-weak);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.ea-stats-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand-1);
+    letter-spacing: -.01em;
+}
+
+/* 상단 글래스 라인 */
+.ea-toolbar::before, .ea-advanced-panel::before, .ea-stats-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+    opacity: .6;
+    z-index: 1;
+}
+
+/* 프리셋 재정의 일관성 */
+.ea-presets .ea-chip {
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .04) !important;
+    font-weight: 600 !important;
+    transition: none !important;
+}
+
+/* ========== 반응형(툴바/통계) ========== */
+@media (max-width: 768px) {
+    .ea-toolbar {
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+    }
+
+    .ea-toolbar-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .ea-stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .ea-advanced-panel {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .ea-option-label {
+        font-size: 13px;
+    }
+
+    .ea-select {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ea-stats-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .ea-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .ea-toolbar-group {
+        gap: 4px;
+    }
+}
+
+/* 텍스트 선명도/폰트(일관성) */
+.ea-toolbar, .ea-advanced-panel, .ea-stats-panel {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-optical-sizing: auto;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
 }

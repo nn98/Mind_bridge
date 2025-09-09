@@ -13,7 +13,7 @@ const BoardControls = ({
             <div className="left-controls">
                 <select value={selectedBoard} onChange={(e) => onChangeBoard(e.target.value)}>
                     <option value="general">일반 게시판</option>
-                    <option value="admin">관리자 게시판</option>
+                    <option value="admin">비공개 게시판</option>
                 </select>
 
                 <select value={sortOrder} onChange={(e) => onChangeSort(e.target.value)}>
