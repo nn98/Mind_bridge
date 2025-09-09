@@ -2,12 +2,8 @@
 
 /* =======================
    ✅ 항상 라이트 모드 강제
-   - OS/브라우저 다크모드 무시
-   - 폼/스크롤바까지 라이트로
 ======================= */
-:root,
-html,
-body {
+:root, html, body {
     color-scheme: light !important;
 }
 
@@ -15,29 +11,21 @@ body {
 :root {
     --bg: #ffffff;
     --bg-2: #f7f9fc;
-
     --surface: rgba(255, 255, 255, .85);
     --surface-strong: rgba(255, 255, 255, .95);
     --border: rgba(17, 24, 39, .08);
-
     --text: #111827;
     --text-weak: #6b7280;
-
-    --brand-1: #8b5cf6;
-    /* 보라 */
-    --brand-2: #22d3ee;
-    /* 민트 */
-    --brand-3: #34d399;
-    /* 그린 */
-
+    --brand-1: #8b5cf6; /* 보라 */
+    --brand-2: #22d3ee; /* 민트 */
+    --brand-3: #34d399; /* 그린 */
+    --hover: #f5f7ff;
     --glow: 0 20px 60px rgba(139, 92, 246, .25);
-
     --radius: 16px;
     --radius-sm: 12px;
-
     --speed: .18s;
 
-    /* 감정 색상 (그래프/카드 공용) */
+    /* 감정 색상 */
     --happy-1: #fbbf24;
     --happy-2: #f59e0b;
     --sad-1: #60a5fa;
@@ -50,10 +38,8 @@ body {
     --cal-2: #10b981;
 }
 
-/* 전역 텍스트 선명도 고정 */
-html,
-body,
-.emotion-page {
+/* 전역 텍스트 선명도 */
+html, body, .emotion-page {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -62,7 +48,7 @@ body,
     color: var(--text);
 }
 
-/* ========== 페이지 배경 ========== */
+/* ========== 페이지 래퍼/컨테이너 ========== */
 .emotion-page {
     position: relative;
     max-width: 880px;
@@ -72,14 +58,38 @@ body,
     background: none;
 }
 
+.emotion-container {
+    padding: 4px;
+}
+
+/* ========== 프리셋 칩 ========== */
+.ea-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.ea-chip {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, background .15s;
+}
+
+.ea-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
+}
+
 /* ========== 글래스 카드 ========== */
 .analysis-card {
     position: relative;
     width: 100%;
-    /* [FIX] 본체 blur 제거: 텍스트 AA 보존 */
-    /* backdrop-filter: blur(14px); */
     background: rgba(255, 255, 255, .72);
-    /* 라이트 고정 */
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 18px;
@@ -89,7 +99,6 @@ body,
     backface-visibility: hidden;
 }
 
-/* 상단 라인 + 은은한 빛 */
 .analysis-card::before {
     content: "";
     position: absolute;
@@ -98,15 +107,12 @@ body,
     background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
     opacity: .85;
     z-index: 1;
-    /* 콘텐츠 아래, ::after 위 */
 }
 
-/* [FIX] blur는 뒤 레이어로만 (의사요소) */
 .analysis-card::after {
     content: "";
     position: absolute;
     inset: 0;
-    /* 카드 전체 커버 */
     pointer-events: none;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
@@ -114,8 +120,7 @@ body,
     z-index: 0;
 }
 
-/* 카드 안 텍스트/콘텐츠는 항상 블러 위 */
-.analysis-card>* {
+.analysis-card > * {
     position: relative;
     z-index: 2;
 }
@@ -133,8 +138,23 @@ body,
     color: var(--text-weak);
     line-height: 1.6;
     font-size: 14px;
-    /* [FIX] 다크 배경 가독성 ↑ */
     font-weight: 500;
+}
+
+/* 뒤로가기 버튼 */
+.back-btn {
+    margin-right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--brand-1);
+    font-weight: 700;
+    transition: transform .1s ease;
+}
+
+.back-btn:hover {
+    transform: translateX(-2px);
 }
 
 /* ========== 입력 영역(글래스) ========== */
@@ -149,7 +169,8 @@ body,
     border-radius: var(--radius-sm);
     padding: 12px 14px;
     line-height: 1.55;
-    font-size: 14px;
+    font-size: 16px;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
     outline: none;
     transition: border-color var(--speed), box-shadow var(--speed), background var(--speed);
 }
@@ -164,14 +185,22 @@ body,
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-1) 25%, transparent);
 }
 
-/* ========== 버튼 ========== */
+/* ========== 버튼/액션 영역 ========== */
+.analysis-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
 .analysis-button {
     margin-top: 10px;
     height: 42px;
     padding: 0 16px;
     border-radius: 12px;
     border: 1px solid color-mix(in oklab, var(--brand-1) 70%, black 0%);
-    color: #ffffff;
+    color: #fff;
     background: linear-gradient(135deg, var(--brand-1) 50%, var(--brand-2));
     font-weight: 800;
     font-size: 14px;
@@ -189,15 +218,29 @@ body,
     box-shadow: 0 14px 36px rgba(34, 211, 238, .28);
 }
 
+/* 🔥 비활성 버튼 가시성 보강 */
 .analysis-button:disabled {
-    opacity: .30;
+    opacity: .55;
     cursor: not-allowed;
-    color: #b6b6b6;
+    background: #e5e7eb;
+    color: #6b7280;
+    box-shadow: none;
+    border-color: transparent;
 }
 
 .analysis-button:focus-visible {
     outline: 3px solid color-mix(in oklab, var(--brand-2) 45%, transparent);
     outline-offset: 2px;
+}
+
+/* 히스토리 토글 */
+.history-toggle {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
 }
 
 /* ========== 로딩 ========== */
@@ -213,7 +256,6 @@ body,
     height: 16px;
     border-radius: 50%;
     border: 2px solid rgba(17, 24, 39, .12);
-    /* 라이트 톤으로 조정 */
     border-top-color: var(--brand-2);
     animation: spin .9s linear infinite;
 }
@@ -222,6 +264,110 @@ body,
     to {
         transform: rotate(360deg);
     }
+}
+
+/* 타이핑 점 애니메이션 */
+.typing-dots {
+    position: relative;
+    padding-right: 28px;
+}
+
+.typing-dots::after {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    text-align: left;
+    animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+    0% {
+        content: "";
+    }
+    33% {
+        content: ".";
+    }
+    66% {
+        content: "..";
+    }
+    100% {
+        content: "...";
+    }
+}
+
+/* ========== KPI 헤더(요약) ========== */
+.kpi-header {
+    display: grid;
+    grid-template-columns:1fr auto;
+    gap: 8px;
+    align-items: center;
+    margin: 10px 0 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+}
+
+.kpi-dominant {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kpi-emoji {
+    font-size: 24px;
+}
+
+.kpi-texts .kpi-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.kpi-texts .kpi-value {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.kpi-confidence {
+    font-size: 13px;
+    color: #374151;
+}
+
+/* ========== 이전 결과와 비교 ========== */
+.diff-strip {
+    display: grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap: 8px;
+    margin: 6px 0 10px;
+}
+
+.diff-item {
+    padding: 8px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.diff-key {
+    display: block;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.diff-val.up {
+    color: #0ea5e9;
+}
+
+.diff-val.down {
+    color: #ef4444;
+}
+
+.diff-now {
+    display: block;
+    font-weight: 700;
 }
 
 /* ========== 결과 섹션 레이아웃 ========== */
@@ -237,11 +383,10 @@ body,
     font-weight: 800;
 }
 
-/* 넓은 화면: 좌 그래프 / 우 메시지 */
 @media (min-width: 900px) {
     .results-section {
         display: grid;
-        grid-template-columns: 1.15fr .85fr;
+        grid-template-columns:1.15fr .85fr;
         gap: 14px 18px;
         align-items: start;
     }
@@ -251,10 +396,14 @@ body,
     }
 }
 
-/* ========== 그래프 ========== */
+/* ========== 그래프(Progress Bars) ========== */
 .progress-bars-container {
     display: grid;
     gap: 8px 12px;
+}
+
+.progress-bar {
+    margin-bottom: 10px;
 }
 
 .progress-bar-label {
@@ -264,7 +413,6 @@ body,
     margin-bottom: 4px;
     color: var(--text);
     font-size: 13px;
-    /* [FIX] 작은 텍스트 두께 보정 */
     font-weight: 500;
 }
 
@@ -299,7 +447,6 @@ body,
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3);
 }
 
-/* 감정별 그라데이션 */
 .progress-bar-fill.happiness {
     background: linear-gradient(90deg, var(--happy-1), var(--happy-2));
 }
@@ -320,7 +467,6 @@ body,
     background: linear-gradient(90deg, var(--cal-1), var(--cal-2));
 }
 
-/* 퍼센트 텍스트 음영 [FIX: 후광 제거] */
 .progress-bar-fill span {
     filter: none;
     text-shadow: none;
@@ -364,6 +510,75 @@ body,
     color: #0b1020;
 }
 
+/* ========== 히스토리 패널 ========== */
+.history-panel {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+}
+
+.history-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.history-item:hover {
+    background: var(--hover);
+}
+
+.history-main {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.history-emoji {
+    font-size: 20px;
+}
+
+.history-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.history-sub {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.history-remove, .history-clear {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.history-remove:hover, .history-clear:hover {
+    color: #ef4444;
+}
+
 /* ========== 모달 ========== */
 .emotion-modal-backdrop {
     position: fixed;
@@ -372,12 +587,8 @@ body,
     display: grid;
     place-items: center;
     background: rgba(6, 9, 20, .40);
-    /* 라이트 톤으로 살짝 완화 */
-    /* [FIX] 본체 blur 제거 */
-    /* backdrop-filter: blur(6px); */
 }
 
-/* [FIX] 모달 blur를 의사요소로 분리 (텍스트 선명도 유지) */
 .emotion-modal-backdrop::before {
     content: "";
     position: fixed;
@@ -394,7 +605,6 @@ body,
     border-radius: var(--radius);
     position: relative;
     z-index: 1;
-    /* 텍스트는 blur 위 */
 }
 
 #emotion-modal-close-btn {
@@ -409,7 +619,7 @@ body,
     color: #0b1020;
     font-size: 20px;
     cursor: pointer;
-    transition: transform .06s ease, filter var(--speed);
+    transition: transform .06s, filter var(--speed);
 }
 
 #emotion-modal-close-btn:hover {
@@ -449,6 +659,10 @@ body,
     .analysis-textarea {
         min-height: 120px;
     }
+
+    .diff-strip {
+        grid-template-columns:repeat(2, 1fr);
+    }
 }
 
 /* ========== 모션 선호도 ========== */
@@ -459,4 +673,73 @@ body,
     }
 }
 
-/* ✅ 다크모드 반응 제거됐으므로, (prefers-color-scheme: light/dark) 관련 블록 없음 */
+/* ✅ 다크모드 반응 제거됨 */
+
+/* ===== 버튼 Hover 전면 비활성화(Override) ===== */
+
+/* 공통: 버튼 류의 hover 시 변화 제거 */
+.analysis-button,
+.history-toggle,
+.back-btn,
+#emotion-modal-close-btn,
+.ea-chip,
+.history-remove,
+.history-clear {
+    transition: none !important;
+}
+
+/* hover 상태에서 어떤 변화도 없음 */
+.analysis-button:hover,
+.analysis-button:hover:enabled,
+.history-toggle:hover,
+.back-btn:hover,
+#emotion-modal-close-btn:hover,
+.ea-chip:hover,
+.history-remove:hover,
+.history-clear:hover {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    background: inherit !important;
+    color: inherit !important;
+}
+
+/* 비활성 버튼은 그대로 유지 (가시성 보강은 유지) */
+.analysis-button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    background: #e5e7eb;
+    color: #6b7280;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.history-toggle,
+.ea-chip {
+    background: #ffffff !important;
+    border: 1px solid #dbe2f2 !important;
+    color: #374151 !important;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .04) !important;
+    font-weight: 600 !important;
+}
+
+/* hover/active/focus에서도 모양 고정 (색 안 바뀌고, 그림자/변형 없음) */
+.history-toggle:hover,
+.history-toggle:active,
+.history-toggle:focus,
+.ea-chip:hover,
+.ea-chip:active,
+.ea-chip:focus {
+    background: #ffffff !important;
+    color: #374151 !important;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .04) !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* 포커스 링만 살짝(접근성) — 원하면 제거 가능 */
+.history-toggle:focus-visible,
+.ea-chip:focus-visible {
+    outline: 3px solid rgba(34, 211, 238, .35) !important; /* brand-2 톤 */
+    outline-offset: 2px !important;
+}

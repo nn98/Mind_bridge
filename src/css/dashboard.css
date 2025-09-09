@@ -288,6 +288,7 @@ body {
     overflow: auto;
     /* ← 핵심 */
     padding: 32px 24px;
+    background: linear-gradient(0deg, #f3e7ff, #ffffff);
 }
 
 /* ============ Cards / Grid ============ */
@@ -515,7 +516,7 @@ body {
 
 .consult-bubble.typing {
     opacity: .85;
-    font-style: italic;
+    font-style: normal;
 }
 
 /* 입력 바: 하단 sticky 고정 */
@@ -534,6 +535,7 @@ body {
     padding: 14px 16px;
     border: none;
     border-radius: 14px;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
     font-size: 16px;
     color: #0c1220;
     background-color: #ffffff;
@@ -559,16 +561,18 @@ body {
 .consult-send {
     height: 42px;
     padding: 0 16px;
-    border: 1px solid var(--primary);
-    background: var(--primary);
+    border: none;
+    background: #0d6efd;     /* 밝은 파랑 */
     color: #fff;
     border-radius: 12px;
     font-weight: 800;
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .consult-send:hover {
-    filter: brightness(.95);
+    background: #0b5ed7;     /* hover 시 진한 파랑 */
+    transform: translateY(-2px);
 }
 
 .consult-send:disabled {
@@ -579,16 +583,17 @@ body {
 .consult-end {
     height: 42px;
     padding: 0 14px;
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--text);
+    background: #198754;     /* 초록 (Success 톤) */
+    color: white;
     border-radius: 12px;
     font-weight: 700;
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .consult-end:hover {
-    background: #0c1426;
+    background: #157347;     /* hover 시 진한 초록 */
+    transform: translateY(-2px);
 }
 
 /* ============ Responsive ============ */
@@ -648,4 +653,26 @@ body {
 .dash-content::-webkit-scrollbar,
 .consult-stream::-webkit-scrollbar {
     display: none;
+}
+
+.system-message {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #7e57c2; /* 브랜드 보라 */
+    margin-bottom: 6px;
+}
+
+.system-message::after,
+.typing::after          {
+    content: "";
+    display: inline-block;
+    animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+    0%   { content: ""; }
+    33%  { content: "."; }
+    66%  { content: ".."; }
+    100% { content: "..."; }
 }

@@ -1,0 +1,271 @@
+:root {
+    --panel: rgba(255, 255, 255, .82);
+    --border: rgba(17, 24, 39, .08);
+    --text: #111827;
+    --text-weak: #6b7280;
+    --brand1: #7e57c2;
+    --shadow: 0 10px 30px rgba(126, 87, 194, .12);
+}
+
+.email-workspace {
+    min-height: 100vh;
+    padding: 24px 24px 120px; /* 아래쪽은 컴포저 공간 */
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    background: radial-gradient(1200px 600px at 70% 20%, rgba(161, 140, 209, .25), transparent 60%),
+    radial-gradient(900px 500px at 30% 80%, rgba(194, 178, 255, .25), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f6f3ff 100%);
+}
+
+/* 공통 카드 */
+.ew-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(8px);
+}
+
+.ew-card + .ew-card {
+    margin-top: 16px;
+}
+
+.ew-card-head {
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.ew-mini {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--brand1);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+/* 왼쪽 */
+.ew-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.ew-templates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ew-chip {
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 8px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.ew-chip:hover {
+    background: #faf7ff;
+    border-color: rgba(126, 87, 194, .35);
+}
+
+.ew-list {
+    display: grid;
+    gap: 6px;
+}
+
+.ew-list-item {
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+}
+
+.ew-list-item:hover {
+    background: #fafafa;
+}
+
+.ew-drafts {
+    display: grid;
+    gap: 8px;
+}
+
+.ew-draft-row {
+    display: flex;
+    gap: 8px;
+}
+
+.ew-draft-load {
+    flex: 1;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+}
+
+.ew-draft-del {
+    border: none;
+    border-radius: 10px;
+    background: #fee;
+    color: #b00;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.ew-empty {
+    color: var(--text-weak);
+    font-size: 13px;
+}
+
+.ew-dim {
+    color: var(--text-weak);
+    font-weight: 400;
+}
+
+.ew-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.ew-signature-preview {
+    margin-top: 10px;
+    background: #fff;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    white-space: pre-wrap;
+    color: var(--text-weak);
+}
+
+/* 중앙 */
+.ew-center {
+    display: grid;
+    gap: 16px;
+}
+
+.ew-hero {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+}
+
+.ew-hero h2 {
+    margin: 0 0 6px 0;
+}
+
+.ew-quick {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ew-quick .ew-file,
+.ew-quick button {
+    border: none;
+    background: var(--brand1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.ew-quick .ew-file input {
+    display: none;
+}
+
+.ew-dropzone {
+    border: 2px dashed rgba(126, 87, 194, .35);
+    background: #fff;
+    border-radius: 16px;
+    min-height: 140px;
+    display: grid;
+    align-items: center;
+    padding: 12px;
+}
+
+.ew-drop-inner {
+    text-align: center;
+    color: var(--text-weak);
+}
+
+.ew-attach-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ew-attach-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+}
+
+.ew-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ew-size {
+    color: var(--text-weak);
+    font-size: 13px;
+}
+
+.ew-x {
+    border: none;
+    background: #eee;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.ew-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ew-stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.ew-stat-label {
+    color: var(--text-weak);
+    font-size: 12px;
+}
+
+.ew-stat-value {
+    font-weight: 800;
+    font-size: 20px;
+    margin-top: 4px;
+}
+
+/* 반응형 */
+@media (max-width: 960px) {
+    .email-workspace {
+        grid-template-columns: 1fr;
+    }
+}
