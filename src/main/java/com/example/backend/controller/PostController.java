@@ -154,7 +154,7 @@ public class PostController {
             @Valid @RequestBody CreateRequest request,
             Authentication authentication) {
         try {
-            System.out.println("request: "+request);
+            
             String userEmail = authentication.getName();
             Detail createdPost = postService.createPost(request, userEmail);
 
