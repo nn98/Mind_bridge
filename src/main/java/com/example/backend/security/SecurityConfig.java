@@ -41,14 +41,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 공개 엔드포인트
                 .requestMatchers(
-                    "/api/auth/login",
-                    "/api/auth/logout",
+                    "/api/users/register",
+                    "/api/users/availability",
                     "/api/auth/find-id",
+                    "/api/auth/login",
                     "/api/auth/reset-password",
-                    "/api/auth/social/**",
+                    "/api/auth/social/**",   // login, callback 포함
                     "/api/posts/public",
                     "/api/posts/recent",
-                    "/api/posts/{id}",
+                    "/api/posts/*",          // /api/posts/{id} 공개 조회
                     "/actuator/health",
                     "/error",
                     "/favicon.ico"
