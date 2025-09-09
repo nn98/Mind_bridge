@@ -38,7 +38,7 @@ com.example.backend
     - JWT: jwt.secret(Base64), jwt.expiration-ms
     - 쿠키: jwt.cookie.* (name, secure, sameSite, path, domain, max-age-seconds)
     - OpenAI: openai.api.key, openai.api.url
-    - OAuth: google.rest.api.key, google.rest.api.secret, google.redirect.uri, kakao.rest.api.key, kakao.redirect.uri, kakao.client-secret(optional)
+    - OAuth: oauth.google.client-id, oauth.google.client-secret, oauth.google.redirect-uri, oauth.kakao.client-id, oauth.kakao.redirect-uri, kakao.client-secret(optional)
 
 2) 의존성 설치 및 실행
 - Gradle: ./gradlew bootRun
