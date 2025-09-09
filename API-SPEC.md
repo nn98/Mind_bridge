@@ -1,5 +1,7 @@
 # API 명세
 
+<img width="878" height="590" alt="image" src="https://gist.github.com/user-attachments/assets/41a61c07-2020-47be-a537-41933e60024f" />
+
 공통
 - Base URL: /api
 - Media Type: application/json (성공), application/problem+json (에러)
