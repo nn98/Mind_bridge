@@ -4,8 +4,6 @@ import React from "react";
 const UsersTable = ({users}) => {
     return (
         <div className="section-container">
-            <h2 className="admin-section-title">👤 유저 정보</h2>
-
             <div className="table-scroll">
                 <table className="admin-table admin-user">
                     <thead>

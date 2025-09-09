@@ -19,6 +19,8 @@ import {
     Bar,
 } from "recharts";
 
+import GenderAgeStats from "./GenderAgeStats";
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const CalendarPanel = ({date, setDate}) => {
@@ -43,14 +45,17 @@ const CalendarPanel = ({date, setDate}) => {
     const [selectedDayCount, setSelectedDayCount] = useState(0);
     const [todayVisitors, setTodayVisitors] = useState(0);
 
-    // 📌 주간 범위 계산
+    // 📌 모든 유저 정보 (성별/나이 포함)
+    const [allUsers, setAllUsers] = useState([]);
+
+    /* ───────── 주간 범위 계산 ───────── */
     useEffect(() => {
         const start = safeDate.startOf("week");
         const end = start.add(6, "day");
         setWeekRange({start, end});
     }, [safeDate]);
 
-    // 📌 주간 상담/접속 데이터
+    /* ───────── 주간 상담/접속 데이터 ───────── */
     useEffect(() => {
         if (!weekRange.start || !weekRange.end) return;
 
@@ -92,22 +97,12 @@ const CalendarPanel = ({date, setDate}) => {
 
         fetchWeekly().catch((e) => {
             console.error("주간 데이터 로드 실패:", e);
-            const fallback = [];
-            for (let i = 0; i < 7; i++) {
-                const d = weekRange.start.add(i, "day");
-                fallback.push({
-                    iso: d.format("YYYY-MM-DD"),
-                    label: d.format("ddd"),
-                    counselling: 0,
-                    visitors: 0,
-                });
-            }
-            setWeeklyData(fallback);
+            setWeeklyData([]);
             setSelectedDayCount(0);
         });
     }, [weekRange, safeDate]);
 
-    // 📌 오늘 접속자 수
+    /* ───────── 오늘 접속자 수 ───────── */
     useEffect(() => {
         const fetchToday = async () => {
             const iso = dayjs().format("YYYY-MM-DD");
@@ -128,6 +123,25 @@ const CalendarPanel = ({date, setDate}) => {
         fetchToday();
     }, []);
 
+    /* ───────── /api/admin/stats에서 유저 성별·나이 불러오기 ───────── */
+    useEffect(() => {
+        const fetchAllUsers = async () => {
+            try {
+                const {data} = await axios.get(`${BACKEND_URL}/api/admin/stats`, {
+                    withCredentials: true,
+                });
+
+                // data.users 배열에 [{nickname, email, phoneNumber, gender, age}, ...]
+                setAllUsers(Array.isArray(data?.users) ? data.users : []);
+            } catch (e) {
+                console.error("유저 목록 불러오기 실패:", e);
+                setAllUsers([]);
+            }
+        };
+
+        fetchAllUsers();
+    }, []);
+
     const selectedDateText = useMemo(
         () => safeDate.format("YYYY.MM.DD (ddd)"),
         [safeDate]
@@ -135,10 +149,10 @@ const CalendarPanel = ({date, setDate}) => {
 
     return (
         <div className="section-container">
-            <h2 className="admin-section-title">📅 캘린더</h2>
+            <h2 className="admin-section-header">📅 캘린더</h2>
 
             <div className="calendar-panel">
-                {/* 📌 캘린더 박스 */}
+                {/* 📌 캘린더 */}
                 <div className="admin-card calendar-card" aria-label="calendar">
                     <LocalizationProvider
                         dateAdapter={AdapterDayjs}
@@ -165,24 +179,29 @@ const CalendarPanel = ({date, setDate}) => {
                     </LocalizationProvider>
                 </div>
 
-                {/* 📌 상담 통계 박스 */}
-                <div className="admin-card counselling-stats" aria-label="daily-count">
-                    <h3>선택한 날짜 상담 횟수</h3>
-                    <p className="selected-date">{selectedDateText}</p>
-                    <div className="count-badge">{selectedDayCount} 회</div>
+                {/* 📌 상담 통계 + 연령/성별 분포 */}
+                <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
+                    <div className="admin-card counselling-stats" aria-label="daily-count">
+                        <h3>선택한 날짜 상담 횟수</h3>
+                        <p className="selected-date">{selectedDateText}</p>
+                        <div className="count-badge">{selectedDayCount} 회</div>
 
-                    <div className="divider"/>
+                        <div className="divider"/>
 
-                    <div className="subline">
-                        <span className="subline-label">금일 접속자 수</span>
-                        <span className="sub-badge">
-              {todayVisitors.toLocaleString()} 명
-            </span>
+                        <div className="subline">
+                            <span className="subline-label">금일 접속자 수</span>
+                            <span className="sub-badge">
+                                {todayVisitors.toLocaleString()} 명
+                            </span>
+                        </div>
                     </div>
+
+                    {/* ✅ 모든 유저 기반 성별/연령 분포 */}
+                    <GenderAgeStats selectedDateUsers={allUsers}/>
                 </div>
             </div>
 
-            {/* 📌 주간 그래프 박스 */}
+            {/* 📌 주간 그래프 */}
             <div className="admin-card counselling-chart" aria-label="weekly-chart">
                 <h3>주간 상담/접속 현황</h3>
                 <div className="chart-frame">
@@ -194,7 +213,11 @@ const CalendarPanel = ({date, setDate}) => {
                             <CartesianGrid strokeDasharray="3 3"/>
                             <XAxis dataKey="label"/>
                             <YAxis yAxisId="left" allowDecimals={false}/>
-                            <YAxis yAxisId="right" orientation="right" allowDecimals={false}/>
+                            <YAxis
+                                yAxisId="right"
+                                orientation="right"
+                                allowDecimals={false}
+                            />
                             <Tooltip
                                 formatter={(val, name) =>
                                     name === "접속자"

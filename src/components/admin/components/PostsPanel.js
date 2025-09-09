@@ -429,7 +429,7 @@ const PostsPanel = () => {
 
     return (
         <div className="section-container posts-panel">
-            <h2 className="admin-section-title">📋 게시글</h2>
+            <h2 className="admin-section-header">📋 게시글</h2>
 
             <div className="toolbar">
                 <form onSubmit={onSearchSubmit} className="toolbar-form">
