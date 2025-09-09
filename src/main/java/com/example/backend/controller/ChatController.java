@@ -68,14 +68,7 @@ public class ChatController {
 
     @PostMapping("/analysis/save")
     public ResponseEntity<CounsellingEntity>receiveAnalysis(@RequestBody Map<String, Object> payload) {
-        System.out.println("📩 [Spring] FastAPI에서 전달받은 분석 결과 ----------------");
-        System.out.println("user_name: " + payload.get("name"));
-        System.out.println("depression: " + payload.get("email"));
-        System.out.println("summary: " + payload.get("summary"));
-        System.out.println("riskFactors: " + payload.get("riskFactors"));
-        System.out.println("protectiveFactors: " + payload.get("protectiveFactors"));
-        System.out.println("summary_emotion: " + payload.get("clientEmotion"));
-        System.out.println("-----------------------------------------------------");
+        
 
         CounsellingEntity saved = counsellingService.saveAnalysis(payload);
 
@@ -89,7 +82,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(@Valid @RequestBody MessageRequest request,
             Authentication authentication) {
         try {
-            System.out.println("Request: " + request);
+            
 
             MessageResponse response = chatService.processMessage(
                     request.getSystemPrompt(),
