@@ -31,28 +31,53 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper om) throws Exception {
-        // CORS는 등록된 CorsConfigurationSource를 사용하여 프리플라이트/본요청 헤더를 처리한다. [12][7]
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 기존 빈 사용 [12]
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 쿠키 기반이지만 서버 세션은 사용하지 않음(Stateless) [12]
-            // 현재 설계에 맞춰 모든 엔드포인트는 일단 허용, 실제 인증 요구는 JWT 필터 및 컨트롤러/서비스에서 처리
-            // 보호/공개를 시큐리티 규칙으로 재분리할 경우 아래 authorizeHttpRequests를 조정한다. [12]
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                // 공개 엔드포인트
+                .requestMatchers(
+                    "/api/auth/login",
+                    "/api/auth/logout",
+                    "/api/auth/find-id",
+                    "/api/auth/reset-password",
+                    "/api/auth/social/**",
+                    "/api/posts/public",
+                    "/api/posts/recent",
+                    "/api/posts/{id}",
+                    "/actuator/health",
+                    "/error",
+                    "/favicon.ico"
+                ).permitAll()
+
+                // 관리자 URL (다음 단계에서 @PreAuthorize로 보강)
+                .requestMatchers("/api/admin/**").authenticated()
+
+                // 사용자 계정 관련
+                .requestMatchers("/api/users/account/**").authenticated()
+                .requestMatchers("/api/users/account").authenticated()
+
+                // 채팅 관련
+                .requestMatchers("/api/chat/**").authenticated()
+
+                // 게시글 쓰기/수정/삭제는 인증 필요
+                .requestMatchers("/api/posts/my").authenticated()
+                .requestMatchers("/api/posts/**").authenticated()
+
+                // 기타는 기본 허용 범위에서 제외하고 보호
+                .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
             .formLogin(formLogin -> formLogin.disable())
             .exceptionHandling(ex -> ex
-                // 인증 실패(미인증 접근) → 401 + ProblemDetail(JSON)
                 .authenticationEntryPoint(JsonAuthHandlers.authenticationEntryPoint(om))
-                // 인가 실패(권한 부족) → 403 + ProblemDetail(JSON)
                 .accessDeniedHandler(JsonAuthHandlers.accessDeniedHandler(om))
             );
 
-        // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치 (기존 동작 유지) [12]
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -68,21 +93,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용 Origin (정확한 출처만 명시; 백엔드는 "요청 출처"가 아니므로 일반적으로 포함하지 않음) [14]
         configuration.setAllowedOrigins(List.of(
-            "http://localhost:3000",              // 개발 프런트 [12]
-            "https://mind-bridge-zeta.vercel.app" // 운영 프런트 [12]
-            // "http://localhost:5173",            // Vite 등 추가 로컬 포트 사용 시 즉시 활성화 [14]
-            // "https://*.vercel.app"              // 서브도메인 확장 필요 시 allowedOriginPatterns로 전환하여 사용 [2]
+            "http://localhost:3000",
+            "https://mind-bridge-zeta.vercel.app"
         ));
-
-        // allowCredentials: 쿠키/자격 증명 전송 허용 (HttpOnly JWT 쿠키를 위한 필수 조건) [2][13]
         configuration.setAllowCredentials(true);
-
-        // 허용 메서드 [12]
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        // 허용 헤더: 레거시 Authorization + 일반 헤더 (필요 시 추가) [11][9]
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization",
             "Content-Type",
@@ -91,30 +107,7 @@ public class SecurityConfig {
             "Origin"
         ));
 
-        // 필요 시 프런트에서 읽어야 하는 응답 헤더를 노출(exposed) [12]
-        // 예: Access-Control-Expose-Headers: "Authorization", "X-Total-Count" 등
-        // configuration.setExposedHeaders(Arrays.asList(
-        //     "Authorization",
-        //     "X-Total-Count"
-        // ));
-
-        // 프리플라이트 캐시 시간(초) [6]
-        // configuration.setMaxAge(3600L);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        // allowedOriginPatterns로 패턴 허용을 사용할 경우:
-        // - setAllowedOrigins 대신 setAllowedOriginPatterns 사용 (allowCredentials(true)와 함께 와일드카드 패턴 가능) [2]
-        // 예시(주석 대기):
-        // CorsConfiguration patternConfig = new CorsConfiguration();
-        // patternConfig.setAllowCredentials(true);
-        // patternConfig.setAllowedOriginPatterns(List.of("https://*.vercel.app"));
-        // patternConfig.setAllowedMethods(configuration.getAllowedMethods());
-        // patternConfig.setAllowedHeaders(configuration.getAllowedHeaders());
-        // source.registerCorsConfiguration("/**", patternConfig);
-        // return source;
-
-        // 기본: 명시 원본 허용 설정 적용
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
