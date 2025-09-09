@@ -10,7 +10,7 @@ import {useAuth} from "../../AuthContext";
 const vis = (v) => (v || "").toUpperCase();
 const isAdmin = (profile) => (profile?.role || "").toUpperCase() === "ADMIN";
 const isOwner = (post, profile) =>
-    String(post?.userId || post?.authorId) === String(profile?.id);
+    String(post?.userNickname) === String(profile?.nickname);
 const canViewPost = (post, profile) =>
     vis(post.visibility) === "PUBLIC" || isAdmin(profile) || isOwner(post, profile);
 const canEditPost = (post, profile) => isAdmin(profile) || isOwner(post, profile);
