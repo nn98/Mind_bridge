@@ -1,9 +1,8 @@
 import axios from "axios";
 
 // 클라우드 서버 주소 (기본 8222번 포트)
-const FASTAPI_URL = "http://localhost:8222";
+const FASTAPI_URL = process.env.REACT_APP_FAST_URL;
 // local테스트 용도
-//process.env.REACT_APP_FAST_URL;
 
 // === 상담 세션 생성 ===
 export async function startNewSession(email, name) {

@@ -127,19 +127,34 @@ body {
 ======================= */
 .admin-stats {
     display: flex;
+    justify-content: space-between;
+    align-items: stretch;
     gap: 16px;
-    margin: 0 16px 24px;
+    width: 100%;
+    margin: 0 16px 24px 0px;
 }
 
 .admin-card {
     flex: 1;
-    background: var(--mb-card);
-    border-left: 5px solid var(--mb-brand);
+    background: #ffffff;
     border-radius: 12px;
-    padding: 16px;
-    font-size: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 1.1rem;
     font-weight: 500;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.admin-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--mb-brand);
+    border-radius: 12px 0 0 12px;
+    left: 0;
 }
 
 .admin-card strong {
@@ -156,10 +171,26 @@ body {
     gap: 16px;
 }
 
-.admin-section-title {
-    font-size: 18px;
+.admin-section-header {
+    display: flex;
+    align-items: center;
+    background: var(--mb-brand);
+    color: #fff;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 12px;
+    padding: 15px 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.admin-section-icon {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.admin-section-title-text {
+    flex: 1;
 }
 
 /* =======================
@@ -252,14 +283,13 @@ body {
 ======================= */
 .calendar-panel {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: flex-start; /* 각 셀이 위에 붙고 높이 자동 확장 */
+    grid-template-columns: 1fr 1.5fr;
+    align-items: flex-start;
     gap: 16px;
 }
 
 .calendar-card {
-    height: 420px;
-    margin: 0 auto;
+    height: 520px;
     padding: 20px;
     background: #fff;
     border-radius: 12px;
@@ -268,63 +298,55 @@ body {
     justify-content: center;
 }
 
-/* ================================
-   📅 MUI DateCalendar 커스터마이징
-================================ */
-
-/* 달력 wrapper (월 전환 애니메이션 컨테이너) */
+/* 📅 MUI DateCalendar */
 .MuiPickersSlideTransition-root {
-    min-height: 420px !important; /* 최소 높이 확보 → 잘림 방지 */
+    min-height: 500px !important;
     height: auto !important;
-    overflow: visible !important; /* 스크롤 제거 */
+    overflow: visible !important;
 }
 
-/* 달력 한 달치 컨테이너 */
 .MuiDayCalendar-monthContainer {
     height: auto !important;
 }
 
-/* 요일 헤더 (일~토) */
 .MuiDayCalendar-weekDayLabel {
     font-weight: 600;
     font-size: 1rem;
     color: #555;
 }
 
-/* 날짜 기본 스타일 */
+/* ✅ 날짜 셀 크기 키움 */
 .MuiPickersDay-root {
-    width: 48px !important; /* 날짜 버튼 크기 */
-    height: 48px !important;
-    margin: 3px !important; /* 날짜 간격 */
-    font-size: 1rem !important;
-    font-weight: 500;
-    border-radius: 50% !important; /* 동그라미 */
+    width: 55px !important;
+    height: 55px !important;
+    margin: 5px !important;
+    font-size: 1.2rem !important;
+    font-weight: 600;
+    border-radius: 50% !important;
     transition: all 0.2s ease;
+    box-shadow: none;
 }
 
-/* hover 시 효과 */
 .MuiPickersDay-root:hover {
-    background-color: rgba(161, 140, 209, 0.15) !important; /* 보라색 은은한 hover */
+    background-color: rgba(161, 140, 209, 0.15) !important;
 }
 
-/* 오늘 날짜 */
 .MuiPickersDay-today {
     border: 2px solid #a18cd1 !important;
     font-weight: 700 !important;
 }
 
-/* 선택된 날짜 */
 .Mui-selected {
-    background-color: #a18cd1 !important; /* 브랜드 보라색 */
+    background-color: #a18cd1 !important;
     color: #fff !important;
     font-weight: bold !important;
 }
 
-.css-17f9e7e-MuiTypography-root-MuiDayCalendar-weekDayLabel{
+.css-17f9e7e-MuiTypography-root-MuiDayCalendar-weekDayLabel {
     font-size: 18px !important;
-    margin: 0 9px !important;
+    margin: 0 14.5px !important;
 }
-/* 주말 색상 */
+
 .MuiDayCalendar-weekDayLabel:nth-of-type(1),
 .MuiPickersDay-root[aria-label*="일요일"] {
     color: red !important;
@@ -335,18 +357,9 @@ body {
     color: blue !important;
 }
 
-.css-19bcpwc-MuiDateCalendar-root{
-    height: 400px !important;
-}
-
-.admin-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+.css-19bcpwc-MuiDateCalendar-root {
+    height: 500px !important;
+    max-height: 500px !important;
 }
 
 .counselling-stats {
@@ -447,7 +460,9 @@ body {
     cursor: pointer;
 }
 
-/* 레이아웃 */
+/* =======================
+   Layout
+======================= */
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -468,7 +483,7 @@ body {
     background: none;
     border: none;
     color: white;
-    font-size: 15px;
+    font-size: 17px;
     padding: 12px 16px;
     text-align: left;
     border-radius: 6px;
@@ -491,7 +506,11 @@ body {
 }
 
 .admin-section {
-    margin-top: 20px;
+    margin: 20px;
+}
+
+.user-search-bar {
+    margin-bottom: 15px;
 }
 
 /* =======================
@@ -504,5 +523,9 @@ body {
 
     .calendar-panel {
         grid-template-columns: 1fr;
+    }
+
+    .admin-stats {
+        flex-direction: column;
     }
 }
