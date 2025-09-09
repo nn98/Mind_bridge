@@ -25,11 +25,15 @@ function parseEmotionJsonLoose(raw) {
 
     // 키 표준화(한글 → 영문)
     const keyMap = {
-        '행복': 'happiness',
+        '기쁨': 'joy',
         '슬픔': 'sadness',
         '분노': 'anger',
+        '두려움': 'fear',
+        '혐오': 'disgust',
         '불안': 'anxiety',
-        '평온': 'calmness',
+        '부끄러움': 'embarrassment',
+        '질투': 'envy',
+        '권태': 'ennui',
     };
     s = s.replace(/"([^"]+)":/g, (m, k) => `"${keyMap[k] || k}":`);
 
@@ -41,7 +45,17 @@ function parseEmotionJsonLoose(raw) {
         throw new Error('JSON 파싱 실패');
     }
 
-    const keys = ['happiness', 'sadness', 'anger', 'anxiety', 'calmness'];
+    const keys = [
+        "joy",           // 기쁨
+        "sadness",       // 슬픔
+        "anger",         // 분노
+        "fear",          // 두려움
+        "disgust",       // 혐오
+        "anxiety",       // 불안
+        "embarrassment", // 부끄러움
+        "envy",          // 질투
+        "ennui"         // 권태 
+    ];
     const out = {};
     let sum = 0;
 
@@ -97,7 +111,7 @@ function withTimeout(promise, ms, signal) {
 // ---------- 폴백: 간단 휴리스틱 분석(모델 실패 시) ----------
 function fallbackHeuristic(text) {
     const t = (text || '').toLowerCase();
-    const score = {happiness: 10, sadness: 10, anger: 10, anxiety: 10, calmness: 60};
+    const score = { happiness: 10, sadness: 10, anger: 10, anxiety: 10, calmness: 60 };
 
     if (/(행복|기쁨|좋다|happy|joy|기분좋)/i.test(t)) score.happiness += 25;
     if (/(슬프|우울|sad|depress|down)/i.test(t)) score.sadness += 25;
@@ -124,7 +138,7 @@ function fallbackHeuristic(text) {
  * @returns {Promise<object>} {happiness, sadness, anger, anxiety, calmness}
  */
 export async function requestEmotionAnalysis(text, opts = {}) {
-    const {signal, timeoutMs = 15000, retries = 1} = opts;
+    const { signal, timeoutMs = 15000, retries = 1 } = opts;
     const model = 'gpt-4'; // 필요 시 백엔드가 지원하는 모델로 교체
 
     const systemPrompt =
@@ -132,18 +146,29 @@ export async function requestEmotionAnalysis(text, opts = {}) {
         '반드시 총합이 100이 되도록 하고, JSON만 반환하세요.';
     const userPrompt = `
 문장을 감정별 비율(%)로 분석해줘.
-카테고리: 행복, 슬픔, 분노, 불안, 평온
+카테고리: 기쁨, 슬픔, 분노, 두려움, 혐오, 불안, 부끄러움, 질투, 권태
 문장: "${text}"
 
 JSON만 출력(설명/코드블럭 금지):
-{"happiness": 40, "sadness": 20, "anger": 10, "anxiety": 10, "calmness": 20}
+{
+  "joy": 30,
+  "sadness": 20,
+  "anger": 10,
+  "fear": 10,
+  "disgust": 10,
+  "anxiety": 5,
+  "embarrassment": 5,
+  "envy": 5 ,
+  "ennui" : 5
+}
+
 `.trim();
 
     const body = {
         model,
         messages: [
-            {role: 'system', content: systemPrompt},
-            {role: 'user', content: userPrompt},
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
         ],
         temperature: 0.2,
         max_tokens: 160,
