@@ -45,7 +45,6 @@ html, body, .emotion-page {
     text-rendering: optimizeLegibility;
     font-optical-sizing: auto;
     color: var(--text);
-    background: var(--bg);
 }
 
 /* 레이아웃 */
