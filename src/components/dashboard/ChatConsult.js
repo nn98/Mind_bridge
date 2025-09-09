@@ -1,7 +1,106 @@
 // src/components/dashboard/ChatConsult.jsx
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {useChatFlow} from "../chat/hooks/useChatFlow";
 import {useAuth} from "../../AuthContext";
+
+/* =========================
+   Color/Math Utilities
+========================= */
+function hexToRgba(hex, alpha = 0.55) {
+    const h = hex.replace("#", "");
+    const bigint = parseInt(h, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function gammaSmooth(mix, gamma = 0.8) {
+    const keys = Object.keys(mix ?? {});
+    const powVals = keys.map((k) => Math.pow((mix[k] ?? 0) / 100, gamma));
+    const sumPow = powVals.reduce((a, b) => a + b, 0) || 1;
+    const out = {};
+    keys.forEach((k, i) => (out[k] = (powVals[i] / sumPow) * 100));
+    return out;
+}
+
+function clampAndRedistribute(mix, {min = 6, max = 65}) {
+    const keys = Object.keys(mix ?? {});
+    const src = {...mix};
+    const nonZero = keys.filter((k) => (src[k] ?? 0) > 0);
+
+    nonZero.forEach((k) => {
+        if (src[k] < min) src[k] = min;
+        if (src[k] > max) src[k] = max;
+    });
+
+    let total = keys.reduce((a, k) => a + (src[k] ?? 0), 0);
+    for (let i = 0; i < 2; i++) {
+        if (total > 100) {
+            let extra = total - 100;
+            const donors = nonZero.filter((k) => src[k] > min);
+            const donorSum = donors.reduce((a, k) => a + (src[k] - min), 0) || 1;
+            donors.forEach((k) => {
+                const room = src[k] - min;
+                const give = Math.min(room, (room / donorSum) * extra);
+                src[k] -= give;
+            });
+        } else if (total < 100) {
+            let deficit = 100 - total;
+            const receivers = nonZero.filter((k) => src[k] < max);
+            const roomSum = receivers.reduce((a, k) => a + (max - src[k]), 0) || 1;
+            receivers.forEach((k) => {
+                const room = max - src[k];
+                const take = Math.min(room, (room / roomSum) * deficit);
+                src[k] += take;
+            });
+        }
+        total = keys.reduce((a, k) => a + (src[k] ?? 0), 0);
+    }
+
+    const err = 100 - total;
+    if (Math.abs(err) > 0.01) {
+        const k = nonZero[0] || keys[0];
+        if (k) src[k] += err;
+    }
+    return src;
+}
+
+function alphaForPct(pct) {
+    if (pct >= 60) return 0.38;
+    if (pct >= 30) return 0.48;
+    return 0.6;
+}
+
+function buildCompositeBackground(mix, palette) {
+    if (!mix) return null;
+    const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
+    const smooth = gammaSmooth(mix, 0.8);
+    const adjusted = clampAndRedistribute(smooth, {min: 6, max: 65});
+
+    let acc = 0;
+    const conicStops = [];
+    for (const key of order) {
+        const pct = Math.max(0, Math.min(100, adjusted[key] || 0));
+        if (!pct) continue;
+        const alpha = alphaForPct(pct);
+        const col = hexToRgba(palette[key] || "#ffffff", alpha);
+        const from = acc;
+        const to = acc + pct;
+        conicStops.push(`${col} ${from.toFixed(2)}% ${to.toFixed(2)}%`);
+        acc = to;
+    }
+
+    const radialA = `radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,.06), rgba(255,255,255,0) 60%)`;
+    const radialB = `radial-gradient(50% 50% at 85% 0%, rgba(255,255,255,.05), rgba(255,255,255,0) 50%)`;
+    const conic = `conic-gradient(at 72% 28%, ${conicStops.join(", ")})`;
+
+    return `${radialA}, ${radialB}, ${conic}`;
+}
+
+/* =========================
+   Component
+========================= */
 
 function ChatConsultInner({profile, isLoggedIn}) {
     const {
@@ -15,17 +114,34 @@ function ChatConsultInner({profile, isLoggedIn}) {
         handleSubmit,
         handleEndChat,
         handleRestartChat,
-    } = useChatFlow({
-        customUser: profile,
-        disableQuestionnaire: isLoggedIn,
-        askProfileIfMissing: !isLoggedIn,
-        fieldsToAsk: [],
-        introMessage: isLoggedIn ? "상담 받고 싶은 내용을 말씀해주세요" : undefined,
-        enforceGreeting: true,
-        autoStartFromProfile: isLoggedIn,
-    });
+        emotionMix,
+        EMOTION_PALETTE,
+    } = useChatFlow({customUser: profile});
 
     const [isEnding, setIsEnding] = useState(false);
+
+    // 교차 페이드용 2 레이어 상태
+    const [activeLayer, setActiveLayer] = useState(0); // 0 또는 1
+    const [bgLayer, setBgLayer] = useState(["", ""]);  // 각 레이어의 backgroundImage 값
+
+    // 새 배경이 오면 비활성 레이어에 먼저 세팅 → active 토글로 페이드
+    const nextBackground = useMemo(
+        () => buildCompositeBackground(emotionMix, EMOTION_PALETTE),
+        [emotionMix, EMOTION_PALETTE]
+    );
+
+    useEffect(() => {
+        if (!nextBackground) return;
+        const inactive = activeLayer ^ 1; // 0->1, 1->0
+        setBgLayer((prev) => {
+            const next = [...prev];
+            next[inactive] = nextBackground;
+            return next;
+        });
+        // 다음 animation frame에 활성 토글해 opacity 전환
+        const t = requestAnimationFrame(() => setActiveLayer(inactive));
+        return () => cancelAnimationFrame(t);
+    }, [nextBackground]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const lastUserQuery = useMemo(() => {
         for (let i = chatHistory.length - 1; i >= 0; i--) {
@@ -34,16 +150,12 @@ function ChatConsultInner({profile, isLoggedIn}) {
         return "";
     }, [chatHistory]);
 
-    // 새 메시지/타이핑 변화 시 최신 메시지 보이기
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
         const parent = chatEndRef.current?.parentNode;
-        if (parent && typeof parent.scrollTop === "number") {
-            parent.scrollTop = parent.scrollHeight;
-        }
+        if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
     }, [chatHistory, isTyping, chatEndRef]);
 
-    // 입력창 포커스 유지
     useEffect(() => {
         if (!isTyping) inputRef.current?.focus();
     }, [isTyping]);
@@ -61,14 +173,35 @@ function ChatConsultInner({profile, isLoggedIn}) {
         }
     };
 
+    useEffect(() => {
+        if (!emotionMix) {
+            console.log("[Emotion] no mix yet (using base background)");
+            return;
+        }
+        const entries = Object.entries(emotionMix)
+            .map(([k, v]) => `${k}:${Number(v).toFixed(2)}%`)
+            .join(" | ");
+        console.log(`[Emotion] active mix → ${entries}`);
+    }, [emotionMix]);
+
     return (
         <div className="consult-wrap">
+            {/* 🔥 감정 물결 배경 — 화면 전체 고정, 2중 레이어 교차 페이드 */}
+            <div
+                className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
+                style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined}
+                aria-hidden
+            />
+            <div
+                className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
+                style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined}
+                aria-hidden
+            />
+
             {/* 상단 헤더 */}
             <div className="consult-header">
                 <div className="consult-logo">MindBridge</div>
-                <h1 className="consult-title">
-                    {lastUserQuery || "무엇이든 물어보세요"}
-                </h1>
+                <h1 className="consult-title">{lastUserQuery || "무엇이든 물어보세요"}</h1>
             </div>
 
             {/* 메시지 영역 */}
@@ -78,9 +211,7 @@ function ChatConsultInner({profile, isLoggedIn}) {
                         {msg.message}
                     </div>
                 ))}
-                {isTyping && (
-                    <div className="consult-bubble ai typing">AI 응답 생성 중</div>
-                )}
+                {isTyping && <div className="consult-bubble ai typing">AI 응답 생성 중</div>}
                 <div ref={chatEndRef}/>
             </div>
 
@@ -92,10 +223,7 @@ function ChatConsultInner({profile, isLoggedIn}) {
                     handleSubmit();
                 }}
             >
-                {/* 종료 중 표시 */}
-                {isEnding && (
-                    <div className="system-message">상담을 종료 중입니다</div>
-                )}
+                {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
 
                 <textarea
                     ref={inputRef}
@@ -159,12 +287,5 @@ export default function ChatConsult() {
     const {profile} = useAuth();
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
-
-    return (
-        <ChatConsultInner
-            key={modeKey}
-            profile={profile}
-            isLoggedIn={isLoggedIn}
-        />
-    );
+    return <ChatConsultInner key={modeKey} profile={profile} isLoggedIn={isLoggedIn}/>;
 }

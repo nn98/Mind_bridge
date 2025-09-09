@@ -50,8 +50,7 @@
     box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
     height: 100%;
 }
 
@@ -67,8 +66,7 @@ body {
     display: flex;
     min-height: 100vh;
     height: 100vh;
-    overflow: hidden;
-    /* 중앙만 스크롤 */
+    overflow: hidden; /* 중앙만 스크롤 */
 }
 
 /* Sidebar */
@@ -77,7 +75,6 @@ body {
     background: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-line);
     display: flex;
-    /* 컬럼 플렉스 → 하단 고정용 */
     flex-direction: column;
     gap: 12px;
     padding: 16px 12px;
@@ -88,7 +85,6 @@ body {
     flex: 0 0 240px;
 
     overflow-y: auto;
-    /* 스크롤 가능 (바 숨김은 아래 공통 섹션) */
     z-index: 1001;
 }
 
@@ -175,22 +171,16 @@ body {
     flex-direction: column;
     gap: 6px;
     min-height: 0;
-    /* 길어지면 내부 스크롤 가능하게 */
 }
 
 .sidebar-bottom {
     margin-top: auto;
-    /* 👈 맨 아래로 밀기 핵심 */
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding-top: 12px;
     border-top: 1px solid var(--sidebar-line);
 }
-
-/* (주의) 이전 파일에 있었던 잘못된 중첩
-   `.sidebar-bottom { .sidebar-bottom { ... } }`
-   블록은 제거되었습니다. */
 
 .nav-close .menu-section {
     display: none;
@@ -280,13 +270,11 @@ body {
     background: #0c1426;
 }
 
-/* 중앙 컨텐츠: 스크롤 가능 (스크롤바 비가시화) */
+/* 중앙 컨텐츠 */
 .dash-content {
     flex: 1 1 auto;
     min-height: 0;
-    /* flex 자식 스크롤 필수 */
     overflow: auto;
-    /* ← 핵심 */
     padding: 32px 24px;
     background: linear-gradient(0deg, #f3e7ff, #ffffff);
 }
@@ -434,10 +422,8 @@ body {
     min-height: 0;
     margin: 0 auto;
     padding: 24px 16px 24px;
-
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    /* 헤더 / 스트림 / 입력 */
     row-gap: 18px;
 }
 
@@ -472,7 +458,7 @@ body {
     text-align: center;
 }
 
-/* 메시지 영역(중앙)만 스크롤 — 크기 고정 */
+/* 메시지 영역 */
 .consult-stream {
     display: flex;
     flex-direction: column;
@@ -516,10 +502,9 @@ body {
 
 .consult-bubble.typing {
     opacity: .85;
-    font-style: normal;
 }
 
-/* 입력 바: 하단 sticky 고정 */
+/* 입력 바 */
 .consult-inputbar {
     position: sticky;
     bottom: 0;
@@ -562,16 +547,16 @@ body {
     height: 42px;
     padding: 0 16px;
     border: none;
-    background: #0d6efd;     /* 밝은 파랑 */
+    background: #0d6efd;
     color: #fff;
     border-radius: 12px;
     font-weight: 800;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
+    transition: background .2s ease, transform .1s ease;
 }
 
 .consult-send:hover {
-    background: #0b5ed7;     /* hover 시 진한 파랑 */
+    background: #0b5ed7;
     transform: translateY(-2px);
 }
 
@@ -583,27 +568,27 @@ body {
 .consult-end {
     height: 42px;
     padding: 0 14px;
-    background: #198754;     /* 초록 (Success 톤) */
+    background: #198754;
     color: white;
     border-radius: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
+    transition: background .2s ease, transform .1s ease;
 }
 
 .consult-end:hover {
-    background: #157347;     /* hover 시 진한 초록 */
+    background: #157347;
     transform: translateY(-2px);
 }
 
 /* ============ Responsive ============ */
-@media (max-width:1080px) {
+@media (max-width: 1080px) {
     .grid-2 {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width:760px) {
+@media (max-width: 760px) {
     .dash-sidebar {
         width: 72px;
     }
@@ -626,32 +611,22 @@ body {
         font-size: 24px;
     }
 
-    .consult-send,
-    .consult-end {
+    .consult-send, .consult-end {
         height: 38px;
         border-radius: 10px;
     }
 }
 
-/* ===== 공통: 스크롤바 비가시화(스크롤 기능 유지) ===== */
-/* Firefox */
-.dash-sidebar,
-.dash-content,
-.consult-stream {
+/* ===== 공통: 스크롤바 비가시화 ===== */
+.dash-sidebar, .dash-content, .consult-stream {
     scrollbar-width: none;
 }
 
-/* IE/Edge 레거시 */
-.dash-sidebar,
-.dash-content,
-.consult-stream {
+.dash-sidebar, .dash-content, .consult-stream {
     -ms-overflow-style: none;
 }
 
-/* WebKit(Chrome/Safari) */
-.dash-sidebar::-webkit-scrollbar,
-.dash-content::-webkit-scrollbar,
-.consult-stream::-webkit-scrollbar {
+.dash-sidebar::-webkit-scrollbar, .dash-content::-webkit-scrollbar, .consult-stream::-webkit-scrollbar {
     display: none;
 }
 
@@ -659,20 +634,103 @@ body {
     text-align: center;
     font-size: 20px;
     font-weight: 600;
-    color: #7e57c2; /* 브랜드 보라 */
+    color: #7e57c2;
     margin-bottom: 6px;
 }
 
-.system-message::after,
-.typing::after          {
+.system-message::after, .typing::after {
     content: "";
     display: inline-block;
     animation: dots 1.5s steps(3, end) infinite;
 }
 
 @keyframes dots {
-    0%   { content: ""; }
-    33%  { content: "."; }
-    66%  { content: ".."; }
-    100% { content: "..."; }
+    0% {
+        content: "";
+    }
+    33% {
+        content: ".";
+    }
+    66% {
+        content: "..";
+    }
+    100% {
+        content: "...";
+    }
+}
+
+/* =========================================================
+   🔥 Emotion Background — Cross-fade + Subtle Drift
+   - 두 레이어(layerA/B)를 교차 페이드
+   - 각 레이어에 다른 속도의 드리프트로 은은한 움직임
+========================================================= */
+
+.emotion-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0; /* 기본은 숨김 */
+    transition: opacity .9s ease; /* 전환 페이드 */
+    filter: blur(46px) saturate(1.03) brightness(1.02);
+    background-size: 160% 160%;
+    background-position: 50% 50%;
+    will-change: opacity, background-position, transform;
+}
+
+/* 활성 레이어 */
+.emotion-bg.active {
+    opacity: 1;
+}
+
+/* 서로 다른 드리프트로 자연스럽게 */
+.emotion-bg.layerA.active {
+    animation: emotionDriftA 22s ease-in-out infinite alternate;
+}
+
+.emotion-bg.layerB.active {
+    animation: emotionDriftB 26s ease-in-out infinite alternate;
+}
+
+/* 미세 드리프트(배경 위치 + 아주 약한 스케일/회전) */
+@keyframes emotionDriftA {
+    0% {
+        background-position: 46% 54%;
+        transform: scale(1.00) rotate(0deg);
+    }
+    50% {
+        background-position: 54% 46%;
+        transform: scale(1.015) rotate(0.45deg);
+    }
+    100% {
+        background-position: 50% 50%;
+        transform: scale(1.02) rotate(-0.35deg);
+    }
+}
+
+@keyframes emotionDriftB {
+    0% {
+        background-position: 52% 48%;
+        transform: scale(1.00) rotate(0deg);
+    }
+    50% {
+        background-position: 48% 52%;
+        transform: scale(1.018) rotate(-0.35deg);
+    }
+    100% {
+        background-position: 50% 50%;
+        transform: scale(1.022) rotate(0.3deg);
+    }
+}
+
+/* 컨텐츠는 항상 위에 */
+.dash-main, .dash-content, .consult-wrap,
+.consult-header, .consult-stream, .consult-inputbar {
+    position: relative;
+    z-index: 1;
+}
+
+/* 버블 그림자 살짝 강조 (배경과 분리) */
+.consult-bubble.ai, .consult-bubble.user {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .18);
 }
