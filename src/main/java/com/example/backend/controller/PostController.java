@@ -65,6 +65,9 @@ public class PostController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<Detail>>> getMyPosts(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException("Authentication required");
+        }
         String userEmail = authentication.getName();
         List<Detail> myPosts = postService.getPostsByUser(userEmail);
         return ResponseEntity.ok(ApiResponse.success(myPosts));
