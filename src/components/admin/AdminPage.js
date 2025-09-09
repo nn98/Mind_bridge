@@ -1,5 +1,5 @@
 // src/components/admin/services/AdminPage.js
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -7,8 +7,7 @@ import "../../css/Admin.css";
 
 import AdminStats from "./components/AdminStats";
 import UsersTable from "./components/UsersTable";
-import CalendarPanel from "./components/CalendarPanel";
-import EmotionStatus from "./components/EmotionStatus";
+import CalendarPanel from "./components/CalendarPanel"; // ✅ 차트는 여기 안에서만 렌더링
 import PostsPanel from "./components/PostsPanel";
 
 import {getAdminStats} from "./services/adminApi";
@@ -46,9 +45,7 @@ export default function AdminPage() {
         const q = search.trim().toLowerCase();
         if (!q) return stats.users;
         return stats.users.filter((u) =>
-            String(u?.nickname || "")
-                .toLowerCase()
-                .includes(q)
+            String(u?.nickname || "").toLowerCase().includes(q)
         );
     }, [stats.users, search]);
 
@@ -58,6 +55,13 @@ export default function AdminPage() {
             case "users":
                 return (
                     <>
+                        {/* ✅ 유저 정보 섹션 헤더 */}
+                        <div className="admin-section-header">
+                            <span className="admin-section-icon">👤</span>
+                            <span className="admin-section-title-text">유저 정보</span>
+                        </div>
+
+                        {/* ✅ 통계 카드 */}
                         <AdminStats
                             totalUsers={stats.totalUsers}
                             totalPosts={stats.totalPosts}
@@ -73,24 +77,32 @@ export default function AdminPage() {
                             />
                         </div>
 
-                        <UsersTable users={filteredUsers}/>
+                        {/* ✅ 유저 테이블 */}
+                        <UsersTable users={filteredUsers} showTitle={false}/>
                     </>
                 );
-            case "emotion":
-                return <EmotionStatus/>;
             case "calendar":
-                return <CalendarPanel date={date} setDate={setDate}/>;
+                return (
+                    <>
+                        {/* 📅 캘린더 + 상담/차트 패널 (GenderAgeStats 포함) */}
+                        <CalendarPanel date={date} setDate={setDate}/>
+                    </>
+                );
             case "posts":
                 // ✅ PostsPanel 은 내부에서 자체적으로 검색 처리
                 return <PostsPanel/>;
             default:
                 return (
                     <>
+                        <div className="section-header">
+                            <span className="section-icon">👤</span>
+                            <span className="section-title">유저 정보</span>
+                        </div>
+                        <UsersTable users={filteredUsers}/>
                         <AdminStats
                             totalUsers={stats.totalUsers}
                             totalPosts={stats.totalPosts}
                         />
-                        <UsersTable users={filteredUsers}/>
                     </>
                 );
         }
@@ -117,12 +129,6 @@ export default function AdminPage() {
                     onClick={() => setSection("users")}
                 >
                     👥 유저 관리
-                </button>
-                <button
-                    className={`side-btn ${section === "emotion" ? "active" : ""}`}
-                    onClick={() => setSection("emotion")}
-                >
-                    😊 감정 상태
                 </button>
                 <button
                     className={`side-btn ${section === "calendar" ? "active" : ""}`}
