@@ -47,7 +47,7 @@ public class UserController {
 
     @GetMapping("/availability")
     public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam AvailabilityType type, @RequestParam String value) {
-        System.out.println("type = " + type);
+        
         boolean isAvailable = switch (type) {
             case NICKNAME -> userService.isNicknameAvailable(value);
             case EMAIL    -> userService.isEmailAvailable(value);
