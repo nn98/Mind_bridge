@@ -217,6 +217,10 @@ body {
     text-overflow: ellipsis;
 }
 
+.post-control {
+    width: 110px;
+}
+
 /* =======================
    Badges
 ======================= */
@@ -425,16 +429,22 @@ body {
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: 6px 10px 6px 10px;
     cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #f59e0b;
+    color: var(--mb-danger);
 }
 
 .btn-link {
     background: none;
+    margin-right: 5px;
     color: var(--mb-brand);
     border: none;
+    padding: 6px 10px 6px 10px;
     cursor: pointer;
-    text-decoration: underline;
 }
 
 /* 레이아웃 */

@@ -392,7 +392,7 @@ const PostsPanel = () => {
 
                         <td>
                             {id ? (
-                                <>
+                                <div className="post-control">
                                     <button
                                         type="button"
                                         className="btn-link"
@@ -406,7 +406,7 @@ const PostsPanel = () => {
                                     <button className="btn-danger" onClick={() => onDelete(id)}>
                                         삭제
                                     </button>
-                                </>
+                                </div>
                             ) : (
                                 "─"
                             )}
