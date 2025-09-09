@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,13 @@ public class CounsellingServiceImpl implements CounsellingService {
 
         // DB 저장
         return counsellingRepository.save(counselling);
+    }
+
+
+    //이메일 + 이름으로 상담내역 조회
+    @Override
+    public List<CounsellingEntity> getCounsellingsByEmailAndName(String userEmail, String userName) {
+        return counsellingRepository.findAllByUserEmailAndUserNameOrderByCounselIdDesc(userEmail, userName);
     }
 
 }
