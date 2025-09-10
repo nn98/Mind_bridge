@@ -64,57 +64,67 @@ const CalendarPanel = ({date, setDate}) => {
         const selectedIso = safeDate.format("YYYY-MM-DD");
 
         const fetchWeekly = async () => {
-            const [{data: csRes}, {data: vsRes}] = await Promise.all([
-                axios.get(`${BACKEND_URL}/api/counselling/stats`, {
-                    params: {start: startStr, end: endStr},
-                    withCredentials: true,
-                }),
-                axios.get(`${BACKEND_URL}/api/visitors/stats`, {
-                    params: {start: startStr, end: endStr},
-                    withCredentials: true,
-                }),
-            ]);
+            try {
+                const {data: rangeRes} = await axios.get(
+                    `${BACKEND_URL}/api/metrics/range`,
+                    {
+                        params: {start: startStr, end: endStr},
+                        withCredentials: true,
+                    }
+                );
 
-            const csArr = Array.isArray(csRes?.data) ? csRes.data : [];
-            const vsArr = Array.isArray(vsRes?.data) ? vsRes.data : [];
+                const arr = Array.isArray(rangeRes) ? rangeRes : [];
 
-            const merged = [];
-            for (let i = 0; i < 7; i++) {
-                const d = weekRange.start.add(i, "day");
-                const iso = d.format("YYYY-MM-DD");
-                merged.push({
-                    iso,
-                    label: d.format("ddd"),
-                    counselling: Number(csArr.find((x) => x.date === iso)?.count || 0),
-                    visitors: Number(vsArr.find((x) => x.date === iso)?.count || 0),
-                });
+                const merged = [];
+                for (let i = 0; i < 7; i++) {
+                    const d = weekRange.start.add(i, "day");
+                    const iso = d.format("YYYY-MM-DD");
+
+                    const matched = arr.find((x) => x.statDate === iso);
+                    merged.push({
+                        iso,
+                        label: d.format("ddd"),
+                        counselling: Number(matched?.dailyChatCount || 0),
+                        visitors: Number(matched?.dailyUsersCount || 0),
+                    });
+                }
+
+                setWeeklyData(merged);
+                setSelectedDayCount(
+                    merged.find((x) => x.iso === selectedIso)?.counselling ?? 0
+                );
+
+                // ✅ 콘솔 출력
+                console.log(
+                    "[📊 주간 데이터]",
+                    merged.map(d => ({
+                        날짜: d.iso,
+                        상담: d.counselling,
+                        접속자: d.visitors,
+                    }))
+                );
+            } catch (e) {
+                console.error("주간 데이터 로드 실패:", e);
+                setWeeklyData([]);
+                setSelectedDayCount(0);
             }
-            setWeeklyData(merged);
-            setSelectedDayCount(
-                merged.find((x) => x.iso === selectedIso)?.counselling ?? 0
-            );
         };
 
-        fetchWeekly().catch((e) => {
-            console.error("주간 데이터 로드 실패:", e);
-            setWeeklyData([]);
-            setSelectedDayCount(0);
-        });
+        fetchWeekly();
     }, [weekRange, safeDate]);
 
     /* ───────── 오늘 접속자 수 ───────── */
     useEffect(() => {
         const fetchToday = async () => {
-            const iso = dayjs().format("YYYY-MM-DD");
             try {
-                const {data} = await axios.get(
-                    `${BACKEND_URL}/api/visitors/by-date`,
-                    {
-                        params: {date: iso},
-                        withCredentials: true,
-                    }
-                );
-                setTodayVisitors(Number(data?.count || 0));
+                const {data} = await axios.get(`${BACKEND_URL}/api/metrics/today`, {
+                    withCredentials: true,
+                });
+                setTodayVisitors(Number(data?.dailyUsersCount || 0));
+
+                // ✅ 콘솔 출력
+                console.log("[👥 오늘 접속자 수]", data?.dailyUsersCount || 0, "명");
+                console.log("[🗨️ 오늘 상담 횟수]", data?.dailyChatCount || 0, "회");
             } catch (e) {
                 console.error("금일 접속자 로드 실패:", e);
                 setTodayVisitors(0);
@@ -131,7 +141,6 @@ const CalendarPanel = ({date, setDate}) => {
                     withCredentials: true,
                 });
 
-                // data.users 배열에 [{nickname, email, phoneNumber, gender, age}, ...]
                 setAllUsers(Array.isArray(data?.users) ? data.users : []);
             } catch (e) {
                 console.error("유저 목록 불러오기 실패:", e);
