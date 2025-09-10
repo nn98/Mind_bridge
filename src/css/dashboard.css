@@ -811,7 +811,7 @@ body {
 .emotion-popover-inner {
     min-width: 280px;
     max-width: 420px;
-    background: #ffffff;
+    background: linear-gradient(0deg, #f3e7ff, #ffffff);
     border-radius: 14px;
     padding: 14px 16px;
     border: 1px solid rgba(0, 0, 0, .06);
