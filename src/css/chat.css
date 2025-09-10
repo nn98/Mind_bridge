@@ -1,124 +1,136 @@
 /* ======== 기존 채팅 UI 관련 CSS ======== */
 
 .chat-box {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  height: 100vh;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 6px;
-  font-size: 14px;
-  line-height: 1.5;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    height: 100vh;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .tab-content {
-  max-width: 700px;
-  margin: 0 auto;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.emotion-emoji-btn {
+    cursor: pointer; /* 클릭 가능만 유지 */
+}
+
+/* hover 상태 무효화 */
+.emotion-emoji-btn:hover {
+    background: none !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .bubble {
-  display: inline-block;
-  max-width: 80%;
-  padding: 0.6rem 1rem;
-  border-radius: 18px;
-  white-space: pre-wrap;
-  position: relative;
-  clear: both;
+    display: inline-block;
+    max-width: 80%;
+    padding: 0.6rem 1rem;
+    border-radius: 18px;
+    white-space: pre-wrap;
+    position: relative;
+    clear: both;
 }
 
 .bubble.user {
-  background-color: #9377d4;
-  color: white;
-  float: right;
-  border-bottom-right-radius: 4px;
-  margin-left: auto;
+    background-color: #9377d4;
+    color: white;
+    float: right;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
 }
 
 .bubble.ai {
-  background-color: #d5caf0;
-  color: #333;
-  float: left;
-  border-bottom-left-radius: 4px;
-  margin-right: auto;
+    background-color: #d5caf0;
+    color: #333;
+    float: left;
+    border-bottom-left-radius: 4px;
+    margin-right: auto;
 }
 
 .bubble.typing::after {
-  content: ' ▓ ▓ ▓';
-  font-size: 12px;
-  margin-left: 6px;
-  animation: blink 1s infinite;
+    content: ' ▓ ▓ ▓';
+    font-size: 12px;
+    margin-left: 6px;
+    animation: blink 1s infinite;
 }
 
 @keyframes blink {
 
-  0%,
-  100% {
-    opacity: 0.4;
-  }
+    0%,
+    100% {
+        opacity: 0.4;
+    }
 
-  50% {
-    opacity: 1;
-  }
+    50% {
+        opacity: 1;
+    }
 }
 
 .input-wrapper {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 .input-fixed {
-  justify-content: flex-start;
-  width: 100%;
-  height: 60px;
-  overflow-y: auto;
-  resize: none;
-  font-size: 16px;
-  padding: 15px;
-  padding-right: 70px;
-  line-height: 1.5;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  font-family: 'Noto Sans KR', sans-serif;
-  scrollbar-width: none;
+    justify-content: flex-start;
+    width: 100%;
+    height: 60px;
+    overflow-y: auto;
+    resize: none;
+    font-size: 16px;
+    padding: 15px;
+    padding-right: 70px;
+    line-height: 1.5;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', sans-serif;
+    scrollbar-width: none;
 }
 
 /* 채팅종료 버튼 */
 .chat-button {
-  display: block;
-  width: 200px;
-  margin: 1rem auto;
-  padding: 0.6rem 1.2rem;
-  background-color: #a18cd1;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
+    display: block;
+    width: 200px;
+    margin: 1rem auto;
+    padding: 0.6rem 1.2rem;
+    background-color: #a18cd1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
 }
 
 /* 전송 버튼 */
 .chat-button1 {
-  display: flex;
-  width: 50px;
-  height: 50px;
-  background-color: #a18cd1;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0 0 10px;
-  font-size: 23px;
-  position: absolute;
-  right: 25px;
-  padding-bottom: 17px;
+    display: flex;
+    width: 50px;
+    height: 50px;
+    background-color: #a18cd1;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0 0 10px;
+    font-size: 23px;
+    position: absolute;
+    right: 25px;
+    padding-bottom: 17px;
 }
 
 
@@ -126,257 +138,257 @@
 
 /* 모달 뒷배경 오버레이 */
 .pwd-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
 }
 
 /* 비밀번호 변경 모달 컨테이너 */
 .pwd-change-container {
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  z-index: 1051;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    z-index: 1051;
 }
 
 .pwd-change-container h3 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  font-size: 1.5rem;
-  color: #333;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    color: #333;
 }
 
 /* 모달 내부 입력 필드 그룹 */
 .pwd-input-group {
-  margin-bottom: 20px;
-  text-align: left;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 .pwd-input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95rem;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+    font-size: 0.95rem;
 }
 
 .pwd-input-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-  box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
 }
 
 .pwd-input-group input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 /* 모달 하단 버튼 영역 */
 .pwd-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
 }
 
 /* 모달 전용 버튼 (기존 .chat-button과 충돌 방지) */
 .modal-action-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #8a63d2;
-  color: white;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #8a63d2;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
 }
 
 .modal-action-button:hover {
-  background-color: #7048c4;
+    background-color: #7048c4;
 }
 
 /* 모달 '취소' 버튼 스타일 */
 .modal-action-button.cancel {
-  background-color: #6c757d;
+    background-color: #6c757d;
 }
 
 .modal-action-button.cancel:hover {
-  background-color: #5a6268;
+    background-color: #5a6268;
 }
 
 /* 토스트 메시지 */
 .validation-toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #e74c3c;
-  color: white;
-  padding: 12px 25px;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 500;
-  z-index: 1100;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  animation: toastFadeInOut 3s ease-in-out forwards;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    z-index: 1100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: toastFadeInOut 3s ease-in-out forwards;
 }
 
 @keyframes toastFadeInOut {
-  0% {
-    opacity: 0;
-    bottom: 0;
-  }
+    0% {
+        opacity: 0;
+        bottom: 0;
+    }
 
-  10% {
-    opacity: 1;
-    bottom: 30px;
-  }
+    10% {
+        opacity: 1;
+        bottom: 30px;
+    }
 
-  90% {
-    opacity: 1;
-    bottom: 30px;
-  }
+    90% {
+        opacity: 1;
+        bottom: 30px;
+    }
 
-  100% {
-    opacity: 0;
-    bottom: 0;
-  }
+    100% {
+        opacity: 0;
+        bottom: 0;
+    }
 }
 
 /* 회원정보 탭 내의 추가 스타일 */
 .profile-section {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
 }
 
 .profile-section:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .profile-field {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 .profile-field span {
-  font-weight: bold;
-  width: 100px;
+    font-weight: bold;
+    width: 100px;
 }
 
 .account-button {
-  padding: 8px 15px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f8f9fa;
-  cursor: pointer;
+    padding: 8px 15px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
 }
 
 .account-button.danger {
-  color: #dc3545;
-  border-color: #dc3545;
+    color: #dc3545;
+    border-color: #dc3545;
 }
 
 /* ===== 상담 말풍선/정렬 통일 (ai 왼쪽, user 오른쪽) ===== */
 .chat-container {
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
 }
 
 .chat-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
 }
 
 .chat-title {
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--text-strong);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-strong);
 }
 
 .chat-box {
-  border: 1px solid var(--border);
-  background: var(--surface-alt);
-  border-radius: 12px;
-  padding: 12px;
-  height: 60vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    border-radius: 12px;
+    padding: 12px;
+    height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .msg {
-  display: flex;
+    display: flex;
 }
 
 .msg.ai {
-  justify-content: flex-start;
+    justify-content: flex-start;
 }
 
 .msg.user {
-  justify-content: flex-end;
+    justify-content: flex-end;
 }
 
 .bubble {
-  max-width: 72%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  line-height: 1.5;
-  word-break: keep-all;
-  white-space: pre-wrap;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    max-width: 72%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    line-height: 1.5;
+    word-break: keep-all;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .msg.ai .bubble {
-  background: var(--brand-50);
-  border-color: var(--brand-200);
-  color: var(--brand-900);
-  border-top-left-radius: 6px;
+    background: var(--brand-50);
+    border-color: var(--brand-200);
+    color: var(--brand-900);
+    border-top-left-radius: 6px;
 }
 
 .msg.user .bubble {
-  background: var(--brand);
-  border-color: var(--brand-700);
-  color: var(--brand-fg);
-  border-top-right-radius: 6px;
+    background: var(--brand);
+    border-color: var(--brand-700);
+    color: var(--brand-fg);
+    border-top-right-radius: 6px;
 }
 
 .chat-input-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 .chat-input {
-  flex: 1;
+    flex: 1;
 }
 
 .chat-end {
-  margin-top: 8px;
-  width: 100%;
+    margin-top: 8px;
+    width: 100%;
 }
