@@ -53,6 +53,7 @@
     transform: translateY(-1px);
     background: #efeaff;
     box-shadow: 0 6px 12px rgba(124, 92, 255, .14);
+    color: var(--ink2);
 }
 
 .topic-tab.active {
@@ -103,6 +104,7 @@
     transform: translateX(2px);
     background: #f4f1ff;
     border-color: #d9d2ff;
+    color: #0a0f1f;
 }
 
 .side-tab.active {
@@ -129,7 +131,7 @@
 }
 
 .dot.rec {
-    background: #7c5cff;
+    background: #bbf7d0;
 }
 
 /* 본문 */
