@@ -145,6 +145,7 @@ body {
 
 .ews-chip:hover {
     background: #faf7ff;
+    color: #0a0f1f;
     border-color: rgba(126, 87, 194, .35);
 }
 
@@ -325,10 +326,17 @@ body {
 
 .ews-x {
     border: none;
-    background: #eee;
+    background: #bb0000;
     border-radius: 8px;
     padding: 4px 8px;
     cursor: pointer;
+}
+
+.ews-x:hover {
+    background: #bb0000;
+    color: white;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* 통계 */

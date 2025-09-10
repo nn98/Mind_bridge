@@ -307,6 +307,13 @@ html, body, .emotion-page {
     text-decoration: underline;
 }
 
+.ea-reset-link:hover {
+    background: none !important;
+    color: var(--brand-1);
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .ea-reset-link:disabled {
     opacity: .5;
     cursor: not-allowed;
