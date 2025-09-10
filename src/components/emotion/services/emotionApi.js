@@ -54,7 +54,7 @@ function parseEmotionJsonLoose(raw) {
         "anxiety",       // 불안
         "embarrassment", // 부끄러움
         "envy",          // 질투
-        "ennui"         // 권태 
+        "ennui"         // 권태
     ];
     const out = {};
     let sum = 0;

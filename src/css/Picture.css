@@ -751,3 +751,9 @@ body {
     background: var(--surface);
     border-top: 1px solid var(--border);
 }
+
+.ews-aside .ews-card,
+.ews-aside .ews-list-item,
+.ews-aside .ews-draft-load {
+    box-shadow: none !important;
+}
