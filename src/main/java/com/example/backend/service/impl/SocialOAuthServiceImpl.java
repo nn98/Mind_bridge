@@ -2,7 +2,6 @@ package com.example.backend.service.impl;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,47 +13,19 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.backend.config.properties.OAuthProperties;
 import com.example.backend.service.SocialOAuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * SocialOAuthServiceImpl (통합)
- * - provider: "google" | "kakao"
- * - 인가 URL / 토큰 교환 / 사용자 조회 / 표준화 추출을 단일 클래스에서 분기 처리
- * - 기존 GoogleSocialAuthController + KakaoOAuthServiceImpl 기능 흡수
- *
- * 주의:
- * - 운영 배포 시 각 콘솔의 redirect_uri가 정확히 일치해야 하며,
- *   HTTPS 환경에서만 Secure Cookie가 동작합니다.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SocialOAuthServiceImpl implements SocialOAuthService {
 
 	private final RestTemplate restTemplate;
-
-	// ===== Google props =====
-	@Value("${oauth.google.client-id}")
-	private String googleClientId;
-
-	@Value("${oauth.google.redirect-uri}")
-	private String googleRedirectUri;
-
-	@Value("${oauth.google.client-secret}")
-	private String googleClientSecret;
-
-	// ===== Kakao props =====
-	@Value("${oauth.kakao.client-id}")
-	private String kakaoClientId;
-
-	@Value("${oauth.kakao.client-secret}")
-	private String kakaoClientSecret;
-
-	@Value("${oauth.kakao.redirect-uri}")
-	private String kakaoRedirectUri;
+	private final OAuthProperties oAuthProps; // 변경: 통합 프로퍼티
 
 	// ===== Google endpoints =====
 	private static final String GOOGLE_AUTH_URL   = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -66,9 +37,6 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	private static final String KAKAO_TOKEN_URL   = "https://kauth.kakao.com/oauth/token";
 	private static final String KAKAO_USER_INFO   = "https://kapi.kakao.com/v2/user/me";
 
-	// =========================
-	// 인가 URL
-	// =========================
 	@Override
 	public String buildAuthorizationUrl(String provider) {
 		return switch (provider.toLowerCase()) {
@@ -79,10 +47,10 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	}
 
 	private String buildGoogleAuthorizeUrl() {
-		// 안전 인코딩 권장
+		var g = oAuthProps.getGoogle();
 		return UriComponentsBuilder.fromHttpUrl(GOOGLE_AUTH_URL)
-			.queryParam("client_id", googleClientId)
-			.queryParam("redirect_uri", googleRedirectUri)
+			.queryParam("client_id", g.getClientId())
+			.queryParam("redirect_uri", g.getRedirectUri())
 			.queryParam("response_type", "code")
 			.queryParam("scope", "email profile openid")
 			.queryParam("access_type", "offline")
@@ -93,18 +61,16 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	}
 
 	private String buildKakaoAuthorizeUrl() {
+		var k = oAuthProps.getKakao();
 		return UriComponentsBuilder.fromHttpUrl(KAKAO_AUTH_URL)
-			.queryParam("client_id", kakaoClientId)
-			.queryParam("redirect_uri", kakaoRedirectUri)
+			.queryParam("client_id", k.getClientId())
+			.queryParam("redirect_uri", k.getRedirectUri())
 			.queryParam("response_type", "code")
 			.queryParam("scope", "profile_nickname,account_email")
 			.build()
 			.toUriString();
 	}
 
-	// =========================
-	// code → access_token
-	// =========================
 	@Override
 	public String exchangeCodeForAccessToken(String provider, String code) {
 		return switch (provider.toLowerCase()) {
@@ -115,11 +81,13 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	}
 
 	private String exchangeGoogleToken(String code) {
+		var g = oAuthProps.getGoogle();
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("code", code);
-		params.add("client_id", googleClientId);
-		params.add("client_secret", googleClientSecret);
-		params.add("redirect_uri", googleRedirectUri);
+		params.add("client_id", g.getClientId());
+		params.add("client_secret", g.getClientSecret());
+		params.add("redirect_uri", g.getRedirectUri());
 		params.add("grant_type", "authorization_code");
 
 		HttpHeaders headers = new HttpHeaders();
@@ -138,16 +106,18 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 	}
 
 	private String exchangeKakaoToken(String code) {
+		var k = oAuthProps.getKakao();
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("grant_type", "authorization_code");
-		params.add("client_id", kakaoClientId);
-		params.add("redirect_uri", kakaoRedirectUri);
+		params.add("client_id", k.getClientId());
+		params.add("redirect_uri", k.getRedirectUri());
 		params.add("code", code);
-		if (kakaoClientSecret != null && !kakaoClientSecret.trim().isEmpty()) {
-			params.add("client_secret", kakaoClientSecret);
+		if (k.getClientSecret() != null && !k.getClientSecret().isBlank()) {
+			params.add("client_secret", k.getClientSecret());
 		}
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
@@ -162,9 +132,6 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 		return (String) at;
 	}
 
-	// =========================
-	// 사용자 정보 조회 (raw)
-	// =========================
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> fetchRawUserInfo(String provider, String accessToken) {
@@ -195,9 +162,6 @@ public class SocialOAuthServiceImpl implements SocialOAuthService {
 		};
 	}
 
-	// =========================
-	// 표준 사용자 추출(email, nickname)
-	// =========================
 	@Override
 	@SuppressWarnings("unchecked")
 	public StandardUser extractStandardUser(String provider, Map<String, Object> raw) {
