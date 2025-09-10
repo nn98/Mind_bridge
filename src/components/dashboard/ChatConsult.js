@@ -12,7 +12,6 @@ function hexToRgba(hex, alpha = 0.55) {
     const b = bigint & 255;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
-
 function gammaSmooth(mix, gamma = 0.8) {
     const keys = Object.keys(mix ?? {});
     const powVals = keys.map((k) => Math.pow((mix[k] ?? 0) / 100, gamma));
@@ -21,7 +20,6 @@ function gammaSmooth(mix, gamma = 0.8) {
     keys.forEach((k, i) => (out[k] = (powVals[i] / sumPow) * 100));
     return out;
 }
-
 function clampAndRedistribute(mix, {min = 6, max = 65}) {
     const keys = Object.keys(mix ?? {});
     const src = {...mix};
@@ -60,13 +58,11 @@ function clampAndRedistribute(mix, {min = 6, max = 65}) {
     }
     return src;
 }
-
 function alphaForPct(pct) {
     if (pct >= 60) return 0.38;
     if (pct >= 30) return 0.48;
     return 0.6;
 }
-
 function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
@@ -89,7 +85,6 @@ function buildCompositeBackground(mix, palette) {
     const conic = `conic-gradient(at 72% 28%, ${conicStops.join(", ")})`;
     return `${radialA}, ${radialB}, ${conic}`;
 }
-
 const EMOTION_DESCRIPTIONS = {
     happiness: "밝고 긍정적인 기분이에요.",
     sadness: "마음이 가라앉은 상태예요.",
@@ -98,8 +93,6 @@ const EMOTION_DESCRIPTIONS = {
     calmness: "평온하고 차분한 상태예요.",
     neutral: "특별한 감정 없이 안정적인 상태예요.",
 };
-/* ====================================== */
-
 const EMOJI = {
     happiness: "😊",
     sadness: "😢",
@@ -109,27 +102,80 @@ const EMOJI = {
     neutral: "🙂",
 };
 
+/* ===== 세션 저장 키 & 타임아웃 ===== */
+const LS_KEY = "mindbridge.chat.session.v1";
+const TWO_MIN = 2 * 60 * 1000;
+const ONE_MIN = 60 * 1000;
+
+/* ===== 로컬스토리지 유틸 ===== */
+function persistSession(payload) {
+    try {
+        const toSave = {
+            ...payload,
+            savedAt: Date.now(),
+            expiresAt: Date.now() + TWO_MIN,
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+        window.dispatchEvent(new CustomEvent("mb:chat:persisted", {detail: toSave}));
+    } catch (_) {}
+}
+function readSession() {
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data?.expiresAt || Date.now() > data.expiresAt) return null;
+        return data;
+    } catch (_) { return null; }
+}
+function clearSession() {
+    try { localStorage.removeItem(LS_KEY); } catch(_) {}
+}
+
 function ChatConsultInner({profile}) {
+    // 1) 복원 데이터 먼저 읽기
+    const saved = readSession();
+
+    // 2) 훅 호출 시 초기값 주입(안전 확장)
     const {
-        chatInput, setChatInput, chatHistory, isTyping, isChatEnded,
-        chatEndRef, inputRef, handleSubmit, handleEndChat, handleRestartChat,
+        chatInput, setChatInput,
+        chatHistory,
+        isTyping, isChatEnded,
+        chatEndRef, inputRef,
+        handleSubmit, handleEndChat, handleRestartChat,
         emotionMix, EMOTION_PALETTE,
-    } = useChatFlow({customUser: profile});
+        __internal, // step, guestForm 등 내부 상태 접근(저장용)
+    } = useChatFlow({
+        customUser: profile,
+        initialHistory: saved?.chatHistory || [],
+        initialInput: saved?.chatInput || "",
+        initialStep: typeof saved?.step === "number" ? saved.step : null,
+        initialGuestForm: saved?.guestForm || null,
+        initialIsChatEnded: typeof saved?.isChatEnded === "boolean" ? saved.isChatEnded : null,
+    });
 
     const [isEnding, setIsEnding] = useState(false);
     const [activeLayer, setActiveLayer] = useState(0);
     const [bgLayer, setBgLayer] = useState(["", ""]);
 
-    // 🔗 좌상단 앵커 버튼 & 팝오버
+    // 좌상단 안내 팝오버
     const [openInfo, setOpenInfo] = useState(false);
     const anchorRef = useRef(null);
     const [popPos, setPopPos] = useState({top: 0, left: 0});
 
+    // 1분 무활동 → 토스트 + 카운트다운 → 추가 1분 뒤 자동 종료
+    const [showIdleToast, setShowIdleToast] = useState(false);
+    const [idleCountdown, setIdleCountdown] = useState(60);
+    const idleTimerRef = useRef(null);
+    const countdownRef = useRef(null);
+    const autoEndRef = useRef(null);
+    const lastActivityRef = useRef(Date.now());
+
+    // 배경 합성
     const nextBackground = useMemo(
         () => buildCompositeBackground(emotionMix, EMOTION_PALETTE),
         [emotionMix, EMOTION_PALETTE]
     );
-
     useEffect(() => {
         if (!nextBackground) return;
         const inactive = activeLayer ^ 1;
@@ -142,56 +188,21 @@ function ChatConsultInner({profile}) {
         return () => cancelAnimationFrame(t);
     }, [nextBackground]);
 
-    const lastUserQuery = useMemo(() => {
-        for (let i = chatHistory.length - 1; i >= 0; i--) {
-            if (chatHistory[i].sender === "user") return chatHistory[i].message;
-        }
-        return "";
-    }, [chatHistory]);
-
+    // 스크롤 유지/포커스
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
         const parent = chatEndRef.current?.parentNode;
         if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
     }, [chatHistory, isTyping, chatEndRef]);
-
-    useEffect(() => {
-        if (!isTyping) inputRef.current?.focus();
-    }, [isTyping]);
-    useEffect(() => {
-        inputRef.current?.focus();
-    }, []);
-
-    const onEndChat = async () => {
-        setIsEnding(true);
-        try {
-            await handleEndChat();
-        } finally {
-            setIsEnding(false);
-        }
-    };
-
-    // 현재 지배 감정 & 퍼센트
-    const dominantEmotion = useMemo(() => {
-        if (!emotionMix) return null;
-        return Object.entries(emotionMix).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
-    }, [emotionMix]);
-
-    const dominantPct = useMemo(() => {
-        if (!emotionMix || !dominantEmotion) return null;
-        const v = Number(emotionMix[dominantEmotion] || 0);
-        return Math.max(0, Math.min(100, v));
-    }, [emotionMix, dominantEmotion]);
+    useEffect(() => { if (!isTyping) inputRef.current?.focus(); }, [isTyping]);
+    useEffect(() => { inputRef.current?.focus(); }, []);
 
     // 팝오버 위치
     const recalcPopover = () => {
         const el = anchorRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
-        setPopPos({
-            top: r.bottom + 10 + window.scrollY,
-            left: r.left + r.width / 2 + window.scrollX,
-        });
+        setPopPos({ top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX });
     };
     useLayoutEffect(() => {
         if (!openInfo) return;
@@ -205,7 +216,108 @@ function ChatConsultInner({profile}) {
         };
     }, [openInfo]);
 
-    // 감정 레전드 아이템 JSX
+    // 지배 감정/퍼센트
+    const dominantEmotion = useMemo(() => {
+        if (!emotionMix) return null;
+        return Object.entries(emotionMix).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    }, [emotionMix]);
+    const dominantPct = useMemo(() => {
+        if (!emotionMix || !dominantEmotion) return null;
+        const v = Number(emotionMix[dominantEmotion] || 0);
+        return Math.max(0, Math.min(100, v));
+    }, [emotionMix, dominantEmotion]);
+
+    // ✅ 세션 저장(입력/히스토리/단계/게스트폼/종료여부)
+    useEffect(() => {
+        if (isEnding) return; // 종료 중에는 저장 X
+        persistSession({
+            chatHistory,
+            chatInput,
+            step: __internal?.step ?? null,
+            guestForm: __internal?.guestForm ?? null,
+            isChatEnded,
+        });
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm]);
+
+    // ✅ 종료 버튼
+    const onEndChat = async () => {
+        stopIdleWatchers();
+        setIsEnding(true);
+        try {
+            await handleEndChat();
+            clearSession(); // 정상 종료 시 복원 방지
+        } finally {
+            setIsEnding(false);
+        }
+    };
+
+    // 🕒 무활동 감시
+    function stopIdleWatchers() {
+        if (idleTimerRef.current) { clearTimeout(idleTimerRef.current); idleTimerRef.current = null; }
+        if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+        if (autoEndRef.current) { clearTimeout(autoEndRef.current); autoEndRef.current = null; }
+        setShowIdleToast(false);
+    }
+    function startIdleWatchers() {
+        if (isChatEnded || isEnding) return;
+        stopIdleWatchers();
+        lastActivityRef.current = Date.now();
+        // 1분 무활동 감지
+        idleTimerRef.current = setTimeout(() => {
+            setShowIdleToast(true);
+            setIdleCountdown(60);
+            // 카운트다운
+            countdownRef.current = setInterval(() => {
+                setIdleCountdown((prev) => prev > 0 ? prev - 1 : 0);
+            }, 1000);
+            // 60초 뒤 자동 종료
+            autoEndRef.current = setTimeout(async () => {
+                stopIdleWatchers();
+                if (!isEnding && !isChatEnded) {
+                    setIsEnding(true);
+                    try {
+                        await handleEndChat();
+                        clearSession();
+                    } finally {
+                        setIsEnding(false);
+                    }
+                }
+            }, ONE_MIN);
+        }, ONE_MIN);
+    }
+    const onAnyActivity = () => {
+        if (isChatEnded || isEnding) return;
+        const now = Date.now();
+        if (now - lastActivityRef.current < 300) return;
+        lastActivityRef.current = now;
+        // 활동 발생 → 즉시 리셋 + 세션 갱신 + 다시 감시 시작
+        stopIdleWatchers();
+        persistSession({
+            chatHistory,
+            chatInput,
+            step: __internal?.step ?? null,
+            guestForm: __internal?.guestForm ?? null,
+            isChatEnded,
+        });
+        startIdleWatchers();
+    };
+    useEffect(() => {
+        startIdleWatchers();
+        const opts = {passive: true};
+        window.addEventListener("mousemove", onAnyActivity, opts);
+        window.addEventListener("click", onAnyActivity, opts);
+        window.addEventListener("keydown", onAnyActivity, false);
+        window.addEventListener("touchstart", onAnyActivity, opts);
+        return () => {
+            window.removeEventListener("mousemove", onAnyActivity, opts);
+            window.removeEventListener("click", onAnyActivity, opts);
+            window.removeEventListener("keydown", onAnyActivity, false);
+            window.removeEventListener("touchstart", onAnyActivity, opts);
+            stopIdleWatchers();
+        };
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm]);
+
+    // 레전드 아이템
     const LegendItem = ({k}) => {
         const color = EMOTION_PALETTE?.[k] || "#ccc";
         const pct = emotionMix && typeof emotionMix[k] === "number"
@@ -215,8 +327,8 @@ function ChatConsultInner({profile}) {
             <div className="legend-item" key={k} title={`${k} ${pct}%`}>
                 <span className="legend-swatch" style={{backgroundColor: color}}/>
                 <span className="legend-label">
-          {EMOJI[k]} {k}
-        </span>
+                    {EMOJI[k]} {k}
+                </span>
                 <span className="legend-pct">{pct}%</span>
                 <div className="legend-desc">{EMOTION_DESCRIPTIONS[k]}</div>
             </div>
@@ -231,12 +343,13 @@ function ChatConsultInner({profile}) {
             <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
                  style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined} aria-hidden/>
 
-            {/* 헤더 (그대로) */}
+            {/* 헤더 */}
             <div className="consult-header">
                 <div className="consult-logo">MindBridge</div>
-                <h1 className="consult-title">{lastUserQuery || "무엇이든 물어보세요"}</h1>
+                <h1 className="consult-title">{(chatHistory.findLast?.(m=>m.sender==="user")?.message) || "무엇이든 물어보세요"}</h1>
             </div>
 
+            {/* 감정 안내 i 버튼 */}
             <button
                 ref={anchorRef}
                 className="emotion-emoji-btn emotion-info-anchor"
@@ -245,7 +358,6 @@ function ChatConsultInner({profile}) {
                 aria-label="감정 안내 열기"
                 aria-expanded={openInfo}
             >
-                {/* 단순 알파벳 i 아이콘 */}
                 <svg className="icon-info" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor"/>
                 </svg>
@@ -255,12 +367,7 @@ function ChatConsultInner({profile}) {
             {openInfo && (
                 <div
                     className="emotion-popover"
-                    style={{
-                        position: "fixed",
-                        top: `${popPos.top}px`,
-                        left: `${popPos.left}px`,
-                        transform: "translate(-50%,0)"
-                    }}
+                    style={{ position: "fixed", top: `${popPos.top}px`, left: `${popPos.left}px`, transform: "translate(-50%,0)" }}
                     role="dialog" aria-modal="true"
                 >
                     <div className="emotion-popover-inner">
@@ -268,23 +375,19 @@ function ChatConsultInner({profile}) {
                             <strong>감정 색상 안내</strong>
                             <button className="close" onClick={() => setOpenInfo(false)} aria-label="닫기">×</button>
                         </div>
-
-                        {/* 레전드 그리드 */}
                         <div className="legend-grid">
                             {["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"].map(k => (
                                 <LegendItem k={k} key={k}/>
                             ))}
                         </div>
-
-                        {/* 현재 상태 라인 */}
                         <div className="current-line">
                             {dominantEmotion ? (
                                 <>
                                     <span className="dot" style={{background: EMOTION_PALETTE[dominantEmotion]}}/>
                                     <span className="state">
-                    지금은 <b>{EMOJI[dominantEmotion]} {dominantEmotion}</b> 상태예요
+                                        지금은 <b>{EMOJI[dominantEmotion]} {dominantEmotion}</b> 상태예요
                                         {typeof dominantPct === "number" ? ` (${Math.round(dominantPct)}%)` : ""}.
-                  </span>
+                                    </span>
                                 </>
                             ) : (
                                 <span className="state">아직 분석된 감정이 없습니다.</span>
@@ -315,6 +418,9 @@ function ChatConsultInner({profile}) {
                     placeholder="질문을 입력하고 Enter를 누르세요. (Shift+Enter 줄바꿈)"
                     value={chatInput}
                     onChange={(e) => {
+                        __internal?.setStep?.(__internal.step); // no-op to silence lints if needed
+                        __internal?.setGuestForm?.(__internal.guestForm);
+                        // 입력 변경도 활동으로 간주되도록
                         setChatInput(e.target.value);
                         const el = e.target;
                         el.style.height = "0px";
@@ -335,20 +441,15 @@ function ChatConsultInner({profile}) {
                             <button type="submit" className="consult-send"
                                     disabled={isTyping || !chatInput.trim() || isEnding}>보내기
                             </button>
-                            <button type="button" className="consult-end" onClick={async () => {
-                                setIsEnding(true);
-                                try {
-                                    await handleEndChat();
-                                } finally {
-                                    setIsEnding(false);
-                                }
-                            }} disabled={isTyping || isEnding}>종료
+                            <button type="button" className="consult-end" onClick={onEndChat}
+                                    disabled={isTyping || isEnding}>종료
                             </button>
                         </>
                     ) : (
                         <button type="button" className="consult-send"
                                 onClick={() => {
                                     handleRestartChat();
+                                    clearSession(); // 새상담은 세션 리셋
                                     inputRef.current?.focus();
                                 }}>
                             새 상담 시작
@@ -356,6 +457,17 @@ function ChatConsultInner({profile}) {
                     )}
                 </div>
             </form>
+
+            {/* 중앙 토스트: 1분 무활동 경고 + 실시간 카운트다운 */}
+            {showIdleToast && !isEnding && !isChatEnded && (
+                <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
+                    <div className="toast-title">1분 동안 활동이 없어요</div>
+                    <div className="toast-desc">
+                        <b>{idleCountdown}</b>초 뒤 채팅이 자동 종료됩니다.
+                    </div>
+                    <div className="toast-sub">정상적 종료를 원하시면 <b>채팅종료</b>를 눌러주세요.</div>
+                </div>
+            )}
         </div>
     );
 }

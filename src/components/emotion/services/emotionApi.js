@@ -109,27 +109,6 @@ function withTimeout(promise, ms, signal) {
 }
 
 // ---------- 폴백: 간단 휴리스틱 분석(모델 실패 시) ----------
-function fallbackHeuristic(text) {
-    const t = (text || '').toLowerCase();
-    const score = { happiness: 10, sadness: 10, anger: 10, anxiety: 10, calmness: 60 };
-
-    if (/(행복|기쁨|좋다|happy|joy|기분좋)/i.test(t)) score.happiness += 25;
-    if (/(슬프|우울|sad|depress|down)/i.test(t)) score.sadness += 25;
-    if (/(화가|분노|짜증|angry|rage)/i.test(t)) score.anger += 25;
-    if (/(불안|걱정|anxious|불편|초조)/i.test(t)) score.anxiety += 25;
-    if (/(차분|편안|calm|평온|안정)/i.test(t)) score.calmness += 25;
-
-    // 정규화(총 100)
-    const sum = Object.values(score).reduce((a, b) => a + b, 0);
-    const out = {};
-    for (const k of Object.keys(score)) out[k] = Math.round((score[k] / sum) * 100);
-    const fix = 100 - Object.values(out).reduce((a, b) => a + b, 0);
-    if (fix !== 0) {
-        const maxKey = Object.keys(out).reduce((a, b) => (out[a] >= out[b] ? a : b));
-        out[maxKey] += fix;
-    }
-    return out;
-}
 
 /**
  * 모델/백엔드 호출
@@ -199,7 +178,6 @@ JSON만 출력(설명/코드블럭 금지):
         const content =
             data?.choices?.[0]?.message?.content ??
             data?.data?.choices?.[0]?.message?.content ??
-            data?.output_text ??
             data?.message?.content ??
             null;
 
@@ -221,8 +199,6 @@ JSON만 출력(설명/코드블럭 금지):
             attempt += 1;
             if (attempt > retries) {
                 console.warn('[Emotion] API 실패, 휴리스틱 폴백 사용:', e.message);
-                // 폴백으로라도 UI 비어 보이지 않게
-                return fallbackHeuristic(text);
             }
             await new Promise(r => setTimeout(r, 400 * attempt));
         }

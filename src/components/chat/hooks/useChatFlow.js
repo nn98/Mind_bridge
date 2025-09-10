@@ -42,7 +42,6 @@ function normalizeEmotionMix(raw) {
 
     let map = {};
 
-    // 객체 {행복: 0.4, ...} 또는 {happiness: 40, ...}
     if (typeof raw === "object" && !Array.isArray(raw)) {
         for (const [k, v] of Object.entries(raw)) {
             const key = (KOR_TO_STD[k] || k || "").toString().toLowerCase();
@@ -53,7 +52,6 @@ function normalizeEmotionMix(raw) {
         }
     }
 
-    // 배열 [{label/value}, ...]
     if (Array.isArray(raw)) {
         for (const item of raw) {
             const label = item?.label ?? item?.emotion ?? item?.name;
@@ -66,16 +64,12 @@ function normalizeEmotionMix(raw) {
         }
     }
 
-    // 문자열
     if (typeof raw === "string") {
         const s = raw.trim();
-
-        // 다중 페어: "기쁨: 1%, 슬픔 60%, 분노:5% ..." (쉼표/슬래시/한글쉼표로 분리)
         const parts = s.split(/[,\u3001/]+/);
         let found = false;
 
         for (const seg of parts) {
-            // "라벨: 값%" 또는 "라벨 값%" 모두 허용
             const m = seg.match(/\s*([^:\s]+)\s*[:\s]\s*([0-9]+(?:\.[0-9]+)?)\s*%?\s*$/);
             if (m) {
                 const label = m[1];
@@ -87,8 +81,6 @@ function normalizeEmotionMix(raw) {
                 }
             }
         }
-
-        // 단일 라벨만 온 경우
         if (!found) {
             const key = (KOR_TO_STD[s] || s).toString().toLowerCase();
             if (KEYS.includes(key)) map[key] = 1;
@@ -97,11 +89,9 @@ function normalizeEmotionMix(raw) {
 
     if (Object.keys(map).length === 0) return null;
 
-    // 합산 후 0이면 무효
     let sum = Object.values(map).reduce((a, b) => a + (Number(b) || 0), 0);
     if (sum <= 0) return null;
 
-    // 합 100으로 스케일
     const scaled = {};
     for (const k of Object.keys(map)) scaled[k] = (map[k] / sum) * 100;
     for (const k of KEYS) if (!(k in scaled)) scaled[k] = 0;
@@ -115,27 +105,50 @@ function debugLogEmotion(label, raw, mix) {
     console.log(`[Emotion] ${label} normalized:`, mix ?? null);
 }
 
-export function useChatFlow({customUser}) {
+/**
+ * ✅ 안전 확장: 초기값 옵션만 추가 (기존 로직은 동일)
+ *   - initialHistory, initialInput, initialStep, initialGuestForm, initialIsChatEnded
+ *   - 모두 선택적이며, 미지정 시 기존 동작 100% 유지
+ */
+export function useChatFlow({
+                                customUser,
+                                initialHistory = [],
+                                initialInput = "",
+                                initialStep = null,
+                                initialGuestForm = null,
+                                initialIsChatEnded = null,
+                            }) {
     const [sessionId, setSessionId] = useState(null);
-    const [chatInput, setChatInput] = useState("");
-    const [chatHistory, setChatHistory] = useState(() =>
-        customUser?.email
-            ? [
-                {
-                    sender: "ai",
-                    message: `안녕하세요 ${customUser.fullName || customUser.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
-                },
-            ]
-            : [
-                {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
-                {sender: "ai", message: guestQuestions[0]},
-            ]
-    );
-    const [isTyping, setIsTyping] = useState(false);
-    const [isChatEnded, setIsChatEnded] = useState(false);
 
-    const [step, setStep] = useState(customUser?.email ? guestQuestions.length : 0);
-    const [guestForm, setGuestForm] = useState({});
+    // 히스토리: 주어지면 그대로 사용, 아니면 기존 초기 메시지 로직
+    const [chatHistory, setChatHistory] = useState(() =>
+        (initialHistory && initialHistory.length > 0)
+            ? initialHistory
+            : (customUser?.email
+                ? [
+                    {
+                        sender: "ai",
+                        message: `안녕하세요 ${customUser.fullName || customUser.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
+                    },
+                ]
+                : [
+                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
+                    {sender: "ai", message: guestQuestions[0]},
+                ])
+    );
+
+    const [chatInput, setChatInput] = useState(initialInput || "");
+    const [isTyping, setIsTyping] = useState(false);
+    const [isChatEnded, setIsChatEnded] = useState(
+        typeof initialIsChatEnded === "boolean" ? initialIsChatEnded : false
+    );
+
+    const [step, setStep] = useState(() => {
+        if (customUser?.email) return guestQuestions.length; // 로그인 사용자는 게스트 단계 생략
+        if (typeof initialStep === "number") return initialStep;
+        return 0;
+    });
+    const [guestForm, setGuestForm] = useState(() => initialGuestForm || {});
 
     // 🔥 실시간 감정 믹스(합=100) — 배경 그라데이션 트리거
     const [emotionMix, setEmotionMix] = useState(null);
@@ -279,8 +292,16 @@ export function useChatFlow({customUser}) {
         // 🔥 배경 그라데이션용 상태/팔레트
         emotionMix,
         EMOTION_PALETTE,
+
+        // ✅ 복원용 내부 상태(컴포넌트에서 저장하기 위함)
+        //  - 기존 외부 API에는 영향 없음
+        __internal: {
+            step, setStep,
+            guestForm, setGuestForm,
+            setChatHistory,
+            setIsChatEnded,
+        },
     };
 }
 
-// named & default 둘 다 제공 (import 충돌 방지)
 export default useChatFlow;

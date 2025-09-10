@@ -392,3 +392,72 @@
     margin-top: 8px;
     width: 100%;
 }
+
+/* ============================
+   예쁜 중앙 토스트 (무활동 경고)
+   파스텔 톤 + 글래스 효과
+============================ */
+.center-toast.inactivity-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 36px;
+    transform: translateX(-50%);
+    z-index: 1100;
+
+    /* 파스텔 톤 글래스 배경 */
+    background: linear-gradient(135deg,
+    rgba(255, 214, 165, 0.85), /* 파스텔 오렌지 */ rgba(207, 225, 255, 0.85), /* 파스텔 블루 */ rgba(227, 209, 255, 0.85) /* 파스텔 퍼플 */
+    );
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+
+    color: #333;
+    padding: 18px 22px;
+    border-radius: 16px;
+    min-width: 300px;
+    max-width: 420px;
+    text-align: center;
+
+    animation: toast-pop-in .25s ease-out;
+}
+
+.center-toast .toast-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    color: #444;
+    letter-spacing: -0.2px;
+}
+
+.center-toast .toast-desc {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.center-toast .toast-desc b {
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #6c63ff; /* 파스텔 보라 포인트 */
+}
+
+.center-toast .toast-sub {
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+}
+
+@keyframes toast-pop-in {
+    from {
+        transform: translate(-50%, 12px);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
