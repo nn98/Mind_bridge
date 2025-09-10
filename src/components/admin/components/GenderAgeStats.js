@@ -31,7 +31,7 @@ const normalizeUser = (raw) => {
 const CustomTooltip = ({active, payload}) => {
     if (active && payload && payload.length) {
         const item = payload[0];
-        const label = item.payload?.name || item.name; // ← ageData/genderData의 name 사용
+        const label = item.payload?.name || item.name;
         return (
             <div
                 style={{
@@ -111,7 +111,11 @@ export default function GenderAgeStats({selectedDateUsers = []}) {
                                 />
                             ))}
                         </Pie>
-                        <Tooltip content={<CustomTooltip/>}/>
+                        <Tooltip
+                            content={<CustomTooltip/>}
+                            wrapperStyle={{transition: "none"}} // ✅ 애니메이션 제거
+                            followCursor={true}                  // ✅ 커서 따라오기 유지
+                        />
                     </PieChart>
                 </ResponsiveContainer>
 
@@ -121,7 +125,11 @@ export default function GenderAgeStats({selectedDateUsers = []}) {
                         <CartesianGrid strokeDasharray="3 3"/>
                         <XAxis dataKey="name"/>
                         <YAxis allowDecimals={false}/>
-                        <Tooltip content={<CustomTooltip/>}/>
+                        <Tooltip
+                            content={<CustomTooltip/>}
+                            wrapperStyle={{transition: "none"}}
+                            followCursor={true}
+                        />
                         <Bar
                             dataKey="value"
                             fill={AgeColor}
