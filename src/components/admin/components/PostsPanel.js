@@ -69,9 +69,7 @@ const PostsPanel = () => {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
 
-    const [searchInput, setSearchInput] = useState("");
-    const [search, setSearch] = useState("");
-
+    const [search, setSearch] = useState(""); // ✅ 입력 즉시 반영
     const [sortKey, setSortKey] = useState("createdAt");
     const [sortDir, setSortDir] = useState("desc");
 
@@ -84,12 +82,12 @@ const PostsPanel = () => {
 
     const sortParam = `${sortKey},${sortDir}`;
 
+    // ✅ 전체 데이터 불러오기
     const fetch = async () => {
         try {
             setLoading(true);
             setError("");
-
-            const raw = await getAllPosts({page: 0, size: 9999, sort: sortParam}); // ✅ 전체 불러오기
+            const raw = await getAllPosts({page: 0, size: 9999, sort: sortParam});
             const data = raw?.data?.content ?? raw?.content ?? raw?.data ?? raw ?? [];
             setPosts(Array.isArray(data) ? data : []);
         } catch (e) {
@@ -105,20 +103,6 @@ const PostsPanel = () => {
         fetch();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sortKey, sortDir]);
-
-    const onSearchSubmit = (e) => {
-        e?.preventDefault?.();
-        setPage(0);
-        setSearch(searchInput.trim());
-    };
-
-    const onKeyDown = (e) => {
-        if (e.isComposing) return;
-        if (e.key === "Enter") {
-            e.preventDefault();
-            e.currentTarget.form?.requestSubmit?.();
-        }
-    };
 
     const onDelete = (postId) => {
         const toastId = toast.info(
@@ -196,7 +180,6 @@ const PostsPanel = () => {
     const filteredPosts = useMemo(() => {
         let arr = [...posts];
 
-        // 검색
         const q = search.trim().toLowerCase();
         if (q) {
             arr = arr.filter((p) => {
@@ -207,7 +190,6 @@ const PostsPanel = () => {
                     p?.user?.nickname ??
                     p?.author?.nickname ??
                     "";
-
                 const email =
                     p?.email ??
                     p?.authorEmail ??
@@ -215,10 +197,8 @@ const PostsPanel = () => {
                     p?.user?.email ??
                     p?.author?.email ??
                     "";
-
                 const content = p?.content ?? "";
                 const title = p?.title ?? "";
-
                 return (
                     String(nickname).toLowerCase().includes(q) ||
                     String(email).toLowerCase().includes(q) ||
@@ -228,7 +208,6 @@ const PostsPanel = () => {
             });
         }
 
-        // 공개/비공개 필터
         if (visibilityFilter !== "all") {
             arr = arr.filter((p) => {
                 const {isPublic} = getVisibilityInfo(p);
@@ -364,24 +343,23 @@ const PostsPanel = () => {
 
     return (
         <div className="section-container posts-panel">
-            <h2 className="admin-section-header">📋 게시글</h2>
+            <h2 className="section-header">📋 게시글</h2>
 
             <div className="toolbar">
-                <form onSubmit={onSearchSubmit} className="toolbar-form">
+                <div className="toolbar-form">
                     <input
                         type="text"
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        onKeyDown={onKeyDown}
+                        value={search}
+                        onChange={(e) => {
+                            setPage(0);
+                            setSearch(e.target.value);
+                        }}
                         placeholder="제목/작성자/이메일/내용 검색"
                         className="input"
                     />
-                    <button type="submit" className="btn">
-                        검색
-                    </button>
-                </form>
+                </div>
 
-                {/* ✅ 유형 필터 */}
+                {/* 유형 필터 */}
                 <select
                     value={visibilityFilter}
                     onChange={(e) => {
@@ -455,8 +433,8 @@ const PostsPanel = () => {
                         이전
                     </button>
                     <span className="page-indicator">
-            {page + 1} / {Math.max(totalPages, 1)}
-          </span>
+                        {page + 1} / {Math.max(totalPages, 1)}
+                    </span>
                     <button
                         className="btn"
                         disabled={page >= totalPages - 1}

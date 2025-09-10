@@ -57,8 +57,7 @@ export default function AdminPage() {
                     <>
                         {/* ✅ 유저 정보 섹션 헤더 */}
                         <div className="admin-section-header">
-                            <span className="admin-section-icon">👤</span>
-                            <span className="admin-section-title-text">유저 정보</span>
+                            <span className="admin-section-title-text">👤 유저 정보</span>
                         </div>
 
                         {/* ✅ 통계 카드 */}
