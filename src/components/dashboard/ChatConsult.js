@@ -241,13 +241,13 @@ function ChatConsultInner({profile}) {
                 ref={anchorRef}
                 className="emotion-emoji-btn emotion-info-anchor"
                 onClick={() => setOpenInfo(v => !v)}
-                title="현재 감정 설명 보기"
+                title="감정 안내 보기"
                 aria-label="감정 안내 열기"
                 aria-expanded={openInfo}
             >
-                {/* 선명한 느낌표 SVG (현재색 상속) */}
-                <svg className="icon-exclaim" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M11 4h2v12h-2zM11 18h2v2h-2z" fill="currentColor"/>
+                {/* 단순 알파벳 i 아이콘 */}
+                <svg className="icon-info" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor"/>
                 </svg>
             </button>
 
