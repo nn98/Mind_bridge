@@ -1,11 +1,9 @@
 // src/components/dashboard/ChatConsult.jsx
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState, useLayoutEffect} from "react";
 import {useChatFlow} from "../chat/hooks/useChatFlow";
 import {useAuth} from "../../AuthContext";
 
-/* =========================
-   Color/Math Utilities
-========================= */
+/* ========= 기존 유틸/로직 (수정 없음) ========= */
 function hexToRgba(hex, alpha = 0.55) {
     const h = hex.replace("#", "");
     const bigint = parseInt(h, 16);
@@ -28,12 +26,10 @@ function clampAndRedistribute(mix, {min = 6, max = 65}) {
     const keys = Object.keys(mix ?? {});
     const src = {...mix};
     const nonZero = keys.filter((k) => (src[k] ?? 0) > 0);
-
     nonZero.forEach((k) => {
         if (src[k] < min) src[k] = min;
         if (src[k] > max) src[k] = max;
     });
-
     let total = keys.reduce((a, k) => a + (src[k] ?? 0), 0);
     for (let i = 0; i < 2; i++) {
         if (total > 100) {
@@ -57,7 +53,6 @@ function clampAndRedistribute(mix, {min = 6, max = 65}) {
         }
         total = keys.reduce((a, k) => a + (src[k] ?? 0), 0);
     }
-
     const err = 100 - total;
     if (Math.abs(err) > 0.01) {
         const k = nonZero[0] || keys[0];
@@ -77,7 +72,6 @@ function buildCompositeBackground(mix, palette) {
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
     const smooth = gammaSmooth(mix, 0.8);
     const adjusted = clampAndRedistribute(smooth, {min: 6, max: 65});
-
     let acc = 0;
     const conicStops = [];
     for (const key of order) {
@@ -90,41 +84,47 @@ function buildCompositeBackground(mix, palette) {
         conicStops.push(`${col} ${from.toFixed(2)}% ${to.toFixed(2)}%`);
         acc = to;
     }
-
     const radialA = `radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,.06), rgba(255,255,255,0) 60%)`;
     const radialB = `radial-gradient(50% 50% at 85% 0%, rgba(255,255,255,.05), rgba(255,255,255,0) 50%)`;
     const conic = `conic-gradient(at 72% 28%, ${conicStops.join(", ")})`;
-
     return `${radialA}, ${radialB}, ${conic}`;
 }
 
-/* =========================
-   Component
-========================= */
+const EMOTION_DESCRIPTIONS = {
+    happiness: "밝고 긍정적인 기분이에요.",
+    sadness: "마음이 가라앉은 상태예요.",
+    anger: "화가 나는 감정이 드는 상태예요.",
+    anxiety: "불안하거나 긴장된 상태예요.",
+    calmness: "평온하고 차분한 상태예요.",
+    neutral: "특별한 감정 없이 안정적인 상태예요.",
+};
+/* ====================================== */
 
-function ChatConsultInner({profile, isLoggedIn}) {
+const EMOJI = {
+    happiness: "😊",
+    sadness: "😢",
+    anger: "😡",
+    anxiety: "😟",
+    calmness: "😌",
+    neutral: "🙂",
+};
+
+function ChatConsultInner({profile}) {
     const {
-        chatInput,
-        setChatInput,
-        chatHistory,
-        isTyping,
-        isChatEnded,
-        chatEndRef,
-        inputRef,
-        handleSubmit,
-        handleEndChat,
-        handleRestartChat,
-        emotionMix,
-        EMOTION_PALETTE,
+        chatInput, setChatInput, chatHistory, isTyping, isChatEnded,
+        chatEndRef, inputRef, handleSubmit, handleEndChat, handleRestartChat,
+        emotionMix, EMOTION_PALETTE,
     } = useChatFlow({customUser: profile});
 
     const [isEnding, setIsEnding] = useState(false);
+    const [activeLayer, setActiveLayer] = useState(0);
+    const [bgLayer, setBgLayer] = useState(["", ""]);
 
-    // 교차 페이드용 2 레이어 상태
-    const [activeLayer, setActiveLayer] = useState(0); // 0 또는 1
-    const [bgLayer, setBgLayer] = useState(["", ""]);  // 각 레이어의 backgroundImage 값
+    // 🔗 좌상단 앵커 버튼 & 팝오버
+    const [openInfo, setOpenInfo] = useState(false);
+    const anchorRef = useRef(null);
+    const [popPos, setPopPos] = useState({top: 0, left: 0});
 
-    // 새 배경이 오면 비활성 레이어에 먼저 세팅 → active 토글로 페이드
     const nextBackground = useMemo(
         () => buildCompositeBackground(emotionMix, EMOTION_PALETTE),
         [emotionMix, EMOTION_PALETTE]
@@ -132,16 +132,15 @@ function ChatConsultInner({profile, isLoggedIn}) {
 
     useEffect(() => {
         if (!nextBackground) return;
-        const inactive = activeLayer ^ 1; // 0->1, 1->0
+        const inactive = activeLayer ^ 1;
         setBgLayer((prev) => {
             const next = [...prev];
             next[inactive] = nextBackground;
             return next;
         });
-        // 다음 animation frame에 활성 토글해 opacity 전환
         const t = requestAnimationFrame(() => setActiveLayer(inactive));
         return () => cancelAnimationFrame(t);
-    }, [nextBackground]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [nextBackground]);
 
     const lastUserQuery = useMemo(() => {
         for (let i = chatHistory.length - 1; i >= 0; i--) {
@@ -159,7 +158,6 @@ function ChatConsultInner({profile, isLoggedIn}) {
     useEffect(() => {
         if (!isTyping) inputRef.current?.focus();
     }, [isTyping]);
-
     useEffect(() => {
         inputRef.current?.focus();
     }, []);
@@ -173,58 +171,144 @@ function ChatConsultInner({profile, isLoggedIn}) {
         }
     };
 
-    useEffect(() => {
-        if (!emotionMix) {
-            console.log("[Emotion] no mix yet (using base background)");
-            return;
-        }
-        const entries = Object.entries(emotionMix)
-            .map(([k, v]) => `${k}:${Number(v).toFixed(2)}%`)
-            .join(" | ");
-        console.log(`[Emotion] active mix → ${entries}`);
+    // 현재 지배 감정 & 퍼센트
+    const dominantEmotion = useMemo(() => {
+        if (!emotionMix) return null;
+        return Object.entries(emotionMix).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
     }, [emotionMix]);
+
+    const dominantPct = useMemo(() => {
+        if (!emotionMix || !dominantEmotion) return null;
+        const v = Number(emotionMix[dominantEmotion] || 0);
+        return Math.max(0, Math.min(100, v));
+    }, [emotionMix, dominantEmotion]);
+
+    // 팝오버 위치
+    const recalcPopover = () => {
+        const el = anchorRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        setPopPos({
+            top: r.bottom + 10 + window.scrollY,
+            left: r.left + r.width / 2 + window.scrollX,
+        });
+    };
+    useLayoutEffect(() => {
+        if (!openInfo) return;
+        recalcPopover();
+        const onWin = () => recalcPopover();
+        window.addEventListener("resize", onWin);
+        window.addEventListener("scroll", onWin, {passive: true});
+        return () => {
+            window.removeEventListener("resize", onWin);
+            window.removeEventListener("scroll", onWin);
+        };
+    }, [openInfo]);
+
+    // 감정 레전드 아이템 JSX
+    const LegendItem = ({k}) => {
+        const color = EMOTION_PALETTE?.[k] || "#ccc";
+        const pct = emotionMix && typeof emotionMix[k] === "number"
+            ? Math.round(Math.max(0, Math.min(100, emotionMix[k])))
+            : 0;
+        return (
+            <div className="legend-item" key={k} title={`${k} ${pct}%`}>
+                <span className="legend-swatch" style={{backgroundColor: color}}/>
+                <span className="legend-label">
+          {EMOJI[k]} {k}
+        </span>
+                <span className="legend-pct">{pct}%</span>
+                <div className="legend-desc">{EMOTION_DESCRIPTIONS[k]}</div>
+            </div>
+        );
+    };
 
     return (
         <div className="consult-wrap">
-            {/* 🔥 감정 물결 배경 — 화면 전체 고정, 2중 레이어 교차 페이드 */}
-            <div
-                className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
-                style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined}
-                aria-hidden
-            />
-            <div
-                className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
-                style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined}
-                aria-hidden
-            />
+            {/* 배경 레이어 */}
+            <div className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
+                 style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined} aria-hidden/>
+            <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
+                 style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined} aria-hidden/>
 
-            {/* 상단 헤더 */}
+            {/* 헤더 (그대로) */}
             <div className="consult-header">
                 <div className="consult-logo">MindBridge</div>
                 <h1 className="consult-title">{lastUserQuery || "무엇이든 물어보세요"}</h1>
             </div>
 
+            <button
+                ref={anchorRef}
+                className="emotion-emoji-btn emotion-info-anchor"
+                onClick={() => setOpenInfo(v => !v)}
+                title="현재 감정 설명 보기"
+                aria-label="감정 안내 열기"
+                aria-expanded={openInfo}
+            >
+                {/* 선명한 느낌표 SVG (현재색 상속) */}
+                <svg className="icon-exclaim" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M11 4h2v12h-2zM11 18h2v2h-2z" fill="currentColor"/>
+                </svg>
+            </button>
+
+            {/* 팝오버 */}
+            {openInfo && (
+                <div
+                    className="emotion-popover"
+                    style={{
+                        position: "fixed",
+                        top: `${popPos.top}px`,
+                        left: `${popPos.left}px`,
+                        transform: "translate(-50%,0)"
+                    }}
+                    role="dialog" aria-modal="true"
+                >
+                    <div className="emotion-popover-inner">
+                        <div className="popover-header-row">
+                            <strong>감정 색상 안내</strong>
+                            <button className="close" onClick={() => setOpenInfo(false)} aria-label="닫기">×</button>
+                        </div>
+
+                        {/* 레전드 그리드 */}
+                        <div className="legend-grid">
+                            {["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"].map(k => (
+                                <LegendItem k={k} key={k}/>
+                            ))}
+                        </div>
+
+                        {/* 현재 상태 라인 */}
+                        <div className="current-line">
+                            {dominantEmotion ? (
+                                <>
+                                    <span className="dot" style={{background: EMOTION_PALETTE[dominantEmotion]}}/>
+                                    <span className="state">
+                    지금은 <b>{EMOJI[dominantEmotion]} {dominantEmotion}</b> 상태예요
+                                        {typeof dominantPct === "number" ? ` (${Math.round(dominantPct)}%)` : ""}.
+                  </span>
+                                </>
+                            ) : (
+                                <span className="state">아직 분석된 감정이 없습니다.</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* 메시지 영역 */}
             <div className="consult-stream" role="log" aria-live="polite">
                 {chatHistory.map((msg, i) => (
-                    <div key={i} className={`consult-bubble ${msg.sender}`}>
-                        {msg.message}
-                    </div>
+                    <div key={i} className={`consult-bubble ${msg.sender}`}>{msg.message}</div>
                 ))}
                 {isTyping && <div className="consult-bubble ai typing">AI 응답 생성 중</div>}
                 <div ref={chatEndRef}/>
             </div>
 
-            {/* 하단 입력창 */}
-            <form
-                className="consult-inputbar"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSubmit();
-                }}
-            >
+            {/* 입력 바 */}
+            <form className="consult-inputbar" onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+            }}>
                 {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
-
                 <textarea
                     ref={inputRef}
                     className="consult-input"
@@ -245,35 +329,28 @@ function ChatConsultInner({profile, isLoggedIn}) {
                     readOnly={isTyping || isChatEnded || isEnding}
                     rows={1}
                 />
-
                 <div className="consult-actions">
                     {!isChatEnded ? (
                         <>
-                            <button
-                                type="submit"
-                                className="consult-send"
-                                disabled={isTyping || !chatInput.trim() || isEnding}
-                            >
-                                보내기
+                            <button type="submit" className="consult-send"
+                                    disabled={isTyping || !chatInput.trim() || isEnding}>보내기
                             </button>
-                            <button
-                                type="button"
-                                className="consult-end"
-                                onClick={onEndChat}
-                                disabled={isTyping || isEnding}
-                            >
-                                종료
+                            <button type="button" className="consult-end" onClick={async () => {
+                                setIsEnding(true);
+                                try {
+                                    await handleEndChat();
+                                } finally {
+                                    setIsEnding(false);
+                                }
+                            }} disabled={isTyping || isEnding}>종료
                             </button>
                         </>
                     ) : (
-                        <button
-                            type="button"
-                            className="consult-send"
-                            onClick={() => {
-                                handleRestartChat();
-                                inputRef.current?.focus();
-                            }}
-                        >
+                        <button type="button" className="consult-send"
+                                onClick={() => {
+                                    handleRestartChat();
+                                    inputRef.current?.focus();
+                                }}>
                             새 상담 시작
                         </button>
                     )}
@@ -287,5 +364,5 @@ export default function ChatConsult() {
     const {profile} = useAuth();
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
-    return <ChatConsultInner key={modeKey} profile={profile} isLoggedIn={isLoggedIn}/>;
+    return <ChatConsultInner key={modeKey} profile={profile}/>;
 }
