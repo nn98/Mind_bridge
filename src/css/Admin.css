@@ -131,7 +131,7 @@ body {
     align-items: stretch;
     gap: 16px;
     width: 100%;
-    margin: 0 16px 24px 0px;
+    margin: 10px 16px 24px 0px;
 }
 
 .admin-card {
@@ -226,6 +226,16 @@ body {
     padding: 24px;
 }
 
+.admin-post-content {
+    max-height: 70px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+}
+
 /* =======================
    Users
 ======================= */
@@ -315,7 +325,6 @@ body {
     color: #555;
 }
 
-/* ✅ 날짜 셀 크기 키움 */
 .MuiPickersDay-root {
     width: 55px !important;
     height: 55px !important;
@@ -412,9 +421,27 @@ body {
     margin-bottom: 12px;
 }
 
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+}
+
 .toolbar-form {
     display: flex;
+    flex: 1;
     gap: 8px;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--mb-border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--mb-card);
+    cursor: pointer;
 }
 
 .input {
@@ -456,8 +483,79 @@ body {
     margin-right: 5px;
     color: var(--mb-brand);
     border: none;
-    padding: 6px 10px 6px 10px;
+    padding: 6px 10px;
     cursor: pointer;
+}
+
+/* =======================
+   Pagination (보라톤 글래스 버튼 스타일)
+======================= */
+.pagination {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination .total {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6a5da8;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 6px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 14px rgba(128, 93, 209, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.pager {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.pager button {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 140, 209, 0.3);
+    background: rgba(255, 255, 255, 0.82);
+    color: #5a3ea1;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pager button:hover:not([disabled]) {
+    background: linear-gradient(135deg, #a18cd1 0%, #805dd1 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 18px rgba(128, 93, 209, 0.25);
+    transform: translateY(-3px) scale(1.03);
+}
+
+.pager button.is-active {
+    background: linear-gradient(135deg, #a18cd1 0%, #805dd1 100%);
+    border: none;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(128, 93, 209, 0.3);
+    transform: scale(1.08);
+    transition: all 0.35s ease;
+}
+
+.pager button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.6);
+    transition: opacity 0.3s ease;
 }
 
 /* =======================

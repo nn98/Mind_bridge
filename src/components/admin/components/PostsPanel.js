@@ -17,7 +17,7 @@ function getSortValue(row, sortKey) {
             const idKey = pick(row, ["id", "postId", "boardId"]);
             const v = idKey ? row[idKey] : undefined;
             const num = Number(v);
-            return Number.isFinite(num) ? num : (v ?? "");
+            return Number.isFinite(num) ? num : v ?? "";
         }
         case "nickname": {
             const v =
@@ -64,79 +64,18 @@ function getVisibilityInfo(row) {
     return {isPublic, label: isPublic ? "공개" : "비공개"};
 }
 
-/** 작성자 관리자 여부 추정 */
-function isAdminAuthor(row) {
-    const candidates = [];
-    if (row?.user) {
-        candidates.push(row.user.role, row.user.roles, row.user.authorities);
-    }
-    candidates.push(row?.authorRole, row?.role, row?.roles, row?.authorities);
-    for (const c of candidates) {
-        if (!c) continue;
-        if (Array.isArray(c)) {
-            if (
-                c.some(
-                    (x) =>
-                        typeof x === "string" &&
-                        (x.includes("ADMIN") || x.includes("ROLE_ADMIN"))
-                )
-            )
-                return true;
-            if (
-                c.some((x) => typeof x === "object" && x?.authority?.includes?.("ADMIN"))
-            )
-                return true;
-        } else if (typeof c === "string") {
-            if (c.includes("ADMIN")) return true;
-        } else if (typeof c === "object" && c?.authority?.includes?.("ADMIN")) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/** 서버 응답 포맷 표준화 */
-function normalizePostsResponse(result, {size}) {
-    let content = [];
-    let totalPages = 0;
-    let totalElements = 0;
-
-    if (Array.isArray(result?.data?.content)) {
-        content = result.data.content;
-        totalPages = Number(result.data.totalPages ?? 0);
-        totalElements = Number(
-            result.data.totalElements ?? result.data.content.length ?? 0
-        );
-    } else if (Array.isArray(result?.content)) {
-        content = result.content;
-        totalPages = Number(result.totalPages ?? 0);
-        totalElements = Number(result.totalElements ?? result.content.length ?? 0);
-    } else if (Array.isArray(result?.data)) {
-        content = result.data;
-    } else if (Array.isArray(result)) {
-        content = result;
-    }
-
-    if (!totalPages || !Number.isFinite(totalPages)) {
-        totalElements = content.length;
-        totalPages = Math.max(1, Math.ceil(totalElements / Math.max(1, size)));
-    }
-
-    return {content, totalPages, totalElements};
-}
-
 const PostsPanel = () => {
     const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
-    const [totalPages, setTotalPages] = useState(0);
-    const [totalElements, setTotalElements] = useState(0);
 
     const [searchInput, setSearchInput] = useState("");
     const [search, setSearch] = useState("");
 
     const [sortKey, setSortKey] = useState("createdAt");
     const [sortDir, setSortDir] = useState("desc");
+
+    const [visibilityFilter, setVisibilityFilter] = useState("all"); // all | public | private
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -150,21 +89,12 @@ const PostsPanel = () => {
             setLoading(true);
             setError("");
 
-            const raw = await getAllPosts({page, size, search, sort: sortParam});
-
-            const {content, totalPages, totalElements} = normalizePostsResponse(
-                raw,
-                {size}
-            );
-
-            setPosts(Array.isArray(content) ? content : []);
-            setTotalPages(Number.isFinite(totalPages) ? totalPages : 0);
-            setTotalElements(Number.isFinite(totalElements) ? totalElements : 0);
+            const raw = await getAllPosts({page: 0, size: 9999, sort: sortParam}); // ✅ 전체 불러오기
+            const data = raw?.data?.content ?? raw?.content ?? raw?.data ?? raw ?? [];
+            setPosts(Array.isArray(data) ? data : []);
         } catch (e) {
             console.error(e);
             setPosts([]);
-            setTotalPages(0);
-            setTotalElements(0);
             setError("게시글을 불러오는 중 오류가 발생했습니다.");
         } finally {
             setLoading(false);
@@ -174,7 +104,7 @@ const PostsPanel = () => {
     useEffect(() => {
         fetch();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, size, search, sortKey, sortDir]);
+    }, [sortKey, sortDir]);
 
     const onSearchSubmit = (e) => {
         e?.preventDefault?.();
@@ -183,15 +113,12 @@ const PostsPanel = () => {
     };
 
     const onKeyDown = (e) => {
-              // IME(한글) 조합 중 Enter는 무시
-                 if (e.isComposing) return;
-              if (e.key === "Enter") {
-                      // 기본 제출 방지 후, 표준 submit 트리거
-                          e.preventDefault();
-                     // 가장 가까운 form을 찾아 안전하게 제출 (버튼 클릭과 동일 라우팅)
-                          e.currentTarget.form?.requestSubmit?.();
-                  }
-          };
+        if (e.isComposing) return;
+        if (e.key === "Enter") {
+            e.preventDefault();
+            e.currentTarget.form?.requestSubmit?.();
+        }
+    };
 
     const onDelete = (postId) => {
         const toastId = toast.info(
@@ -213,7 +140,7 @@ const PostsPanel = () => {
                                 toast.dismiss(toastId);
                                 toast.error(
                                     e?.response?.status === 403
-                                        ? "삭제 권한이 없습니다. (관리자 권한이 필요하거나 작성자만 삭제 가능합니다)"
+                                        ? "삭제 권한이 없습니다."
                                         : "삭제 중 오류가 발생했습니다."
                                 );
                             }
@@ -265,43 +192,57 @@ const PostsPanel = () => {
     const sortIndicator = (key) =>
         sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "";
 
-    // ✅ 검색엔진 (프론트단 필터링)
+    // ✅ 검색 + 공개/비공개 필터링
     const filteredPosts = useMemo(() => {
+        let arr = [...posts];
+
+        // 검색
         const q = search.trim().toLowerCase();
-        if (!q) return posts;
+        if (q) {
+            arr = arr.filter((p) => {
+                const nickname =
+                    p?.nickname ??
+                    p?.authorNickname ??
+                    p?.userNickname ??
+                    p?.user?.nickname ??
+                    p?.author?.nickname ??
+                    "";
 
-        return posts.filter((p) => {
-            const nickname =
-                p?.nickname ??
-                p?.authorNickname ??
-                p?.userNickname ??
-                p?.user?.nickname ??
-                p?.author?.nickname ??
-                "";
+                const email =
+                    p?.email ??
+                    p?.authorEmail ??
+                    p?.userEmail ??
+                    p?.user?.email ??
+                    p?.author?.email ??
+                    "";
 
-            const email =
-                p?.email ??
-                p?.authorEmail ??
-                p?.userEmail ??
-                p?.user?.email ??
-                p?.author?.email ??
-                "";
+                const content = p?.content ?? "";
+                const title = p?.title ?? "";
 
-            const content = p?.content ?? "";
-            const title = p?.title ?? "";
+                return (
+                    String(nickname).toLowerCase().includes(q) ||
+                    String(email).toLowerCase().includes(q) ||
+                    String(content).toLowerCase().includes(q) ||
+                    String(title).toLowerCase().includes(q)
+                );
+            });
+        }
 
-            return (
-                String(nickname).toLowerCase().includes(q) ||
-                String(email).toLowerCase().includes(q) ||
-                String(content).toLowerCase().includes(q) ||
-                String(title).toLowerCase().includes(q)
-            );
-        });
-    }, [posts, search]);
+        // 공개/비공개 필터
+        if (visibilityFilter !== "all") {
+            arr = arr.filter((p) => {
+                const {isPublic} = getVisibilityInfo(p);
+                return visibilityFilter === "public" ? isPublic : !isPublic;
+            });
+        }
 
+        return arr;
+    }, [posts, search, visibilityFilter]);
+
+    // ✅ 정렬 + 페이지네이션
     const displayRows = useMemo(() => {
-        const arr = Array.isArray(filteredPosts) ? [...filteredPosts] : [];
-        return arr
+        const arr = [...filteredPosts];
+        const sorted = arr
             .map((row, idx) => ({row, idx}))
             .sort((a, b) => {
                 const av = getSortValue(a.row, sortKey);
@@ -313,7 +254,12 @@ const PostsPanel = () => {
                 return sortDir === "asc" ? comp : -comp;
             })
             .map(({row}) => row);
-    }, [filteredPosts, sortKey, sortDir]);
+
+        return sorted.slice(page * size, (page + 1) * size);
+    }, [filteredPosts, sortKey, sortDir, page, size]);
+
+    const totalElements = filteredPosts.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
 
     const renderRows = () => {
         if (!displayRows || displayRows.length === 0) {
@@ -361,7 +307,6 @@ const PostsPanel = () => {
 
             const content = p?.content ?? "";
             const {isPublic, label: visLabel} = getVisibilityInfo(p);
-            const admin = isAdminAuthor(p);
 
             return (
                 <React.Fragment key={id ?? `${nick}-${createdStr}`}>
@@ -373,23 +318,14 @@ const PostsPanel = () => {
                 {email}
               </span>
                         </td>
-
                         <td className="nowrap">
               <span
                   className={`badge ${isPublic ? "badge-public" : "badge-private"}`}
               >
                 {visLabel}
               </span>
-                            {admin && (
-                                <>
-                                    {" "}
-                                    <span className="badge badge-admin">(관리자)</span>
-                                </>
-                            )}
                         </td>
-
                         <td className="nowrap">{createdStr}</td>
-
                         <td>
                             {id ? (
                                 <div className="post-control">
@@ -412,11 +348,10 @@ const PostsPanel = () => {
                             )}
                         </td>
                     </tr>
-
                     {openRowId === id && (
                         <tr className="detail-row">
                             <td colSpan="6">
-                                <div className="post-content">
+                                <div className="admin-post-content">
                                     {content ? content : <em>내용이 없습니다.</em>}
                                 </div>
                             </td>
@@ -445,6 +380,19 @@ const PostsPanel = () => {
                         검색
                     </button>
                 </form>
+
+                {/* ✅ 유형 필터 */}
+                <select
+                    value={visibilityFilter}
+                    onChange={(e) => {
+                        setVisibilityFilter(e.target.value);
+                        setPage(0);
+                    }}
+                >
+                    <option value="all">전체</option>
+                    <option value="public">공개</option>
+                    <option value="private">비공개</option>
+                </select>
             </div>
 
             <div className="table-scroll">
@@ -457,7 +405,6 @@ const PostsPanel = () => {
                         <col style={{width: 120}}/>
                         <col style={{width: 120}}/>
                     </colgroup>
-
                     <thead>
                     <tr>
                         <th onClick={() => handleHeaderSort("id")} role="button">
@@ -496,6 +443,7 @@ const PostsPanel = () => {
                 </table>
             </div>
 
+            {/* ✅ 페이지네이션 */}
             <div className="pagination">
                 <div className="total">총 {totalElements}건</div>
                 <div className="pager">
