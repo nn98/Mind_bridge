@@ -149,7 +149,7 @@ const CalendarPanel = ({date, setDate}) => {
 
     return (
         <div className="section-container">
-            <h2 className="admin-section-header">📅 캘린더</h2>
+            <h2 className="section-header">📅 캘린더</h2>
 
             <div className="calendar-panel">
                 {/* 📌 캘린더 */}
