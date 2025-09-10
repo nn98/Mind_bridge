@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.entity.CounsellingEntity;
 import com.example.backend.service.CounsellingService;
+import com.example.backend.service.DailyMetricsService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +27,15 @@ public class ChatController {
 
     @Autowired
     private CounsellingService counsellingService;
+    private final DailyMetricsService dailyMetricsService; 
 
     //저장
     @PostMapping("/analysis/save")
     public ResponseEntity<CounsellingEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
         CounsellingEntity saved = counsellingService.saveAnalysis(payload);
+
+        //일일 채팅종료 수 카운트 증가
+        dailyMetricsService.increaseChatCount();
 
         return ResponseEntity.ok(saved);
     }
