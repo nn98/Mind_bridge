@@ -14,7 +14,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,7 @@ public class JwtUtil {
     private Key key;
 
     public JwtUtil(@Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration-ms}") long expirationMillis) {
+        @Value("${jwt.expiration-ms}") long expirationMillis) {
         this.secretKey = secretKey;
         this.expirationMillis = expirationMillis;
     }
@@ -45,11 +44,11 @@ public class JwtUtil {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMillis);
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(email)
+            .setIssuedAt(now)
+            .setExpiration(expiry)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public boolean validateToken(String token) {
@@ -67,62 +66,66 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    //토큰갱신
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-
         if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {  
-                if ("jwt".equals(cookie.getName())) {
+            for (var cookie : request.getCookies()) {
+                if (jwtCookieName.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
         }
-
         return null;
     }
+
+    // ================== Cookie properties (externalized) ==================
+
     @Value("${jwt.cookie.name:jwt}")
     private String jwtCookieName;
 
     @Value("${jwt.cookie.secure:true}")
     private boolean cookieSecure;
 
-    @Value("${jwt.cookie.samesite:None}")
+    @Value("${jwt.cookie.same-site:None}")
     private String cookieSameSite;
 
     @Value("${jwt.cookie.path:/}")
     private String cookiePath;
 
-    @Value("${jwt.cookie.domain:}") // 필요 시 설정
+    @Value("${jwt.cookie.domain:}")
     private String cookieDomain;
 
-    @Value("${jwt.cookie.max-age-seconds:3600}")
+    @Value("${jwt.cookie.max-age-seconds:86400}")
     private long cookieMaxAgeSeconds;
 
+    // ================== Cookie operations ==================
+
     public void setJwtCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+        ResponseCookie cookie = ResponseCookie.from(jwtCookieName, token)
             .httpOnly(true)
-            .secure(true)               // SameSite=None이면 필수
-            .path("/")
-            .maxAge(3600)
-            .sameSite("None")           // 크로스 도메인이라면 명시
-            // .domain("your.domain.com") // 필요 시 생성/삭제 모두 동일하게
+            .secure(cookieSecure)
+            .path(cookiePath)
+            .maxAge(cookieMaxAgeSeconds)
+            .sameSite(cookieSameSite)
+            .domain(cookieDomain != null && !cookieDomain.isBlank() ? cookieDomain : null) // null이면 생략됨
             .build();
+
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
     public void clearJwtCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+        ResponseCookie cookie = ResponseCookie.from(jwtCookieName, "")
             .httpOnly(true)
-            .secure(true)               // 생성 시와 동일
-            .path("/")
-            .maxAge(0)                  // 즉시 만료
-            .sameSite("None")           // 생성 시와 동일
-            // .domain("your.domain.com") // 생성 시와 동일
+            .secure(cookieSecure)
+            .path(cookiePath)
+            .maxAge(0)
+            .sameSite(cookieSameSite)
+            .domain(cookieDomain != null && !cookieDomain.isBlank() ? cookieDomain : null)
             .build();
+
         response.addHeader("Set-Cookie", cookie.toString());
     }
 }
