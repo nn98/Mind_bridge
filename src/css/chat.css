@@ -408,24 +408,25 @@
 ============================ */
 .center-toast.inactivity-toast {
     position: fixed;
-    left: 50%;
-    bottom: 36px;
+    left: 56%;
+    bottom: 250px;
     transform: translateX(-50%);
     z-index: 1100;
 
-    /* 파스텔 톤 글래스 배경 */
     background: linear-gradient(135deg,
-    rgba(255, 214, 165, 0.85), /* 파스텔 오렌지 */ rgba(207, 225, 255, 0.85), /* 파스텔 블루 */ rgba(227, 209, 255, 0.85) /* 파스텔 퍼플 */
+    rgba(255, 255, 255, 0.95),
+    rgba(248, 250, 252, 0.95),
+    rgba(241, 245, 249, 0.95)
     );
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
 
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
 
-    color: #333;
-    padding: 18px 22px;
-    border-radius: 16px;
+    color: #0f172a;
+    padding: 20px 24px;
+    border-radius: 14px;
     min-width: 300px;
     max-width: 420px;
     text-align: center;
@@ -437,13 +438,13 @@
     font-weight: 800;
     font-size: 1.05rem;
     margin-bottom: 8px;
-    color: #444;
+    color: #0f172a;
     letter-spacing: -0.2px;
 }
 
 .center-toast .toast-desc {
     font-size: 0.95rem;
-    color: #555;
+    color: #475569;
     margin-bottom: 6px;
 }
 
@@ -451,12 +452,12 @@
     font-variant-numeric: tabular-nums;
     font-weight: 900;
     font-size: 1.1rem;
-    color: #6c63ff; /* 파스텔 보라 포인트 */
+    color: #6366f1;
 }
 
 .center-toast .toast-sub {
     font-size: 0.85rem;
-    color: #666;
+    color: #64748b;
     font-style: italic;
 }
 
