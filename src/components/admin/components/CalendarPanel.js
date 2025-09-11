@@ -97,7 +97,7 @@ const CalendarPanel = ({date, setDate}) => {
                 // ✅ 콘솔 출력
                 console.log(
                     "[📊 주간 데이터]",
-                    merged.map(d => ({
+                    merged.map((d) => ({
                         날짜: d.iso,
                         상담: d.counselling,
                         접속자: d.visitors,
@@ -175,7 +175,8 @@ const CalendarPanel = ({date, setDate}) => {
                             slotProps={{
                                 day: (ownerState) => ({
                                     ...getMetaForDay(ownerState.day),
-                                    outsideCurrentMonth: ownerState.outsideCurrentMonth,
+                                    outsideCurrentMonth:
+                                    ownerState.outsideCurrentMonth,
                                 }),
                             }}
                             sx={{
@@ -190,7 +191,10 @@ const CalendarPanel = ({date, setDate}) => {
 
                 {/* 📌 상담 통계 + 연령/성별 분포 */}
                 <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-                    <div className="admin-card counselling-stats" aria-label="daily-count">
+                    <div
+                        className="admin-card counselling-stats"
+                        aria-label="daily-count"
+                    >
                         <h3>선택한 날짜 상담 횟수</h3>
                         <p className="selected-date">{selectedDateText}</p>
                         <div className="count-badge">{selectedDayCount} 회</div>
@@ -233,6 +237,8 @@ const CalendarPanel = ({date, setDate}) => {
                                         ? [`${val}명`, "접속자"]
                                         : [`${val}회`, "상담"]
                                 }
+                                wrapperStyle={{transition: "none"}} // ✅ 애니메이션 제거
+                                followCursor={true}                   // ✅ 커서 따라오기 유지
                             />
                             <Legend/>
                             <Bar

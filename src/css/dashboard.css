@@ -659,9 +659,8 @@ body {
 }
 
 /* =========================================================
-   🔥 Emotion Background — Cross-fade + Subtle Drift
-   - 두 레이어(layerA/B)를 교차 페이드
-   - 각 레이어에 다른 속도의 드리프트로 은은한 움직임
+   🎨 Emotion Background — Pastel Strong Wave
+   - 파스텔 톤 + 눈에 잘 보이는 파도 흔들림
 ========================================================= */
 
 .emotion-bg {
@@ -669,12 +668,14 @@ body {
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0; /* 기본은 숨김 */
-    transition: opacity .9s ease; /* 전환 페이드 */
-    filter: blur(46px) saturate(1.03) brightness(1.02);
-    background-size: 160% 160%;
+    opacity: 0;
+    transition: opacity .9s ease;
+    filter: blur(50px) saturate(1.1) brightness(1.05);
+
+    /* 🔥 큰 파도 표현을 위해 더 넓은 배경 */
+    background-size: 300% 300%;
     background-position: 50% 50%;
-    will-change: opacity, background-position, transform;
+    will-change: opacity, background-position;
 }
 
 /* 활성 레이어 */
@@ -682,45 +683,53 @@ body {
     opacity: 1;
 }
 
-/* 서로 다른 드리프트로 자연스럽게 */
+/* A 레이어: 큰 파도 */
 .emotion-bg.layerA.active {
-    animation: emotionDriftA 22s ease-in-out infinite alternate;
+    animation: waveBigA 12s ease-in-out infinite;
 }
 
+/* B 레이어: 다른 속도의 큰 파도 */
 .emotion-bg.layerB.active {
-    animation: emotionDriftB 26s ease-in-out infinite alternate;
+    animation: waveBigB 18s ease-in-out infinite alternate;
 }
 
-/* 미세 드리프트(배경 위치 + 아주 약한 스케일/회전) */
-@keyframes emotionDriftA {
+/* 파도 키프레임 (넓은 진폭) */
+@keyframes waveBigA {
     0% {
-        background-position: 46% 54%;
-        transform: scale(1.00) rotate(0deg);
+        background-position: 40% 60%;
+    }
+    25% {
+        background-position: 60% 40%;
     }
     50% {
-        background-position: 54% 46%;
-        transform: scale(1.015) rotate(0.45deg);
+        background-position: 55% 65%;
+    }
+    75% {
+        background-position: 35% 45%;
     }
     100% {
-        background-position: 50% 50%;
-        transform: scale(1.02) rotate(-0.35deg);
+        background-position: 40% 60%;
     }
 }
 
-@keyframes emotionDriftB {
+@keyframes waveBigB {
     0% {
-        background-position: 52% 48%;
-        transform: scale(1.00) rotate(0deg);
+        background-position: 60% 40%;
+    }
+    25% {
+        background-position: 35% 65%;
     }
     50% {
-        background-position: 48% 52%;
-        transform: scale(1.018) rotate(-0.35deg);
+        background-position: 65% 55%;
+    }
+    75% {
+        background-position: 45% 35%;
     }
     100% {
-        background-position: 50% 50%;
-        transform: scale(1.022) rotate(0.3deg);
+        background-position: 60% 40%;
     }
 }
+
 
 /* 컨텐츠는 항상 위에 */
 .dash-main, .dash-content, .consult-wrap,
