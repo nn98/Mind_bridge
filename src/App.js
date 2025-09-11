@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import {Routes, Route, Navigate, useLocation} from "react-router-dom";
 
 // CSS
 import "./css/App.css";
@@ -20,7 +20,7 @@ import Map from "./components/map/Map";
 import Picture from "./components/email/EmailComposer";
 import SelfTest from "./components/SelfTest";
 import AboutSection from "./components/about/AboutSection/AboutSectionMain";
-import { BoardSection } from "./components/board/BoardSectionmain";
+import {BoardSection} from "./components/board/BoardSectionmain";
 import AuthSection from "./components/authSection/AuthSection/index";
 import FloatingSidebar from "./components/FloatingSidebar";
 import EmotionAnalysisPage from "./components/emotion/EmotionAnalysisPage";
@@ -36,14 +36,18 @@ import ChatConsult from "./components/dashboard/ChatConsult";
 import PrivateRoute from "./components/route-guards/PrivateRoute";
 import AdminRoute from "./components/route-guards/AdminRoute";
 
-// 전역 UI 셸 제어를 위해 간단 토글만 유지
-import { useLocation } from "react-router-dom";
-import { useMemo, useState } from "react";
+// Redirect Layout
+import RedirectLayout from "./components/layout/RedirectLayout";
+
+// 전역 UI 셸 제어
+import {useMemo, useState} from "react";
+import {useAuth} from "./AuthContext";
 
 const App = () => {
     const location = useLocation();
+    const {profile} = useAuth(); // ✅ 로그인 여부 체크
 
-    // 헤더/플로팅/FAQ/지도 표시 제어만 남김
+    // 헤더/플로팅/FAQ/지도 표시 제어
     const [mapVisible, setMapVisible] = useState(false);
     const [faqVisible, setFaqVisible] = useState(false);
     const [scrollTarget, setScrollTarget] = useState(null);
@@ -62,11 +66,8 @@ const App = () => {
 
     return (
         <>
-            {!hideShell && (
-                <>
-                    <FloatingSidebar scrollTargetSelector=".dash-content" />
-                </>
-            )}
+            {!hideShell && <FloatingSidebar scrollTargetSelector=".dash-content"/>}
+
             {mapVisible && !hideShell && (
                 <div
                     style={{
@@ -80,49 +81,68 @@ const App = () => {
                         padding: "10px",
                     }}
                 >
-                    <h2 style={{ textAlign: "center" }}>내 주변 병원 지도</h2>
-                    <Map />
+                    <h2 style={{textAlign: "center"}}>내 주변 병원 지도</h2>
+                    <Map/>
                 </div>
             )}
 
             <Routes>
                 {/* 보호된 레이아웃 + 하위 라우트 */}
-                <Route element={<PrivateRoute />}>
-                    <Route element={<DashboardLayout />}>
-                        <Route index element={<ChatConsult />} />
-                        <Route path="/emotion" element={<EmotionAnalysisPage mode="page" />} />
-                        <Route path="/img" element={<Picture />} />
-                        <Route path="/board" element={<BoardSection />} />
-                        <Route path="/library" element={<ResourceLibrary />} />
-                        <Route path="/map" element={<Map />} />
-                        <Route path="/help" element={<HelpPage />} />
-                        <Route path="/profile" element={<UserProfile />} />
+                <Route element={<PrivateRoute/>}>
+                    <Route element={<DashboardLayout/>}>
+                        <Route index element={<ChatConsult/>}/>
+
+                        {/* ✅ 감정 분석 접근 분기 */}
+                        <Route
+                            path="/emotion"
+                            element={
+                                profile ? (
+                                    <EmotionAnalysisPage mode="page"/>
+                                ) : (
+                                    <RedirectLayout
+                                        message="감정 분석 페이지는 로그인 후 이용 가능합니다."
+                                        target="/"
+                                    />
+                                )
+                            }
+                        />
+
+                        <Route path="/img" element={<Picture/>}/>
+                        <Route path="/board" element={<BoardSection/>}/>
+                        <Route path="/library" element={<ResourceLibrary/>}/>
+                        <Route path="/map" element={<Map/>}/>
+                        <Route path="/help" element={<HelpPage/>}/>
+                        <Route path="/profile" element={<UserProfile/>}/>
                         <Route
                             path="/contact"
-                            element={<div style={{ padding: 16 }}><h1>문의하기</h1></div>}
+                            element={
+                                <div style={{padding: 16}}>
+                                    <h1>문의하기</h1>
+                                </div>
+                            }
                         />
                     </Route>
                 </Route>
 
                 {/* 관리자 전용 */}
-                <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminPage />} />
+                <Route element={<AdminRoute/>}>
+                    <Route path="/admin" element={<AdminPage/>}/>
                 </Route>
 
                 {/* 인증/공용 라우트 */}
-                <Route path="/login" element={<AuthSection type="login" />} />
-                <Route path="/logout" element={<AuthSection type="logout" />} />
-                <Route path="/signup" element={<AuthSection type="signup" />} />
-                <Route path="/find-id" element={<AuthSection type="find-id" />} />
-                <Route path="/find-password" element={<AuthSection type="find-password" />} />
-                <Route path="/auth/loading" element={<AuthLoadingPage />} />
+                <Route path="/login" element={<AuthSection type="login"/>}/>
+                <Route path="/logout" element={<AuthSection type="logout"/>}/>
+                <Route path="/signup" element={<AuthSection type="signup"/>}/>
+                <Route path="/find-id" element={<AuthSection type="find-id"/>}/>
+                <Route path="/find-password" element={<AuthSection type="find-password"/>}/>
+                <Route path="/auth/loading" element={<AuthLoadingPage/>}/>
 
                 {/* 레거시/기타 */}
                 <Route
                     path="/legacy-home"
                     element={
                         <AboutSection
-                            refs={{}} // 필요시 ref 전달
+                            refs={{}}
                             scrollTarget={scrollTarget}
                             setScrollTarget={setScrollTarget}
                             setIsEmotionModalOpen={setIsEmotionModalOpen}
@@ -134,17 +154,22 @@ const App = () => {
                     element={
                         <SelfTest
                             testType={"우울증"}
-                            setTestType={() => {}}
+                            setTestType={() => {
+                            }}
                             selfAnswers={Array(20).fill("")}
-                            handleSelfAnswer={() => {}}
-                            handleSelfSubmit={() => {}}
+                            handleSelfAnswer={() => {
+                            }}
+                            handleSelfSubmit={() => {
+                            }}
                             resultText={""}
-                            setSelfAnswers={() => {}}
-                            setResultText={() => {}}
+                            setSelfAnswers={() => {
+                            }}
+                            setResultText={() => {
+                            }}
                         />
                     }
                 />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/" replace/>}/>
             </Routes>
         </>
     );
