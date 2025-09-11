@@ -114,7 +114,7 @@ const UserProfile = () => {
         return (
             <RedirectLayout
                 message="회원 프로필은 로그인 후 이용 가능합니다."
-                target="/"
+                target="/login"
             />
         );
     }
