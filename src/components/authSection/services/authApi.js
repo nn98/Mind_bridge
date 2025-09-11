@@ -1,19 +1,19 @@
 import AuthapiClient from "./AuthapiClient";
 
 export const apiLogin = async (email, password) => {
-    const res = await AuthapiClient.post("/api/auth/login", { email, password }, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/auth/login", {email, password}, {withCredentials: true});
     return res.data;
 };
 
 // 로그아웃
 export const apiLogout = async () => {
-    const res = await AuthapiClient.post("/api/auth/logout", {}, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/auth/logout", {}, {withCredentials: true});
     return res.data;
 };
 
 // 회원가입
 export const apiRegister = async (payload) => {
-    const res = await AuthapiClient.post("/api/users/register", payload, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/users/register", payload, {withCredentials: true});
     return res.data;
 };
 
@@ -31,18 +31,17 @@ export const apiCheckEmail = async (email) => {
 
 // 아이디 찾기
 export const apiFindId = async (payload) => {
-    const res = await AuthapiClient.post("/api/auth/find-id", payload, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/auth/find-id", payload, {withCredentials: true});
     return res.data;
 };
 
-// 비밀번호 찾기(임시 비번 발급)
 export const apiResetPassword = async (payload) => {
-    const res = await AuthapiClient.post("/api/auth/reset-password", payload, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/auth/reset-password", payload, {withCredentials: true});
     return res.data;
 };
 
 // 소셜 로그인(코드 교환)
 export const apiSocialLogin = async (provider, code) => {
-    const res = await AuthapiClient.post("/api/auth/social-login", { provider, code }, { withCredentials: true });
+    const res = await AuthapiClient.post("/api/auth/social-login", {provider, code}, {withCredentials: true});
     return res.data;
 };

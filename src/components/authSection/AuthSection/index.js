@@ -365,8 +365,8 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                     email: formData.email, phoneNumber: formData.phoneNumber,
                 });
 
-                if (response.data?.data?.tempPassword) {
-                    setTempPassword(response.data.data.tempPassword);
+                if (response.data?.tempPassword) {
+                    setTempPassword(response.data.tempPassword);
                     setIsPasswordModalOpen(true);
                 } else {
                     alert("임시 비밀번호 발급에 실패했습니다.");
