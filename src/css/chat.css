@@ -237,7 +237,6 @@
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #e74c3c;
     color: white;
     padding: 12px 25px;
     border-radius: 25px;
@@ -246,6 +245,16 @@
     z-index: 1100;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     animation: toastFadeInOut 3s ease-in-out forwards;
+}
+
+/* ✅ 성공 */
+.validation-toast.success {
+    background-color: #4caf50; /* 초록색 */
+}
+
+/* ✅ 에러 */
+.validation-toast.error {
+    background-color: #f44336; /* 빨간색 */
 }
 
 @keyframes toastFadeInOut {
