@@ -12,6 +12,7 @@ function hexToRgba(hex, alpha = 0.55) {
     const b = bigint & 255;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
 function gammaSmooth(mix, gamma = 0.8) {
     const keys = Object.keys(mix ?? {});
     const powVals = keys.map((k) => Math.pow((mix[k] ?? 0) / 100, gamma));
@@ -20,6 +21,7 @@ function gammaSmooth(mix, gamma = 0.8) {
     keys.forEach((k, i) => (out[k] = (powVals[i] / sumPow) * 100));
     return out;
 }
+
 function clampAndRedistribute(mix, {min = 6, max = 65}) {
     const keys = Object.keys(mix ?? {});
     const src = {...mix};
@@ -58,11 +60,13 @@ function clampAndRedistribute(mix, {min = 6, max = 65}) {
     }
     return src;
 }
+
 function alphaForPct(pct) {
     if (pct >= 60) return 0.38;
     if (pct >= 30) return 0.48;
     return 0.6;
 }
+
 function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
@@ -85,6 +89,7 @@ function buildCompositeBackground(mix, palette) {
     const conic = `conic-gradient(at 72% 28%, ${conicStops.join(", ")})`;
     return `${radialA}, ${radialB}, ${conic}`;
 }
+
 const EMOTION_DESCRIPTIONS = {
     happiness: "밝고 긍정적인 기분이에요.",
     sadness: "마음이 가라앉은 상태예요.",
@@ -117,8 +122,10 @@ function persistSession(payload) {
         };
         localStorage.setItem(LS_KEY, JSON.stringify(toSave));
         window.dispatchEvent(new CustomEvent("mb:chat:persisted", {detail: toSave}));
-    } catch (_) {}
+    } catch (_) {
+    }
 }
+
 function readSession() {
     try {
         const raw = localStorage.getItem(LS_KEY);
@@ -126,10 +133,16 @@ function readSession() {
         const data = JSON.parse(raw);
         if (!data?.expiresAt || Date.now() > data.expiresAt) return null;
         return data;
-    } catch (_) { return null; }
+    } catch (_) {
+        return null;
+    }
 }
+
 function clearSession() {
-    try { localStorage.removeItem(LS_KEY); } catch(_) {}
+    try {
+        localStorage.removeItem(LS_KEY);
+    } catch (_) {
+    }
 }
 
 function ChatConsultInner({profile}) {
@@ -194,15 +207,19 @@ function ChatConsultInner({profile}) {
         const parent = chatEndRef.current?.parentNode;
         if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
     }, [chatHistory, isTyping, chatEndRef]);
-    useEffect(() => { if (!isTyping) inputRef.current?.focus(); }, [isTyping]);
-    useEffect(() => { inputRef.current?.focus(); }, []);
+    useEffect(() => {
+        if (!isTyping) inputRef.current?.focus();
+    }, [isTyping]);
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
 
     // 팝오버 위치
     const recalcPopover = () => {
         const el = anchorRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
-        setPopPos({ top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX });
+        setPopPos({top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX});
     };
     useLayoutEffect(() => {
         if (!openInfo) return;
@@ -253,11 +270,21 @@ function ChatConsultInner({profile}) {
 
     // 🕒 무활동 감시
     function stopIdleWatchers() {
-        if (idleTimerRef.current) { clearTimeout(idleTimerRef.current); idleTimerRef.current = null; }
-        if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
-        if (autoEndRef.current) { clearTimeout(autoEndRef.current); autoEndRef.current = null; }
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
+        }
+        if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+        }
+        if (autoEndRef.current) {
+            clearTimeout(autoEndRef.current);
+            autoEndRef.current = null;
+        }
         setShowIdleToast(false);
     }
+
     function startIdleWatchers() {
         if (isChatEnded || isEnding) return;
         stopIdleWatchers();
@@ -285,6 +312,7 @@ function ChatConsultInner({profile}) {
             }, ONE_MIN);
         }, ONE_MIN);
     }
+
     const onAnyActivity = () => {
         if (isChatEnded || isEnding) return;
         const now = Date.now();
@@ -346,7 +374,7 @@ function ChatConsultInner({profile}) {
             {/* 헤더 */}
             <div className="consult-header">
                 <div className="consult-logo">MindBridge</div>
-                <h1 className="consult-title">{(chatHistory.findLast?.(m=>m.sender==="user")?.message) || "무엇이든 물어보세요"}</h1>
+                <h1 className="consult-title">{(chatHistory.findLast?.(m => m.sender === "user")?.message) || "무엇이든 물어보세요"}</h1>
             </div>
 
             {/* 감정 안내 i 버튼 */}
@@ -367,7 +395,12 @@ function ChatConsultInner({profile}) {
             {openInfo && (
                 <div
                     className="emotion-popover"
-                    style={{ position: "fixed", top: `${popPos.top}px`, left: `${popPos.left}px`, transform: "translate(-50%,0)" }}
+                    style={{
+                        position: "fixed",
+                        top: `${popPos.top}px`,
+                        left: `${popPos.left}px`,
+                        transform: "translate(-50%,0)"
+                    }}
                     role="dialog" aria-modal="true"
                 >
                     <div className="emotion-popover-inner">
