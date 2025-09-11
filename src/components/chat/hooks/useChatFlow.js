@@ -1,5 +1,5 @@
 // src/components/chat/hooks/useChatFlow.js
-import {useState, useRef, useCallback} from "react";
+import {useState, useRef, useCallback, useEffect} from "react";
 import {toast} from "react-toastify";
 import {startNewSession, sendMessage, completeSession} from "../services/counsellingApi";
 
@@ -13,14 +13,14 @@ const guestQuestions = [
     "이전에 상담 경험이 있었나요?",
 ];
 
-/** 감정 팔레트 (진한 버전) */
+/** 감정 팔레트 (파스텔 톤) */
 export const EMOTION_PALETTE = {
-    happiness: "#ffd280",  // 파스텔 오렌지 (밝고 따뜻)
-    sadness: "#a5b8ff",    // 파스텔 블루 (차분, 우울)
-    anger: "#ff9b9b",      // 파스텔 레드 (부드러운 분노)
-    anxiety: "#c8a2ff",    // 파스텔 퍼플 (불안)
-    calmness: "#9be7d6",   // 파스텔 민트 (차분)
-    neutral: "#b0bec5",    // 파스텔 그레이 (중립)
+    happiness: "#ffd6a5",  // 파스텔 오렌지
+    sadness: "#cfe1ff",    // 파스텔 블루
+    anger: "#ffc9c9",      // 파스텔 레드
+    anxiety: "#e3d1ff",    // 파스텔 퍼플
+    calmness: "#c9f2e8",   // 파스텔 민트
+    neutral: "#eaeaea",    // 파스텔 그레이
 };
 
 /** 한국어/영문 동의어 → 표준 키 */
@@ -107,15 +107,15 @@ export function useChatFlow({
                                 initialGuestForm = null,
                                 initialIsChatEnded = null,
                             }) {
-    const [sessionId, setSessionId] = useState(null);
+    const isLoggedIn = !!customUser?.email;
 
     const [chatHistory, setChatHistory] = useState(() =>
         (initialHistory && initialHistory.length > 0)
             ? initialHistory
-            : (customUser?.email
+            : (isLoggedIn
                 ? [{
                     sender: "ai",
-                    message: `안녕하세요 ${customUser.fullName || customUser.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
+                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
                 }]
                 : [
                     {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
@@ -129,7 +129,7 @@ export function useChatFlow({
         typeof initialIsChatEnded === "boolean" ? initialIsChatEnded : false
     );
     const [step, setStep] = useState(() => {
-        if (customUser?.email) return guestQuestions.length;
+        if (isLoggedIn) return guestQuestions.length;
         if (typeof initialStep === "number") return initialStep;
         return 0;
     });
@@ -139,34 +139,50 @@ export function useChatFlow({
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
 
+    /** 🔥 로그인 프로필이 나중에 들어와도 게스트 질문이 안 나오도록 보정 */
+    useEffect(() => {
+        if (isLoggedIn && chatHistory.length > 0 && chatHistory[0]?.message?.includes("게스트님")) {
+            setChatHistory([{
+                sender: "ai",
+                message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
+            }]);
+            setStep(guestQuestions.length);
+        }
+    }, [isLoggedIn, customUser, chatHistory]);
+
+    // === 새 상담 시작 ===
     const handleRestartChat = useCallback(() => {
+        setChatHistory(
+            isLoggedIn
+                ? [{
+                    sender: "ai",
+                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
+                }]
+                : [
+                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
+                    {sender: "ai", message: guestQuestions[0]},
+                ]
+        );
         setSessionId(null);
         setChatInput("");
         setIsChatEnded(false);
         setIsTyping(false);
         setGuestForm({});
         setEmotionMix(null);
-        setStep(customUser?.email ? guestQuestions.length : 0);
-        if (customUser?.email) {
-            setChatHistory([{
-                sender: "ai",
-                message: `안녕하세요 ${customUser.fullName || customUser.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
-            }]);
-        } else {
-            setChatHistory([
-                {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
-                {sender: "ai", message: guestQuestions[0]},
-            ]);
-        }
-    }, [customUser]);
+        setStep(isLoggedIn ? guestQuestions.length : 0);
+    }, [customUser, isLoggedIn]);
 
+    const [sessionId, setSessionId] = useState(null);
+
+    // === 메시지 전송 ===
     const handleSubmit = useCallback(async () => {
         if (!chatInput.trim() || isTyping || isChatEnded) return;
         const input = chatInput.trim();
         setChatHistory((prev) => [...prev, {sender: "user", message: input}]);
         setChatInput("");
 
-        if (!customUser?.email && step < guestQuestions.length) {
+        // 게스트 정보 수집 단계
+        if (!isLoggedIn && step < guestQuestions.length) {
             const keys = ["이름", "성별", "나이", "상태", "상담내용", "이전상담경험"];
             setGuestForm((prev) => ({...prev, [keys[step]]: input}));
             const nextStep = step + 1;
@@ -211,8 +227,9 @@ export function useChatFlow({
         } finally {
             setIsTyping(false);
         }
-    }, [chatInput, sessionId, isTyping, isChatEnded, step, guestForm, customUser]);
+    }, [chatInput, sessionId, isTyping, isChatEnded, step, guestForm, customUser, isLoggedIn]);
 
+    // === 세션 종료 ===
     const handleEndChat = useCallback(async () => {
         if (!sessionId) {
             setIsChatEnded(true);
