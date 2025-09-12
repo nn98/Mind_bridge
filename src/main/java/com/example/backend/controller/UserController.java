@@ -7,7 +7,6 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -89,19 +88,16 @@ public class UserController {
 
     /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
-        @AuthenticationPrincipal(expression = "username") String email, HttpServletResponse httpRes) {
-        log.info("request : {}", request);
+        Authentication authentication,
+        HttpServletResponse httpRes) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
-            email,
-            request.currentPassword(),
-            request.password(),
-            request.confirmPassword()  // ✅ 추가!
+            email, request.currentPassword(), request.password(), request.confirmPassword()
         );
-
-        jwtUtil.clearJwtCookie(httpRes);                         // 전송 계층 책임(쿠키 삭제)
-        return ResponseEntity.status(303)
-            .header("Location", "/")
+        jwtUtil.clearJwtCookie(httpRes);
+        return ResponseEntity.noContent()
             .header("Cache-Control", "no-store")
             .header("Pragma", "no-cache")
             .header("Expires", "0")
@@ -114,7 +110,4 @@ public class UserController {
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new NotFoundException("User not found"));
     }
-    
-
-
 }
