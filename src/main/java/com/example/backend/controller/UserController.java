@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
     private final UserService userService;
+    private final SecurityUtil securityUtil;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
@@ -56,26 +59,29 @@ public class UserController {
     }
 
     @GetMapping("/account")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException("Authentication required");
-        }
-        log.info("Get account for email {}", authentication.getName());
-        Profile profile = userService.getUserByEmail(authentication.getName()).orElseThrow(() -> new NotFoundException("User not found"));
+        String email = securityUtil.requirePrincipalEmail(authentication);
+        Profile profile = userService.getUserByEmail(email)
+            .orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")
-            .header("Vary", "Cookie").body(profile);
+            .body(profile);
     }
 
     @PatchMapping("/account")
-    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, @AuthenticationPrincipal(expression = "username") String email) {
+    @PreAuthorize("#request != null and isAuthenticated()")
+    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.updateUser(email, request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/account")
-    public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal(expression = "username") String email, HttpServletResponse response) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.deleteUser(email);
         jwtUtil.clearJwtCookie(response);
         return ResponseEntity.noContent().build();
