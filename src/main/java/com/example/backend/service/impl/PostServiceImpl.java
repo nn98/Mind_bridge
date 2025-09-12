@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,14 +122,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private void validateUserPermission(PostEntity post, String userEmail, String action) {
-
-        // 관리자 권한 확인하는 부분
-        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
-                .getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!post.getUserEmail().equals(userEmail)&& !isAdmin) {
+        if (!post.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("게시글 " + action + " 권한이 없습니다.");
         }
     }
