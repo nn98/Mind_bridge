@@ -125,16 +125,6 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
         }
     });
 
-    const persistAuth = (payload) => {
-        const token = payload?.token || payload?.accessToken || null;
-        if (token) {
-            localStorage.setItem("token", token);
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        } else {
-            localStorage.setItem("token", "LOGIN");
-        }
-    };
-
     // ---------- validators ----------
     const validateAll = (next = formData, {strict = false} = {}) => {
         const nextErrors = {...errors};
@@ -296,11 +286,9 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                 if (submitting) return;
                 setSubmitting(true);
 
-                const loginResponse = await apiLogin(formData.email, formData.password);
-                const payload = loginResponse.data?.data || loginResponse.data || {};
-                const user = payload?.profile || payload?.user || {};
+                await apiLogin(formData.email, formData.password);
+                const user = await fetchProfile();
 
-                persistAuth(payload);
                 applyProfileUpdate?.(user);
                 setCustomUser?.(user);
                 setIsCustomLoggedIn?.(true);
