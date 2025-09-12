@@ -6,11 +6,10 @@
     padding: 2.5rem;
     background: #ffffff;
     border-radius: 16px;
-    box-shadow:
-            0 0 20px rgba(0, 0, 0, 0.05),
-                    0 0 50px rgba(139, 92, 246, 0.3),
-                    0 0 90px rgba(34, 211, 238, 0.20),
-                    0 0 140px rgba(139, 92, 246, 0.18);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05),
+    0 0 50px rgba(139, 92, 246, 0.3),
+    0 0 90px rgba(34, 211, 238, 0.20),
+    0 0 140px rgba(139, 92, 246, 0.18);
     max-width: 400px;
     width: 100%;
     text-align: center;
@@ -26,11 +25,10 @@
     padding: 16px;
     background: #ffffff;
     border-radius: 20px;
-    box-shadow:
-                0 0 20px rgba(0, 0, 0, 0.05),
-                        0 0 50px rgba(139, 92, 246, 0.3),
-                        0 0 90px rgba(34, 211, 238, 0.20),
-                        0 0 140px rgba(139, 92, 246, 0.18);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05),
+    0 0 50px rgba(139, 92, 246, 0.3),
+    0 0 90px rgba(34, 211, 238, 0.20),
+    0 0 140px rgba(139, 92, 246, 0.18);
 
     /* 추가된 코드 */
     max-height: 100%; /* 화면 높이의 80%로 최대 높이를 제한 */
@@ -249,5 +247,53 @@
     to {
         bottom: 36px;
         opacity: 1;
+    }
+}
+
+/* ============================= */
+/* ✅ 추가: validation-toast 스타일 */
+/* ============================= */
+
+.validation-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    z-index: 1100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: toastFadeInOut 3s ease-in-out forwards;
+}
+
+/* ✅ 성공 */
+.validation-toast.success {
+    background-color: #4caf50; /* 초록색 */
+}
+
+/* ✅ 에러 */
+.validation-toast.error {
+    background-color: #f44336; /* 빨간색 */
+}
+
+@keyframes toastFadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
     }
 }

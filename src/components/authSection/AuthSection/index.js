@@ -31,6 +31,7 @@ import TermsModal from "../modals/TermsModal";
 import TempPasswordModal from "../modals/TempPasswordModal";
 import IdFoundModal from "../modals/IdFoundModal";
 import termsContent from "../data/termsContent";
+import Toast from '../../chat-modal/components/Toast'; // Toast 컴포넌트 import 추가
 
 import {
     apiLogin, apiRegister, apiCheckEmail, apiFindId, apiResetPassword, apiCheckNickname
@@ -98,6 +99,15 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
     const [foundId, setFoundId] = useState("");
     const [isIdModalOpen, setIsIdModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+
+    // Toast 메시지 state 추가
+    const [toastState, setToastState] = useState({show: false, message: '', type: 'info'});
+
+    // Toast 메시지 표시 함수
+    const showToast = (message, type = 'info') => {
+        setToastState({show: true, message, type});
+        setTimeout(() => setToastState({show: false, message: '', type: 'info'}), 3000);
+    };
 
     // 파생 상태
     const isPwOk = passwordRegex.test(formData.password);
@@ -305,27 +315,27 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                 setSubmitted(true);
                 const nextErrors = validateAll(formData, {strict: true});
                 if (Object.keys(nextErrors).length > 0) {
-                    alert("입력 정보를 다시 확인해주세요.");
+                    showToast("입력 정보를 다시 확인해주세요.", "error");
                     return;
                 }
                 if (!isPwOk) {
-                    alert("비밀번호 형식을 확인해주세요.");
+                    showToast("비밀번호 형식을 확인해주세요.", "error");
                     return;
                 }
                 if (!isPwMatch) {
-                    alert("비밀번호가 일치하지 않습니다.");
+                    showToast("비밀번호가 일치하지 않습니다.", "error");
                     return;
                 }
                 if (emailCheck.isAvailable !== true) {
-                    alert("이메일 중복 확인을 완료해주세요.");
+                    showToast("이메일 중복 확인을 완료해주세요.", "error");
                     return;
                 }
                 if (nickCheck.isAvailable !== true) {
-                    alert("닉네임 중복 확인을 완료해주세요.");
+                    showToast("닉네임 중복 확인을 완료해주세요.", "error");
                     return;
                 }
                 if (!termsAgreed) {
-                    alert("서비스 이용약관에 동의해야 합니다.");
+                    showToast("서비스 이용약관에 동의해야 합니다.", "error");
                     return;
                 }
 
@@ -341,8 +351,10 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                     termsAccepted: !!termsAgreed,
                 });
 
-                alert("회원가입이 완료되었습니다. 로그인 해주세요.");
-                navigate("/login", {replace: true});
+                showToast("회원가입이 완료되었습니다. 로그인 해주세요.", "success");
+                setTimeout(() => {
+                    navigate("/login", {replace: true});
+                }, 1500);
                 return;
             }
 
@@ -355,7 +367,7 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                     setFoundId(response.data.data.email);
                     setIsIdModalOpen(true);
                 } else {
-                    alert("해당 정보로 가입된 이메일을 찾을 수 없습니다.");
+                    showToast("해당 정보로 가입된 이메일을 찾을 수 없습니다.", "error");
                 }
                 return;
             }
@@ -369,14 +381,14 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                     setTempPassword(response.data.tempPassword);
                     setIsPasswordModalOpen(true);
                 } else {
-                    alert("임시 비밀번호 발급에 실패했습니다.");
+                    showToast("임시 비밀번호 발급에 실패했습니다.", "error");
                 }
                 return;
             }
         } catch (err) {
             setSubmitting(false);
             console.error(`${type} error:`, err);
-            alert(err.response?.data?.message || "요청 처리 중 오류가 발생했습니다.");
+            showToast(err.response?.data?.message || "이메일 또는 비밀번호가 다릅니다.", "error");
         }
     };
 
@@ -950,6 +962,8 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                 navigate("/login", {replace: true});
             }}
         />)}
+        {/* Toast 컴포넌트 추가 */}
+        <Toast message={toastState.message} show={toastState.show} type={toastState.type}/>
     </section>);
 };
 
