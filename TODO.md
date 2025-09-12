@@ -25,9 +25,9 @@
 
 ## work
 
-- [ ] 메소드 시큐리티(@PreAuthorize) 도입
-  - [ ] 게시글 권한 확인
-  - [ ] 사용자 계정 권한 확인
+- [X] 메소드 시큐리티(@PreAuthorize) 도입
+  - [X] 게시글 권한 확인
+  - [X] 사용자 계정 권한 확인
 - [ ] 서비스 보안 의존 제거(순수화)
   - [ ] PostServiceImpl에서 SecurityContext 접근 제거
-  - [ ] UserServiceImpl는 이미 이메일 인자를 받아 동작하므로 변경 최소
+  - [X] UserServiceImpl는 이미 이메일 인자를 받아 동작하므로 변경 최소
