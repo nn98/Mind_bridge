@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +24,7 @@ import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,104 +39,75 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
     private final UserService userService;
+    private final SecurityUtil securityUtil;
     private final JwtUtil jwtUtil;
 
-    /**
-     * 회원가입
-     */
     @PostMapping("/register")
     public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
         Profile profile = userService.register(request);
-        return ResponseEntity
-                .created(URI.create("/api/users/" + profile.getNickname()))
-                .body(profile);
+        return ResponseEntity.created(URI.create("/api/users/" + profile.getNickname())).body(profile);
     }
 
-    /**
-     * 이메일/닉네임 중복 확인
-     */
     @GetMapping("/availability")
-    public ResponseEntity<Map<String, Boolean>> checkAvailability(
-            @RequestParam AvailabilityType type,
-            @RequestParam String value) {
+    public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam AvailabilityType type, @RequestParam String value) {
         boolean isAvailable = switch (type) {
             case NICKNAME -> userService.isNicknameAvailable(value);
-            case EMAIL -> userService.isEmailAvailable(value);
+            case EMAIL    -> userService.isEmailAvailable(value);
         };
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
 
-    /**
-     * 내 계정 정보 조회
-     */
     @GetMapping("/account")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException("Authentication required");
-        }
-        log.info("Get account for email {}", authentication.getName());
-        Profile profile = userService.getUserByEmail(authentication.getName())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        String email = securityUtil.requirePrincipalEmail(authentication);
+        Profile profile = userService.getUserByEmail(email)
+            .orElseThrow(() -> new NotFoundException("User not found"));
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
-                .header("Pragma", "no-cache")
-                .header("Expires", "0")
-                .header("Vary", "Cookie")
-                .body(profile);
+            .cacheControl(CacheControl.noStore())
+            .header("Pragma", "no-cache").header("Expires", "0")
+            .body(profile);
     }
 
-    /**
-     * 내 계정 정보 수정
-     */
     @PatchMapping("/account")
-    public ResponseEntity<Void> updateAccount(
-            @Valid @RequestBody UpdateRequest request,
-            @AuthenticationPrincipal(expression = "username") String email) {
+    @PreAuthorize("#request != null and isAuthenticated()")
+    public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.updateUser(email, request);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 회원 탈퇴
-     */
     @DeleteMapping("/account")
-    public ResponseEntity<Void> deleteAccount(
-            @AuthenticationPrincipal(expression = "username") String email,
-            HttpServletResponse response) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication, HttpServletResponse response) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.deleteUser(email);
         jwtUtil.clearJwtCookie(response);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 비밀번호 변경 (현재 비밀번호 검증 + 새 비밀번호 설정)
-     */
+    /* 비밀번호 변경은 타 정보와 다르게 추가 검증 必. 동일 리소스에도 행위의 민감도는 다름.    */
     @PatchMapping("/account/password")
-    public ResponseEntity<Void> changePassword(
-            @Valid @RequestBody ChangePasswordRequest request,
-            @AuthenticationPrincipal(expression = "username") String email,
-            HttpServletResponse httpRes) {
-        log.info("request : {}", request);
-
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
+        Authentication authentication,
+        HttpServletResponse httpRes) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
-                email,
-                request.currentPassword(),
-                request.password(),
-                request.confirmPassword()
+            email, request.currentPassword(), request.password(), request.confirmPassword()
         );
-
-        jwtUtil.clearJwtCookie(httpRes); // 세션 정리 (쿠키 삭제)
-
-        return ResponseEntity.noContent().build(); // ✅ 204 No Content
+        jwtUtil.clearJwtCookie(httpRes);
+        return ResponseEntity.noContent()
+            .header("Cache-Control", "no-store")
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .build();
     }
 
-    /**
-     * 유저 요약 정보 조회
-     */
     @GetMapping("/summary")
     public ResponseEntity<Summary> getSummary(@RequestParam String nickname) {
         return userService.getUserByNickname(nickname)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }
