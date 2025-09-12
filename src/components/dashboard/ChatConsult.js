@@ -329,7 +329,11 @@ function ChatConsultInner({profile}) {
         });
         startIdleWatchers();
     };
+    // 2분 타이머
     useEffect(() => {
+        // 채팅 시작(사용자 메시지 있음) 후에만 idle 감시 시작
+        if (!chatHistory.some(m => m.sender === "user")) return;
+
         startIdleWatchers();
         const opts = {passive: true};
         window.addEventListener("mousemove", onAnyActivity, opts);
