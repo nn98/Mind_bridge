@@ -669,13 +669,15 @@ body {
     z-index: 0;
     pointer-events: none;
     opacity: 0;
-    transition: opacity .9s ease;
-    filter: blur(50px) saturate(1.1) brightness(1.05);
+    transition: opacity 1s ease;
 
-    /* 🔥 큰 파도 표현을 위해 더 넓은 배경 */
-    background-size: 300% 300%;
+    /* conic-gradient 채워짐 (JS) */
+    background-size: 180% 180%; /* 더 크게 */
     background-position: 50% 50%;
-    will-change: opacity, background-position;
+    will-change: background-position, transform, opacity, filter;
+
+    /* 섞이는 느낌 */
+    filter: blur(90px) saturate(1.2);
 }
 
 /* 활성 레이어 */
@@ -683,51 +685,26 @@ body {
     opacity: 1;
 }
 
-/* A 레이어: 큰 파도 */
+/* A 레이어: 빠른 큰 출렁임 */
 .emotion-bg.layerA.active {
-    animation: waveBigA 12s ease-in-out infinite;
+    animation: waveMotionA 16s ease-in-out infinite;
 }
 
-/* B 레이어: 다른 속도의 큰 파도 */
+/* B 레이어: 느린 큰 출렁임 */
 .emotion-bg.layerB.active {
-    animation: waveBigB 18s ease-in-out infinite alternate;
+    animation: waveMotionB 28s ease-in-out infinite alternate;
 }
 
-/* 파도 키프레임 (넓은 진폭) */
-@keyframes waveBigA {
-    0% {
-        background-position: 40% 60%;
-    }
-    25% {
-        background-position: 60% 40%;
-    }
-    50% {
-        background-position: 55% 65%;
-    }
-    75% {
-        background-position: 35% 45%;
-    }
-    100% {
-        background-position: 40% 60%;
-    }
+@keyframes waveMotionA {
+    0%   { background-position: 50% 50%; transform: scale(1); }
+    50%  { background-position: 80% 20%; transform: scale(1.5); } /* 확 크게 */
+    100% { background-position: 50% 50%; transform: scale(1); }
 }
 
-@keyframes waveBigB {
-    0% {
-        background-position: 60% 40%;
-    }
-    25% {
-        background-position: 35% 65%;
-    }
-    50% {
-        background-position: 65% 55%;
-    }
-    75% {
-        background-position: 45% 35%;
-    }
-    100% {
-        background-position: 60% 40%;
-    }
+@keyframes waveMotionB {
+    0%   { background-position: 50% 50%; transform: scale(1); }
+    50%  { background-position: 20% 80%; transform: scale(1.5); } /* 반대 방향 */
+    100% { background-position: 50% 50%; transform: scale(1); }
 }
 
 

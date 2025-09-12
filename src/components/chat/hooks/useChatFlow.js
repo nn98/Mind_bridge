@@ -39,6 +39,7 @@ function normalizeEmotionMix(raw) {
     if (raw == null) return null;
     let map = {};
 
+    // object {감정: 수치}
     if (typeof raw === "object" && !Array.isArray(raw)) {
         for (const [k, v] of Object.entries(raw)) {
             const key = (KOR_TO_STD[k] || k || "").toString().toLowerCase();
@@ -49,6 +50,7 @@ function normalizeEmotionMix(raw) {
         }
     }
 
+    // array [{label, value}, ...]
     if (Array.isArray(raw)) {
         for (const item of raw) {
             const label = item?.label ?? item?.emotion ?? item?.name;
@@ -61,6 +63,7 @@ function normalizeEmotionMix(raw) {
         }
     }
 
+    // string "행복:40, 슬픔:60"
     if (typeof raw === "string") {
         const s = raw.trim();
         const parts = s.split(/[,\u3001/]+/);
@@ -86,16 +89,12 @@ function normalizeEmotionMix(raw) {
     if (Object.keys(map).length === 0) return null;
     let sum = Object.values(map).reduce((a, b) => a + (Number(b) || 0), 0);
     if (sum <= 0) return null;
+
     const scaled = {};
     for (const k of Object.keys(map)) scaled[k] = (map[k] / sum) * 100;
     for (const k of KEYS) if (!(k in scaled)) scaled[k] = 0;
-    return scaled;
-}
 
-/** 로그 */
-function debugLogEmotion(label, raw, mix) {
-    console.log(`[Emotion] ${label} raw:`, raw);
-    console.log(`[Emotion] ${label} normalized:`, mix ?? null);
+    return scaled;
 }
 
 /** 메인 훅 */
@@ -138,8 +137,9 @@ export function useChatFlow({
 
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
+    const [sessionId, setSessionId] = useState(null);
 
-    /** 🔥 로그인 프로필이 나중에 들어와도 게스트 질문이 안 나오도록 보정 */
+    /** 로그인 이후 게스트 질문 보정 */
     useEffect(() => {
         if (isLoggedIn && chatHistory.length > 0 && chatHistory[0]?.message?.includes("게스트님")) {
             setChatHistory([{
@@ -171,8 +171,6 @@ export function useChatFlow({
         setEmotionMix(null);
         setStep(isLoggedIn ? guestQuestions.length : 0);
     }, [customUser, isLoggedIn]);
-
-    const [sessionId, setSessionId] = useState(null);
 
     // === 메시지 전송 ===
     const handleSubmit = useCallback(async () => {
@@ -216,7 +214,6 @@ export function useChatFlow({
                 setChatHistory((prev) => [...prev, {sender: "ai", message: result["상담사_응답"] || "응답 오류"}]);
                 if (result["감정"] !== undefined) {
                     const mix = normalizeEmotionMix(result["감정"]);
-                    debugLogEmotion("received", result["감정"], mix);
                     setEmotionMix(mix || null);
                 }
                 if (result["세션_종료"]) setIsChatEnded(true);
@@ -257,4 +254,5 @@ export function useChatFlow({
     };
 }
 
+// ✅ named export + default export 둘 다 제공
 export default useChatFlow;
