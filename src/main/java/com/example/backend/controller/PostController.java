@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,7 +91,9 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Detail>> updatePost(@PathVariable Long id,
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Detail>> updatePost(
+        @PathVariable Long id,
         @Valid @RequestBody UpdateRequest request,
         Authentication authentication) {
         Detail updatedPost = postService.updatePost(id, request, authentication.getName());
@@ -98,7 +101,10 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deletePost(@PathVariable Long id, Authentication authentication) {
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> deletePost(
+        @PathVariable Long id,
+        Authentication authentication) {
         postService.deletePost(id, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 삭제되었습니다."));
     }
