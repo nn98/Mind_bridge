@@ -1,4 +1,14 @@
-# Mind Bridge 보안·설정·구조 개선 종합 정리 (완료 / TODO)
+<details><summary><h1>🛠️ 보안·설정·구조 개선</h1></summary>
+
+> ## 설계 원칙/기준
+> - 실패는 RFC7807(JSON), 성공은 도메인 DTO 직반환(래퍼 제거 지향)
+> - 인증(경로)·인가(메소드) 선언적 분리, 서비스는 보안 비의존 순수 로직
+> - SpEL에서는 authentication.name만 사용(principal.username 금지)
+> - 설정은 @ConfigurationProperties로 타입 세이프 주입, prefix는 kebab-case(예: oauth)
+> - 쿠키 정책은 SameSite/Secure/Domain/Path/HttpOnly/MaxAge 외부화, 운영은 Secure=true
+> - 키/시크릿은 레포 금지, 환경/시크릿 매니저 관리, 강도/롤링 고려
+> - OSIV=off 전제, 쿼리/연관 로딩 명시적 최적화
+> - 테스트는 슬라이스+통합 혼합, 보안/에러 스펙 스냅샷화
 
 ## Done(Confirmed)
 
@@ -9,39 +19,39 @@
 
 ### 2) 보호 정책(경로 기반) 적용 및 세부 조정
 - permitAll:
-    - POST /api/users/register
-    - GET  /api/users/availability
-    - POST /api/auth/find-id
-    - POST /api/auth/login
-    - POST /api/auth/reset-password
-    - GET  /api/auth/social/** (login, callback)
-    - GET  /api/posts/public
-    - GET  /api/posts/recent
-    - GET  /api/posts/* (단일 {id} 공개 조회)
-    - /actuator/health, /error, /favicon.ico
+  - POST /api/users/register
+  - GET  /api/users/availability
+  - POST /api/auth/find-id
+  - POST /api/auth/login
+  - POST /api/auth/reset-password
+  - GET  /api/auth/social/** (login, callback)
+  - GET  /api/posts/public
+  - GET  /api/posts/recent
+  - GET  /api/posts/* (단일 {id} 공개 조회)
+  - /actuator/health, /error, /favicon.ico
 - authenticated:
-    - /api/users/account, /api/users/account/**
-    - /api/posts/my
-    - /api/posts/** (쓰기/수정/삭제 등)
-    - /api/chat/**
-    - /api/admin/**
-    - 그 외 anyRequest().authenticated()로 마감(신규 기본 보호)
+  - /api/users/account, /api/users/account/**
+  - /api/posts/my
+  - /api/posts/** (쓰기/수정/삭제 등)
+  - /api/chat/**
+  - /api/admin/**
+  - 그 외 anyRequest().authenticated()로 마감(신규 기본 보호)
 
 ### 3) OAuth 설정 키 통일(.properties)
 - 키:
-    - oauth.google.client-id, oauth.google.client-secret, oauth.google.redirect-uri
-    - oauth.kakao.client-id,  oauth.kakao.client-secret,  oauth.kakao.redirect-uri
+  - oauth.google.client-id, oauth.google.client-secret, oauth.google.redirect-uri
+  - oauth.kakao.client-id,  oauth.kakao.client-secret,  oauth.kakao.redirect-uri
 - 바인딩: OAuthProperties(@ConfigurationProperties(prefix="oauth"))로 통합, 서비스에서 타입 세이프 주입.
 - 수동 테스트 완료: /api/auth/social/{provider}/login 302, callback 정상.
 
 ### 4) JWT 쿠키 설정 외부화(환경에서 제어)
 - application.properties 추가:
-    - jwt.cookie.name=jwt
-    - jwt.cookie.path=/
-    - jwt.cookie.domain=
-    - jwt.cookie.same-site=None
-    - jwt.cookie.secure=true
-    - jwt.cookie.max-age-seconds=86400
+  - jwt.cookie.name=jwt
+  - jwt.cookie.path=/
+  - jwt.cookie.domain=
+  - jwt.cookie.same-site=None
+  - jwt.cookie.secure=true
+  - jwt.cookie.max-age-seconds=86400
 - JwtUtil: ResponseCookie로 Set-Cookie 생성(HTTPOnly, SameSite, Secure, Max-Age, Domain, Path).
 - 수동 테스트 완료: 로그인/로그아웃 쿠키 동작 확인.
 
@@ -52,8 +62,8 @@
 ### 6) 메소드 시큐리티 + 서비스 순수화(동시 적용)
 - @EnableMethodSecurity(prePostEnabled = true) 활성.
 - @PreAuthorize:
-    - 게시글 수정/삭제: @postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')
-    - 사용자 계정: isAuthenticated() + 컨트롤러에서 authentication.name 사용
+  - 게시글 수정/삭제: @postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')
+  - 사용자 계정: isAuthenticated() + 컨트롤러에서 authentication.name 사용
 - 서비스: SecurityContext 의존 제거(명시 인자만 사용).
 
 ### 7) EndpointInventory 도입
@@ -81,9 +91,9 @@
 
 ### A) 외부 API 에러 변환 표준화(서비스→도메인 예외→Advice)
 - RestTemplate 예외를 ExternalServiceException으로 변환:
-    - 외부 5xx → 502 Bad Gateway
-    - 타임아웃/연결실패 → 503 Service Unavailable
-    - 외부 4xx → 502로 치환(게이트웨이 실패 의미)
+  - 외부 5xx → 502 Bad Gateway
+  - 타임아웃/연결실패 → 503 Service Unavailable
+  - 외부 4xx → 502로 치환(게이트웨이 실패 의미)
 - Advice에서 상태코드 매핑 확정, 메시지는 민감정보/URL 제외.
 
 ### B) MapStruct 도입
@@ -131,15 +141,5 @@
 
 ### M) 토큰 전략 개선(선택)
 - Access/Refresh 분리(회전·블랙리스트), 재발급/탈취 대응 강화
+</details> 
 
-
-## 설계 원칙(합의 기준)
-
-- 실패는 RFC7807(JSON), 성공은 도메인 DTO 직반환(래퍼 제거 지향)
-- 인증(경로)·인가(메소드) 선언적 분리, 서비스는 보안 비의존 순수 로직
-- SpEL에서는 authentication.name만 사용(principal.username 금지)
-- 설정은 @ConfigurationProperties로 타입 세이프 주입, prefix는 kebab-case(예: oauth)
-- 쿠키 정책은 SameSite/Secure/Domain/Path/HttpOnly/MaxAge 외부화, 운영은 Secure=true
-- 키/시크릿은 레포 금지, 환경/시크릿 매니저 관리, 강도/롤링 고려
-- OSIV=off 전제, 쿼리/연관 로딩 명시적 최적화
-- 테스트는 슬라이스+통합 혼합, 보안/에러 스펙 스냅샷화
