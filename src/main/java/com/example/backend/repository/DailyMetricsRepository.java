@@ -16,12 +16,12 @@ public interface DailyMetricsRepository extends JpaRepository<DailyMetricsEntity
 
     //접속자 수
     @Modifying
-    @Query("UPDATE DailyMetricsEntity d SET d.dailyUsersCount = d.dailyUsersCount + 1 WHERE d.statDate = :date")
+    @Query("UPDATE DailyMetricsEntity d SET d.loginCount = d.loginCount + 1 WHERE d.statDate = :date")
     int incrementDailyUsers(@Param("date") LocalDate date);
 
     //채팅 종료 수
     @Modifying
-    @Query("UPDATE DailyMetricsEntity d SET d.dailyChatCount = d.dailyChatCount + 1 WHERE d.statDate = :date")
+    @Query("UPDATE DailyMetricsEntity d SET d.chatCount = d.chatCount + 1 WHERE d.statDate = :date")
     int incrementDailyChats(@Param("date") LocalDate date);
 
     List<DailyMetricsEntity> findAllByStatDateBetween(LocalDate start, LocalDate end);

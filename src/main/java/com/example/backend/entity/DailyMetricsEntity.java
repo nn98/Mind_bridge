@@ -19,18 +19,17 @@ public class DailyMetricsEntity {
     private LocalDate statDate; // 날짜별 PK
 
     @Column(nullable = false)
-    private int dailyUsersCount = 0; // 로그인 수 누적
+    private Integer loginCount = 0; // 로그인 수 누적
 
     @Column(nullable = false)
-    private int dailyChatCount = 0;  // 채팅 종료 수 누적
+    private Integer chatCount = 0;  // 채팅 종료 수 누적
 
     // 생성자
     public DailyMetricsEntity() {}
     
-    public DailyMetricsEntity(LocalDate statDate, int dailyUsersCount, int dailyChatCount) {
+    public DailyMetricsEntity(LocalDate statDate, Integer loginCount, Integer chatCount) {
         this.statDate = statDate;
-        this.dailyUsersCount = dailyUsersCount;
-        this.dailyChatCount = dailyChatCount;
+        this.loginCount = loginCount;
+        this.chatCount = chatCount;
     }
-
 }
