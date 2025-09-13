@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.auth.FindIdRequest;
 import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
 import com.example.backend.dto.auth.ResetPasswordRequest;
 import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.security.JwtUtil;
@@ -41,18 +40,17 @@ public class AuthController {
      * 사용자 로그인 - HTTP 처리만 담당 (실패는 예외 전파 → Advice)
      */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(
+    public ResponseEntity<ApiResponse<Void>> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response) {
 
-        LoginResponse loginResponse = authService.login(request);
-        jwtUtil.setJwtCookie(response, loginResponse.getAccessToken());
+        jwtUtil.setJwtCookie(response, jwtUtil.generateToken(request.getEmail()));
         authService.updateLastLogin(request);
 
         //일일 접속자 수카운트 증가
         dailyMetricsService.increaseUserCount();
 
-        return ResponseEntity.ok(ApiResponse.success(loginResponse));
+        return ResponseEntity.ok(ApiResponse.empty());
     }
 
     /**

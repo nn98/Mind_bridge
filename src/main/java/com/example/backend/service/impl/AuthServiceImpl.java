@@ -1,6 +1,8 @@
 // service/impl/AuthServiceImpl.java
 package com.example.backend.service.impl;
 
+import static com.example.backend.dto.auth.LoginResponse.*;
+
 import java.util.Optional;
 import java.util.Random;
 
@@ -44,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity user = authenticateUser(request);
 		String accessToken = jwtUtil.generateToken(user.getEmail());
 		Profile profile = userMapper.toProfile(user); // 매퍼 사용
-		return new LoginResponse(accessToken, profile);
+		return ofAccess(profile, accessToken, 84000000L);
 	}
 
 	@Override
