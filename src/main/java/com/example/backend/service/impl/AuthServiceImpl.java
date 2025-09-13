@@ -83,6 +83,10 @@ public class AuthServiceImpl implements AuthService {
 			return null;
 		}
 		UserEntity user = optionalUser.get();
+		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+			log.warn("이메일과 전화번호가 일지하지 않습니다: {}", request.getEmail());
+			return null;
+		}
 		String tempPassword = generateTempPassword();
 		try {
 			sendTempPasswordEmail(user.getEmail(), tempPassword);
