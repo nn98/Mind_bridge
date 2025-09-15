@@ -128,8 +128,6 @@ public class AdminController {
             .body(ApiResponse.success(list));
     }
 
-
-
     @GetMapping("/metrics/weekly")
     public ResponseEntity<ApiResponse<List<WeeklyMetricPoint>>> metricsWeekly(@RequestParam(defaultValue = "8") @Min(1) @Max(52) int weeks) {
         List<WeeklyMetricPoint> list = adminQueryService.getWeeklyMetrics(weeks);
