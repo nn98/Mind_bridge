@@ -52,7 +52,8 @@ public class SecurityConfig {
                     "/api/posts/*",          // /api/posts/{id} 공개 조회
                     "/actuator/health",
                     "/error",
-                    "/favicon.ico"
+                    "/favicon.ico",
+                    "/api/emotion/analyze"  // 감정 분석 엔드포인트 공개
                 ).permitAll()
 
                 // 관리자 URL (다음 단계에서 @PreAuthorize로 보강)
