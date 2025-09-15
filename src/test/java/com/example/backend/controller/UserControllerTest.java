@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Optional;
@@ -47,7 +46,7 @@ import com.example.backend.service.UserService;
 	}
 )
 @AutoConfigureMockMvc(addFilters = true) // 핵심 보안 필터 활성(WithMockUser 동작)
-@Import({TestSecurityConfig.class, TestErrorAdvice.class})
+@Import({TestSecurityConfig.class})
 @EnableMethodSecurity(prePostEnabled = true)
 class UserControllerTest {
 
@@ -107,7 +106,6 @@ class UserControllerTest {
                       "termsAccepted": true
                     }
                 """))
-			.andDo(print())
 			.andExpect(status().isUnprocessableEntity())
 			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
 			.andExpect(jsonPath("$.status").value(422))
@@ -262,4 +260,147 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.status").value(404))
 			.andExpect(jsonPath("$.instance").value("/api/users/summary"));
 	} // [5][6]
+
+	// 1) register: 형식 오류 400 (malformed JSON)
+	@Test
+	@DisplayName("POST /api/users/register (Malformed JSON) → 400 Bad Request")
+	void register_malformedJson_400() throws Exception {
+		mvc.perform(post("/api/users/register")
+				.contentType(MediaType.APPLICATION_JSON)
+			.content("{\"age\":\"xx\"}")
+		).andExpect(status().isBadRequest());
+	} // 역직렬화 실패는 400 경로가 맞다 [7]
+
+	// 2) register: Content-Type 미지정 → 415 (선호 시, produces 설정 없으면 400일 수도)
+	@Test
+	@DisplayName("POST /api/users/register (Unsupported Media Type) → 415")
+	void register_unsupportedMediaType_415() throws Exception {
+		mvc.perform(post("/api/users/register")
+				.content("email=kim@ex.com&password=x")) // no contentType
+			.andExpect(status().isUnsupportedMediaType());
+	} // 미지정/비호환 미디어타입 검증 예시 [7]
+
+	// 3) register: 이메일 중복 409
+	@Test
+	@DisplayName("POST /api/users/register (이메일 중복) → 409 Conflict")
+	void register_conflict_email_409() throws Exception {
+		willThrow(new com.example.backend.common.error.ConflictException(
+			"이미 사용중인 이메일입니다.", "DUPLICATE_EMAIL", "email"))
+			.given(userService).register(any());
+
+		mvc.perform(post("/api/users/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+      {"email":"dup@ex.com","password":"Qwer1234!","confirmPassword":"Qwer1234!","nickname":"KIM","gender":"male","age":28,"termsAccepted":true,"phoneNumber":"010-1111-2222"}
+      """))
+			.andExpect(status().isConflict())
+			.andExpect(header().string("Content-Type", startsWith("application/problem+json")));
+	} // 도메인 충돌을 409로 분리 [7]
+
+	// 4) register: 닉네임 중복 409
+	@Test
+	@DisplayName("POST /api/users/register (닉네임 중복) → 409 Conflict")
+	void register_conflict_nickname_409() throws Exception {
+		willThrow(new com.example.backend.common.error.ConflictException(
+			"이미 사용중인 닉네임입니다.", "DUPLICATE_NICKNAME", "nickname"))
+			.given(userService).register(any());
+
+		mvc.perform(post("/api/users/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+      {"email":"new@ex.com","password":"Qwer1234!","confirmPassword":"Qwer1234!","nickname":"DUP","gender":"male","age":28,"termsAccepted":true,"phoneNumber":"010-1111-2222"}
+      """))
+			.andExpect(status().isConflict());
+	} // [7]
+
+	// 5) availability: 잘못된 enum → 400
+	@Test
+	@DisplayName("GET /api/users/availability (잘못된 type) → 400 Bad Request")
+	void availability_invalidEnum_400() throws Exception {
+		mvc.perform(get("/api/users/availability")
+				.param("type","WRONG") // enum 변환 실패
+				.param("value","KIM"))
+			.andExpect(status().isBadRequest());
+	} // 파라미터 타입 변환 실패 검증 [7]
+
+	// 6) availability: 필수 파라미터 누락 → 400
+	@Test
+	@DisplayName("GET /api/users/availability (value 누락) → 400 Bad Request")
+	void availability_missingParam_400() throws Exception {
+		mvc.perform(get("/api/users/availability")
+				.param("type","NICKNAME"))
+			.andExpect(status().isBadRequest());
+	} // 필수 파라미터 누락 시 400 [7]
+
+	// 7) account: 인증 필수 → 401 (이미 존재)
+	@Test
+	@DisplayName("GET /api/users/account (인증 없음) → 401")
+	void account_unauth_401_again() throws Exception {
+		mvc.perform(get("/api/users/account"))
+			.andExpect(status().isUnauthorized());
+	} // 보안 흐름 확인 추가 [21]
+
+	// 8) updateAccount: 미인증 → 401
+	@Test
+	@DisplayName("PATCH /api/users/account (미인증) → 401")
+	void update_account_unauth_401() throws Exception {
+		mvc.perform(patch("/api/users/account")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"nickname":"NEW"}"""))
+			.andExpect(status().isUnauthorized());
+	} // 인증 요구 경로 검증 [21]
+
+	// 9) updateAccount: DTO 검증 실패 → 422
+	@Test
+	@DisplayName("PATCH /api/users/account (검증 실패) → 422")
+	void update_account_422() throws Exception {
+		given(securityUtil.requirePrincipalEmail(any())).willReturn("me@ex.com");
+		mvc.perform(patch("/api/users/account")
+				.with(user("me@ex.com"))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"nickname":""}
+					""")) // @Size(min=2) 위반
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(header().string("Content-Type", startsWith("application/problem+json")));
+	} // Bean Validation 실패는 422 정책 [9]
+
+	// 10) deleteAccount: 미인증 → 401
+	@Test
+	@DisplayName("DELETE /api/users/account (미인증) → 401")
+	void delete_account_unauth_401() throws Exception {
+		mvc.perform(delete("/api/users/account"))
+			.andExpect(status().isUnauthorized());
+	} // [21]
+
+	// 11) changePassword: 미인증 → 401
+	@Test
+	@DisplayName("PATCH /api/users/account/password (미인증) → 401")
+	void change_password_unauth_401() throws Exception {
+		mvc.perform(patch("/api/users/account/password")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+                  {"currentPassword":"x","password":"y","confirmPassword":"y"}"""))
+			.andExpect(status().isUnauthorized());
+	} // [21]
+
+	// 12) changePassword: 형식 오류 400
+	@Test
+	@DisplayName("PATCH /api/users/account/password (Malformed JSON) → 400")
+	void change_password_malformed_400() throws Exception {
+		mvc.perform(patch("/api/users/account/password")
+				.with(user("me@ex.com"))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(String.format("{\"currentPassword\":\"x\",\"password\":\"y\""))) // 닫힘 누락
+			.andExpect(status().isBadRequest());
+	} // 역직렬화 실패 400 [7]
+
+	// 13) summary: 파라미터 누락 → 400
+	@Test
+	@DisplayName("GET /api/users/summary (nickname 누락) → 400")
+	void summary_missingParam_400() throws Exception {
+		mvc.perform(get("/api/users/summary"))
+			.andExpect(status().isBadRequest());
+	} // 필수 파라미터 누락 [7]
 }
