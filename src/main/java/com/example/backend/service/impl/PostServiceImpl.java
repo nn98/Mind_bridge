@@ -35,8 +35,16 @@ public class PostServiceImpl implements PostService {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         PostEntity post = createPostEntity(request, userEmail, user.getNickname());
+        // 타이틀이 없으면 제목없음 넣음 
+        if (post.getTitle() == null || post.getTitle().isBlank()) {
+            post.setTitle("제목 없음");
+        } else {
+            post.setTitle(post.getTitle());
+        }
         PostEntity savedPost = postRepository.save(post);
         log.info("새 게시글 작성 완료 - ID: {}, 작성자: {}", savedPost.getId(), userEmail);
+
+
         return mapToDetail(savedPost);
     }
 
