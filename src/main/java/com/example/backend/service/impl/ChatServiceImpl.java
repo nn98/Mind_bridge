@@ -180,6 +180,7 @@ public class ChatServiceImpl implements ChatService {
 		return response;
 	}
 
+	@SuppressWarnings("unused")
 	private MessageResponse createErrorResponse(String errorMessage, Long sessionId) {
 		MessageResponse errorResponse = new MessageResponse();
 		errorResponse.setEmotion("오류");
