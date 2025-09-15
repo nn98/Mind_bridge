@@ -97,9 +97,10 @@ public class UserServiceImpl implements UserService {
 			u.setTermsAccepted(Boolean.TRUE);
 			u.setTermsAcceptedAt(java.time.LocalDateTime.now());
 			// 요청에 termsVersion이 오면 사용, 없으면 시스템 현재 약관 버전 주입(예: Config/DB에서)
-			u.setTermsVersion(request.getTermsVersion() != null
-				? request.getTermsVersion()
-				: currentTermsVersionProvider.get()); // 주입받는 컴포넌트
+			// 현재 약관 관련 구상만 있으니 보류
+			// u.setTermsVersion(request.getTermsVersion() != null
+			// 	? request.getTermsVersion()
+			// 	: currentTermsVersionProvider.get()); // 주입받는 컴포넌트
 		} else {
 			// false 또는 null → DB 기본 정책에 맞게 처리
 			u.setTermsAccepted(Boolean.FALSE);
