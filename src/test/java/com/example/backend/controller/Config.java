@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /** 테스트 전용 Security 설정: 운영 필터/구성 제외, 공개 경로만 permitAll */
@@ -57,14 +56,37 @@ class TestSecurityConfig {
 
 /** 컨트롤러에서 NotFoundException 던질 때 404 RFC7807로 직렬화 */
 @RestControllerAdvice
+@org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
 class TestErrorAdvice {
+
+	@ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+	public org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail>
+	handleValidation(org.springframework.web.bind.MethodArgumentNotValidException ex,
+		jakarta.servlet.http.HttpServletRequest req) {
+
+		var pd = ex.getBody(); // 스프링이 만든 ProblemDetail 가져오기
+		pd.setStatus(422);
+		pd.setTitle("Unprocessable Content"); // 선택
+		pd.setInstance(java.net.URI.create(req.getRequestURI()));
+
+		// 필드 에러 맵을 추가(선택)
+		var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+			.collect(java.util.stream.Collectors.groupingBy(
+				org.springframework.validation.FieldError::getField,
+				java.util.stream.Collectors.mapping(org.springframework.context.support.DefaultMessageSourceResolvable::getDefaultMessage,
+					java.util.stream.Collectors.toList())));
+		pd.setProperty("errors", fieldErrors);
+
+		return org.springframework.http.ResponseEntity.unprocessableEntity().body(pd);
+	}
+
 	@ExceptionHandler(com.example.backend.common.error.NotFoundException.class)
-	public ProblemDetail handleNotFound(com.example.backend.common.error.NotFoundException ex,
-		HttpServletRequest req) {
-		ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+	public org.springframework.http.ProblemDetail handleNotFound(com.example.backend.common.error.NotFoundException ex,
+		jakarta.servlet.http.HttpServletRequest req) {
+		var pd = org.springframework.http.ProblemDetail.forStatus(org.springframework.http.HttpStatus.NOT_FOUND);
 		pd.setTitle("Not Found");
 		pd.setDetail(ex.getMessage());
-		pd.setInstance(URI.create(req.getRequestURI()));
+		pd.setInstance(java.net.URI.create(req.getRequestURI()));
 		return pd;
 	}
 }
