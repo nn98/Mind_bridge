@@ -1,206 +1,25 @@
-// src/services/emotionApi.js (업그레이드 교체본)
+// src/services/emotionApi.js
+import axios from "axios";
 
-const apiKey = process.env.REACT_APP_KEY;
-const apiAddress = process.env.REACT_APP_CHAT_ADDRESS;
+const REST_API = process.env.REACT_APP_BACKEND_URL;
 
-// ---------- 유틸: 관대 파서 ----------
-function parseEmotionJsonLoose(raw) {
-    if (raw == null) throw new Error('빈 응답');
+export async function requestEmotionAnalysis(email, text, options = {}) {
+  try {
+    const response = await axios.post(
+      `${REST_API}/api/emotion/analyze`,
+      { email, text },
+      {
+        ...options,
+        withCredentials: true, 
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    let s = String(raw).trim()
-        .replace(/^\s*```(?:json)?/i, '')
-        .replace(/```?\s*$/i, '')
-        .trim();
-
-    const first = s.indexOf('{');
-    const last = s.lastIndexOf('}');
-    if (first !== -1 && last !== -1) s = s.slice(first, last + 1);
-
-    // 작은따옴표 → 큰따옴표
-    s = s.replace(/'([^']*)'/g, (_, g1) => `"${g1.replace(/"/g, '\\"')}"`);
-    // 트레일링 콤마 제거
-    s = s.replace(/,\s*([}\]])/g, '$1');
-    // % 기호 제거
-    s = s.replace(/%/g, '');
-
-    // 키 표준화(한글 → 영문)
-    const keyMap = {
-        '기쁨': 'joy',
-        '슬픔': 'sadness',
-        '분노': 'anger',
-        '두려움': 'fear',
-        '혐오': 'disgust',
-        '불안': 'anxiety',
-        '부끄러움': 'embarrassment',
-        '질투': 'envy',
-        '권태': 'ennui',
-    };
-    s = s.replace(/"([^"]+)":/g, (m, k) => `"${keyMap[k] || k}":`);
-
-    let obj;
-    try {
-        obj = JSON.parse(s);
-    } catch (e) {
-        console.error('[Emotion] JSON 파싱 실패 원본:', s.slice(0, 400));
-        throw new Error('JSON 파싱 실패');
-    }
-
-    const keys = [
-        "joy",           // 기쁨
-        "sadness",       // 슬픔
-        "anger",         // 분노
-        "fear",          // 두려움
-        "disgust",       // 혐오
-        "anxiety",       // 불안
-        "embarrassment", // 부끄러움
-        "envy",          // 질투
-        "ennui"         // 권태
-    ];
-    const out = {};
-    let sum = 0;
-
-    for (const k of keys) {
-        let v = obj[k];
-        if (typeof v === 'string') v = v.trim();
-        v = Number(v);
-        if (!Number.isFinite(v)) v = 0;
-        out[k] = v;
-        sum += v;
-    }
-    if (sum <= 0) throw new Error('모든 감정 값이 0입니다.');
-
-    // 합계 100 정규화 (+ 반올림 보정)
-    if (Math.round(sum) !== 100) {
-        for (const k of keys) out[k] = Math.round((out[k] / sum) * 100);
-        const fix = 100 - Object.values(out).reduce((a, b) => a + b, 0);
-        if (fix !== 0) {
-            const maxKey = keys.reduce((a, b) => (out[a] >= out[b] ? a : b));
-            out[maxKey] += fix;
-        }
-    }
-    return out;
-}
-
-// ---------- 유틸: 타임아웃 래퍼 ----------
-function withTimeout(promise, ms, signal) {
-    if (!ms) return promise;
-    return new Promise((resolve, reject) => {
-        const t = setTimeout(() => {
-            const err = new Error('요청 타임아웃');
-            err.name = 'TimeoutError';
-            // 호출 측에서 AbortController를 썼다면 여기서 abort해서 fetch도 끊어줄 수 있음
-            try {
-                signal?.throwIfAborted?.();
-            } catch {
-            }
-            reject(err);
-        }, ms);
-        promise.then(
-            (v) => {
-                clearTimeout(t);
-                resolve(v);
-            },
-            (e) => {
-                clearTimeout(t);
-                reject(e);
-            }
-        );
-    });
-}
-
-// ---------- 폴백: 간단 휴리스틱 분석(모델 실패 시) ----------
-
-/**
- * 모델/백엔드 호출
- * @param {string} text
- * @param {{ signal?: AbortSignal, timeoutMs?: number, retries?: number }} [opts]
- * @returns {Promise<object>} {happiness, sadness, anger, anxiety, calmness}
- */
-export async function requestEmotionAnalysis(text, opts = {}) {
-    const { signal, timeoutMs = 15000, retries = 1 } = opts;
-    const model = 'gpt-4'; // 필요 시 백엔드가 지원하는 모델로 교체
-
-    const systemPrompt =
-        '당신은 짧은 한국어 문장을 감정 비율(%)로 평가하는 분석가입니다. ' +
-        '반드시 총합이 100이 되도록 하고, JSON만 반환하세요.';
-    const userPrompt = `
-문장을 감정별 비율(%)로 분석해줘.
-카테고리: 기쁨, 슬픔, 분노, 두려움, 혐오, 불안, 부끄러움, 질투, 권태
-문장: "${text}"
-
-JSON만 출력(설명/코드블럭 금지):
-{
-  "joy": 30,
-  "sadness": 20,
-  "anger": 10,
-  "fear": 10,
-  "disgust": 10,
-  "anxiety": 5,
-  "embarrassment": 5,
-  "envy": 5 ,
-  "ennui" : 5
-}
-
-`.trim();
-
-    const body = {
-        model,
-        messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 160,
-    };
-
-    async function once() {
-        const res = await withTimeout(
-            fetch(`${apiAddress}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                body: JSON.stringify(body),
-                signal, // ⬅️ 훅에서 온 AbortSignal
-            }),
-            timeoutMs,
-            signal
-        );
-
-        if (!res.ok) {
-            const raw = await res.text().catch(() => '');
-            throw new Error(`API ${res.status} ${res.statusText} ${raw}`);
-        }
-
-        const data = await res.json();
-
-        const content =
-            data?.choices?.[0]?.message?.content ??
-            data?.data?.choices?.[0]?.message?.content ??
-            data?.message?.content ??
-            null;
-
-        if (!content) {
-            console.error('[Emotion] 원본 응답 스니펫:', JSON.stringify(data).slice(0, 800));
-            throw new Error('모델 응답이 비어있습니다.');
-        }
-
-        return parseEmotionJsonLoose(content);
-    }
-
-    // 재시도(간단 백오프)
-    let attempt = 0;
-    while (true) {
-        try {
-            return await once();
-        } catch (e) {
-            if (e?.name === 'AbortError') throw e; // 사용자가 취소
-            attempt += 1;
-            if (attempt > retries) {
-                console.warn('[Emotion] API 실패, 휴리스틱 폴백 사용:', e.message);
-            }
-            await new Promise(r => setTimeout(r, 400 * attempt));
-        }
-    }
+    return response.data;
+  } catch (err) {
+    console.error("감정 분석 요청 실패:", err.response?.data || err.message);
+    return null;
+  }
 }
