@@ -1,4 +1,4 @@
-// repository/EmotionRepository.java
+// src/main/java/com/example/backend/repository/EmotionRepository.java
 package com.example.backend.repository;
 
 import com.example.backend.entity.EmotionEntity;
