@@ -41,7 +41,7 @@ public class PostEntity {
     /**
      * 게시글 제목 - AdminQueryServiceImpl에서 사용됨
      */
-    @Column(nullable = false, length = 200)
+    @Column(nullable = true, length = 200)
     private String title;
 
     /**
