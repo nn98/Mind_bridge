@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,10 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
 /** 테스트 전용 Security 설정: 운영 필터/구성 제외, 공개 경로만 permitAll */
 @TestConfiguration
 class TestSecurityConfig {
-
-	@Bean ObjectMapper testObjectMapper() {
-		return Jackson2ObjectMapperBuilder.json().build();
-	}
 
 	@Bean
 	SecurityFilterChain testSecurity(HttpSecurity http, ObjectMapper om) throws Exception {
