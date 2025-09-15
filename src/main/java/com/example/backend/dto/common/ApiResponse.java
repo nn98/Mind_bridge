@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.Map;
 
 import java.time.LocalDateTime;
 
@@ -33,8 +34,7 @@ public class ApiResponse<T> {
                 "요청이 성공적으로 처리되었습니다.",
                 data,
                 null,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     /**
@@ -46,8 +46,7 @@ public class ApiResponse<T> {
                 message,
                 data,
                 null,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     /**
@@ -59,8 +58,7 @@ public class ApiResponse<T> {
                 message,
                 message, // data 필드에도 메시지를 넣어서 String 타입으로 만듦
                 null,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     /**
@@ -72,8 +70,7 @@ public class ApiResponse<T> {
                 "처리되었습니다.",
                 null,
                 null,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     /**
@@ -85,8 +82,7 @@ public class ApiResponse<T> {
                 message,
                 null,
                 error,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     /**
