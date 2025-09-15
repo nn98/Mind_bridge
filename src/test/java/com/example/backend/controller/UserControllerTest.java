@@ -77,12 +77,11 @@ class UserControllerTest {
                   "confirmPassword":"Qwer1234!",
                   "nickname":"KIM",
                   "phoneNumber":"01012345678",
-                              "gender":"male",
-                                          "age":28,
-                                                      "termsAccepted": true
+                  "gender":"male",
+                  "age":28,
+                  "termsAccepted": true
                 }
             """))
-			.andDo(print())
 			.andExpect(status().isCreated())
 			.andExpect(header().string("Location", "/api/users/" + profile.getNickname()))
 			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -102,9 +101,13 @@ class UserControllerTest {
                       "password":"short",
                       "confirmPassword":"mismatch",
                       "nickname":"",
-                      "phoneNumber":"010"
+                      "phoneNumber":"01012345678",
+                      "gender":"male",
+                      "age":28,
+                      "termsAccepted": true
                     }
                 """))
+			.andDo(print())
 			.andExpect(status().isUnprocessableEntity())
 			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
 			.andExpect(jsonPath("$.status").value(422))
