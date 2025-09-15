@@ -62,9 +62,13 @@
 ### 6) 메소드 시큐리티 + 서비스 순수화(동시 적용)
 - @EnableMethodSecurity(prePostEnabled = true) 활성.
 - @PreAuthorize:
-  - 게시글 수정/삭제: @postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')
-  - 사용자 계정: isAuthenticated() + 컨트롤러에서 authentication.name 사용
+  - [X] 게시글 권한 확인
+    - 게시글 수정/삭제: @postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')
+  - [X] 사용자 계정 권한 확인
+    - 사용자 계정: isAuthenticated() + 컨트롤러에서 authentication.name 사용
 - 서비스: SecurityContext 의존 제거(명시 인자만 사용).
+  - [X] PostServiceImpl에서 SecurityContext 접근 제거
+  - [X] UserServiceImpl는 이미 이메일 인자를 받아 동작하므로 변경 최소
 
 ### 7) EndpointInventory 도입
 - 기동 시 전체 매핑 콘솔/JSON 덤프, 공개/보호 정책 검증 근거로 활용.
@@ -78,12 +82,6 @@
 
 ### 10) JWT 키 강건성 원칙 확립
 - 최소 32B(256비트)+ Base64 랜덤 키, 레포 금지(환경/시크릿 매니저). dev는 교체 권고.
-
-### 11) 메소드 시큐리티(@PreAuthorize) 도입 / 서비스 보안 의존 제거(순수화)
-- [X] 게시글 권한 확인
-- [X] 사용자 계정 권한 확인
-- [X] PostServiceImpl에서 SecurityContext 접근 제거
-- [X] UserServiceImpl는 이미 이메일 인자를 받아 동작하므로 변경 최소
 
 ------------------------------------------------------------------------------------
 
