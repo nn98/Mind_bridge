@@ -158,7 +158,7 @@
 |:--------------:|:-----------------------------|
 |      `작성`      | `김윤서`                        |
 |      `날짜`      | `2025-09-04`                 |
-|      `주제`      | `Front` `Back`               |
+|      `주제`      | `Front` / `Back`             |
 |    `Front`     | `Verification`               |
 | `Verification` | 비밀번호 변경에서의 입력값 검증 책임 - 둘다    |
 |     `Back`     | `Coupling`                   |
@@ -169,10 +169,49 @@
 |:--------------:|:------------------------------|
 |      `작성`      | `김윤서`                         |
 |      `날짜`      | `2025-09-05`                  |
-|      `주제`      | `Front` `Back`                |
+|      `주제`      | `Front` / `Back`              |
 |    `Front`     | `Verification` / `Validation` |
 | `Verification` | 비밀번호 변경 및 그 사후처리 로직 구현        |
 |  `Validation`  | 데이터 valid 대응, 1차 검증           |
 |     `Back`     | `Validation` / `Deployment`   |
 |  `Validation`  | 어노테이션으로 빠르고 간단하게 입력값 확인       |
 |  `Deployment`  | 백엔드 서버 배포 및 로드밸런싱, 리버스프록시 설정  |
+
+|       `구분`       | `내용`                                              |
+|:----------------:|:--------------------------------------------------|
+|       `작성`       | `김윤서`                                             |
+|       `날짜`       | `2025-09-08`                                      |
+|       `주제`       | `Back`                                            |
+|      `Back`      | `Validation` / `Authentication` / `Documentation` |
+|   `Validation`   | Enum 등 테이블 대응 엔티티 수정                              |
+| `Authentication` | Authentication, principal 구조와 문법 학습               |
+| `Documentation`  | 백엔드 설계/설명/상세/명세/정책 문서 작성                          |
+
+|       `구분`       | `내용`                                                                                         |
+|:----------------:|:---------------------------------------------------------------------------------------------|
+|       `작성`       | `김윤서`                                                                                        |
+|       `날짜`       | `2025-09-09`                                                                                 |
+|       `주제`       | `Front` / `Back`                                                                             |
+|      `Back`      | `Authentication` / `ProblemDetails` / `Security`                                             |
+| `Authentication` | 비로그인 유저 Authentication 예상과 다른 예외 발생(expected 401, but was 500)<br/>실행 흐름 파악 후 정상 동작하도록 로직 수정 |
+| `ProblemDetails` | 개별 try/catch 및 파편화된 핸들링 RestControllerAdvice로 통합 및 일원화,<br/>ProblemDetailFactory 및 커스텀 예외 정의 |
+|    `Security`    | 누락된 공개 엔드포인트 추가, 정책 보완/강화                                                                    |
+
+|     `구분`     | `내용`                                     |
+|:------------:|:-----------------------------------------|
+|     `작성`     | `김윤서`                                    |
+|     `날짜`     | `2025-09-10`                             |
+|     `주제`     | `Git` `Back`                             |
+|    `Git`     | `Branch` / `Pull Request` / `Properties` |
+|   `Branch`   | 기능별 브랜치 분기/안전 작업/병합 정책에 따라 작업            |
+|     `PR`     | 분기된 브랜치 기능 구현 완료 후 병합, 팀원들에게 과정 설명       |
+| `Properties` | 환경변수 정리, JWT secret 보완                   |
+
+|    `구분`    | `내용`                                                  |
+|:----------:|:------------------------------------------------------|
+|    `작성`    | `김윤서`                                                 |
+|    `날짜`    | `2025-09-12`                                          |
+|    `주제`    | `Back`                                                |
+|   `Back`   | `Security` / `HTTP`                                   |
+| `Security` | 메소드 시큐리티 PreAuthorize 적용 / AuthenticationPrincipal 제거 |
+|   `HTTP`   | HTTP 요청 - 응답 구조 학습 및 미완성부 수정                          |
