@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.common.error.ConflictException;
 import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
@@ -33,16 +34,80 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public Profile register(RegistrationRequest request) {
+		// 1) 중복 선검사 → 409
 		if (userRepository.existsByEmail(request.getEmail())) {
-			throw new RuntimeException("이미 사용중인 이메일입니다.");
+			throw new ConflictException("이미 사용중인 이메일입니다.", "DUPLICATE_EMAIL", "email"); // 409 [1]
 		}
-		if (userRepository.existsByNickname(request.getNickname())) {
-			throw new RuntimeException("이미 사용중인 닉네임입니다.");
+		if (request.getNickname() != null && userRepository.existsByNickname(request.getNickname())) {
+			throw new ConflictException("이미 사용중인 닉네임입니다.", "DUPLICATE_NICKNAME", "nickname"); // 409 [1]
 		}
+
+		// 2) 유도값 정규화/보정
+		normalizeRequest(request);
+
+		// 3) 엔티티 생성 (약관 필드 원자적 설정 포함)
 		UserEntity user = createUserEntity(request);
+
+		// 4) 저장
 		UserEntity saved = userRepository.save(user);
 		log.info("새 사용자 가입 완료: {}", saved.getEmail());
+
+		// 5) 응답 DTO 매핑
 		return userMapper.toProfile(saved);
+	}
+
+	private void normalizeRequest(RegistrationRequest req) {
+		if (req.getEmail() != null) req.setEmail(req.getEmail().trim().toLowerCase());
+		if (req.getNickname() != null) req.setNickname(req.getNickname().trim());
+		if (req.getFullName() != null) req.setFullName(req.getFullName().trim());
+		if (req.getGender() != null) req.setGender(req.getGender().trim().toLowerCase()); // male|female|other|unknown
+		if (req.getPhoneNumber() != null) req.setPhoneNumber(req.getPhoneNumber().trim());
+		if (req.getMentalState() != null) req.setMentalState(req.getMentalState().trim());
+		if (req.getTermsVersion() != null) req.setTermsVersion(req.getTermsVersion().trim());
+	}
+	private UserEntity createUserEntity(RegistrationRequest request) {
+		UserEntity u = new UserEntity();
+
+		// 필수/기초
+		u.setEmail(request.getEmail());
+
+		// 비밀번호: null/blank 방지 후 인코딩
+		if (request.getPassword() != null && !request.getPassword().isBlank()) {
+			u.setPassword(passwordEncoder.encode(request.getPassword())); // BCrypt는 null에서 IAE [10]
+		} else {
+			// 소셜 가입이 아니라면 비밀번호는 필수. 여기까지 내려오면 컨트롤러 @Valid가 보장해야 하지만,
+			// 방어적으로 IllegalArgumentException을 명확 메시지로 던질 수 있음(전역 400 매핑)
+			throw new IllegalArgumentException("password is required for local registration");
+		}
+
+		// 선택/프로필
+		u.setFullName(request.getFullName());
+		u.setNickname(request.getNickname());
+		u.setGender(request.getGender());         // 엔티티 @Pattern으로 제한됨
+		u.setAge(request.getAge());
+		u.setPhoneNumber(request.getPhoneNumber());
+		u.setMentalState(request.getMentalState());
+
+		// 역할/프로바이더 표준
+		u.setRole("USER");                        // 엔티티 @Pattern USER|ADMIN [상수화 고려]
+		u.setProvider("local");                   // 이메일·비번 기반 가입은 local로 표준화
+
+		// 약관 필드 세트
+		if (Boolean.TRUE.equals(request.getTermsAccepted())) {
+			u.setTermsAccepted(Boolean.TRUE);
+			u.setTermsAcceptedAt(java.time.LocalDateTime.now());
+			// 요청에 termsVersion이 오면 사용, 없으면 시스템 현재 약관 버전 주입(예: Config/DB에서)
+			u.setTermsVersion(request.getTermsVersion() != null
+				? request.getTermsVersion()
+				: currentTermsVersionProvider.get()); // 주입받는 컴포넌트
+		} else {
+			// false 또는 null → DB 기본 정책에 맞게 처리
+			u.setTermsAccepted(Boolean.FALSE);
+			u.setTermsAcceptedAt(null);
+			u.setTermsVersion(null);
+		}
+
+		return u;
 	}
 
 	@Override
@@ -109,20 +174,6 @@ public class UserServiceImpl implements UserService {
 			u.setGender("OTHER");
 			return userRepository.save(u);
 		});
-	}
-
-	private UserEntity createUserEntity(RegistrationRequest request) {
-		UserEntity u = new UserEntity();
-		u.setEmail(request.getEmail());
-		u.setPassword(passwordEncoder.encode(request.getPassword()));
-		u.setFullName(request.getFullName());
-		u.setNickname(request.getNickname());
-		u.setGender(request.getGender());
-		u.setAge(request.getAge());
-		u.setPhoneNumber(request.getPhoneNumber());
-		u.setMentalState(request.getMentalState());
-		u.setRole("USER");
-		return u;
 	}
 
 	private String generateUniqueNickname(String preferredName) {
