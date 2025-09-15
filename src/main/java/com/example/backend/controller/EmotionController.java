@@ -1,9 +1,7 @@
-// controller/EmotionController.java
+// src/main/java/com/example/backend/controller/EmotionController.java
 package com.example.backend.controller;
 
-import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.dto.emotion.EmotionRequest;
-import com.example.backend.dto.emotion.EmotionResponse;
 import com.example.backend.service.EmotionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +19,8 @@ public class EmotionController {
     }
 
     @PostMapping("/analyze")
-    public ResponseEntity<ApiResponse<EmotionResponse>> analyzeEmotion(@RequestBody EmotionRequest request) {
+    public ResponseEntity<Map<String, Integer>> analyzeEmotion(@RequestBody EmotionRequest request) {
         Map<String, Integer> result = emotionService.analyzeText(request.getEmail(), request.getText());
-        return ResponseEntity.ok(ApiResponse.success(new EmotionResponse(result)));
+        return ResponseEntity.ok(result);
     }
 }
