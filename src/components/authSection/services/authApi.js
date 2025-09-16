@@ -19,13 +19,17 @@ export const apiRegister = async (payload) => {
 
 // 닉네임 중복확인
 export const apiCheckNickname = async (nickname) => {
-    const res = await AuthapiClient.get(`/api/users/availability`, {params: {type: "nickname", value: nickname},});
+    const res = await AuthapiClient.get(`/api/users/availability`, {
+        params: {type: "nickname", value: nickname},
+    });
     return res.data;
 };
 
 // 이메일 중복 체크
 export const apiCheckEmail = async (email) => {
-    const res = await AuthapiClient.get(`/api/users/availability`, {params: {type: "email", value: email},});
+    const res = await AuthapiClient.get(`/api/users/availability`, {
+        params: {type: "email", value: email},
+    });
     return res.data;
 };
 
@@ -35,6 +39,7 @@ export const apiFindId = async (payload) => {
     return res.data;
 };
 
+// 비밀번호 재설정
 export const apiResetPassword = async (payload) => {
     const res = await AuthapiClient.post("/api/auth/reset-password", payload, {withCredentials: true});
     return res.data;
@@ -43,5 +48,11 @@ export const apiResetPassword = async (payload) => {
 // 소셜 로그인(코드 교환)
 export const apiSocialLogin = async (provider, code) => {
     const res = await AuthapiClient.post("/api/auth/social-login", {provider, code}, {withCredentials: true});
+    return res.data;
+};
+
+// ✅ 채팅 감성 스타일 저장
+export const apiSaveChatStyle = async ({style}) => {
+    const res = await AuthapiClient.post("/api/user/chat-style", {style}, {withCredentials: true});
     return res.data;
 };

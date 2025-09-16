@@ -34,7 +34,7 @@ import termsContent from "../data/termsContent";
 import Toast from '../../chat-modal/components/Toast'; // Toast 컴포넌트 import 추가
 
 import {
-    apiLogin, apiRegister, apiCheckEmail, apiFindId, apiResetPassword, apiCheckNickname
+    apiLogin, apiRegister, apiCheckEmail, apiFindId, apiResetPassword, apiCheckNickname, apiSaveChatStyle
 } from "../services/authApi";
 
 ensureWelcomeToastMounted();
@@ -81,6 +81,7 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
         mentalState: "",
         age: "",
         gender: "", // male | female | other
+
     });
 
     const [errors, setErrors] = useState({});
@@ -124,6 +125,15 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
             }
         }
     });
+
+    // ---------- 감성 스타일 ----------
+    const styleOptions = ["따뜻한", "차가운", "쾌활한", "진중한", "심플한", "전문적"];
+
+    const handleStyleSelect = (_e, newStyle) => {
+        if (newStyle !== null) {
+            setFormData((prev) => ({...prev, chatStyle: newStyle}));
+        }
+    };
 
     // ---------- validators ----------
     const validateAll = (next = formData, {strict = false} = {}) => {
@@ -336,6 +346,7 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                     mentalState: formData.mentalState,
                     age: Number(formData.age),
                     gender: String(formData.gender || "").toUpperCase(),
+
                     termsAccepted: !!termsAgreed,
                 });
 
@@ -771,48 +782,67 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                         </Box>
 
                         <Box className="form-right-legend">
-                            <FormControl component="fieldset" margin="normal">
-                                <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
-                                <RadioGroup
-                                    row
-                                    name="mentalState"
-                                    value={formData.mentalState}
-                                    onChange={handleChange}
-                                    className="radio-list"
-                                >
-                                    {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (<FormControlLabel
-                                        key={state}
-                                        value={state}
-                                        control={<Radio sx={{"&.Mui-checked": {color: "#a18cd1"}}}/>}
-                                        label={state}
-                                    />))}
-                                </RadioGroup>
-                            </FormControl>
 
-                            {/* 약관 동의 */}
-                            <Box>
-                                <FormControlLabel
-                                    control={<Checkbox
-                                        checked={termsAgreed}
-                                        onChange={(_, c) => setTermsAgreed(c)}
-                                        disabled={!termsViewed}
-                                        sx={{"&.Mui-checked": {color: "#a18cd1"}}}
-                                    />}
-                                    label={<Typography component="span" sx={{fontSize: "0.9rem"}}>
-                                        {" "}
-                                        <Button
-                                            variant="text"
-                                            onClick={() => setIsTermsModalOpen(true)}
-                                            sx={{p: 0, color: "#a18cd1", textDecoration: "underline"}}
+                            <Box sx={{mt: 3}}>
+                                <FormLabel component="legend">채팅 감성 스타일 선택</FormLabel>
+                                <div className="chat-style-buttons">
+                                    {styleOptions.map((style) => (
+                                        <button
+                                            key={style}
+                                            type="button"
+                                            className={`chat-style-button ${formData.chatStyle === style ? "selected" : ""}`}
+                                            onClick={() => setFormData((prev) => ({...prev, chatStyle: style}))}
                                         >
-                                            {" "}서비스 이용약관{" "}
-                                        </Button>{" "}
-                                        에 동의합니다.{" "}
-                                    </Typography>}
-                                />
-                                {!termsViewed && (<FormHelperText sx={{ml: "14px", color: "rgba(0, 0, 0, 0.6)"}}>
-                                    {" "}이용약관을 클릭하여 확인 후 동의해주세요.{" "}
-                                </FormHelperText>)}
+                                            {style}
+                                        </button>
+                                    ))}
+                                </div>
+                                <FormControl component="fieldset" margin="normal">
+                                    <FormLabel component="legend">내가 생각하는 나의 현재 상태</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        name="mentalState"
+                                        value={formData.mentalState}
+                                        onChange={handleChange}
+                                        className="radio-list"
+                                    >
+                                        {["우울증", "불안장애", "ADHD", "게임중독", "반항장애"].map((state) => (<FormControlLabel
+                                            key={state}
+                                            value={state}
+                                            control={<Radio sx={{"&.Mui-checked": {color: "#a18cd1"}}}/>}
+                                            label={state}
+                                        />))}
+                                    </RadioGroup>
+                                </FormControl>
+
+                                {/* 약관 동의 */}
+                                <Box>
+                                    <FormControlLabel
+                                        control={<Checkbox
+                                            checked={termsAgreed}
+                                            onChange={(_, c) => setTermsAgreed(c)}
+                                            disabled={!termsViewed}
+                                            sx={{"&.Mui-checked": {color: "#a18cd1"}}}
+                                        />}
+                                        label={<Typography component="span" sx={{fontSize: "0.9rem"}}>
+                                            {" "}
+                                            <Button
+                                                variant="text"
+                                                onClick={() => setIsTermsModalOpen(true)}
+                                                sx={{p: 0, color: "#a18cd1", textDecoration: "underline"}}
+                                            >
+                                                {" "}서비스 이용약관{" "}
+                                            </Button>{" "}
+                                            에 동의합니다.{" "}
+                                        </Typography>}
+                                    />
+                                    {!termsViewed && (
+                                        <FormHelperText sx={{ml: "14px", color: "rgba(0, 0, 0, 0.6)"}}>
+                                            {" "}이용약관을 클릭하여 확인 후 동의해주세요.{" "}
+                                        </FormHelperText>)}
+                                </Box>
+                                {/* 감성 스타일 선택 */}
+
                             </Box>
                         </Box>
                     </Box>
