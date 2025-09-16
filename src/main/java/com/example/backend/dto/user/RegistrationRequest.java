@@ -33,4 +33,5 @@ public class RegistrationRequest {
     @Size(max=50) private String mentalState;
     @NotNull @AssertTrue private Boolean termsAccepted;
     @Size(max=32) private String termsVersion;
+    private String chatStyle; //채팅스타일 
 }
