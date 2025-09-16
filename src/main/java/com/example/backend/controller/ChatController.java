@@ -5,16 +5,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.entity.CounsellingEntity;
+import com.example.backend.entity.ChatHistoryEntity;
+import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.service.CounsellingService;
 import com.example.backend.service.DailyMetricsService;
+import com.example.backend.service.ChatHistoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,26 +25,33 @@ public class ChatController {
 
     @Autowired
     private CounsellingService counsellingService;
-    private final DailyMetricsService dailyMetricsService; 
+    private final DailyMetricsService dailyMetricsService;
+    private final ChatHistoryService chatHistoryService;
 
-    //저장
+    // 저장
     @PostMapping("/analysis/save")
     public ResponseEntity<CounsellingEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
+        log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", payload);
         CounsellingEntity saved = counsellingService.saveAnalysis(payload);
-
-        //일일 채팅종료 수 카운트 증가
+        log.info("💾 [Spring] DB 저장 완료: {}", saved.getCounselId());
         dailyMetricsService.increaseChatCount();
-
         return ResponseEntity.ok(saved);
     }
 
-    //db에서 이메일 + 이름으로 상담내역 조회
+    // db에서 이메일 + 이름으로 상담내역 조회
     @GetMapping("/analysis/search")
     public ResponseEntity<List<CounsellingEntity>> getCounsellings(
             @RequestParam String email,
             @RequestParam String name) {
         List<CounsellingEntity> result = counsellingService.getCounsellingsByEmailAndName(email, name);
         return ResponseEntity.ok(result);
+    }
+
+    // ✅ 메시지 저장 (FastAPI → Spring)
+    @PostMapping("/message/save")
+    public ResponseEntity<ChatHistoryEntity> saveMessage(@RequestBody ChatMessageRequest dto) {
+        ChatHistoryEntity saved = chatHistoryService.saveMessage(dto);
+        return ResponseEntity.ok(saved);
     }
 
 }
