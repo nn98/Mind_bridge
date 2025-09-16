@@ -1,92 +1,363 @@
-/* ✅ 12. 지도 섹션 — 안정화(단일 컬럼) */
-
+/* =======================
+   병원 찾기 페이지 전체 스타일
+======================= */
 .map-container {
-  /* 앱 사이드바(260px) 옆에 정확히 맞추기 */
-  max-width: 1100px;
-  margin: 40px 24px 80px 260px;
-  /* top right bottom left */
-  padding: 0 24px;
-  box-sizing: border-box;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fdfdfd;
+    min-height: 100vh;
 }
 
-/* 지도 박스(라운드 + 그림자 + 오버플로우 클리핑) */
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.map-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+
+/* =======================
+   지역 선택 드롭다운
+======================= */
+.region-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.region-select label {
+    font-weight: bold;
+    color: #555;
+}
+
+.region-select select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    background: #fff;
+    color: black;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.region-select select:focus {
+    outline: none;
+    border-color: #6c63ff;
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.25);
+}
+
+/* =======================
+   지도 + 병원 패널 레이아웃
+======================= */
+.map-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    height: 70vh;
+}
+
+.map-section {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
 .map-box {
-  width: 100%;
-  /* 화면 비율에 맞게 유연 / 최소 높이 확보 */
-  aspect-ratio: 16 / 9;
-  min-height: 480px;
-  max-height: 640px;
-
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-  /* infowindow/타일 라운드 안으로 */
-  background: #f8fafc;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    border-radius: 12px;
 }
 
-/* 실제 지도 iframe */
-.map-iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
+/* =======================
+   병원 패널 기본 영역
+======================= */
+.hospital-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* 지도 캡션(선택) */
-.map-caption {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #6b7280;
+/* =======================
+   병원 상세 패널
+======================= */
+.hospital-info-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-/* 병원 정보 카드 — 지도 아래에 딱 맞게 */
-.hospital-info-box {
-  margin: 14px 0 0;
-  /* 위쪽만 간격 */
-  padding: 16px 18px;
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  font-size: 16px;
-  line-height: 1.6;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, .04);
-
-  /* 스티키/고정 높이 제거 → 잔여 여백 사라짐 */
-  position: static;
-  max-height: none;
-  overflow: visible;
+.hospital-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #eee;
 }
 
-.hospital-info-box h3 {
-  font-size: 17px;
-  font-weight: 700;
-  margin: 0 0 10px 0;
+.hospital-info-header h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
 }
 
-/* Toast 여백 축소(우측 아래 떠 있을 때 레이아웃 영향 최소화) */
-.Toastify__toast {
-  box-shadow: 0 6px 24px 4px rgba(0, 0, 0, 0.22);
-  margin: 0 16px 16px 0;
-  border-radius: 10px;
+/* 목록으로 돌아가기 버튼 */
+.back-btn {
+    background: #6c63ff;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* ===== 반응형 ===== */
-@media (max-width: 1280px) {
-  .map-container {
-    margin-left: 240px;
-  }
+.back-btn:hover {
+    background: #5848d9;
+    box-shadow: 0 2px 6px rgba(108, 99, 255, 0.3);
 }
 
+/* 상세 컨텐츠 */
+.hospital-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.hospital-name {
+    margin-bottom: 1rem;
+}
+
+.hospital-name h4 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    color: #222;
+    padding: 1rem;
+    background: #f8f9ff;
+    border-radius: 8px;
+    border-left: 4px solid #6c63ff;
+}
+
+.hospital-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem;
+    background: #fafafa;
+    border-radius: 8px;
+}
+
+.detail-label {
+    font-weight: bold;
+    color: #555;
+    font-size: 14px;
+}
+
+.detail-value {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* =======================
+   병원 목록
+======================= */
+.hospital-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 8px;
+    max-height: 100%;
+}
+
+.hospital-card {
+    background: #fff;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    position: relative;
+}
+
+/* hover 시 강조 효과 (올라감 제거) */
+.hospital-card:hover {
+    background: #faf9ff;
+    border: 1px solid #6c63ff;
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.25);
+    transform: none !important;
+}
+
+/* 선택된 카드 (active) */
+.hospital-card.active {
+    background: #6c63ff !important;
+    border: 1px solid #6c63ff !important;
+    color: #fff !important;
+}
+
+.hospital-card.active h3,
+.hospital-card.active p,
+.hospital-card.active span,
+.hospital-card.active .detail-value {
+    color: #fff !important;
+}
+
+/* =======================
+   배지 (거리, 시간)
+======================= */
+.hospital-distance {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+.distance-badge,
+.time-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.distance-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.time-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* active 카드 안에서도 배지 가독성 유지 */
+.hospital-card.active .distance-badge,
+.hospital-card.active .time-badge {
+    background: #fff !important;
+    color: #6c63ff !important;
+}
+
+/* 아이콘 컬러 */
+.hospital-card svg {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: inherit;
+}
+
+.hospital-card.active .distance-badge svg,
+.hospital-card.active .time-badge svg {
+    color: #6c63ff !important;
+}
+
+/* =======================
+   페이지네이션 (가로 정렬)
+======================= */
+.hospital-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.hospital-pagination button {
+    border: 1px solid #ddd;
+    outline: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fff;
+    color: #6c63ff;
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.hospital-pagination button:hover:not(:disabled) {
+    background: #f3f0ff;
+    border-color: #6c63ff;
+}
+
+.hospital-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #fafafa;
+    color: #aaa;
+}
+
+.hospital-pagination span {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* =======================
+   반응형
+======================= */
 @media (max-width: 1024px) {
-  .map-container {
-    margin: 24px 16px 60px 16px;
-    padding: 0;
-  }
+    .map-content {
+        grid-template-columns: 1fr 350px;
+    }
+}
 
-  .map-box {
-    aspect-ratio: auto;
-    /* 작은 화면에서는 고정 높이로 */
-    height: 420px;
-  }
+@media (max-width: 768px) {
+    .map-container {
+        padding: 1rem;
+    }
+
+    .map-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 300px 1fr;
+        height: auto;
+    }
+
+    .hospital-section {
+        max-height: 500px;
+        padding: 1rem;
+    }
+
+    .hospital-list {
+        max-height: calc(500px - 120px);
+    }
 }

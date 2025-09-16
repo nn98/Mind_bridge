@@ -48,10 +48,6 @@
     transition: transform 0.2s ease;
 }
 
-.hospital-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
 
 .hospital-card h3 {
     font-size: 16px;

@@ -11,20 +11,27 @@ import HospitalInfoPanel from "./HospitalInfoPanel";
 import {haversineDistance} from "./utils/geo";
 
 import "react-toastify/dist/ReactToastify.css";
+import "../../css/map.css";
 
 const apiKey = process.env.REACT_APP_MAP_KEY;
 const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
 
 export default function Map() {
     const routePolylineRef = useRef(null);
-    const {mapRef, map, mapInstanceRef, ready} = useKakaoMap(apiKey);
+    const markersRef = useRef([]);
+    const {mapRef, mapInstanceRef, ready} = useKakaoMap(apiKey);
     const userLoc = useGeolocation(ready);
 
-    // 목록/필터/정렬 (HospitalRegionPage 로직 이식)
     const [hospitals, setHospitals] = useState([]);
     const [regionList, setRegionList] = useState([]);
     const [selectedRegion, setSelectedRegion] = useState("전체");
+    const [selectedHospital, setSelectedHospital] = useState(null);
 
+    // 페이지네이션 상태
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // CSV 데이터 로드
     useEffect(() => {
         Papa.parse("/HospitalInfoWithPhone.csv", {
             download: true,
@@ -46,17 +53,25 @@ export default function Map() {
 
                 setHospitals(parsed);
 
-                const regions = new Set(parsed.map((h) => (h.region || "").split(" ")[0]));
-                setRegionList(["전체", ...Array.from(regions)]);
+                const regions = new Set(parsed.map((h) => (h.region || h.address || "").split(" ")[0]));
+                setRegionList(["전체", ...Array.from(regions).filter(Boolean)]);
             },
+            error: (error) => {
+                console.error("CSV 로드 실패:", error);
+                toast.error("병원 데이터를 불러오는데 실패했습니다.");
+            }
         });
     }, []);
 
+    // 지역 필터링
     const filtered = useMemo(() => {
         if (selectedRegion === "전체") return hospitals;
-        return hospitals.filter((h) => h.address.startsWith(selectedRegion));
+        return hospitals.filter((h) =>
+            h.address && h.address.startsWith(selectedRegion)
+        );
     }, [hospitals, selectedRegion]);
 
+    // 거리순 정렬
     const sortedHospitals = useMemo(() => {
         return filtered
             .map((h) => {
@@ -77,33 +92,72 @@ export default function Map() {
             });
     }, [filtered, userLoc]);
 
-    // 마커/선택 훅 (clearSelection 추가 사용)
-    const {selected, setSelected, clearSelection} = useHospitals(mapInstanceRef, userLoc);
+    // 페이지네이션 계산
+    const totalPages = Math.ceil(sortedHospitals.length / itemsPerPage);
+    const paginatedHospitals = sortedHospitals.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
-    // 마커 클릭 선택 → 패널 동기화
-    const [selectedHospital, setSelectedHospital] = useState(null);
-    if (selectedHospital !== selected) {
-        // 렌더 루프 방지용 조건부 동기화
-        // eslint-disable-next-line no-void
-        void setSelectedHospital(selected);
-    }
+    // 마커 관리 훅
+    const {setSelected, clearSelection, createInfoWindow} = useHospitals(mapInstanceRef, userLoc);
 
-    // “목록으로” 버튼/동작
-    const handleBackToList = () => {
-        setSelectedHospital(null); // 패널 닫기 → 목록 보임
-        clearSelection();          // 인포윈도우/선택 상태 클리어
-    };
+    // 마커 생성 및 업데이트
+    useEffect(() => {
+        if (!ready || !mapInstanceRef.current || !window.kakao) return;
+
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+
+        sortedHospitals.forEach((hospital) => {
+            const position = new window.kakao.maps.LatLng(hospital.lat, hospital.lon);
+
+            const marker = new window.kakao.maps.Marker({
+                position,
+                map: mapInstanceRef.current,
+            });
+
+            window.kakao.maps.event.addListener(marker, 'click', () => {
+                const infoWindow = createInfoWindow(hospital, () => drawRoute(hospital));
+                infoWindow.open(mapInstanceRef.current, marker);
+
+                setSelected({
+                    ...hospital,
+                    position,
+                    marker
+                });
+            });
+
+            markersRef.current.push(marker);
+        });
+
+        return () => {
+            markersRef.current.forEach(marker => marker.setMap(null));
+            markersRef.current = [];
+        };
+    }, [ready, sortedHospitals, mapInstanceRef, userLoc]);
 
     // 경로 그리기
-    const drawRoute = async (startLatLng, endLatLng) => {
+    const drawRoute = async (hospital) => {
+        if (!userLoc) {
+            toast.warn("현재 위치를 찾을 수 없습니다.");
+            return;
+        }
+
         try {
+            const startLatLng = new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon);
+            const endLatLng = new window.kakao.maps.LatLng(hospital.lat, hospital.lon);
+
             const {coords, durationMin} = await fetchFootRoute(
                 REST_API_KEY,
                 startLatLng,
                 endLatLng
             );
 
-            if (routePolylineRef.current) routePolylineRef.current.setMap(null);
+            if (routePolylineRef.current) {
+                routePolylineRef.current.setMap(null);
+            }
+
             routePolylineRef.current = new window.kakao.maps.Polyline({
                 path: coords,
                 strokeWeight: 5,
@@ -111,120 +165,155 @@ export default function Map() {
                 strokeOpacity: 0.8,
                 strokeStyle: "solid",
             });
-            routePolylineRef.current.setMap(mapInstanceRef.current);
-            mapInstanceRef.current.setCenter(coords[0]);
 
-            const timeBox = document.getElementById("timeBox");
-            if (timeBox) timeBox.innerText = `소요 시간: 약 ${durationMin}분`;
+            routePolylineRef.current.setMap(mapInstanceRef.current);
+
+            const bounds = new window.kakao.maps.LatLngBounds();
+            coords.forEach(coord => bounds.extend(coord));
+            mapInstanceRef.current.setBounds(bounds);
+
+            toast.success(`길찾기 완료! 소요시간: 약 ${durationMin}분`);
         } catch (err) {
             toast.error("길찾기 실패: " + err.message);
             console.error(err);
         }
     };
 
-    // 인포윈도우 '길찾기' 버튼 바인딩
-    if (ready && map && selected?.position && userLoc) {
-        setTimeout(() => {
-            const btn = document.getElementById("routeBtn");
-            if (btn) {
-                btn.onclick = () => {
-                    const start = new window.kakao.maps.LatLng(userLoc.lat, userLoc.lon);
-                    drawRoute(start, selected.position);
-                };
-            }
-        }, 0);
-    }
-
-    // 목록 클릭 → 지도 이동 + 패널 열기
-    const handleListClick = (h) => {
-        setSelectedHospital({
-            name: h.name,
-            address: h.address,
-            phone: h.phone,
-            distance: h.distance,
-        });
-
-        if (ready && mapInstanceRef.current && window.kakao) {
-            const pos = new window.kakao.maps.LatLng(h.lat, h.lon);
-            mapInstanceRef.current.panTo(pos);
+    // 목록 초기화
+    const handleBackToList = () => {
+        setSelectedHospital(null);
+        clearSelection();
+        if (routePolylineRef.current) {
+            routePolylineRef.current.setMap(null);
+            routePolylineRef.current = null;
         }
     };
 
-    return (
-        <>
-            {/* 지도 */}
-            <div ref={mapRef} className="map-box"/>
+    // 목록 클릭 → 상세 패널 열기
+    const handleListClick = (hospital) => {
+        setSelectedHospital({
+            name: hospital.name,
+            address: hospital.address,
+            phone: hospital.phone,
+            distance: hospital.distance,
+            drivingTime: hospital.drivingTime,
+            lat: hospital.lat,
+            lon: hospital.lon,
+        });
 
-            {/* 지역 선택 */}
-            <div className="region-select" style={{margin: "12px 0"}}>
-                <label htmlFor="region">지역 선택: </label>
-                <select
-                    id="region"
-                    value={selectedRegion}
-                    onChange={(e) => {
-                        setSelectedRegion(e.target.value);
-                        handleBackToList(); // 지역 바꾸면 항상 목록 모드로
-                    }}
-                >
-                    {regionList.map((region) => (
-                        <option key={region} value={region}>
-                            {region}
-                        </option>
-                    ))}
-                </select>
+        if (ready && mapInstanceRef.current && window.kakao) {
+            const pos = new window.kakao.maps.LatLng(hospital.lat, hospital.lon);
+            mapInstanceRef.current.panTo(pos);
+            mapInstanceRef.current.setLevel(4);
+        }
+    };
+
+    const handleRegionChange = (region) => {
+        setSelectedRegion(region);
+        setCurrentPage(1); // ✅ 지역 변경 시 첫 페이지로
+        handleBackToList();
+    };
+
+    return (
+        <div className="map-container">
+            {/* 헤더 섹션 */}
+            <div className="map-header">
+                <h2>🏥 병원 찾기</h2>
+                <div className="region-select">
+                    <label htmlFor="region">지역 선택: </label>
+                    <select
+                        id="region"
+                        value={selectedRegion}
+                        onChange={(e) => handleRegionChange(e.target.value)}
+                    >
+                        {regionList.map((region) => (
+                            <option key={region} value={region}>
+                                {region}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
-            {/* 상세 패널(선택 시) / 목록(선택 전) */}
-            {selectedHospital ? (
-                <HospitalInfoPanel hospital={selectedHospital} onClose={handleBackToList}/>
-            ) : sortedHospitals.length > 0 ? (
-                <div className="hospital-list">
-                    {sortedHospitals.map((h, idx) => (
-                        <button
-                            key={`${h.name}-${idx}`}
-                            className="hospital-card"
-                            onClick={() => handleListClick(h)}
-                            style={{
-                                textAlign: "left",
-                                border: "1px solid #ccc",
-                                padding: "1rem",
-                                marginBottom: "1rem",
-                                borderRadius: "8px",
-                                backgroundColor: "#f9f9f9",
-                                cursor: "pointer",
-                                width: "100%",
-                            }}
-                        >
-                            <h3 style={{margin: 0}}>{h.name}</h3>
-                            <p style={{margin: "6px 0"}}><strong>주소:</strong> {h.address}</p>
-                            <p style={{margin: "6px 0"}}><strong>전화번호:</strong> {h.phone}</p>
-                            {userLoc && (
-                                <>
-                                    <p style={{margin: "6px 0"}}>
-                                        <strong>거리:</strong> {h.distance} km
-                                    </p>
-                                    <p style={{margin: "6px 0"}}>
-                                        <strong>차량 예상 시간:</strong> 약 {h.drivingTime}분
-                                    </p>
-                                </>
-                            )}
-                        </button>
-                    ))}
+            {/* 메인 컨텐츠 */}
+            <div className="map-content">
+                <div className="map-section">
+                    <div ref={mapRef} className="map-box"/>
+                    {!ready && (
+                        <div className="map-loading">
+                            <div className="loading-spinner"></div>
+                            <p>지도를 불러오는 중...</p>
+                        </div>
+                    )}
                 </div>
-            ) : (
-                <p>해당 지역에 병원 정보가 없습니다.</p>
-            )}
 
-            <ToastContainer
-                position="bottom-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                pauseOnHover
-                draggable
-                limit={2}
-            />
-        </>
+                {/* 병원 목록/상세 */}
+                <div className="hospital-section">
+                    {selectedHospital ? (
+                        <HospitalInfoPanel
+                            hospital={selectedHospital}
+                            onClose={handleBackToList}
+                        />
+                    ) : sortedHospitals.length > 0 ? (
+                        <>
+                            <div className="hospital-header">
+                                <h3>병원 목록 ({sortedHospitals.length}개)</h3>
+                                {userLoc && <span className="sort-info">거리순 정렬</span>}
+                            </div>
+                            <div className="hospital-list">
+                                {paginatedHospitals.map((hospital, idx) => (
+                                    <button
+                                        key={`${hospital.name}-${idx}`}
+                                        className="hospital-card"
+                                        onClick={() => handleListClick(hospital)}
+                                    >
+                                        <div className="hospital-number">
+                                            {(currentPage - 1) * itemsPerPage + idx + 1}
+                                        </div>
+                                        <h3>{hospital.name}</h3>
+                                        <p><strong>📍 주소:</strong> {hospital.address}</p>
+                                        <p><strong>📞 전화번호:</strong> {hospital.phone || "정보 없음"}</p>
+                                        {userLoc && hospital.distance && (
+                                            <div className="hospital-distance">
+                                                <span className="distance-badge">
+                                                    🚗 {hospital.distance} km
+                                                </span>
+                                                <span className="time-badge">
+                                                    ⏱️ 약 {hospital.drivingTime}분
+                                                </span>
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                            {/* 페이지네이션 */}
+                            <div className="hospital-pagination">
+                                <button
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                >
+                                    ◀ 이전
+                                </button>
+                                <span>{currentPage} / {totalPages}</span>
+                                <button
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                >
+                                    다음 ▶
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="empty-state">
+                            <div className="empty-icon">🏥</div>
+                            <p>해당 지역에 병원 정보가 없습니다.</p>
+                            <p className="empty-sub">다른 지역을 선택해 보세요.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <ToastContainer position="bottom-right" autoClose={3000} limit={3}/>
+        </div>
     );
 }
