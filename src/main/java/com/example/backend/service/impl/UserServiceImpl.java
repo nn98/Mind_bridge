@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
 		if (req.getPhoneNumber() != null) req.setPhoneNumber(req.getPhoneNumber().trim());
 		if (req.getMentalState() != null) req.setMentalState(req.getMentalState().trim());
 		if (req.getTermsVersion() != null) req.setTermsVersion(req.getTermsVersion().trim());
+		if (req.getChatStyle() !=null) req.setChatStyle(req.getChatStyle().trim()); //채팅스타일
 	}
 	private UserEntity createUserEntity(RegistrationRequest request) {
 		UserEntity u = new UserEntity();
@@ -87,6 +88,7 @@ public class UserServiceImpl implements UserService {
 		u.setAge(request.getAge());
 		u.setPhoneNumber(request.getPhoneNumber());
 		u.setMentalState(request.getMentalState());
+		u.setChatStyle(request.getChatStyle()); //채팅스타일
 
 		// 역할/프로바이더 표준
 		u.setRole("USER");                        // 엔티티 @Pattern USER|ADMIN [상수화 고려]
@@ -173,6 +175,7 @@ public class UserServiceImpl implements UserService {
 			u.setPassword("");            // 소셜 로그인 계정은 로컬 패스워드 미사용
 			u.setAge(0);
 			u.setGender("OTHER");
+			u.setChatStyle(""); //채팅스타일 추가
 			return userRepository.save(u);
 		});
 	}
