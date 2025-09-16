@@ -1,6 +1,8 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.UserEntity;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,8 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.Optional;
+import com.example.backend.entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
@@ -25,30 +26,48 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     boolean existsByNickname(String nickname);
 
+    public static interface GenderCount {
+        String getGender();
+        Long getCnt();
+    }
+    public static interface AgeBucketCount {
+        String getBucket();
+        Long getCnt();
+    }
+
     @Modifying
     @Transactional
     @Query("update UserEntity u set u.lastLoginAt = CURRENT_TIMESTAMP where u.email = :email")
     int touchLastLogin(@Param("email") String email);
 
-    @Query("SELECT u.gender, COUNT(u) FROM UserEntity u WHERE u.gender IS NOT NULL GROUP BY u.gender")
-    Map<String, Long> countByGenderGroup();
+    @Query("select u.gender as gender, count(u.id) as cnt " +
+        "from UserEntity u where u.gender is not null group by u.gender")
+    List<GenderCount> countByGenderGroup();
 
-    @Query("SELECT CASE " +
-           "WHEN u.age BETWEEN 10 AND 19 THEN '10s' " +
-           "WHEN u.age BETWEEN 20 AND 29 THEN '20s' " +
-           "WHEN u.age BETWEEN 30 AND 39 THEN '30s' " +
-           "WHEN u.age BETWEEN 40 AND 49 THEN '40s' " +
-           "WHEN u.age BETWEEN 50 AND 59 THEN '50s' " +
-           "WHEN u.age >= 60 THEN '60s' " +
-           "ELSE 'Unknown' END, " +
-           "COUNT(u) FROM UserEntity u GROUP BY CASE " +
-           "WHEN u.age BETWEEN 10 AND 19 THEN '10s' " +
-           "WHEN u.age BETWEEN 20 AND 29 THEN '20s' " +
-           "WHEN u.age BETWEEN 30 AND 39 THEN '30s' " +
-           "WHEN u.age BETWEEN 40 AND 49 THEN '40s' " +
-           "WHEN u.age BETWEEN 50 AND 59 THEN '50s' " +
-           "WHEN u.age >= 60 THEN '60s' " +
-           "ELSE 'Unknown' END")
-    Map<String, Long> countByAgeBucketGroup();
+    @Query("""
+       select 
+         case 
+           when u.age between 10 and 19 then '10s'
+           when u.age between 20 and 29 then '20s'
+           when u.age between 30 and 39 then '30s'
+           when u.age between 40 and 49 then '40s'
+           when u.age between 50 and 59 then '50s'
+           when u.age >= 60 then '60s'
+           else 'Unknown'
+         end as bucket,
+         count(u.id) as cnt
+       from UserEntity u
+       group by 
+         case 
+           when u.age between 10 and 19 then '10s'
+           when u.age between 20 and 29 then '20s'
+           when u.age between 30 and 39 then '30s'
+           when u.age between 40 and 49 then '40s'
+           when u.age between 50 and 59 then '50s'
+           when u.age >= 60 then '60s'
+           else 'Unknown'
+         end
+       """)
+    List<AgeBucketCount> countByAgeBucketGroup();
 }
 
