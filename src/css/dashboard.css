@@ -696,15 +696,35 @@ body {
 }
 
 @keyframes waveMotionA {
-    0%   { background-position: 50% 50%; transform: scale(1); }
-    50%  { background-position: 80% 20%; transform: scale(1.5); } /* 확 크게 */
-    100% { background-position: 50% 50%; transform: scale(1); }
+    0% {
+        background-position: 50% 50%;
+        transform: scale(1);
+    }
+    50% {
+        background-position: 80% 20%;
+        transform: scale(1.5);
+    }
+    /* 확 크게 */
+    100% {
+        background-position: 50% 50%;
+        transform: scale(1);
+    }
 }
 
 @keyframes waveMotionB {
-    0%   { background-position: 50% 50%; transform: scale(1); }
-    50%  { background-position: 20% 80%; transform: scale(1.5); } /* 반대 방향 */
-    100% { background-position: 50% 50%; transform: scale(1); }
+    0% {
+        background-position: 50% 50%;
+        transform: scale(1);
+    }
+    50% {
+        background-position: 20% 80%;
+        transform: scale(1.5);
+    }
+    /* 반대 방향 */
+    100% {
+        background-position: 50% 50%;
+        transform: scale(1);
+    }
 }
 
 
@@ -853,11 +873,10 @@ body {
 .legend-label {
     font-size: 13px;
     font-weight: 600;
-    text-shadow:
-            -1px  0   #000,
-            1px  0   #000,
-            0   -1px #000,
-            0    1px #000;
+    text-shadow: -1px 0 #000,
+    1px 0 #000,
+    0 -1px #000,
+    0 1px #000;
 }
 
 .legend-pct {

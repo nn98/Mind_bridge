@@ -454,40 +454,40 @@ function ChatConsultInner({profile}) {
                           rows={1}/>
                 <div className="consult-actions">
                     {!isChatEnded ? (
-                            <>
+                        <>
                             <button type="submit"
-                            className="consult-send"
-                            disabled={isTyping || !chatInput.trim() || isEnding}>보내기
+                                    className="consult-send"
+                                    disabled={isTyping || !chatInput.trim() || isEnding}>보내기
                             </button>
-                        <button type="button" className="consult-end" onClick={onEndChat}
-                                disabled={isTyping || isEnding}>종료
-                        </button>
+                            <button type="button" className="consult-end" onClick={onEndChat}
+                                    disabled={isTyping || isEnding}>종료
+                            </button>
                         </>
-                        ) : (
+                    ) : (
                         <button type="button" className="consult-send" onClick={() => {
-                        handleRestartChat();
-                        clearSession();
-                        inputRef.current?.focus();
-                    }}>
-                    새 상담 시작
-                </button>
-                )}
-        </div>
-</form>
+                            handleRestartChat();
+                            clearSession();
+                            inputRef.current?.focus();
+                        }}>
+                            새 상담 시작
+                        </button>
+                    )}
+                </div>
+            </form>
 
-{/* 무활동 토스트 */}
-{
-    showIdleToast && !isEnding && !isChatEnded && (
-        <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
-            <div className="toast-title">1분 동안 활동이 없어요</div>
-            <div className="toast-desc"><b>{idleCountdown}</b>초 뒤 채팅이 자동 종료됩니다.</div>
-            <div className="toast-sub">정상적 종료를 원하시면 <b>채팅종료</b>를 눌러주세요.</div>
+            {/* 무활동 토스트 */}
+            {
+                showIdleToast && !isEnding && !isChatEnded && (
+                    <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
+                        <div className="toast-title">1분 동안 활동이 없어요</div>
+                        <div className="toast-desc"><b>{idleCountdown}</b>초 뒤 채팅이 자동 종료됩니다.</div>
+                        <div className="toast-sub">정상적 종료를 원하시면 <b>채팅종료</b>를 눌러주세요.</div>
+                    </div>
+                )
+            }
         </div>
     )
-}
-</div>
-)
-    ;
+        ;
 }
 
 export default function ChatConsult() {
