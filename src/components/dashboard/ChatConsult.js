@@ -104,7 +104,7 @@ const EMOTION_DESCRIPTIONS = {
     anger: "화가 나는 감정이 드는 상태예요.",
     anxiety: "불안하거나 긴장된 상태예요.",
     calmness: "평온하고 차분한 상태예요.",
-    neutral: "특별한 감정 없이 안정적인 상태예요.",
+    neutral: "중립적이고 안정적인 상태예요.",
 };
 const EMOJI = {
     happiness: "😊",
@@ -200,6 +200,38 @@ function ChatConsultInner({profile}) {
         const t = requestAnimationFrame(() => setActiveLayer(inactive));
         return () => cancelAnimationFrame(t);
     }, [nextBackground]);
+
+    /* === 스크롤 유지 === */
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
+        const parent = chatEndRef.current?.parentNode;
+        if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
+    }, [chatHistory, isTyping, chatEndRef]);
+    useEffect(() => {
+        if (!isTyping) inputRef.current?.focus();
+    }, [isTyping]);
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
+
+    /* === 팝오버 위치 === */
+    const recalcPopover = () => {
+        const el = anchorRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        setPopPos({top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX});
+    };
+    useLayoutEffect(() => {
+        if (!openInfo) return;
+        recalcPopover();
+        const onWin = () => recalcPopover();
+        window.addEventListener("resize", onWin);
+        window.addEventListener("scroll", onWin, {passive: true});
+        return () => {
+            window.removeEventListener("resize", onWin);
+            window.removeEventListener("scroll", onWin);
+        };
+    }, [openInfo]);
 
     /* === 세션 저장 === */
     useEffect(() => {
@@ -320,7 +352,7 @@ function ChatConsultInner({profile}) {
         return (
             <div className="legend-item" key={k} title={`${k} ${pct}%`}>
                 <span className="legend-swatch" style={{backgroundColor: color}}/>
-                <span className="legend-label">{EMOJI[k]} {k}</span>
+                <span className="legend-label" style={{color: color}}>{k.toUpperCase()}</span>
                 <span className="legend-pct">{pct}%</span>
                 <div className="legend-desc">{EMOTION_DESCRIPTIONS[k]}</div>
             </div>
