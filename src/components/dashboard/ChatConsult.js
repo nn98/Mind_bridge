@@ -142,7 +142,7 @@ function readSession() {
     }
 }
 
-function clearSession() {
+export function clearSession() {
     try {
         localStorage.removeItem(LS_KEY);
     } catch (_) {
@@ -492,6 +492,11 @@ function ChatConsultInner({profile}) {
 
 export default function ChatConsult() {
     const {profile} = useAuth();
+    useEffect(() => {
+        if (!profile) {
+            clearSession();   // ✅ 로그아웃 상태라면 세션 제거
+        }
+    }, [profile]);
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
     return <ChatConsultInner key={modeKey} profile={profile}/>;

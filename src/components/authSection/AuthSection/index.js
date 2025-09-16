@@ -32,6 +32,7 @@ import TempPasswordModal from "../modals/TempPasswordModal";
 import IdFoundModal from "../modals/IdFoundModal";
 import termsContent from "../data/termsContent";
 import Toast from '../../chat-modal/components/Toast'; // Toast 컴포넌트 import 추가
+import {clearSession} from "../../dashboard/ChatConsult";
 
 import {
     apiLogin, apiRegister, apiCheckEmail, apiFindId, apiResetPassword, apiCheckNickname, apiSaveChatStyle
@@ -118,9 +119,11 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
     useKakaoSdk();
     useSocialLoginEffect({applyProfileUpdate, setCustomUser, setIsCustomLoggedIn, fetchProfile});
     useLogoutEffect({
-        type, onAfterLogout: () => {
+        type,
+        onAfterLogout: () => {
             try {
                 logoutSuccess?.();
+                clearSession();   // ✅ 로그아웃 시 채팅 세션도 제거
             } catch {
             }
         }
