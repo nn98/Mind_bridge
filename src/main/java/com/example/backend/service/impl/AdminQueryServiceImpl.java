@@ -27,6 +27,7 @@ import com.example.backend.dto.admin.AdminUserSearchRequest;
 import com.example.backend.dto.admin.DailyMetricPoint;
 import com.example.backend.dto.admin.UserDistribution;
 import com.example.backend.dto.admin.WeeklyMetricPoint;
+import com.example.backend.dto.user.Profile;
 import com.example.backend.entity.DailyMetricsEntity;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
@@ -37,7 +38,9 @@ import com.example.backend.service.AdminQueryService;
 
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -60,6 +63,17 @@ public class AdminQueryServiceImpl implements AdminQueryService {
         List<DailyMetricsEntity> recent = dailyMetricsRepository.findAllByStatDateBetween(start, today);
         long weekChats = recent.stream().mapToLong(DailyMetricsEntity::getChatCount).sum();
         long weekVisits = recent.stream().mapToLong(DailyMetricsEntity::getLoginCount).sum();
+        List<Profile> users = userRepository.findAll()
+            .stream()
+            .map(u -> Profile.builder()
+                .nickname(u.getNickname())
+                .email(u.getEmail())
+                .phoneNumber(u.getPhoneNumber())
+                .gender(u.getGender())
+                .age(u.getAge())
+                .build()
+            )
+            .toList();
         return AdminStats.builder()
             .totalUsers(totalUsers)
             .totalPosts(totalPosts)
@@ -67,6 +81,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
             .todayVisits(todayVisits)
             .weekChats(weekChats)
             .weekVisits(weekVisits)
+            .users(users)
             .build();
     }
 
@@ -214,8 +229,22 @@ public class AdminQueryServiceImpl implements AdminQueryService {
 
     @Override
     public UserDistribution getUserDistribution() {
-        Map<String, Long> gender = userRepository.countByGenderGroup();
-        Map<String, Long> ageBuckets = userRepository.countByAgeBucketGroup();
+        java.util.List<UserRepository.GenderCount> genderRows =
+            userRepository.countByGenderGroup();
+        java.util.Map<String, Long> gender = genderRows.stream()
+            .collect(java.util.stream.Collectors.toMap(
+                row -> row.getGender() == null ? "UNKNOWN" : row.getGender(),
+                UserRepository.GenderCount::getCnt
+            ));
+
+        java.util.List<UserRepository.AgeBucketCount> ageRows =
+            userRepository.countByAgeBucketGroup();
+        java.util.Map<String, Long> ageBuckets = ageRows.stream()
+            .collect(java.util.stream.Collectors.toMap(
+                UserRepository.AgeBucketCount::getBucket,
+                UserRepository.AgeBucketCount::getCnt
+            ));
+
         return UserDistribution.builder()
             .genderCounts(gender)
             .ageBuckets(ageBuckets)
