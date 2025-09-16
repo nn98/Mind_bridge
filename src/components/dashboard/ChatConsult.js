@@ -400,49 +400,6 @@ function ChatConsultInner({profile}) {
                 <h1 className="consult-title">
                     {(chatHistory.findLast?.(m => m.sender === "user")?.message) || "무엇이든 물어보세요"}
                 </h1>
-
-                {/* ▶ 스타일 선택 토글 (칩 형태, 스크롤 가능) */}
-                <div
-                    role="radiogroup"
-                    aria-label="대화 톤 선택"
-                    style={{
-                        marginTop: 10,
-                        display: "flex",
-                        gap: 8,
-                        flexWrap: "wrap",
-                        overflowX: "auto",
-                        padding: "2px",
-                    }}
-                >
-                    {styleOptions.map((opt) => {
-                        const active = formData.chatStyle === opt;
-                        return (
-                            <button
-                                key={opt}
-                                role="radio"
-                                aria-checked={active}
-                                type="button"
-                                onClick={(e) => handleStyleSelect(e, opt)}
-                                className={`style-chip ${active ? "active" : ""}`}
-                                style={{
-                                    padding: "6px 10px",
-                                    borderRadius: 999,
-                                    border: `1px solid ${active ? "rgba(124,92,255,.65)" : "rgba(0,0,0,.12)"}`,
-                                    background: active ? "rgba(124,92,255,.08)" : "rgba(255,255,255,.7)",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    cursor: "pointer",
-                                    backdropFilter: "saturate(160%) blur(6px)",
-                                    color: "black",
-                                    boxShadow:"none",
-                                }}
-                                title={`${opt} 스타일`}
-                            >
-                                {opt}
-                            </button>
-                        );
-                    })}
-                </div>
             </div>
 
             {/* 감정 안내 버튼 */}
@@ -501,52 +458,210 @@ function ChatConsultInner({profile}) {
             </div>
 
             {/* 입력창 */}
-            <form className="consult-inputbar" onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-            }}>
+            <form
+                className="consult-inputbar"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                }}
+            >
                 {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
-                <textarea
-                    ref={inputRef}
-                    className="consult-input"
-                    placeholder="질문을 입력하고 Enter를 누르세요. (Shift+Enter 줄바꿈)"
-                    value={chatInput}
-                    onChange={(e) => {
-                        __internal?.setStep?.(__internal.step);
-                        __internal?.setGuestForm?.(__internal.guestForm);
-                        setChatInput(e.target.value);
-                        const el = e.target;
-                        el.style.height = "0px";
-                        el.style.height = Math.min(el.scrollHeight, 200) + "px";
+
+                <div
+                    style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "flex-end",
+                        gap: "8px",
+                        background: "rgba(255,255,255,0.1)",
+                        borderRadius: "12px",
+                        padding: "12px",
+                        backdropFilter: "blur(10px)",
                     }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSubmit();
-                        }
-                    }}
-                    readOnly={isTyping || isChatEnded || isEnding}
-                    rows={1}
-                />
-                <div className="consult-actions">
-                    {!isChatEnded ? (
-                        <>
-                            <button type="submit" className="consult-send"
-                                    disabled={isTyping || !chatInput.trim() || isEnding}>보내기
-                            </button>
-                            <button type="button" className="consult-end" onClick={onEndChat}
-                                    disabled={isTyping || isEnding}>종료
-                            </button>
-                        </>
-                    ) : (
-                        <button type="button" className="consult-send" onClick={() => {
-                            handleRestartChat();
-                            clearSession();
-                            inputRef.current?.focus();
-                        }}>
-                            새 상담 시작
+                >
+                    {/* 스타일 선택 드롭다운 (왼쪽) */}
+                    <div className="style-dropdown" style={{position: "relative"}}>
+                        <button
+                            type="button"
+                            onClick={() => setStyleDropdownOpen(!styleDropdownOpen)}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "8px 10px",
+                                background: "#805dd1",
+                                border: "1px solid rgba(255,255,255,0.2)",
+                                borderRadius: "8px",
+                                color: "white",
+                                fontSize: "15px",
+                                fontWeight: "500",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                minWidth: "100px",
+                                justifyContent: "space-between",
+                                height: "54px",
+                            }}
+                        >
+                            <span>🎭 {formData.chatStyle}</span>
+                            <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                style={{
+                                    transform: styleDropdownOpen ? "rotate(0deg)" : "rotate(180deg)",
+                                    transition: "transform 0.2s ease",
+                                }}
+                            >
+                                <path
+                                    d="M6 9l6 6 6-6"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
                         </button>
-                    )}
+
+                        {styleDropdownOpen && (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    bottom: "100%",
+                                    left: "0",
+                                    marginBottom: "8px",
+                                    background: "rgba(0,0,0,0.95)",
+                                    border: "1px solid rgba(255,255,255,0.2)",
+                                    borderRadius: "12px",
+                                    backdropFilter: "blur(20px)",
+                                    zIndex: 1000,
+                                    overflow: "hidden",
+                                    boxShadow: "0 -8px 32px rgba(0,0,0,0.4)",
+                                    minWidth: "200px",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        padding: "8px 0",
+                                        borderBottom: "1px solid rgba(255,255,255,0.1)",
+                                        margin: "0 12px 8px",
+                                        fontSize: "11px",
+                                        color: "rgba(255,255,255,0.6)",
+                                        fontWeight: "600",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    대화 스타일 선택
+                                </div>
+                                {styleOptions.map((style) => (
+                                    <button
+                                        key={style.name}
+                                        type="button"
+                                        onClick={() => handleStyleSelect(style)}
+                                        style={{
+                                            width: "100%",
+                                            padding: "12px 16px",
+                                            background:
+                                                formData.chatStyle === style.name
+                                                    ? "rgba(255,255,255,0.1)"
+                                                    : "transparent",
+                                            border: "none",
+                                            color: "white",
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                            fontSize: "13px",
+                                            transition: "background 0.2s ease",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "2px",
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                fontWeight: "500",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px",
+                                            }}
+                                        >
+                                            {style.name}
+                                            {formData.chatStyle === style.name && (
+                                                <span style={{fontSize: "10px", opacity: 0.7}}>✓</span>
+                                            )}
+                                        </div>
+                                        <div
+                                            style={{
+                                                fontSize: "11px",
+                                                color: "rgba(255,255,255,0.7)",
+                                            }}
+                                        >
+                                            {style.desc}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 입력창 */}
+                    <textarea
+                        ref={inputRef}
+                        className="consult-input"
+                        placeholder="질문을 입력하고 Enter를 누르세요. (Shift+Enter 줄바꿈)"
+                        value={chatInput}
+                        onChange={(e) => {
+                            __internal?.setStep?.(__internal.step);
+                            __internal?.setGuestForm?.(__internal.guestForm);
+                            setChatInput(e.target.value);
+                            const el = e.target;
+                            el.style.height = "0px";
+                            el.style.height = Math.min(el.scrollHeight, 200) + "px";
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmit();
+                            }
+                        }}
+                        readOnly={isTyping || isChatEnded || isEnding}
+                        rows={1}
+                        style={{flex: 1}}
+                    />
+
+                    {/* 버튼들 (입력창 오른쪽) */}
+                    <div className="consult-actions" style={{display: "flex", gap: "6px"}}>
+                        {!isChatEnded ? (
+                            <>
+                                <button
+                                    type="submit"
+                                    className="consult-send"
+                                    disabled={isTyping || !chatInput.trim() || isEnding}
+                                >
+                                    보내기
+                                </button>
+                                <button
+                                    type="button"
+                                    className="consult-end"
+                                    onClick={onEndChat}
+                                    disabled={isTyping || isEnding}
+                                >
+                                    종료
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                type="button"
+                                className="consult-send"
+                                onClick={() => {
+                                    handleRestartChat();
+                                    clearSession();
+                                    inputRef.current?.focus();
+                                }}
+                            >
+                                새 상담 시작
+                            </button>
+                        )}
+                    </div>
                 </div>
             </form>
 
