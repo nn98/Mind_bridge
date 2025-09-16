@@ -343,13 +343,14 @@ const AuthSection = ({type, setIsCustomLoggedIn, setCustomUser}) => {
                 await apiRegister({
                     email: formData.email.trim(),
                     password: formData.password,
+                    confirmPassword: formData.passwordConfirm,
                     nickname: formData.nickname.trim(),
                     fullName: formData.fullName.trim(),
-                    phoneNumber: formData.phoneNumber.replace(/\D/g, ""),
+                    phoneNumber: formData.phoneNumber.replace(/^0(\d{2,3})(\d{3,4})(\d{4})$/, '0$1-$2-$3'),
                     mentalState: formData.mentalState,
                     age: Number(formData.age),
                     gender: String(formData.gender || "").toUpperCase(),
-
+                    chatStyle: String(formData.chatStyle),
                     termsAccepted: !!termsAgreed,
                 });
 
