@@ -181,33 +181,31 @@ function ChatConsultInner({profile}) {
     const autoEndRef = useRef(null);
     const lastActivityRef = useRef(Date.now());
 
-    /* === 스타일 선택 (요청 반영) === */
-    const styleOptions = ["따뜻한", "차가운", "쾌활한", "진중한", "심플한", "전문적"];
-    const savedSession = useMemo(() => readSession(), []); // 한 번만 읽음
+    /* === 스타일 선택 (입력창으로 이동) === */
+    const styleOptions = [
+        {name: '따뜻한', desc: '공감하고 위로하는'},
+        {name: '차가운', desc: '냉정하고 객관적인'},
+        {name: '쾌활한', desc: '밝고 긍정적인'},
+        {name: '진중한', desc: '깊이 있게 생각하는'},
+        {name: '심플한', desc: '간결하고 명확한'},
+        {name: '전문적', desc: '전문성 있는'}
+    ];
 
-    const [formData, setFormData] = useState(() => ({
-        chatStyle: savedSession?.chatStyle || profile?.chatStyle || "심플한",
-    }));
+    const [formData, setFormData] = useState({
+        chatStyle: saved?.chatStyle || "심플한",
+    });
 
-    useEffect(() => {
-        const newStyle = savedSession?.chatStyle || profile?.chatStyle || "심플한"; //값이 없다면 심플한
+    const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
 
-        // 값이 실제로 바뀌었을 때만 setFormData 호출
-        setFormData(prev => {
-            if (prev.chatStyle === newStyle) return prev;
-            return { ...prev, chatStyle: newStyle };
-        });
-    }, [profile, savedSession]);
-
-    const handleStyleSelect = (_e, newStyle) => {
-        if (newStyle !== null && newStyle !== formData.chatStyle) {
-            setFormData(prev => ({ ...prev, chatStyle: newStyle }));
-        }
+    const handleStyleSelect = (style) => {
+        setFormData((prev) => ({...prev, chatStyle: style.name}));
+        setStyleDropdownOpen(false);
     };
+
     // 전역 data-속성으로도 노출 (CSS에서 조건부 스타일 가능)
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
-        window.dispatchEvent(new CustomEvent("mb:chat:style", { detail: formData.chatStyle }));
+        window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
     }, [formData.chatStyle]);
 
     /* === 배경 === */
@@ -665,6 +663,7 @@ function ChatConsultInner({profile}) {
                 </div>
             </form>
 
+
             {/* 무활동 토스트 */}
             {showIdleToast && !isEnding && !isChatEnded && (
                 <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
@@ -678,7 +677,8 @@ function ChatConsultInner({profile}) {
 }
 
 export default function ChatConsult() {
-    const {profile} = useAuth();
+    const
+    {profile} = useAuth();
     useEffect(() => {
         if (!profile) {
             clearSession();
