@@ -139,7 +139,7 @@ function readSession() {
     }
 }
 
-function clearSession() {
+export function clearSession() {
     try {
         localStorage.removeItem(LS_KEY);
     } catch (_) {
@@ -183,18 +183,31 @@ function ChatConsultInner({profile}) {
 
     /* === 스타일 선택 (요청 반영) === */
     const styleOptions = ["따뜻한", "차가운", "쾌활한", "진중한", "심플한", "전문적"];
-    const [formData, setFormData] = useState({
-        chatStyle: saved?.chatStyle || "심플한",
-    });
+    const savedSession = useMemo(() => readSession(), []); // 한 번만 읽음
+
+    const [formData, setFormData] = useState(() => ({
+        chatStyle: savedSession?.chatStyle || profile?.chatStyle || "심플한",
+    }));
+
+    useEffect(() => {
+        const newStyle = savedSession?.chatStyle || profile?.chatStyle || "심플한"; //값이 없다면 심플한
+
+        // 값이 실제로 바뀌었을 때만 setFormData 호출
+        setFormData(prev => {
+            if (prev.chatStyle === newStyle) return prev;
+            return { ...prev, chatStyle: newStyle };
+        });
+    }, [profile, savedSession]);
+
     const handleStyleSelect = (_e, newStyle) => {
-        if (newStyle !== null) {
-            setFormData((prev) => ({...prev, chatStyle: newStyle}));
+        if (newStyle !== null && newStyle !== formData.chatStyle) {
+            setFormData(prev => ({ ...prev, chatStyle: newStyle }));
         }
     };
     // 전역 data-속성으로도 노출 (CSS에서 조건부 스타일 가능)
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
-        window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
+        window.dispatchEvent(new CustomEvent("mb:chat:style", { detail: formData.chatStyle }));
     }, [formData.chatStyle]);
 
     /* === 배경 === */
@@ -551,6 +564,11 @@ function ChatConsultInner({profile}) {
 
 export default function ChatConsult() {
     const {profile} = useAuth();
+    useEffect(() => {
+        if (!profile) {
+            clearSession();   // ✅ 로그아웃 상태라면 세션 제거
+        }
+    }, [profile]);
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
     return <ChatConsultInner key={modeKey} profile={profile}/>;
