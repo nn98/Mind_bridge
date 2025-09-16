@@ -421,7 +421,7 @@ function ChatConsultInner({profile}) {
                                     cursor: "pointer",
                                     backdropFilter: "saturate(160%) blur(6px)",
                                     color: "black",
-                                    boxShadow: "none",
+                                    boxShadow:"none",
                                 }}
                                 title={`${opt} 스타일`}
                             >
