@@ -1,31 +1,34 @@
 import axios from "axios";
 
-// 클라우드 서버 주소 (기본 8222번 포트)
-const FASTAPI_URL = process.env.REACT_APP_FAST_URL;
-// local테스트 용도
+const FASTAPI_URL = "http://localhost:8222";
 
 // === 상담 세션 생성 ===
-export async function startNewSession(email, name) {
+export async function startNewSession(email, name, age, counsel, gender, status, chatStyle) {
   try {
     const response = await axios.post(
       `${FASTAPI_URL}/api/chat/session/start`,
-      { email, name }, // ✅ body 전달
-      { headers: { "Content-Type": "application/json" } }
+      { email, name, age, counsel, gender, status, chat_style: chatStyle },
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,   // ✅ 쿠키 포함
+      }
     );
     return response.data?.data || null;
   } catch (err) {
-    console.error("세션 생성 실패:", err);
+    console.error("세션 생성 실패:", err.response?.data || err);
     return null;
   }
 }
 
-// === 메시지 전송 ===
-export async function sendMessage(sessionId, userMessage) {
+export async function sendMessage(sessionId, userMessage, chatStyle) {
   try {
     const response = await axios.post(
       `${FASTAPI_URL}/api/chat/message`,
-      { sessionId, userMessage },
-      { headers: { "Content-Type": "application/json" } }
+      { sessionId, userMessage, chat_style: chatStyle },
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,   // ✅ 쿠키 포함
+      }
     );
 
     const data = response.data;
@@ -35,7 +38,7 @@ export async function sendMessage(sessionId, userMessage) {
       세션_종료: data["세션_종료"] || false,
     };
   } catch (err) {
-    console.error("메시지 전송 실패:", err);
+    console.error("메시지 전송 실패:", err.response?.data || err);
     return null;
   }
 }
@@ -46,11 +49,14 @@ export async function completeSession(sessionId) {
     const response = await axios.post(
       `${FASTAPI_URL}/api/chat/session/${sessionId}/complete`,
       null,
-      { headers: { "Content-Type": "application/json" } }
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,   // ✅ 쿠키 포함
+      }
     );
     return response.data;
   } catch (err) {
-    console.error("세션 종료 실패:", err);
+    console.error("세션 종료 실패:", err.response?.data || err);
     return null;
   }
 }
