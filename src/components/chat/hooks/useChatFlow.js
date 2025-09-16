@@ -1,7 +1,7 @@
 // src/components/chat/hooks/useChatFlow.js
-import {useState, useRef, useCallback, useEffect} from "react";
-import {toast} from "react-toastify";
-import {startNewSession, sendMessage, completeSession} from "../services/counsellingApi";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { toast } from "react-toastify";
+import { startNewSession, sendMessage, completeSession } from "../services/counsellingApi";
 
 /** 게스트 질문 순서 */
 const guestQuestions = [
@@ -99,13 +99,13 @@ function normalizeEmotionMix(raw) {
 
 /** 메인 훅 */
 export function useChatFlow({
-                                customUser,
-                                initialHistory = [],
-                                initialInput = "",
-                                initialStep = null,
-                                initialGuestForm = null,
-                                initialIsChatEnded = null,
-                            }) {
+    customUser,
+    initialHistory = [],
+    initialInput = "",
+    initialStep = null,
+    initialGuestForm = null,
+    initialIsChatEnded = null,
+}) {
     const isLoggedIn = !!customUser?.email;
 
     const [chatHistory, setChatHistory] = useState(() =>
@@ -117,8 +117,8 @@ export function useChatFlow({
                     message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
                 }]
                 : [
-                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
-                    {sender: "ai", message: guestQuestions[0]},
+                    { sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요." },
+                    { sender: "ai", message: guestQuestions[0] },
                 ])
     );
 
@@ -159,8 +159,8 @@ export function useChatFlow({
                     message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
                 }]
                 : [
-                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요."},
-                    {sender: "ai", message: guestQuestions[0]},
+                    { sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요." },
+                    { sender: "ai", message: guestQuestions[0] },
                 ]
         );
         setSessionId(null);
@@ -176,42 +176,79 @@ export function useChatFlow({
     const handleSubmit = useCallback(async () => {
         if (!chatInput.trim() || isTyping || isChatEnded) return;
         const input = chatInput.trim();
-        setChatHistory((prev) => [...prev, {sender: "user", message: input}]);
+        setChatHistory((prev) => [...prev, { sender: "user", message: input }]);
         setChatInput("");
 
         // 게스트 정보 수집 단계
         if (!isLoggedIn && step < guestQuestions.length) {
             const keys = ["이름", "성별", "나이", "상태", "상담내용", "이전상담경험"];
-            setGuestForm((prev) => ({...prev, [keys[step]]: input}));
+            setGuestForm((prev) => ({ ...prev, [keys[step]]: input }));
             const nextStep = step + 1;
             setStep(nextStep);
             if (nextStep < guestQuestions.length) {
-                setChatHistory((prev) => [...prev, {sender: "ai", message: guestQuestions[nextStep]}]);
+                setChatHistory((prev) => [
+                    ...prev,
+                    { sender: "ai", message: guestQuestions[nextStep] }
+                ]);
                 return;
             }
-            setChatHistory((prev) => [...prev, {
-                sender: "ai",
-                message: `감사합니다, ${guestForm["이름"] || input}님. 이제 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
-            }]);
+            setChatHistory((prev) => [
+                ...prev,
+                {
+                    sender: "ai",
+                    message: `감사합니다, ${guestForm["이름"] || input}님. 이제 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`
+                }
+            ]);
             return;
         }
 
         try {
             setIsTyping(true);
             let currentSessionId = sessionId;
+
+            // 🔹 세션 생성 (처음 메시지 보낼 때)
             if (!currentSessionId) {
                 const email = customUser?.email || "guest@example.com";
-                const name = customUser?.fullName || customUser?.name || guestForm["이름"] || "게스트";
-                currentSessionId = await startNewSession(email, name);
+                const name =
+                    customUser?.fullName ||
+                    customUser?.name ||
+                    guestForm["이름"] ||
+                    "게스트";
+
+                // ✅ chatStyle 기본값 추가
+                const chatStyle =
+                    guestForm["chatStyle"] ||
+                    customUser?.chatStyle ||
+                    "심플한";
+
+                currentSessionId = await startNewSession(
+                    email,
+                    name,
+                    guestForm["나이"] || "0",
+                    guestForm["상담내용"] || "",
+                    guestForm["성별"] || "미상",
+                    guestForm["상태"] || "",
+                    chatStyle
+                );
+
                 if (!currentSessionId) {
                     toast.error("세션 생성 실패");
                     return;
                 }
                 setSessionId(currentSessionId);
             }
-            const result = await sendMessage(currentSessionId, input);
+
+            // ✅ 메시지 전송할 때도 chatStyle 같이 전달
+            const chatStyle =
+                guestForm["chatStyle"] || customUser?.chatStyle || "심플한";
+
+            const result = await sendMessage(currentSessionId, input, chatStyle);
+
             if (result) {
-                setChatHistory((prev) => [...prev, {sender: "ai", message: result["상담사_응답"] || "응답 오류"}]);
+                setChatHistory((prev) => [
+                    ...prev,
+                    { sender: "ai", message: result["상담사_응답"] || "응답 오류" }
+                ]);
                 if (result["감정"] !== undefined) {
                     const mix = normalizeEmotionMix(result["감정"]);
                     setEmotionMix(mix || null);
@@ -226,18 +263,19 @@ export function useChatFlow({
         }
     }, [chatInput, sessionId, isTyping, isChatEnded, step, guestForm, customUser, isLoggedIn]);
 
+
     // === 세션 종료 ===
     const handleEndChat = useCallback(async () => {
         if (!sessionId) {
             setIsChatEnded(true);
-            setChatHistory((prev) => [...prev, {sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜"}]);
+            setChatHistory((prev) => [...prev, { sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜" }]);
             return;
         }
         try {
             const result = await completeSession(sessionId);
             console.log("📌 세션 종료 분석 결과:", result);
             setIsChatEnded(true);
-            setChatHistory((prev) => [...prev, {sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜"}]);
+            setChatHistory((prev) => [...prev, { sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜" }]);
         } catch (err) {
             console.error("세션 종료 실패:", err);
         }
@@ -250,7 +288,7 @@ export function useChatFlow({
         chatEndRef, inputRef,
         handleSubmit, handleEndChat, handleRestartChat,
         emotionMix, EMOTION_PALETTE,
-        __internal: {step, setStep, guestForm, setGuestForm, setChatHistory, setIsChatEnded},
+        __internal: { step, setStep, guestForm, setGuestForm, setChatHistory, setIsChatEnded },
     };
 }
 

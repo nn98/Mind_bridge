@@ -681,7 +681,7 @@ export default function ChatConsult() {
     const {profile} = useAuth();
     useEffect(() => {
         if (!profile) {
-            clearSession();   // ✅ 로그아웃 상태라면 세션 제거
+            clearSession();
         }
     }, [profile]);
     const isLoggedIn = !!profile;
