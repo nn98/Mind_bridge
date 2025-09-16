@@ -795,7 +795,7 @@ body {
 }
 
 .emotion-popover-inner {
-    min-width: 280px;
+    min-width: 450px;
     max-width: 420px;
     background: linear-gradient(0deg, #f3e7ff, #ffffff);
     border-radius: 14px;
@@ -843,16 +843,21 @@ body {
 }
 
 .legend-swatch {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 24px;
     border-radius: 4px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2);
     grid-row: 1 / span 2;
 }
 
 .legend-label {
     font-size: 13px;
     font-weight: 600;
+    text-shadow:
+            -1px  0   #000,
+            1px  0   #000,
+            0   -1px #000,
+            0    1px #000;
 }
 
 .legend-pct {
@@ -863,6 +868,7 @@ body {
 
 .legend-desc {
     font-size: 12px;
+    font-weight: 600;
     color: #444;
     grid-column: 2 / -1;
 }
