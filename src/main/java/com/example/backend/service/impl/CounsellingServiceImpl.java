@@ -24,9 +24,15 @@ public class CounsellingServiceImpl implements CounsellingService {
         counselling.setUserEmail((String) payload.get("email"));
         counselling.setUserName((String) payload.get("name"));
         counselling.setSummary((String) payload.get("summary"));
-        counselling.setRiskFactors(payload.get("riskFactors").toString());
-        counselling.setProtectiveFactors(payload.get("protectiveFactors").toString());
-        counselling.setSummaryEmotion((String) payload.get("clientEmotion"));
+
+        // 리스트나 null일 수 있으므로 방어 처리
+        Object risks = payload.get("riskFactors");
+        counselling.setRiskFactors(risks != null ? risks.toString() : "");
+
+        Object protects = payload.get("protectiveFactors");
+        counselling.setProtectiveFactors(protects != null ? protects.toString() : "");
+
+        counselling.setSummaryEmotion((String) payload.getOrDefault("clientEmotion", ""));
 
         // DB 저장
         return counsellingRepository.save(counselling);
