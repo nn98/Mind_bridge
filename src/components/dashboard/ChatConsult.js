@@ -76,16 +76,13 @@ function buildCompositeBackground(mix, palette) {
 
     let acc = 0;
     const conicStops = [];
-
     for (const key of order) {
         const pct = Math.max(0, Math.min(100, adjusted[key] || 0));
         if (pct < 1) continue;
-
         const alpha = alphaForPct(pct);
         const col = hexToRgba(palette[key] || "#ffffff", alpha);
         const from = acc;
         const to = acc + pct;
-
         conicStops.push(`${col} ${Math.max(0, from - 1)}% ${Math.min(100, to + 1)}%`);
         acc = to;
     }
@@ -184,6 +181,22 @@ function ChatConsultInner({profile}) {
     const autoEndRef = useRef(null);
     const lastActivityRef = useRef(Date.now());
 
+    /* === 스타일 선택 (요청 반영) === */
+    const styleOptions = ["따뜻한", "차가운", "쾌활한", "진중한", "심플한", "전문적"];
+    const [formData, setFormData] = useState({
+        chatStyle: saved?.chatStyle || "심플한",
+    });
+    const handleStyleSelect = (_e, newStyle) => {
+        if (newStyle !== null) {
+            setFormData((prev) => ({...prev, chatStyle: newStyle}));
+        }
+    };
+    // 전역 data-속성으로도 노출 (CSS에서 조건부 스타일 가능)
+    useEffect(() => {
+        document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
+        window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
+    }, [formData.chatStyle]);
+
     /* === 배경 === */
     const nextBackground = useMemo(
         () => buildCompositeBackground(emotionMix, EMOTION_PALETTE),
@@ -241,8 +254,9 @@ function ChatConsultInner({profile}) {
             step: __internal?.step ?? null,
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
+            chatStyle: formData.chatStyle,           // ← 저장
         });
-    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm]);
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle]);
 
     /* === 종료 === */
     const onEndChat = async () => {
@@ -309,6 +323,7 @@ function ChatConsultInner({profile}) {
             step: __internal?.step ?? null,
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
+            chatStyle: formData.chatStyle,           // ← 저장
         });
         startIdleWatchers();
     };
@@ -316,7 +331,6 @@ function ChatConsultInner({profile}) {
     /* ✅ user 메시지가 있어야 idle 감시 시작 */
     useEffect(() => {
         if (!chatHistory.some(m => m.sender === "user")) return;
-
         startIdleWatchers();
         const opts = {passive: true};
         window.addEventListener("mousemove", onAnyActivity, opts);
@@ -330,7 +344,7 @@ function ChatConsultInner({profile}) {
             window.removeEventListener("touchstart", onAnyActivity, opts);
             stopIdleWatchers();
         };
-    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm]);
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle]);
 
     /* === 지배 감정 === */
     const dominantEmotion = useMemo(() => {
@@ -373,12 +387,58 @@ function ChatConsultInner({profile}) {
                 <h1 className="consult-title">
                     {(chatHistory.findLast?.(m => m.sender === "user")?.message) || "무엇이든 물어보세요"}
                 </h1>
+
+                {/* ▶ 스타일 선택 토글 (칩 형태, 스크롤 가능) */}
+                <div
+                    role="radiogroup"
+                    aria-label="대화 톤 선택"
+                    style={{
+                        marginTop: 10,
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        overflowX: "auto",
+                        padding: "2px",
+                    }}
+                >
+                    {styleOptions.map((opt) => {
+                        const active = formData.chatStyle === opt;
+                        return (
+                            <button
+                                key={opt}
+                                role="radio"
+                                aria-checked={active}
+                                type="button"
+                                onClick={(e) => handleStyleSelect(e, opt)}
+                                className={`style-chip ${active ? "active" : ""}`}
+                                style={{
+                                    padding: "6px 10px",
+                                    borderRadius: 999,
+                                    border: `1px solid ${active ? "rgba(124,92,255,.65)" : "rgba(0,0,0,.12)"}`,
+                                    background: active ? "rgba(124,92,255,.08)" : "rgba(255,255,255,.7)",
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    backdropFilter: "saturate(160%) blur(6px)",
+                                    color: "black",
+                                    boxShadow:"none",
+                                }}
+                                title={`${opt} 스타일`}
+                            >
+                                {opt}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* 감정 안내 버튼 */}
-            <button ref={anchorRef} className="emotion-emoji-btn emotion-info-anchor"
-                    onClick={() => setOpenInfo(v => !v)}
-                    title="감정 안내 보기" aria-label="감정 안내 열기" aria-expanded={openInfo}>
+            <button
+                ref={anchorRef}
+                className="emotion-emoji-btn emotion-info-anchor"
+                onClick={() => setOpenInfo(v => !v)}
+                title="감정 안내 보기" aria-label="감정 안내 열기" aria-expanded={openInfo}
+            >
                 <svg className="icon-info" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor"/>
                 </svg>
@@ -433,30 +493,32 @@ function ChatConsultInner({profile}) {
                 handleSubmit();
             }}>
                 {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
-                <textarea ref={inputRef} className="consult-input"
-                          placeholder="질문을 입력하고 Enter를 누르세요. (Shift+Enter 줄바꿈)"
-                          value={chatInput}
-                          onChange={(e) => {
-                              __internal?.setStep?.(__internal.step);
-                              __internal?.setGuestForm?.(__internal.guestForm);
-                              setChatInput(e.target.value);
-                              const el = e.target;
-                              el.style.height = "0px";
-                              el.style.height = Math.min(el.scrollHeight, 200) + "px";
-                          }}
-                          onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();
-                                  handleSubmit();
-                              }
-                          }}
-                          readOnly={isTyping || isChatEnded || isEnding}
-                          rows={1}/>
+                <textarea
+                    ref={inputRef}
+                    className="consult-input"
+                    placeholder="질문을 입력하고 Enter를 누르세요. (Shift+Enter 줄바꿈)"
+                    value={chatInput}
+                    onChange={(e) => {
+                        __internal?.setStep?.(__internal.step);
+                        __internal?.setGuestForm?.(__internal.guestForm);
+                        setChatInput(e.target.value);
+                        const el = e.target;
+                        el.style.height = "0px";
+                        el.style.height = Math.min(el.scrollHeight, 200) + "px";
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSubmit();
+                        }
+                    }}
+                    readOnly={isTyping || isChatEnded || isEnding}
+                    rows={1}
+                />
                 <div className="consult-actions">
                     {!isChatEnded ? (
                         <>
-                            <button type="submit"
-                                    className="consult-send"
+                            <button type="submit" className="consult-send"
                                     disabled={isTyping || !chatInput.trim() || isEnding}>보내기
                             </button>
                             <button type="button" className="consult-end" onClick={onEndChat}
@@ -476,18 +538,15 @@ function ChatConsultInner({profile}) {
             </form>
 
             {/* 무활동 토스트 */}
-            {
-                showIdleToast && !isEnding && !isChatEnded && (
-                    <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
-                        <div className="toast-title">1분 동안 활동이 없어요</div>
-                        <div className="toast-desc"><b>{idleCountdown}</b>초 뒤 채팅이 자동 종료됩니다.</div>
-                        <div className="toast-sub">정상적 종료를 원하시면 <b>채팅종료</b>를 눌러주세요.</div>
-                    </div>
-                )
-            }
+            {showIdleToast && !isEnding && !isChatEnded && (
+                <div className="center-toast inactivity-toast" role="status" aria-live="assertive">
+                    <div className="toast-title">1분 동안 활동이 없어요</div>
+                    <div className="toast-desc"><b>{idleCountdown}</b>초 뒤 채팅이 자동 종료됩니다.</div>
+                    <div className="toast-sub">정상적 종료를 원하시면 <b>채팅종료</b>를 눌러주세요.</div>
+                </div>
+            )}
         </div>
-    )
-        ;
+    );
 }
 
 export default function ChatConsult() {

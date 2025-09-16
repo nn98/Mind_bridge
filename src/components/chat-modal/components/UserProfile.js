@@ -272,12 +272,6 @@ const UserProfile = () => {
                         </div>
                     )}
                 </div>
-
-                {/* ===== 상담 이력 ===== */}
-                <div className="profile-section">
-                    <SessionHistory userId={userId}/>
-                </div>
-
                 {/* ===== 계정 관리 ===== */}
                 <div className="account-actions">
                     <button
