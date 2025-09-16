@@ -65,31 +65,25 @@ const CalendarPanel = ({date, setDate}) => {
 
         const fetchWeekly = async () => {
             try {
-                const {data: rangeRes} = await axios.get(
-                    `${BACKEND_URL}/api/metrics/range`,
-                    {
-                        params: {start: startStr, end: endStr},
-                        withCredentials: true,
-                    }
-                );
-
-                const arr = Array.isArray(rangeRes) ? rangeRes : [];
-
+                const { data } = await axios.get(
+                    `${BACKEND_URL}/api/admin/metrics/range`,
+                    { params: { start: startStr, end: endStr }, withCredentials: true }
+                ); // [21][20]
+                console.log(data);
+                const arr = Array.isArray(data?.data ?? data) ? (data?.data ?? data) : []; // ApiResponse 대응 [21]
                 const merged = [];
                 for (let i = 0; i < 7; i++) {
                     const d = weekRange.start.add(i, "day");
                     const iso = d.format("YYYY-MM-DD");
-
-                    const matched = arr.find((x) => x.statDate === iso);
+                    const matched = arr.find((x) => (x.date ?? x.statDate) === iso);
                     merged.push({
                         iso,
                         label: d.format("ddd"),
-                        counselling: Number(matched?.dailyChatCount || 0),
-                        visitors: Number(matched?.dailyUsersCount || 0),
+                        counselling: Number(matched?.chatCount ?? matched?.dailyChatCount ?? 0),
+                        visitors: Number(matched?.visitCount ?? matched?.dailyUsersCount ?? 0),
                     });
                 }
-
-                setWeeklyData(merged);
+                setWeeklyData(merged); // [21]
                 setSelectedDayCount(
                     merged.find((x) => x.iso === selectedIso)?.counselling ?? 0
                 );
@@ -117,14 +111,17 @@ const CalendarPanel = ({date, setDate}) => {
     useEffect(() => {
         const fetchToday = async () => {
             try {
-                const {data} = await axios.get(`${BACKEND_URL}/api/metrics/today`, {
-                    withCredentials: true,
-                });
-                setTodayVisitors(Number(data?.dailyUsersCount || 0));
+                const { data: todayRes } = await axios.get(
+                    `${BACKEND_URL}/api/admin/metrics/today`,
+                    { withCredentials: true }
+                ); // [21]
+                const todayBody = todayRes?.data ?? todayRes;
+                setTodayVisitors(Number(todayBody?.visitCount ?? 0)); // [21]
 
                 // ✅ 콘솔 출력
-                console.log("[👥 오늘 접속자 수]", data?.dailyUsersCount || 0, "명");
-                console.log("[🗨️ 오늘 상담 횟수]", data?.dailyChatCount || 0, "회");
+                console.log(todayBody);
+                console.log("[👥 오늘 접속자 수]", todayBody?.visitCount || 0, "명");
+                console.log("[🗨️ 오늘 상담 횟수]", todayBody?.chatCount || 0, "회");
             } catch (e) {
                 console.error("금일 접속자 로드 실패:", e);
                 setTodayVisitors(0);
@@ -136,18 +133,15 @@ const CalendarPanel = ({date, setDate}) => {
     /* ───────── /api/admin/stats에서 유저 성별·나이 불러오기 ───────── */
     useEffect(() => {
         const fetchAllUsers = async () => {
-            try {
-                const {data} = await axios.get(`${BACKEND_URL}/api/admin/stats`, {
-                    withCredentials: true,
-                });
-
-                setAllUsers(Array.isArray(data?.users) ? data.users : []);
-            } catch (e) {
-                console.error("유저 목록 불러오기 실패:", e);
-                setAllUsers([]);
-            }
+            const { data: distRes } = await axios.get(
+                `${BACKEND_URL}/api/admin/metrics/users/distribution`,
+                { withCredentials: true }
+            ); // [21]
+            const dist = distRes?.data ?? distRes;
+            console.log(`dist: ${JSON.stringify(dist)}`);
+// GenderAgeStats가 기대하는 형태로 변환 필요 시 조정
+            setAllUsers(dist); // 분포는 집계 데이터이므로 allUsers에 그대로 넣지 말고 컴포넌트 내부에서 dist를 사용하도록 리팩터 권장 [21]
         };
-
         fetchAllUsers();
     }, []);
 

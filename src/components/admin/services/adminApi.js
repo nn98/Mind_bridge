@@ -176,6 +176,7 @@ const looksLikePageResponse = (body) =>
 export const getAdminStats = async () => {
     const path = joinPath("/api/admin/stats");
     const res = await api.get(path);
+    console.log(`res: ${JSON.stringify(res)}`);
     return res.data?.data ?? res.data;
 };
 
