@@ -10,7 +10,7 @@ export async function startNewSession(email, name, age, counsel, gender, status,
       { email, name, age, counsel, gender, status, chat_style: chatStyle },
       {
         headers: { "Content-Type": "application/json" },
-        withCredentials: true,   // ✅ 쿠키 포함
+        withCredentials: true,   
       }
     );
     return response.data?.data || null;
@@ -27,7 +27,7 @@ export async function sendMessage(sessionId, userMessage, chatStyle) {
       { sessionId, userMessage, chat_style: chatStyle },
       {
         headers: { "Content-Type": "application/json" },
-        withCredentials: true,   // ✅ 쿠키 포함
+        withCredentials: true,   
       }
     );
 

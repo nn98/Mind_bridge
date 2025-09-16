@@ -431,20 +431,31 @@ body {
     margin-top: 6px;
 }
 
+/* ✅ 링크 줄바꿈 처리 */
+.ews-stats .links .ok,
+.ews-stats .links .warn {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
 .ews-stats .links .ok {
     color: #14532d;
     background: #ecfdf5;
     border: 1px solid #a7f3d0;
-    border-radius: 8px;
-    padding: 4px 8px;
 }
 
 .ews-stats .links .warn {
     color: #7c2d12;
     background: #fff7ed;
     border: 1px solid #fed7aa;
-    border-radius: 8px;
-    padding: 4px 8px;
 }
 
 /* 입력 폭 */

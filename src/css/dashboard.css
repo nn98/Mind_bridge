@@ -1,9 +1,5 @@
 /**************
  * MindBridge UI — Clean Dark v3 (Fixed Full CSS, Sidebar Contrast Up)
- * - 중앙(.dash-content) 스크롤 활성화 + 스크롤바 비가시화
- * - 헤더 sticky, 입력창 sticky 하단 고정
- * - 사이드바/채팅 스트림도 스크롤 가능(바는 숨김)
- * - Sidebar 색상/텍스트 대비 강화
  **************/
 
 :root {
@@ -66,7 +62,7 @@ body {
     display: flex;
     min-height: 100vh;
     height: 100vh;
-    overflow: hidden; /* 중앙만 스크롤 */
+    overflow: hidden;
 }
 
 /* Sidebar */
@@ -78,12 +74,10 @@ body {
     flex-direction: column;
     gap: 12px;
     padding: 16px 12px;
-
     position: sticky;
     top: 0;
     height: 100vh;
     flex: 0 0 240px;
-
     overflow-y: auto;
     z-index: 1001;
 }
@@ -161,7 +155,7 @@ body {
 .menu-item.active {
     background: var(--sidebar-active-bg);
     outline: 1px solid var(--sidebar-active-outline);
-    color: #ffffff;
+    color: #fff;
     box-shadow: 0 0 0 1px rgba(59, 130, 246, .15) inset;
 }
 
@@ -279,7 +273,7 @@ body {
     background: linear-gradient(0deg, #f3e7ff, #ffffff);
 }
 
-/* ============ Cards / Grid ============ */
+/* Cards */
 .grid {
     display: grid;
 }
@@ -376,44 +370,7 @@ body {
     filter: brightness(.95);
 }
 
-/* ============ Landing (옵션) ============ */
-.chat-hero {
-    display: grid;
-    place-items: center;
-    min-height: calc(100vh - 120px);
-    padding: 32px 16px;
-}
-
-.chat-hero-inner {
-    width: 100%;
-    max-width: 920px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.chat-logo {
-    margin-bottom: 24px;
-}
-
-.chat-logo-text {
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -.02em;
-    color: #e8f0ff;
-}
-
-.chat-card {
-    position: relative;
-    width: 100%;
-    background: transparent;
-    color: var(--text);
-    border: none;
-    border-radius: 16px;
-    padding: 0;
-    box-shadow: none;
-}
-
-/* ======== 상담 레이아웃 ======== */
+/* 상담 레이아웃 */
 .consult-wrap {
     position: relative;
     width: 100%;
@@ -421,7 +378,7 @@ body {
     height: calc(100vh - 120px);
     min-height: 0;
     margin: 0 auto;
-    padding: 24px 16px 24px;
+    padding: 24px 16px;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     row-gap: 18px;
@@ -471,7 +428,6 @@ body {
     scroll-behavior: smooth;
 }
 
-/* 버블 */
 .consult-bubble {
     max-width: 760px;
     width: fit-content;
@@ -513,8 +469,19 @@ body {
     z-index: 2;
 }
 
+/* 🔹 새로 추가: 입력창 + 버튼 가로 정렬 */
+.consult-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    backdrop-filter: blur(10px);
+}
+
 .consult-input {
-    width: 100%;
+    flex: 1;
     min-height: 54px;
     max-height: 220px;
     padding: 14px 16px;
@@ -522,8 +489,8 @@ body {
     border-radius: 14px;
     font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
     font-size: 16px;
-    color: #0c1220;
-    background-color: #ffffff;
+    color: black;
+    background-color: #fff !important;
     box-shadow: none;
     resize: none;
 }
@@ -536,23 +503,26 @@ body {
     color: #7c8aa3;
 }
 
+/* 버튼 */
 .consult-actions {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 10px;
+    gap: 6px;
+}
+
+.consult-send, .consult-end {
+    height: 54px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s ease, transform .1s ease;
 }
 
 .consult-send {
-    height: 42px;
-    padding: 0 16px;
-    border: none;
     background: #0d6efd;
     color: #fff;
-    border-radius: 12px;
     font-weight: 800;
-    cursor: pointer;
-    transition: background .2s ease, transform .1s ease;
 }
 
 .consult-send:hover {
@@ -566,24 +536,18 @@ body {
 }
 
 .consult-end {
-    height: 42px;
-    padding: 0 14px;
     background: #a78bfa;
-    color: white;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background .2s ease, transform .1s ease;
+    color: #fff;
 }
 
 .consult-end:hover {
     transform: translateY(-2px);
 }
 
-/* ============ Responsive ============ */
+/* Responsive */
 @media (max-width: 1080px) {
     .grid-2 {
-        grid-template-columns: 1fr;
+        grid-template-columns:1fr;
     }
 }
 
@@ -616,7 +580,7 @@ body {
     }
 }
 
-/* ===== 공통: 스크롤바 비가시화 ===== */
+/* 스크롤바 숨김 */
 .dash-sidebar, .dash-content, .consult-stream {
     scrollbar-width: none;
 }
@@ -629,6 +593,7 @@ body {
     display: none;
 }
 
+/* system */
 .system-message {
     text-align: center;
     font-size: 20px;
@@ -658,11 +623,7 @@ body {
     }
 }
 
-/* =========================================================
-   🎨 Emotion Background — Pastel Strong Wave
-   - 파스텔 톤 + 눈에 잘 보이는 파도 흔들림
-========================================================= */
-
+/* Emotion Background */
 .emotion-bg {
     position: fixed;
     inset: 0;
@@ -670,27 +631,20 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease;
-
-    /* conic-gradient 채워짐 (JS) */
-    background-size: 180% 180%; /* 더 크게 */
+    background-size: 180% 180%;
     background-position: 50% 50%;
     will-change: background-position, transform, opacity, filter;
-
-    /* 섞이는 느낌 */
-    filter: blur(90px) saturate(1.2);
+    filter: blur(20px) saturate(1.2);
 }
 
-/* 활성 레이어 */
 .emotion-bg.active {
     opacity: 1;
 }
 
-/* A 레이어: 빠른 큰 출렁임 */
 .emotion-bg.layerA.active {
     animation: waveMotionA 16s ease-in-out infinite;
 }
 
-/* B 레이어: 느린 큰 출렁임 */
 .emotion-bg.layerB.active {
     animation: waveMotionB 28s ease-in-out infinite alternate;
 }
@@ -704,7 +658,6 @@ body {
         background-position: 80% 20%;
         transform: scale(1.5);
     }
-    /* 확 크게 */
     100% {
         background-position: 50% 50%;
         transform: scale(1);
@@ -720,22 +673,18 @@ body {
         background-position: 20% 80%;
         transform: scale(1.5);
     }
-    /* 반대 방향 */
     100% {
         background-position: 50% 50%;
         transform: scale(1);
     }
 }
 
-
-/* 컨텐츠는 항상 위에 */
-.dash-main, .dash-content, .consult-wrap,
-.consult-header, .consult-stream, .consult-inputbar {
+/* 위 컨텐츠 항상 위 */
+.dash-main, .dash-content, .consult-wrap, .consult-header, .consult-stream, .consult-inputbar {
     position: relative;
     z-index: 1;
 }
 
-/* 버블 그림자 살짝 강조 (배경과 분리) */
 .consult-bubble.ai, .consult-bubble.user {
     box-shadow: 0 2px 12px rgba(0, 0, 0, .18);
 }
@@ -746,17 +695,17 @@ body {
     top: 20%;
     left: 50%;
     transform: translateX(-50%);
-    background: white;
+    background: #fff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .2);
     z-index: 999;
 }
 
 .emotion-info-btn {
     margin-left: auto;
     background: #9b59b6;
-    color: white;
+    color: #fff;
     border: none;
     border-radius: 50%;
     width: 28px;
@@ -765,12 +714,11 @@ body {
     font-weight: bold;
 }
 
-/* 원하는 ‘빨간 동그라미’ 자리에 버튼 고정 */
 .emotion-info-anchor {
-    position: absolute; /* consult-wrap 기준 */
-    top: 10px; /* 필요시 미세 조정 */
-    left: -16vw; /* 필요시 미세 조정 */
-    z-index: 3; /* 헤더/버블 위 */
+    position: absolute;
+    top: 10px;
+    left: -16vw;
+    z-index: 3;
 }
 
 .emotion-emoji-btn {
@@ -782,10 +730,9 @@ body {
     border-radius: 999px;
     border: 0;
     padding: 0;
-    background: linear-gradient(180deg, #ffeef6 0%, #fff9fb 70%, #ffffff 100%);
-    color: #0b5ed7; /* 아이콘 색 (currentColor) */
-    box-shadow: 0 8px 20px rgba(255, 105, 180, .28),
-    inset 0 1px 0 rgba(255, 255, 255, .95);
+    background: linear-gradient(180deg, #ffeef6 0%, #fff9fb 70%, #fff 100%);
+    color: #0b5ed7;
+    box-shadow: 0 8px 20px rgba(255, 105, 180, .28), inset 0 1px 0 rgba(255, 255, 255, .95);
     outline: 1px solid rgba(214, 51, 108, .18);
     cursor: pointer;
     line-height: 1;
@@ -800,13 +747,11 @@ body {
     transform: translateY(0);
 }
 
-/* SVG 아이콘 선명도 ↑ */
 .icon-exclaim {
     width: 18px;
     height: 18px;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .18));
 }
-
 
 /* 팝오버 */
 .emotion-popover {
@@ -815,9 +760,9 @@ body {
 }
 
 .emotion-popover-inner {
-    min-width: 450px;
+    min-width: 280px;
     max-width: 420px;
-    background: linear-gradient(0deg, #f3e7ff, #ffffff);
+    background: linear-gradient(0deg, #f3e7ff, #fff);
     border-radius: 14px;
     padding: 14px 16px;
     border: 1px solid rgba(0, 0, 0, .06);
