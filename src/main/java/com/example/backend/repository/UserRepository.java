@@ -26,11 +26,11 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     boolean existsByNickname(String nickname);
 
-    public static interface GenderCount {
+    interface GenderCount {
         String getGender();
         Long getCnt();
     }
-    public static interface AgeBucketCount {
+    interface AgeBucketCount {
         String getBucket();
         Long getCnt();
     }
