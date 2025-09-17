@@ -1,19 +1,5 @@
 package com.example.backend.controller;
 
-import io.micrometer.core.instrument.Meter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.distribution.HistogramSnapshot;
-import io.micrometer.core.instrument.distribution.ValueAtPercentile;
-import jakarta.annotation.Nullable;
-import org.springframework.http.MediaType;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.distribution.HistogramSnapshot;
+import io.micrometer.core.instrument.distribution.ValueAtPercentile;
+import jakarta.annotation.Nullable;
 
 /**
  * Internal metrics dump for http.server.requests.
