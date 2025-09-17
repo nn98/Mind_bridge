@@ -36,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_PATTERNS = List.of(
         "/actuator/health",
         "/error",
-        "/favicon.ico"
+        "/favicon.ico",
+        "/api/users/availability"
     );
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
