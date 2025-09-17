@@ -102,5 +102,5 @@
 | `상황` |                                            타입 주입 과정에서 복수의 타입 후보가 존재할 때, 모호성 발생.                                            |
 | `원인` |           Actuator 활성화에 따른 controllerEndpointHandlerMapping 추가, <br/>requestMappingHandlerMapping 과 충돌, 모호성 발생.            |
 | `설명` | 기존에는 단일 후보였던 타입 주입이 다중 후보 상태로, <br/>이 상태에서 특정 컴포넌트가 HandlerMapping(또는 상위 타입)을 <br/>“하나만” 주입받으려 하면 후보가 2개 이상이라 선택 불가가 되어 폭발 |
-| `해결` |    `다중 후보 수용` <br/>List<HandlerMapping> 또는 Map<String, HandlerMapping>으로 주입받아 <br/>의도적으로 여러 빈을 허용하고 내부에서 선택 로직을 두는 방식이 가장 안전    |
+| `해결` | `다중 후보 수용` <br/>List<HandlerMapping> 또는 Map<String, HandlerMapping>으로 주입받아 <br/>의도적으로 여러 빈을 허용하고 내부에서 선택 로직을 두는 방식이 가장 안전  |
 
