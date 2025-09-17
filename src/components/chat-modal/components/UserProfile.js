@@ -217,9 +217,9 @@ const UserProfile = () => {
                         {isEditing ? (
                             <select name="gender" value={editedInfo.gender} onChange={handleChange}>
                                 <option value="">선택</option>
-                                <option value="남성">남성</option>
-                                <option value="여성">여성</option>
-                                <option value="기타">기타</option>
+                                <option value="male">남성</option>
+                                <option value="female">여성</option>
+                                <option value="other">기타</option>
                             </select>
                         ) : (
                             <p>{userInfo.gender || "─"}</p>

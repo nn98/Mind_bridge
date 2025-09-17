@@ -173,6 +173,7 @@ function ChatConsultInner({profile}) {
     const [openInfo, setOpenInfo] = useState(false);
     const anchorRef = useRef(null);
     const [popPos, setPopPos] = useState({top: 0, left: 0});
+    const popoverRef = useRef(null);
 
     const [showIdleToast, setShowIdleToast] = useState(false);
     const [idleCountdown, setIdleCountdown] = useState(60);
@@ -196,6 +197,7 @@ function ChatConsultInner({profile}) {
     });
 
     const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null); // 드롭다운 ref 추가
 
     const handleStyleSelect = (style) => {
         setFormData((prev) => ({...prev, chatStyle: style.name}));
@@ -207,6 +209,41 @@ function ChatConsultInner({profile}) {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
         window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
     }, [formData.chatStyle]);
+
+    // 드롭다운 외부 클릭 감지
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setStyleDropdownOpen(false);
+            }
+        };
+
+        if (styleDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [styleDropdownOpen]);
+
+    // 팝오버 외부 클릭 감지
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (popoverRef.current && !popoverRef.current.contains(event.target) &&
+                anchorRef.current && !anchorRef.current.contains(event.target)) {
+                setOpenInfo(false);
+            }
+        };
+
+        if (openInfo) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openInfo]);
 
     /* === 배경 === */
     const nextBackground = useMemo(
@@ -415,6 +452,7 @@ function ChatConsultInner({profile}) {
             {/* 팝오버 */}
             {openInfo && (
                 <div className="emotion-popover"
+                     ref={popoverRef}
                      style={{
                          position: "fixed",
                          top: `${popPos.top}px`,
@@ -478,7 +516,7 @@ function ChatConsultInner({profile}) {
                     }}
                 >
                     {/* 스타일 선택 드롭다운 (왼쪽) */}
-                    <div className="style-dropdown" style={{position: "relative"}}>
+                    <div className="style-dropdown" style={{position: "relative"}} ref={dropdownRef}>
                         <button
                             type="button"
                             onClick={() => setStyleDropdownOpen(!styleDropdownOpen)}
@@ -487,7 +525,7 @@ function ChatConsultInner({profile}) {
                                 alignItems: "center",
                                 gap: "6px",
                                 padding: "8px 10px",
-                                background: "#805dd1",
+                                background: "#E0E7FF",
                                 border: "1px solid rgba(255,255,255,0.2)",
                                 borderRadius: "8px",
                                 color: "white",
@@ -528,7 +566,7 @@ function ChatConsultInner({profile}) {
                                     bottom: "100%",
                                     left: "0",
                                     marginBottom: "8px",
-                                    background: "rgba(0,0,0,0.95)",
+                                    background: "#818CF8",
                                     border: "1px solid rgba(255,255,255,0.2)",
                                     borderRadius: "12px",
                                     backdropFilter: "blur(20px)",
@@ -677,8 +715,7 @@ function ChatConsultInner({profile}) {
 }
 
 export default function ChatConsult() {
-    const
-    {profile} = useAuth();
+    const {profile} = useAuth();
     useEffect(() => {
         if (!profile) {
             clearSession();
