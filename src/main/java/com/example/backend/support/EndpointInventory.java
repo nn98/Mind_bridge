@@ -35,18 +35,9 @@ public class EndpointInventory implements ApplicationRunner {
 		this.objectMapper = objectMapper;
 	}
 
-	public static record Endpoint(
-		String httpMethod,
-		String path,
-		String controller,
-		String handler,
-		List<String> consumes,
-		List<String> produces
-	) {}
-
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		RequestMappingHandlerMapping mapping = ctx.getBean(RequestMappingHandlerMapping.class);
+		RequestMappingHandlerMapping mapping = ctx.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
 		Map<RequestMappingInfo, HandlerMethod> handlerMethods = mapping.getHandlerMethods();
 
 		List<Endpoint> endpoints = new ArrayList<>();
@@ -137,4 +128,14 @@ public class EndpointInventory implements ApplicationRunner {
 		if (!StringUtils.hasText(s)) return s;
 		return s.length() <= max ? s : s.substring(0, max - 3) + "...";
 	}
+
+	public static record Endpoint(
+		String httpMethod,
+		String path,
+		String controller,
+		String handler,
+		List<String> consumes,
+		List<String> produces
+	) {}
+
 }
