@@ -19,6 +19,7 @@ const PasswordChangeModal = ({isOpen, onClose, onLogout}) => {
         console.log(`currentPassword: ${currentPassword}`);
         console.log(`password: ${password}`);
         console.log(`confirmPassword: ${confirmPassword}`);
+        console.log(`URL: ${BACKEND_URL} / ${BACKEND_URL}/api/users/account/password`);
 
         // ✅ 입력값 검증
         if (!currentPassword || !password || !confirmPassword) {
@@ -45,7 +46,6 @@ const PasswordChangeModal = ({isOpen, onClose, onLogout}) => {
 
         try {
             const payload = {currentPassword, password, confirmPassword};
-            console.log(`URL: ${BACKEND_URL} / ${BACKEND_URL}/api/users/account/password`);
             await axios.patch(`${BACKEND_URL}/api/users/account/password`, payload, {
                 withCredentials: true,
                 headers: {'Content-Type': 'application/json', Accept: 'application/json'},
