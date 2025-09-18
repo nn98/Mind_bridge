@@ -67,6 +67,7 @@ function alphaForPct(pct) {
     return 0.6;
 }
 
+
 /* ========= 배경 빌드 ========= */
 function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
@@ -79,18 +80,29 @@ function buildCompositeBackground(mix, palette) {
     for (const key of order) {
         const pct = Math.max(0, Math.min(100, adjusted[key] || 0));
         if (pct < 1) continue;
+
         const alpha = alphaForPct(pct);
         const col = hexToRgba(palette[key] || "#ffffff", alpha);
+
         const from = acc;
         const to = acc + pct;
-        conicStops.push(`${col} ${Math.max(0, from - 1)}% ${Math.min(100, to + 1)}%`);
+
+        // 🎨 경계 부드럽게 → -2% ~ +2% 오버랩
+        conicStops.push(
+            `${col} ${Math.max(0, from - 2)}% ${Math.min(100, to + 2)}%`
+        );
+
         acc = to;
     }
 
-    const radialA = `radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.08), transparent 70%)`;
-    const radialB = `radial-gradient(50% 50% at 80% 10%, rgba(255,255,255,.05), transparent 60%)`;
+    // ✨ radial 레이어 (빛번짐 느낌 유지)
+    const radialA = `radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.08), transparent 75%)`;
+    const radialB = `radial-gradient(50% 50% at 80% 10%, rgba(255,255,255,.05), transparent 70%)`;
+
+    // ✨ conic-gradient (감정 비율 배경)
     const conic = `conic-gradient(from 180deg at 50% 50%, ${conicStops.join(", ")})`;
 
+    // 여러 레이어 합성
     return `${radialA}, ${radialB}, ${conic}`;
 }
 
@@ -112,12 +124,11 @@ const EMOJI = {
     neutral: "🙂",
 };
 
-/* ========= 세션 저장 키 & 타임아웃 ========= */
+/* ========= 세션 저장 키 & 타이머 ========= */
 const LS_KEY = "mindbridge.chat.session.v1";
 const TWO_MIN = 2 * 60 * 1000;
 const ONE_MIN = 60 * 1000;
 
-/* ========= 로컬스토리지 유틸 ========= */
 function persistSession(payload) {
     try {
         const toSave = {...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN};
@@ -182,7 +193,7 @@ function ChatConsultInner({profile}) {
     const autoEndRef = useRef(null);
     const lastActivityRef = useRef(Date.now());
 
-    /* === 스타일 선택 (입력창으로 이동) === */
+    /* === 스타일 선택 === */
     const styleOptions = [
         {name: '따뜻한', desc: '공감하고 위로하는'},
         {name: '차가운', desc: '냉정하고 객관적인'},
@@ -191,43 +202,36 @@ function ChatConsultInner({profile}) {
         {name: '심플한', desc: '간결하고 명확한'},
         {name: '전문적', desc: '전문성 있는'}
     ];
-
     const [formData, setFormData] = useState({
         chatStyle: saved?.chatStyle || "심플한",
     });
-
     const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null); // 드롭다운 ref 추가
+    const dropdownRef = useRef(null);
 
     const handleStyleSelect = (style) => {
         setFormData((prev) => ({...prev, chatStyle: style.name}));
         setStyleDropdownOpen(false);
     };
 
-    // 전역 data-속성으로도 노출 (CSS에서 조건부 스타일 가능)
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
         window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
     }, [formData.chatStyle]);
 
-    // 드롭다운 외부 클릭 감지
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setStyleDropdownOpen(false);
             }
         };
-
         if (styleDropdownOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [styleDropdownOpen]);
 
-    // 팝오버 외부 클릭 감지
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (popoverRef.current && !popoverRef.current.contains(event.target) &&
@@ -235,15 +239,14 @@ function ChatConsultInner({profile}) {
                 setOpenInfo(false);
             }
         };
-
         if (openInfo) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [openInfo]);
+
 
     /* === 배경 === */
     const nextBackground = useMemo(
@@ -503,40 +506,13 @@ function ChatConsultInner({profile}) {
             >
                 {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
 
-                <div
-                    style={{
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "flex-end",
-                        gap: "8px",
-                        background: "rgba(255,255,255,0.1)",
-                        borderRadius: "12px",
-                        padding: "12px",
-                        backdropFilter: "blur(10px)",
-                    }}
-                >
+                <div className="consult-input-wrapper">
                     {/* 스타일 선택 드롭다운 (왼쪽) */}
-                    <div className="style-dropdown" style={{position: "relative"}} ref={dropdownRef}>
+                    <div className="style-dropdown" ref={dropdownRef}>
                         <button
                             type="button"
                             onClick={() => setStyleDropdownOpen(!styleDropdownOpen)}
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                                padding: "8px 10px",
-                                background: "#E0E7FF",
-                                border: "1px solid rgba(255,255,255,0.2)",
-                                borderRadius: "8px",
-                                color: "white",
-                                fontSize: "15px",
-                                fontWeight: "500",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                minWidth: "100px",
-                                justifyContent: "space-between",
-                                height: "54px",
-                            }}
+                            className={`style-dropdown-btn ${styleDropdownOpen ? "open" : ""}`}
                         >
                             <span>🎭 {formData.chatStyle}</span>
                             <svg
@@ -544,10 +520,7 @@ function ChatConsultInner({profile}) {
                                 height="15"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                style={{
-                                    transform: styleDropdownOpen ? "rotate(0deg)" : "rotate(180deg)",
-                                    transition: "transform 0.2s ease",
-                                }}
+                                className="dropdown-arrow"
                             >
                                 <path
                                     d="M6 9l6 6 6-6"
@@ -560,79 +533,24 @@ function ChatConsultInner({profile}) {
                         </button>
 
                         {styleDropdownOpen && (
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    bottom: "100%",
-                                    left: "0",
-                                    marginBottom: "8px",
-                                    background: "#818CF8",
-                                    border: "1px solid rgba(255,255,255,0.2)",
-                                    borderRadius: "12px",
-                                    backdropFilter: "blur(20px)",
-                                    zIndex: 1000,
-                                    overflow: "hidden",
-                                    boxShadow: "0 -8px 32px rgba(0,0,0,0.4)",
-                                    minWidth: "200px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        padding: "8px 0",
-                                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                                        margin: "0 12px 8px",
-                                        fontSize: "11px",
-                                        color: "rgba(255,255,255,0.6)",
-                                        fontWeight: "600",
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    대화 스타일 선택
-                                </div>
+                            <div className="style-dropdown-menu">
+                                <div className="style-dropdown-header">대화 스타일 선택</div>
                                 {styleOptions.map((style) => (
                                     <button
                                         key={style.name}
                                         type="button"
                                         onClick={() => handleStyleSelect(style)}
-                                        style={{
-                                            width: "100%",
-                                            padding: "12px 16px",
-                                            background:
-                                                formData.chatStyle === style.name
-                                                    ? "rgba(255,255,255,0.1)"
-                                                    : "transparent",
-                                            border: "none",
-                                            color: "white",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            fontSize: "13px",
-                                            transition: "background 0.2s ease",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: "2px",
-                                        }}
+                                        className={`style-dropdown-item ${
+                                            formData.chatStyle === style.name ? "active" : ""
+                                        }`}
                                     >
-                                        <div
-                                            style={{
-                                                fontWeight: "500",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "8px",
-                                            }}
-                                        >
+                                        <div className="style-dropdown-item-title">
                                             {style.name}
                                             {formData.chatStyle === style.name && (
-                                                <span style={{fontSize: "10px", opacity: 0.7}}>✓</span>
+                                                <span className="checkmark">✓</span>
                                             )}
                                         </div>
-                                        <div
-                                            style={{
-                                                fontSize: "11px",
-                                                color: "rgba(255,255,255,0.7)",
-                                            }}
-                                        >
-                                            {style.desc}
-                                        </div>
+                                        <div className="style-dropdown-item-desc">{style.desc}</div>
                                     </button>
                                 ))}
                             </div>
@@ -700,7 +618,6 @@ function ChatConsultInner({profile}) {
                     </div>
                 </div>
             </form>
-
 
             {/* 무활동 토스트 */}
             {showIdleToast && !isEnding && !isChatEnded && (
