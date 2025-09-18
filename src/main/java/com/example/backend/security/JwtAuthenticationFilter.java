@@ -34,30 +34,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper; // 추가 주입
 
     private static final List<String> EXCLUDE_PATTERNS = List.of(
-        "/actuator/health",
-        "/error",
-        "/favicon.ico"
+            "/actuator/health",
+            "/error",
+            "/favicon.ico",
+            "/api/users/register",
+            "/api/users/availability*",
+            "/api/auth/login",
+            "/api/auth/reset-password",
+            "/api/auth/social/**"
     );
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private boolean isExcluded(@NonNull String uri) {
         for (String pattern : EXCLUDE_PATTERNS) {
-            if (PATH_MATCHER.match(pattern, uri)) return true;
+            if (PATH_MATCHER.match(pattern, uri)) {
+                return true;
+            }
         }
         return false;
     }
 
     @Override
     protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
         return isExcluded(request.getRequestURI());
     }
 
     @Override
     protected void doFilterInternal(
-        @Nonnull HttpServletRequest request,
-        @Nonnull HttpServletResponse response,
-        @Nonnull FilterChain filterChain
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain
     ) throws ServletException, IOException {
 
         final String path = request.getRequestURI();
@@ -123,8 +132,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             var authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null,
-                userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
+                    userDetails, null,
+                    userDetails.getAuthorities() != null ? userDetails.getAuthorities() : Collections.emptyList()
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("[JWT] Auth success for {}", email);
