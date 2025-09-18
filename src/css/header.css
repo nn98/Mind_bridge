@@ -286,3 +286,248 @@ body,
     font-size: 0.95rem;
     color: #666;
 }
+
+/* ====== UserProfile 2열 레이아웃 ====== */
+.profile-two-col {
+    max-width: 1000px; /* 컨테이너는 그대로, 우측 패널 고려해 약간 확장해도 OK */
+}
+
+.profile-main {
+    display: grid;
+    grid-template-columns: 1fr 360px; /* 좌측 정보 / 우측 세션 */
+    gap: 16px;
+}
+
+.profile-left {
+    min-width: 0;
+}
+
+.profile-right {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+}
+
+/* ====== Session List Card ====== */
+.session-list-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    border: 1px solid #eee;
+}
+
+.session-list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+
+.session-list-head h4 {
+    margin: 0;
+}
+
+.session-list-head .muted {
+    color: #888;
+    font-size: .9rem;
+}
+
+.list-skel {
+    padding: .75rem;
+    color: #666;
+}
+
+.list-empty {
+    padding: 1rem;
+    color: #888;
+    text-align: center;
+}
+
+.session-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.session-item {
+    display: grid;
+    grid-template-columns: 1fr 92px; /* 텍스트 / 그래프 */
+    gap: .75rem;
+    padding: .75rem;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.session-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+}
+
+.item-top {
+    min-width: 0;
+}
+
+.item-title-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.item-date {
+    font-weight: 600;
+}
+
+.item-summary {
+    margin: .25rem 0 0;
+    color: #555;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.risk-badge {
+    font-size: .75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+
+.risk-badge.ok {
+    background: #eafaf1;
+    color: #0b7a3a;
+    border-color: #caeed7;
+}
+
+.risk-badge.warn {
+    background: #fff6e6;
+    color: #a66300;
+    border-color: #ffe0b3;
+}
+
+.risk-badge.danger {
+    background: #ffecec;
+    color: #b00020;
+    border-color: #ffc9c9;
+}
+
+.item-graph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ====== Triangle Graph ====== */
+.triangle-graph {
+    display: block;
+}
+
+.tri-outline {
+    fill: none;
+    stroke: #d9e1f2;
+    stroke-width: 2;
+}
+
+.tri-grid {
+    fill: none;
+    stroke: #eef2ff;
+    stroke-width: 1;
+}
+
+.tri-dot {
+    fill: #a18cd1;
+}
+
+.tri-dot.halo {
+    fill: rgba(161, 140, 209, .25);
+}
+
+.tri-label {
+    fill: #444;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tri-label.small {
+    font-size: 10px;
+}
+
+.tri-pct {
+    fill: #666;
+    font-size: 11px;
+}
+
+.tri-pct.small {
+    font-size: 9px;
+}
+
+/* ====== Modal ====== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    width: min(720px, 92vw);
+    max-height: 86vh;
+    overflow: auto;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.modal-meta {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 16px;
+    color: #444;
+}
+
+.modal-graph {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 16px;
+}
+
+.modal-notes h5 {
+    margin: .25rem 0 .5rem;
+}
+
+.tri-area {
+    fill: rgba(161, 140, 209, 0.35); /* 보라 반투명 영역 */
+    stroke: #a18cd1;
+    stroke-width: 2;
+}
+
+.tri-outline {
+    fill: none;
+    stroke: #d9e1f2;
+    stroke-width: 2;
+}

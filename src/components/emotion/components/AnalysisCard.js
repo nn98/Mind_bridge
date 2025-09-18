@@ -2,14 +2,6 @@
 import React, {useMemo, useState} from 'react';
 import ResultSection from './ResultSection';
 
-/**
- * Optional props (있으면 사용, 없으면 무시되어 하위 호환 유지)
- * - analyzeDisabled?: boolean
- * - history?: Array<{ createdAt:number, text:string, percentages:Record<string,number>, dominantEmotion:string, confidence:number }>
- * - onClearHistory?: () => void
- * - onRemoveHistory?: (createdAt:number) => void
- * - compareWithPrevious?: () => Record<string, number> | null
- */
 export default function AnalysisCard({
                                          text,
                                          setText,
