@@ -57,6 +57,11 @@ public class ChatSessionEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "division")
+    private String division;
+
+
+
     @PrePersist
     public void prePersist() {
         if (this.sessionStatus == null) {
