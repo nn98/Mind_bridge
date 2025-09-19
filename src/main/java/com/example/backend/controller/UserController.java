@@ -23,7 +23,6 @@ import com.example.backend.dto.user.AvailabilityType;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
-import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.security.SecurityUtil;
@@ -109,12 +108,5 @@ public class UserController {
             .header("Pragma", "no-cache")
             .header("Expires", "0")
             .build();
-    }
-
-    @GetMapping("/summary")
-    public ResponseEntity<Summary> getSummary(@RequestParam String nickname) {
-        return userService.getUserByNickname(nickname)
-            .map(ResponseEntity::ok)
-            .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }
