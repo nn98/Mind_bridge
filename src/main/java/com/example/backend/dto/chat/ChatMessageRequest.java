@@ -1,30 +1,19 @@
+// dto/chat/MessageRequest.java
 package com.example.backend.dto.chat;
 
-import com.example.backend.entity.ChatHistoryEntity;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChatMessageRequest {
+@ToString
+public class MessageRequest {
 
-    private String sessionId;
-    private String messageContent;
-    private String messageType;   
-    private String userEmail;
-    private String chatStyle;
-    private String emotion;
+    @NotBlank(message = "시스템 프롬프트는 필수입니다")
+    private String systemPrompt;
 
-    // DTO → Entity 변환
-    public ChatHistoryEntity toEntity() {
-        return ChatHistoryEntity.builder()
-                .sessionId(this.sessionId)
-                .messageContent(this.messageContent)
-                .messageType(ChatHistoryEntity.MessageType.valueOf(this.messageType.toUpperCase()))
-                .userEmail(this.userEmail)
-                .chatStyle(this.chatStyle)
-                .emotion(this.emotion)
-                .build();
-    }
+    private String userMessage; // 사용자가 직접 입력한 메시지 (선택사항)
+    private Long sessionId; // 세션 관리용
 }
