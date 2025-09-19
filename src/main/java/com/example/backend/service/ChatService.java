@@ -7,7 +7,6 @@ import java.util.Optional;
 import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.dto.chat.SessionRequest;
-import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 
@@ -28,8 +27,6 @@ public interface ChatService {
     ChatSessionEntity updateSession(String sessionId, SessionRequest request);
 
     // === 조회 관련 ===
-    List<SessionHistory> getAllSessions();
-    List<SessionHistory> getSessionsByUserEmail(String userEmail);
     List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName);
     Optional<ChatSessionEntity> getSessionById(String sessionId);
 

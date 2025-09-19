@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,9 +32,9 @@ import lombok.Setter;
 public class ChatSessionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // BIGINT AUTO_INCREMENT 기대
+    @Column(name = "session_id")
+    private String sessionId;  // id → sessionId로 변경
 
     @Column(name = "user_email", nullable = true, length = 255)
     private String userEmail;
@@ -43,17 +45,17 @@ public class ChatSessionEntity {
     @Column(name = "summary", columnDefinition = "TEXT", nullable = true)
     private String summary;
 
-    @Column(name = "emotion_summary", columnDefinition = "TEXT", nullable = true)
-    private String summaryEmotion;
+    @Column(name = "emotions", columnDefinition = "TEXT", nullable = true)
+    private String emotions;
 
-    @Column(name = "risk_factors", columnDefinition = "TEXT", nullable = true)
-    private String riskFactors;
+    @Column(name = "primary_risk", columnDefinition = "TEXT", nullable = true)
+    private String primaryRisk;
 
     @Column(name = "protective_factors", columnDefinition = "TEXT", nullable = true)
     private String protectiveFactors;
 
-    @Column(name = "division", columnDefinition = "TEXT", nullable = true)
-    private String division;
+    @Column(name = "risk_factors", columnDefinition = "TEXT", nullable = true)
+    private String riskFactors;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = true, updatable = false)
@@ -62,4 +64,11 @@ public class ChatSessionEntity {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = true)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.sessionId == null) {
+            this.sessionId = UUID.randomUUID().toString();
+        }
+    }
 }

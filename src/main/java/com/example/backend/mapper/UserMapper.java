@@ -33,7 +33,7 @@ public interface UserMapper {
 
     // === DTO to Entity 매핑 (명시적 매핑) ===
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "password", ignore = true) // 서비스에서 인코딩 처리
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -55,7 +55,7 @@ public interface UserMapper {
 
     // === 업데이트 매핑 ===
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "email", ignore = true) // 이메일은 수정 불가
     @Mapping(target = "password", ignore = true) // 비밀번호는 별도 API
     @Mapping(target = "createdAt", ignore = true)
@@ -78,7 +78,7 @@ public interface UserMapper {
 
     // === 소셜 사용자 생성 매핑 ===
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "password", constant = "")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
