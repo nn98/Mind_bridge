@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -149,7 +150,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("GET /api/admin/posts → 200 + 페이지 콘텐츠")
     void getPosts_ok() throws Exception {
-        var row = com.example.backend.dto.admin.AdminPostRow.builder().id(10L).title("T").authorNickname("A").visibility("public").build();
+        var row = com.example.backend.dto.admin.AdminPostRow.builder().id(10L).title("T").userNickname("A").visibility(PUBLIC).build();
         Page<AdminPostRow> page = new PageImpl<>(List.of(row), org.springframework.data.domain.PageRequest.of(0,20), 1);
         given(adminQueryService.findPosts(any(), any(Pageable.class))).willReturn(page);
 
@@ -183,7 +184,7 @@ class AdminControllerTest {
                 .content("{\"visibility\":\"public\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
-        then(adminQueryService).should().updatePostVisibility(1L, "public");
+        then(adminQueryService).should().updatePostVisibility(1L, PUBLIC);
     } // DTO 유효 성공 [1]
 
     // 공개 상태 변경 422 (검증 실패)
