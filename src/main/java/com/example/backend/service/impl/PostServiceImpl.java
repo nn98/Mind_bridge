@@ -44,7 +44,7 @@ public class PostServiceImpl implements PostService {
             post.setTitle(post.getTitle());
         }
         PostEntity savedPost = postRepository.save(post);
-        log.info("새 게시글 작성 완료 - ID: {}, 작성자: {}", savedPost.getId(), userEmail);
+        log.info("새 게시글 작성 완료 - ID: {}, 작성자: {}", savedPost.getPostId(), userEmail);
 
 
         return mapToDetail(savedPost);
@@ -139,7 +139,7 @@ public class PostServiceImpl implements PostService {
 
     private Detail mapToDetail(PostEntity post) {
         Detail detail = new Detail();
-        detail.setId(post.getId());
+        detail.setId(post.getPostId());
         detail.setContent(post.getContent());
         detail.setUserEmail(post.getUserEmail());
         detail.setUserNickname(post.getUserNickname());
@@ -155,7 +155,7 @@ public class PostServiceImpl implements PostService {
 
     private Summary mapToSummary(PostEntity post) {
         Summary summary = new Summary();
-        summary.setId(post.getId());
+        summary.setId(post.getPostId());
         summary.setContentPreview(truncateContent(post.getContent(), 100));
         summary.setUserNickname(post.getUserNickname());
         summary.setVisibility(post.getVisibility());

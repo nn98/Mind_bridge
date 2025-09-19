@@ -1,7 +1,5 @@
 package com.example.backend.entity;
 
-import static com.example.backend.common.constant.PostConstants.Visibility.*;
-
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,18 +18,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * 게시글 정보를 담는 엔티티 클래스
- * 사용자가 작성한 게시글의 내용과 메타데이터를 저장
- */
 @Entity
-@Table(name = "posts",
-    indexes = {
-        @Index(name = "idx_user_email", columnList = "user_email"),
-        @Index(name = "idx_visibility", columnList = "visibility"),
-        @Index(name = "idx_created_at", columnList = "created_at"),
-        @Index(name = "idx_user_email_visibility", columnList = "user_email, visibility")
-    })
+@Table(name = "posts", indexes = {
+    @Index(name = "idx_posts_user_email", columnList = "user_email"),
+    @Index(name = "idx_posts_created_at", columnList = "created_at"),
+    @Index(name = "idx_user_email", columnList = "user_email"),
+    @Index(name = "idx_visibility", columnList = "visibility"),
+    @Index(name = "idx_created_at", columnList = "created_at"),
+    @Index(name = "idx_user_email_visibility", columnList = "user_email, visibility"),
+    @Index(name = "fk_posts_user_nickname", columnList = "user_nickname")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,7 +37,8 @@ public class PostEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "post_id")  // ❌ "postid" → ✅ "post_id"
+    private Long postId;
 
     @Column(nullable = true, length = 200)
     private String title;
@@ -49,57 +46,41 @@ public class PostEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    // ✅ 테이블 컬럼명과 정확히 일치하는 직접 매핑
-    @Column(name = "user_email", nullable = false, length = 255)
+    @Column(name = "user_email", nullable = false, length = 255)  // ❌ "useremail" → ✅ "user_email"
     private String userEmail;
 
-    @Column(name = "user_nickname", nullable = false, length = 50)
+    @Column(name = "user_nickname", nullable = false, length = 50)  // ❌ "usernickname" → ✅ "user_nickname"
     private String userNickname;
 
-    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'public'")
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private String visibility = PUBLIC;
+    private String visibility = "public";
 
-    @Column(name = "like_count", nullable = false, columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer likeCount = 0;
-
-    @Column(name = "comment_count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "comment_count", nullable = false)  // ❌ "commentcount" → ✅ "comment_count"
     @Builder.Default
     private Integer commentCount = 0;
 
-    @Column(name = "view_count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "like_count", nullable = false)  // ❌ "likecount" → ✅ "like_count"
+    @Builder.Default
+    private Integer likeCount = 0;
+
+    @Column(name = "view_count", nullable = false)  // ❌ "viewcount" → ✅ "view_count"
     @Builder.Default
     private Integer viewCount = 0;
 
-    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'active'")
+    @Column(nullable = false, length = 20)
     @Builder.Default
     private String status = "active";
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)  // ❌ "createdat" → ✅ "created_at"
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)  // ❌ "updatedat" → ✅ "updated_at"
     private LocalDateTime updatedAt;
 
-    // ✅ author 연관관계 제거! userEmail, userNickname 직접 사용
-
-    // 비즈니스 메서드들은 유지
-    public void incrementLikeCount() {
-        this.likeCount = (this.likeCount == null ? 0 : this.likeCount) + 1;
-    }
-
-    public void decrementLikeCount() {
-        this.likeCount = Math.max(0, (this.likeCount == null ? 0 : this.likeCount) - 1);
-    }
-
     public boolean isPublic() {
-        return PUBLIC.equals(this.visibility);
-    }
-
-    public boolean isActive() {
-        return "active".equals(this.status);
+        return "public".equals(this.visibility);
     }
 }
