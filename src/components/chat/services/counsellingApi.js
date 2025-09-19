@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const FASTAPI_URL = "http://localhost:8222";
+const FASTAPI_URL = "https://nasejong.shop"; 
 
 // === 상담 세션 생성 ===
 export async function startNewSession(email, name, age, counsel, gender, status, chatStyleOptions) {
