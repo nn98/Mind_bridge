@@ -1,9 +1,166 @@
 // src/components/dashboard/ChatConsult.jsx
-import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
-import { useChatFlow } from "../chat/hooks/useChatFlow";
-import { useAuth } from "../../AuthContext";
+import {useEffect, useMemo, useRef, useState, useLayoutEffect} from "react";
+import {useChatFlow} from "../chat/hooks/useChatFlow";
+import {useAuth} from "../../AuthContext";
+import {Canvas, useFrame, useThree} from '@react-three/fiber';
+import {forwardRef} from 'react';
+import {Color} from 'three';
 
-/* ========= 기존 유틸 ========= */
+/* ========= Silk Component ========= */
+const hexToNormalizedRGB = hex => {
+    hex = hex.replace('#', '');
+    return [
+        parseInt(hex.slice(0, 2), 16) / 255,
+        parseInt(hex.slice(2, 4), 16) / 255,
+        parseInt(hex.slice(4, 6), 16) / 255
+    ];
+};
+
+const vertexShader = `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const fragmentShader = `
+varying vec2 vUv;
+uniform float uTime;
+uniform float uSpeed;
+uniform float uScale;
+uniform float uRotation;
+uniform float uNoiseIntensity;
+uniform vec3  uColors[6];
+uniform float uWeights[6];   // ✅ 감정 비율 (합 = 1)
+
+const float e = 2.71828182845904523536;
+
+float noise(vec2 texCoord) {
+  float G = e;
+  vec2  r = (G * sin(G * texCoord));
+  return fract(r.x * r.y * (1.0 + texCoord.x));
+}
+
+vec2 rotateUvs(vec2 uv, float angle) {
+  float c = cos(angle);
+  float s = sin(angle);
+  mat2  rot = mat2(c, -s, s, c);
+  return rot * uv;
+}
+
+// ✅ 감정 비율 기반 그라데이션 색상
+vec3 getGradientColor(float t) {
+  vec3 color = vec3(0.0);
+  float totalWeight = 0.0;
+
+  for (int i = 0; i < 6; i++) {
+    float dist = abs(t - (float(i) / 5.0));   // 색상 기준 위치와 거리
+    float w = uWeights[i] * exp(-dist * 10.0); // 거리 기반 가중치 (부드러운 종 모양)
+    color += uColors[i] * w;
+    totalWeight += w;
+  }
+
+  return color / max(totalWeight, 0.0001);
+}
+
+void main() {
+  float rnd        = noise(gl_FragCoord.xy);
+  vec2  uv         = rotateUvs(vUv * uScale, uRotation);
+  vec2  tex        = uv * uScale;
+  float tOffset    = uSpeed * uTime;
+  tex.y += 0.03 * sin(8.0 * tex.x - tOffset);
+
+  // ✅ 패턴 값 안정화 (0.9 ~ 1.0 범위 유지 → 검정 방지)
+  float pattern = 0.9 + 0.1 * sin(
+      5.0 * (tex.x + tex.y +
+             cos(3.0 * tex.x + 5.0 * tex.y) +
+             0.02 * tOffset) +
+      sin(20.0 * (tex.x + tex.y - 0.1 * tOffset))
+  );
+
+  // ✅ 대각선 그라데이션 위치 (0~1)
+  float gradPos = clamp((vUv.x + vUv.y) * 0.5, 0.0, 1.0);
+  vec3 gradColor = getGradientColor(gradPos);
+
+  // ✅ 노이즈는 약간만 더하기 (음수 제거 → 검정 방지)
+  vec3 finalColor = gradColor * pattern + vec3(abs(rnd) * 0.02 * uNoiseIntensity);
+
+  gl_FragColor = vec4(finalColor, 1.0);
+}
+
+`;
+
+const SilkPlane = forwardRef(function SilkPlane({uniforms}, ref) {
+    const {viewport} = useThree();
+    useLayoutEffect(() => {
+        if (ref.current) {
+            ref.current.scale.set(viewport.width, viewport.height, 1);
+        }
+    }, [ref, viewport]);
+
+    useFrame((_, delta) => {
+        if (ref.current) {
+            ref.current.material.uniforms.uTime.value += 0.1 * delta;
+        }
+    });
+
+    return (
+        <mesh ref={ref}>
+            <planeGeometry args={[1, 1, 1, 1]}/>
+            <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader}/>
+        </mesh>
+    );
+});
+SilkPlane.displayName = 'SilkPlane';
+
+const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotation = 0}) => {
+    const meshRef = useRef();
+
+    const uniforms = useMemo(() => {
+        const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
+
+        // 감정 비율 보정
+
+
+        const colors = order.map(k =>
+            new Color(...hexToNormalizedRGB(palette?.[k] || "#7B7481"))
+        );
+        const weights = order.map(k => (mix?.[k] || 0) / 100);
+
+        return {
+            uSpeed: {value: speed},
+            uScale: {value: scale},
+            uNoiseIntensity: {value: noiseIntensity},
+            uRotation: {value: rotation},
+            uTime: {value: 0},
+            uColors: {value: colors},
+            uWeights: {value: weights},   // ✅ 추가
+        };
+    }, [speed, scale, noiseIntensity, rotation, palette, mix]);
+
+
+    return (
+        <Canvas
+            dpr={[1, 2]}
+            frameloop="always"
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: -1,
+                pointerEvents: 'none'
+            }}
+        >
+            <SilkPlane ref={meshRef} uniforms={uniforms}/>
+        </Canvas>
+    );
+};
+
+
+/* ========= 유틸 함수 ========= */
 function hexToRgba(hex, alpha = 0.55) {
     const h = hex.replace("#", "");
     const bigint = parseInt(h, 16);
@@ -22,9 +179,9 @@ function gammaSmooth(mix, gamma = 0.8) {
     return out;
 }
 
-function clampAndRedistribute(mix, { min = 6, max = 65 }) {
+function clampAndRedistribute(mix, {min = 6, max = 65}) {
     const keys = Object.keys(mix ?? {});
-    const src = { ...mix };
+    const src = {...mix};
     const nonZero = keys.filter((k) => (src[k] ?? 0) > 0);
     nonZero.forEach((k) => {
         if (src[k] < min) src[k] = min;
@@ -67,42 +224,30 @@ function alphaForPct(pct) {
     return 0.6;
 }
 
-
 /* ========= 배경 빌드 ========= */
 function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
     const smooth = gammaSmooth(mix, 0.8);
-    const adjusted = clampAndRedistribute(smooth, { min: 6, max: 65 });
+    const adjusted = clampAndRedistribute(smooth, {min: 6, max: 65});
 
     let acc = 0;
     const conicStops = [];
     for (const key of order) {
         const pct = Math.max(0, Math.min(100, adjusted[key] || 0));
         if (pct < 1) continue;
-
         const alpha = alphaForPct(pct);
         const col = hexToRgba(palette[key] || "#ffffff", alpha);
-
         const from = acc;
         const to = acc + pct;
-
-        // 🎨 경계 부드럽게 → -2% ~ +2% 오버랩
-        conicStops.push(
-            `${col} ${Math.max(0, from - 2)}% ${Math.min(100, to + 2)}%`
-        );
-
+        conicStops.push(`${col} ${Math.max(0, from - 2)}% ${Math.min(100, to + 2)}%`);
         acc = to;
     }
 
-    // ✨ radial 레이어 (빛번짐 느낌 유지)
     const radialA = `radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.08), transparent 75%)`;
     const radialB = `radial-gradient(50% 50% at 80% 10%, rgba(255,255,255,.05), transparent 70%)`;
-
-    // ✨ conic-gradient (감정 비율 배경)
     const conic = `conic-gradient(from 180deg at 50% 50%, ${conicStops.join(", ")})`;
 
-    // 여러 레이어 합성
     return `${radialA}, ${radialB}, ${conic}`;
 }
 
@@ -131,9 +276,9 @@ const ONE_MIN = 60 * 1000;
 
 function persistSession(payload) {
     try {
-        const toSave = { ...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN };
+        const toSave = {...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN};
         localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-        window.dispatchEvent(new CustomEvent("mb:chat:persisted", { detail: toSave }));
+        window.dispatchEvent(new CustomEvent("mb:chat:persisted", {detail: toSave}));
     } catch (_) {
     }
 }
@@ -157,8 +302,9 @@ export function clearSession() {
     }
 }
 
+
 /* ========= 메인 컴포넌트 ========= */
-function ChatConsultInner({ profile }) {
+function ChatConsultInner({profile}) {
     const saved = readSession();
 
     const [formData, setFormData] = useState({
@@ -186,10 +332,11 @@ function ChatConsultInner({ profile }) {
     const [isEnding, setIsEnding] = useState(false);
     const [activeLayer, setActiveLayer] = useState(0);
     const [bgLayer, setBgLayer] = useState(["", ""]);
+    const [useSilkBg, setUseSilkBg] = useState(false); // Silk 배경 토글
 
     const [openInfo, setOpenInfo] = useState(false);
     const anchorRef = useRef(null);
-    const [popPos, setPopPos] = useState({ top: 0, left: 0 });
+    const [popPos, setPopPos] = useState({top: 0, left: 0});
     const popoverRef = useRef(null);
 
     const [showIdleToast, setShowIdleToast] = useState(false);
@@ -201,24 +348,24 @@ function ChatConsultInner({ profile }) {
 
     /* === 스타일 선택 === */
     const styleOptions = [
-        { name: '따뜻한', desc: '공감하고 위로하는' },
-        { name: '차가운', desc: '냉정하고 객관적인' },
-        { name: '쾌활한', desc: '밝고 긍정적인' },
-        { name: '진중한', desc: '깊이 있게 생각하는' },
-        { name: '심플한', desc: '간결하고 명확한' },
-        { name: '전문적', desc: '전문성 있는' }
+        {name: '따뜻한', desc: '공감하고 위로하는'},
+        {name: '차가운', desc: '냉정하고 객관적인'},
+        {name: '쾌활한', desc: '밝고 긍정적인'},
+        {name: '진중한', desc: '깊이 있게 생각하는'},
+        {name: '심플한', desc: '간결하고 명확한'},
+        {name: '전문적', desc: '전문성 있는'}
     ];
     const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const handleStyleSelect = (style) => {
-        setFormData((prev) => ({ ...prev, chatStyle: style.name }));
+        setFormData((prev) => ({...prev, chatStyle: style.name}));
         setStyleDropdownOpen(false);
     };
 
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
-        window.dispatchEvent(new CustomEvent("mb:chat:style", { detail: formData.chatStyle }));
+        window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
     }, [formData.chatStyle]);
 
     useEffect(() => {
@@ -250,6 +397,12 @@ function ChatConsultInner({ profile }) {
         };
     }, [openInfo]);
 
+    /* === Silk 배경용 색상 계산 === */
+    const silkColor = useMemo(() => {
+        if (!emotionMix) return '#7B7481';
+        const dominantEmotion = Object.entries(emotionMix).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+        return EMOTION_PALETTE[dominantEmotion] || '#7B7481';
+    }, [emotionMix, EMOTION_PALETTE]);
 
     /* === 배경 === */
     const nextBackground = useMemo(
@@ -257,7 +410,7 @@ function ChatConsultInner({ profile }) {
         [emotionMix, EMOTION_PALETTE]
     );
     useEffect(() => {
-        if (!nextBackground) return;
+        if (!nextBackground || useSilkBg) return;
         const inactive = activeLayer ^ 1;
         setBgLayer((prev) => {
             const next = [...prev];
@@ -266,11 +419,11 @@ function ChatConsultInner({ profile }) {
         });
         const t = requestAnimationFrame(() => setActiveLayer(inactive));
         return () => cancelAnimationFrame(t);
-    }, [nextBackground]);
+    }, [nextBackground, useSilkBg]);
 
     /* === 스크롤 유지 === */
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        chatEndRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
         const parent = chatEndRef.current?.parentNode;
         if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
     }, [chatHistory, isTyping, chatEndRef]);
@@ -286,14 +439,14 @@ function ChatConsultInner({ profile }) {
         const el = anchorRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
-        setPopPos({ top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX });
+        setPopPos({top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX});
     };
     useLayoutEffect(() => {
         if (!openInfo) return;
         recalcPopover();
         const onWin = () => recalcPopover();
         window.addEventListener("resize", onWin);
-        window.addEventListener("scroll", onWin, { passive: true });
+        window.addEventListener("scroll", onWin, {passive: true});
         return () => {
             window.removeEventListener("resize", onWin);
             window.removeEventListener("scroll", onWin);
@@ -309,8 +462,9 @@ function ChatConsultInner({ profile }) {
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
             chatStyle: formData.chatStyle,           // ← 저장
+            useSilkBg,                              // ← Silk 설정도 저장
         });
-    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle]);
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle, useSilkBg]);
 
     /* === 종료 === */
     const onEndChat = async () => {
@@ -378,6 +532,7 @@ function ChatConsultInner({ profile }) {
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
             chatStyle: formData.chatStyle,           // ← 저장
+            useSilkBg,                              // ← Silk 설정도 저장
         });
         startIdleWatchers();
     };
@@ -386,7 +541,7 @@ function ChatConsultInner({ profile }) {
     useEffect(() => {
         if (!chatHistory.some(m => m.sender === "user")) return;
         startIdleWatchers();
-        const opts = { passive: true };
+        const opts = {passive: true};
         window.addEventListener("mousemove", onAnyActivity, opts);
         window.addEventListener("click", onAnyActivity, opts);
         window.addEventListener("keydown", onAnyActivity, false);
@@ -398,7 +553,7 @@ function ChatConsultInner({ profile }) {
             window.removeEventListener("touchstart", onAnyActivity, opts);
             stopIdleWatchers();
         };
-    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle]);
+    }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle, useSilkBg]);
 
     /* === 지배 감정 === */
     const dominantEmotion = useMemo(() => {
@@ -411,16 +566,23 @@ function ChatConsultInner({ profile }) {
         return Math.max(0, Math.min(100, v));
     }, [emotionMix, dominantEmotion]);
 
+    /* === 세션에서 Silk 설정 복원 === */
+    useEffect(() => {
+        if (saved?.useSilkBg !== undefined) {
+            setUseSilkBg(saved.useSilkBg);
+        }
+    }, []);
+
     /* === 레전드 === */
-    const LegendItem = ({ k }) => {
+    const LegendItem = ({k}) => {
         const color = EMOTION_PALETTE?.[k] || "#ccc";
         const pct = emotionMix && typeof emotionMix[k] === "number"
             ? Math.round(Math.max(0, Math.min(100, emotionMix[k])))
             : 0;
         return (
             <div className="legend-item" key={k} title={`${k} ${pct}%`}>
-                <span className="legend-swatch" style={{ backgroundColor: color }} />
-                <span className="legend-label" style={{ color: color }}>{k.toUpperCase()}</span>
+                <span className="legend-swatch" style={{backgroundColor: color}}/>
+                <span className="legend-label" style={{color: color}}>{k.toUpperCase()}</span>
                 <span className="legend-pct">{pct}%</span>
                 <div className="legend-desc">{EMOTION_DESCRIPTIONS[k]}</div>
             </div>
@@ -428,12 +590,38 @@ function ChatConsultInner({ profile }) {
     };
 
     return (
-        <div className="consult-wrap">
-            {/* 배경 */}
-            <div className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
-                style={bgLayer[0] ? { backgroundImage: bgLayer[0] } : undefined} aria-hidden />
-            <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
-                style={bgLayer[1] ? { backgroundImage: bgLayer[1] } : undefined} aria-hidden />
+        <div className="consult-wrap" style={{position: 'relative'}}>
+            {/* Silk 배경 - 전체 화면에 고정 */}
+            {useSilkBg && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: -10,
+                    pointerEvents: 'none'
+                }}>
+                    <Silk
+                        speed={10}
+                        scale={1.2}
+                        palette={EMOTION_PALETTE}
+                        mix={emotionMix}   // ✅ 감정 비율 전달
+                        noiseIntensity={0.8}
+                        rotation={0}
+                    />
+                </div>
+            )}
+
+            {/* 기존 배경 (Silk가 비활성화일 때만) */}
+            {!useSilkBg && (
+                <>
+                    <div className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
+                         style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined} aria-hidden/>
+                    <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
+                         style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined} aria-hidden/>
+                </>
+            )}
 
             {/* 헤더 */}
             <div className="consult-header">
@@ -441,6 +629,28 @@ function ChatConsultInner({ profile }) {
                 <h1 className="consult-title">
                     {(chatHistory.findLast?.(m => m.sender === "user")?.message) || "무엇이든 물어보세요"}
                 </h1>
+
+                {/* 배경 토글 버튼 */}
+                <button
+                    className="bg-toggle-btn"
+                    onClick={() => setUseSilkBg(!useSilkBg)}
+                    title={`${useSilkBg ? '기본' : 'Silk'} 배경으로 변경`}
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    {useSilkBg ? '🎨 기본' : '✨ Silk'}
+                </button>
             </div>
 
             {/* 감정 안내 버튼 */}
@@ -451,21 +661,21 @@ function ChatConsultInner({ profile }) {
                 title="감정 안내 보기" aria-label="감정 안내 열기" aria-expanded={openInfo}
             >
                 <svg className="icon-info" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor" />
+                    <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor"/>
                 </svg>
             </button>
 
             {/* 팝오버 */}
             {openInfo && (
                 <div className="emotion-popover"
-                    ref={popoverRef}
-                    style={{
-                        position: "fixed",
-                        top: `${popPos.top}px`,
-                        left: `${popPos.left}px`,
-                        transform: "translate(-50%,0)"
-                    }}
-                    role="dialog" aria-modal="true">
+                     ref={popoverRef}
+                     style={{
+                         position: "fixed",
+                         top: `${popPos.top}px`,
+                         left: `${popPos.left}px`,
+                         transform: "translate(-50%,0)"
+                     }}
+                     role="dialog" aria-modal="true">
                     <div className="emotion-popover-inner">
                         <div className="popover-header-row">
                             <strong>감정 색상 안내</strong>
@@ -473,12 +683,12 @@ function ChatConsultInner({ profile }) {
                         </div>
                         <div className="legend-grid">
                             {["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"].map(k => <LegendItem
-                                k={k} key={k} />)}
+                                k={k} key={k}/>)}
                         </div>
                         <div className="current-line">
                             {dominantEmotion ? (
                                 <>
-                                    <span className="dot" style={{ background: EMOTION_PALETTE[dominantEmotion] }} />
+                                    <span className="dot" style={{background: EMOTION_PALETTE[dominantEmotion]}}/>
                                     <span className="state">
                                         지금은 <b>{EMOJI[dominantEmotion]} {dominantEmotion}</b> 상태예요
                                         {typeof dominantPct === "number" ? ` (${Math.round(dominantPct)}%)` : ""}.
@@ -496,7 +706,7 @@ function ChatConsultInner({ profile }) {
                     <div key={i} className={`consult-bubble ${msg.sender}`}>{msg.message}</div>
                 ))}
                 {isTyping && <div className="consult-bubble ai typing">AI 응답 생성 중</div>}
-                <div ref={chatEndRef} />
+                <div ref={chatEndRef}/>
             </div>
 
             {/* 입력창 */}
@@ -582,11 +792,11 @@ function ChatConsultInner({ profile }) {
                         }}
                         readOnly={isTyping || isChatEnded || isEnding}
                         rows={1}
-                        style={{ flex: 1 }}
+                        style={{flex: 1}}
                     />
 
                     {/* 버튼들 (입력창 오른쪽) */}
-                    <div className="consult-actions" style={{ display: "flex", gap: "6px" }}>
+                    <div className="consult-actions" style={{display: "flex", gap: "6px"}}>
                         {!isChatEnded ? (
                             <>
                                 <button
@@ -635,7 +845,7 @@ function ChatConsultInner({ profile }) {
 }
 
 export default function ChatConsult() {
-    const { profile } = useAuth();
+    const {profile} = useAuth();
     useEffect(() => {
         if (!profile) {
             clearSession();
@@ -643,5 +853,5 @@ export default function ChatConsult() {
     }, [profile]);
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
-    return <ChatConsultInner key={modeKey} profile={profile} />;
+    return <ChatConsultInner key={modeKey} profile={profile}/>;
 }

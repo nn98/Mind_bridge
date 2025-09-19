@@ -278,7 +278,7 @@ body {
 .dash-content {
     flex: 1 1 auto;
     position: relative;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     background: linear-gradient(25deg, #ffb39a 0%, #ffe8b0 42%, #b18cff 100%);
 }
