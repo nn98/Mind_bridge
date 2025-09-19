@@ -55,15 +55,17 @@ export default function AnalysisCard({
             <h1 className="analysis-title">마음 상태 분석기</h1>
             <p className="analysis-subtitle">오늘 당신의 마음은 어떤가요? 당신의 이야기를 들려주세요.</p>
 
-            {/* 입력 영역 */}
-            <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                className="analysis-textarea"
-                placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
-                aria-label="감정 분석 입력"
-                rows={5}
-            />
+            {/* 입력 영역 - wrapper 추가로 안정화 */}
+            <div className="analysis-textarea-wrapper">
+                <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    className="analysis-textarea"
+                    placeholder="예: 오늘 너무 행복한 하루였어. 친구랑 맛있는 것도 먹고 이야기도 많이 나눴거든."
+                    aria-label="감정 분석 입력"
+                    rows={5}
+                />
+            </div>
 
             <div className="analysis-actions">
                 <button
@@ -155,9 +157,10 @@ export default function AnalysisCard({
                 <div className="history-panel" role="region" aria-label="분석 히스토리">
                     <div className="history-head">
                         <strong>최근 결과</strong>
-                        <div className="history-head-actions">
+                        {/* 🔥 변경: 액션 컨테이너와 클래스명 */}
+                        <div className="ea-history-actions">
                             {typeof onClearHistory === 'function' && (
-                                <button type="button" className="history-clear" onClick={onClearHistory}>
+                                <button type="button" className="ea-clear-all-btn" onClick={onClearHistory}>
                                     전체 삭제
                                 </button>
                             )}
@@ -182,10 +185,11 @@ export default function AnalysisCard({
                                     </div>
                                 </div>
 
+                                {/* 🔥 변경: 개별 삭제 버튼 클래스명 */}
                                 {typeof onRemoveHistory === 'function' && (
                                     <button
                                         type="button"
-                                        className="history-remove"
+                                        className="ea-remove-item-btn"
                                         onClick={() => onRemoveHistory(h.createdAt)}
                                         aria-label="히스토리에서 제거"
                                     >

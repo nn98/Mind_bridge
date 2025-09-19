@@ -35,7 +35,7 @@
     --max-width: 1200px;
     --col-gap: 24px;
 
-    /* sticky → 고정처럼 보이되, 스크롤시 ‘따라 내려오지’ 않게 상단값만 고정 */
+    /* sticky → 고정처럼 보이되, 스크롤시 '따라 내려오지' 않게 상단값만 고정 */
     --sticky-top: 16px;
 }
 
@@ -63,11 +63,22 @@ html, body, .emotion-page {
 }
 
 @media (min-width: 1100px) {
-    .emotion-container {
-        grid-template-columns: var(--sidebar-width) minmax(0, 1fr); /* 왼쪽: 사이드 */
-        column-gap: var(--col-gap);
-        align-items: start;
+    .ea-sidebar > .ea-advanced-panel {
+        position: sticky;
+        top: var(--sticky-top);
+        z-index: 10; /* 내용 위에 오도록 */
+        /* overflow:visible;   그림자 잘리면 해제 */
     }
+
+    .ea-sidebar > .ea-advanced-panel,
+    .ea-sidebar > .ea-stats-panel {
+        z-index: auto; /* 과거 z-index:0 덮어쓰기 */
+    }
+}
+.emotion-container {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr); /* 왼쪽: 사이드 */
+    column-gap: var(--col-gap);
+    align-items: start;
 }
 
 .ea-main {
@@ -83,7 +94,7 @@ html, body, .emotion-page {
     gap: 16px;
 }
 
-/* 사이드 패널이 화면 상단에 고정된 것처럼 보이되, 스크롤과 함께 ‘따라’ 내려오지 않도록 sticky 사용 + 별도 z-index */
+/* 사이드 패널이 화면 상단에 고정된 것처럼 보이되, 스크롤과 함께 '따라' 내려오지 않도록 sticky 사용 + 별도 z-index */
 @media (min-width: 1100px) {
     .ea-sidebar > .ea-advanced-panel,
     .ea-sidebar > .ea-stats-panel {
@@ -125,6 +136,7 @@ html, body, .emotion-page {
     padding: 18px;
     box-shadow: var(--glow);
     overflow: clip;
+    contain: layout; /* 레이아웃 변경 최적화 */
 }
 
 /* 🔥 상단 그라데이션 리본 제거 */
@@ -169,7 +181,9 @@ html, body, .emotion-page {
 .analysis-textarea {
     width: 100%;
     min-height: 140px;
-    resize: vertical;
+    max-height: 140px; /* 고정 높이 */
+    height: 140px; /* 명시적 높이 설정 */
+    resize: none; /* 리사이즈 완전 비활성화 */
     background: var(--surface);
     color: var(--text);
     border: 1px solid var(--border);
@@ -180,6 +194,8 @@ html, body, .emotion-page {
     font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
     outline: none;
     transition: border-color var(--speed), box-shadow var(--speed), background var(--speed);
+    box-sizing: border-box; /* 패딩 포함한 크기 계산 */
+    overflow-y: auto; /* 내용이 넘치면 스크롤 */
 }
 
 .analysis-textarea::placeholder {
@@ -190,6 +206,13 @@ html, body, .emotion-page {
     background: var(--surface-strong);
     border-color: color-mix(in oklab, var(--brand-1) 55%, white 0%);
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-1) 25%, transparent);
+}
+
+/* 텍스트 영역 wrapper로 움직임 방지 */
+.analysis-textarea-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 8px;
 }
 
 /* 액션 */
@@ -224,14 +247,254 @@ html, body, .emotion-page {
     border-color: transparent;
 }
 
+/* ========== 개선된 History Toggle 스타일 (호버 제거) ========== */
 .history-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
     border: 1px solid var(--border);
-    background: #fff;
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 12px;
+    border-radius: 12px;
+    background: var(--surface-strong);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-    color: #0a0f1f;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+}
+
+/* 아이콘 추가 */
+.history-toggle::after {
+    content: "📊";
+    font-size: 14px;
+    opacity: .7;
+}
+
+/* 활성화 상태 (토글된 상태) */
+.history-toggle.active {
+    background: linear-gradient(135deg,
+    color-mix(in oklab, var(--brand-1) 15%, transparent),
+    color-mix(in oklab, var(--brand-2) 10%, transparent)
+    );
+    border-color: color-mix(in oklab, var(--brand-1) 40%, transparent);
+    color: var(--brand-1);
+    box-shadow: 0 4px 16px rgba(139, 92, 246, .2),
+    0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.history-toggle.active::after {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* ========== 히스토리 패널 스타일 ========== */
+.history-panel {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+}
+
+.history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.history-head strong {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.history-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0; /* 텍스트 오버플로우 방지 */
+}
+
+.history-emoji {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.history-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.history-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.history-sub {
+    font-size: 11px;
+    color: var(--text-weak);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* KPI 관련 스타일 추가 */
+.kpi-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--text-weak);
+    font-weight: 600;
+}
+
+.kpi-value {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.kpi-confidence {
+    font-size: 13px;
+    color: var(--text-weak);
+}
+
+.kpi-confidence strong {
+    color: var(--brand-1);
+    font-weight: 800;
+}
+
+/* 로딩 스피너 */
+.loading-spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin: 16px 0;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid color-mix(in oklab, var(--brand-1) 20%, transparent);
+    border-top: 3px solid var(--brand-1);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 타이핑 애니메이션 */
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.typing-dots::after {
+    content: "";
+    display: inline-flex;
+    gap: 2px;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+}
+/* 히스토리 액션 영역 */
+.ea-history-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+/* 전체 삭제 버튼 */
+.ea-clear-all-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid color-mix(in oklab, #ef4444 25%, transparent);
+    border-radius: 10px;
+    background: var(--surface);
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+}
+
+.ea-clear-all-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* 개별 삭제 버튼 */
+.ea-remove-item-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid color-mix(in oklab, #f59e0b 25%, transparent);
+    border-radius: 10px;
+    background: var(--surface);
+    color: #d97706;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+}
+
+.ea-remove-item-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 /* 고급 옵션 패널 */
@@ -566,6 +829,30 @@ html, body, .emotion-page {
     .analysis-textarea {
         min-height: 120px;
     }
+
+    /* 모바일에서 히스토리 토글 조정 */
+    .history-toggle {
+        height: 32px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .history-toggle::after {
+        font-size: 12px;
+    }
+
+    /* 모바일에서 히스토리 버튼들 조정 */
+    .ea-history-actions {
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .ea-clear-all-btn,
+    .ea-remove-item-btn {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
 }
 
 /* ====== KPI: 가로 정렬 ====== */
@@ -663,15 +950,5 @@ html, body, .emotion-page {
 }
 
 @media (min-width: 1100px) {
-    .ea-sidebar > .ea-advanced-panel {
-        position: sticky;
-        top: var(--sticky-top);
-        z-index: 10; /* 내용 위에 오도록 */
-        /* overflow:visible;   그림자 잘리면 해제 */
-    }
 
-    .ea-sidebar > .ea-advanced-panel,
-    .ea-sidebar > .ea-stats-panel {
-        z-index: auto; /* 과거 z-index:0 덮어쓰기 */
-    }
 }
