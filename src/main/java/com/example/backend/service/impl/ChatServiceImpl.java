@@ -10,8 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.chat.ChatMessageRequest;
-import com.example.backend.dto.chat.SessionRequest;
+import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.dto.chat.SessionHistory;
+import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.mapper.ChatMapper;
@@ -119,5 +120,19 @@ public class ChatServiceImpl implements ChatService {
 	public Optional<SessionHistory> getActiveSession(String userEmail) {
 		return chatSessionRepository.findByUserEmailAndSessionStatus(userEmail, "IN_PROGRESS")
 			.map(chatMapper::toSessionHistory);
+	}
+
+	@Override
+	public List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail) {
+		List<ChatSessionEntity> sessions = chatSessionRepository.findByUserEmailOrderByCreatedAtDesc(userEmail);
+
+		// Entity -> DTO 변환
+		return sessions.stream().map(session -> new RiskAssessment(
+			session.getRiskFactors(),
+			session.getDivision(),
+			session.getCreatedAt().toString(), // LocalDateTime -> String
+			session.getSessionId(),
+			session.getUserEmail()
+		)).toList();
 	}
 }

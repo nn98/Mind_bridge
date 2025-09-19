@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.example.backend.dto.chat.ChatMessageRequest;
+import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.entity.ChatMessageEntity;
@@ -35,4 +36,5 @@ public interface ChatService {
     // === 상태 관련 ===
     long getCompletedSessionCount(String userEmail);
     Optional<SessionHistory> getActiveSession(String userEmail);
+    List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail);
 }
