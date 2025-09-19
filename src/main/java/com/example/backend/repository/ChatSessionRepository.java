@@ -25,4 +25,8 @@ public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, 
 
     // 특정 점수 이상의 세션
     List<ChatSessionEntity> findByUserEmailAndConversationScoreGreaterThanEqual(String userEmail, Integer minScore);
+
+	List<ChatSessionEntity> findAllByUserEmailAndUserNameOrderBySessionIdDesc(String userEmail, String userName);
+
+    long countByUserEmailAndSessionStatus(String userEmail, String completed);
 }
