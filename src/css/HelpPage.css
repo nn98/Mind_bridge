@@ -1,277 +1,623 @@
-/* =========================
-   HelpPage 전용 CSS (단독 사용)
-   - 라이트 테마 고정
-   - Aurora 보라/민트 포인트
-========================= */
+/* ========================================
+   HelpPage CSS - 완전히 새로운 모던 디자인
+   네오모피즘 + 글래스모피즘 스타일
+======================================== */
+
+/* CSS 변수 - Aurora 테마 */
 :root {
-    --bg: #f6f7fb;
-    --card: #ffffff;
-    --text: #111827;
-    --text-weak: #6b7280;
-    --border: #e6e8ef;
+    --bg-primary: #f6f7fb;
+    --bg-secondary: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(139, 92, 246, 0.2);
+    --glass-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
 
-    --brand-1: #8b5cf6; /* purple */
-    --brand-2: #22d3ee; /* mint */
-    --brand-3: #34d399; /* green */
-    --glow: 0 16px 40px rgba(139, 92, 246, .25);
-    --radius: 16px;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-accent: #8b5cf6;
+
+    --aurora-purple: #8b5cf6;
+    --aurora-mint: #22d3ee;
+    --aurora-green: #34d399;
+    --aurora-pink: #ec4899;
+
+    --gradient-1: linear-gradient(135deg, var(--aurora-purple) 0%, var(--aurora-mint) 100%);
+    --gradient-2: linear-gradient(45deg, var(--aurora-pink) 0%, var(--aurora-green) 100%);
+    --gradient-3: linear-gradient(225deg, var(--aurora-mint) 0%, var(--aurora-purple) 100%);
+
+    --border-radius: 24px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 페이지 */
+/* ===================
+   전체 레이아웃 - Aurora 라이트 테마
+=================== */
 .help-page {
-    max-width: 1000px;
-    margin: 24px auto;
-    padding: 0 20px;
-    color: var(--text);
-    background: radial-gradient(80% 60% at 70% 0%, rgba(139, 92, 246, 0.06), transparent 60%),
-    radial-gradient(70% 50% at 10% 20%, rgba(34, 211, 238, 0.05), transparent 60%),
-    var(--bg);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    padding: 3rem 2rem;
+    background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(52, 211, 153, 0.06) 0%, transparent 50%),
+    var(--bg-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
 }
 
-/* 카드 공통 */
+.help-page > * {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===================
+   글래스모피즘 카드
+=================== */
 .help-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--glass-shadow);
+    margin-bottom: 2rem;
     position: relative;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin: 0 auto 18px;
-    box-shadow: var(--glow);
+    overflow: hidden;
+    transition: var(--transition);
 }
 
-/* 카드 상단 그라데이션 라인 */
 .help-card::before {
-    content: "";
+    content: '';
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
-    border-radius: var(--radius) var(--radius) 0 0;
-    opacity: .95;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient-1);
+    opacity: 0.8;
 }
 
-/* Hero */
+.help-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.help-card > * {
+    padding: 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===================
+   히어로 섹션 - 네온 효과
+=================== */
 .hero .help-title {
-    margin: 4px 0 6px;
-    font-size: clamp(22px, 2.4vw, 30px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #0a0f1f;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin: 0 0 1rem;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    line-height: 1.1;
+    position: relative;
+    text-shadow: 0 0 30px rgba(187, 134, 252, 0.5);
+}
+
+.hero .help-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: var(--gradient-1);
+    border-radius: 2px;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 .hero .help-subtitle {
-    margin: 0 0 12px;
-    color: var(--text-weak);
-    font-size: 14px;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0 0 3rem;
+    font-weight: 400;
+    line-height: 1.6;
 }
 
-/* 액션 버튼 */
+/* ===================
+   네온 버튼 그리드
+=================== */
 .help-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
-    gap: 10px;
-    width: min(720px, 100%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
 }
 
 .help-btn {
-    height: 44px;
-    padding: 0 16px;
-    border-radius: 12px;
-    border: 1px solid rgba(139, 92, 246, .6);
-    color: #fff;
-    background: linear-gradient(135deg, var(--brand-1) 55%, var(--brand-2));
-    font-weight: 800;
-    font-size: 14px;
+    position: relative;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 12px 28px rgba(34, 211, 238, .26);
-    transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    transition: var(--transition);
+    overflow: hidden;
+    min-width: 200px;
+    text-align: center;
+}
+
+.help-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: var(--gradient-1);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+}
+
+.help-btn::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: var(--bg-secondary);
+    border-radius: calc(var(--border-radius) - 2px);
+    transition: var(--transition);
+    z-index: -1;
+}
+
+.help-btn:nth-child(even)::before {
+    background: var(--gradient-2);
 }
 
 .help-btn:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.02);
+    transform: translateY(-4px) scale(1.05);
+    text-shadow: 0 0 20px currentColor;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
 }
 
-.help-btn:active {
-    transform: translateY(0);
+.help-btn:hover::after {
+    background: rgba(139, 92, 246, 0.1);
 }
 
-/* 섹션 타이틀 */
+/* ===================
+   섹션 타이틀 - 홀로그램 효과
+=================== */
 .help-section-title {
-    margin: 0 0 12px;
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 2rem;
+    text-align: center;
+    position: relative;
+    color: var(--text-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
-/* FAQ details */
+.help-section-title::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+            90deg,
+            transparent 0%,
+            var(--aurora-mint) 25%,
+            var(--aurora-purple) 50%,
+            var(--aurora-mint) 75%,
+            transparent 100%
+    );
+    z-index: -1;
+}
+
+.help-section-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--bg-primary);
+    padding: 0 2rem;
+    margin: 0 auto;
+    display: block;
+    width: fit-content;
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ===================
+   Aurora 아코디언
+=================== */
 .help-details {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin: 10px 0;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    margin: 1rem 0;
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+.help-details::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.help-details:hover::before {
+    left: 100%;
+}
+
+.help-details:hover {
+    border-color: var(--aurora-purple);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    transform: translateX(10px);
 }
 
 .help-details summary {
+    padding: 1.25rem;
     cursor: pointer;
-    font-weight: 800;
+    font-weight: 600;
     list-style: none;
+    position: relative;
+    color: var(--text-primary);
+    transition: var(--transition);
+    border-left: 4px solid transparent;
 }
 
-.help-details summary::-webkit-details-marker {
-    display: none;
+.help-details summary::before {
+    content: '▶';
+    position: absolute;
+    right: 1.25rem;
+    color: var(--aurora-purple);
+    transition: var(--transition);
+}
+
+.help-details[open] summary::before {
+    transform: rotate(90deg);
 }
 
 .help-details[open] summary {
-    color: var(--brand-1);
+    color: var(--text-accent);
+    border-left-color: var(--aurora-purple);
+    background: rgba(139, 92, 246, 0.05);
 }
 
 .help-details div {
-    margin-top: 8px;
-    color: var(--text-weak);
-    line-height: 1.65;
-    font-size: 14px;
+    padding: 0 1.25rem 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    animation: slideDown 0.3s ease;
 }
 
-/* 문의하기 레이아웃 */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================
+   문의하기 - 비대칭 레이아웃
+=================== */
 .help-contact {
     display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 22px;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2rem;
     align-items: start;
 }
 
 .help-contact-form,
 .help-contact-info {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .04);
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
-/* 연락처 카드 */
+.help-contact-form::before,
+.help-contact-info::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, var(--aurora-purple), transparent);
+    animation: rotate 4s linear infinite;
+    opacity: 0.15;
+    z-index: -1;
+}
+
+@keyframes rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .help-contact-info h3 {
-    margin: 0 0 10px;
+    margin: 0 0 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-accent);
 }
 
+/* ===================
+   연락처 정보 - Aurora 스타일
+=================== */
 .info-row {
     display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border-left: 3px solid var(--aurora-mint);
+    transition: var(--transition);
+}
+
+.info-row:hover {
+    background: rgba(34, 211, 238, 0.1);
+    transform: translateX(8px);
 }
 
 .icon {
-    font-size: 20px;
-    line-height: 1;
+    font-size: 1.5rem;
+    color: var(--aurora-mint);
+    min-width: 2rem;
+    text-align: center;
 }
 
 .bold-text {
-    margin: 0;
-    font-weight: 800;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
 }
 
 .sub-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
     margin: 0;
-    color: var(--text-weak);
-    font-size: 13px;
 }
 
 .social-icons {
     display: flex;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
 }
 
 .social-icons img {
-    width: 28px;
-    height: 28px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--aurora-purple);
+    padding: 0.25rem;
+    transition: var(--transition);
+    filter: grayscale(0.3) brightness(1.1);
 }
 
-/* ─────────────── 모달 ─────────────── */
+.social-icons img:hover {
+    transform: scale(1.2) rotate(10deg);
+    border-color: var(--aurora-mint);
+    filter: grayscale(0);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+}
+
+/* ===================
+   Aurora 모달
+=================== */
 .hp-modal-backdrop {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    display: grid;
-    place-items: center;
-    background: rgba(10, 15, 31, 0.45);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
 }
 
 .hp-modal {
-    width: min(900px, calc(100vw - 40px));
-    max-height: calc(100vh - 80px);
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, .25);
+    width: 100%;
+    max-width: 900px;
+    max-height: calc(100vh - 4rem);
+    background: var(--bg-secondary);
+    border: 2px solid var(--aurora-purple);
+    border-radius: var(--border-radius);
+    box-shadow: 0 0 50px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
     overflow: hidden;
     position: relative;
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .hp-modal::before {
-    content: "";
+    content: '';
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-1);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 .hp-modal-title {
-    margin: 14px 56px 0 16px;
-    font-size: 18px;
-    font-weight: 800;
+    padding: 2rem 4rem 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-accent);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .hp-modal-close {
     position: absolute;
-    right: 10px;
-    top: 8px;
-    width: 36px;
-    height: 36px;
-    border: 0;
-    border-radius: 10px;
-    background: #ffffff;
+    top: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid var(--aurora-pink);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--aurora-pink);
     cursor: pointer;
-    font-size: 22px;
-    line-height: 1;
-    color: #111827;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    font-size: 1.25rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hp-modal-close:hover {
+    background: var(--aurora-pink);
+    color: white;
+    transform: rotate(90deg);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
 }
 
 .hp-modal-content {
-    padding: 12px 16px 18px;
-    max-height: calc(100vh - 140px);
-    overflow: auto;
+    padding: 0 2rem 2rem;
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-cyan) transparent;
+}
+
+.hp-modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.hp-modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hp-modal-content::-webkit-scrollbar-thumb {
+    background: var(--aurora-purple);
+    border-radius: 3px;
 }
 
 .hp-pre {
-    margin: 0;
-    white-space: pre-wrap; /* 줄바꿈 보존 + 자동 줄바꿈 */
+    white-space: pre-wrap;
     word-break: break-word;
-    line-height: 1.7;
-    font-size: 14px;
-    color: #222;
+    line-height: 1.8;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background: rgba(139, 92, 246, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--aurora-purple);
 }
 
-/* 반응형 */
-@media (max-width: 900px) {
+/* ===================
+   반응형 & 애니메이션
+=================== */
+@media (max-width: 768px) {
+    .help-page {
+        padding: 2rem 1rem;
+    }
+
     .help-contact {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .help-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero .help-title {
+        font-size: clamp(2rem, 8vw, 3rem);
+    }
+
+    .help-card > * {
+        padding: 1.5rem;
     }
 }
 
-@media (max-width: 600px) {
-    .help-actions {
-        grid-template-columns: 1fr;
+@media (max-width: 480px) {
+    .hp-modal-title {
+        padding-right: 3rem;
+        font-size: 1.25rem;
     }
 
-    .hp-modal-title {
-        margin-right: 48px;
+    .help-btn {
+        min-width: 180px;
+        padding: 0.875rem 2rem;
+    }
+}
+
+/* 스크롤 애니메이션 */
+@media (prefers-reduced-motion: no-preference) {
+    .help-card {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .help-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .help-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .help-card:nth-child(4) {
+        animation-delay: 0.3s;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
