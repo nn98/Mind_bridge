@@ -11,7 +11,6 @@ import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.dto.user.RegistrationRequest;
-import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
@@ -86,11 +85,6 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserByEmail(String email) {
 		return userRepository.findByEmail(email).map(userMapper::toProfile);
-	}
-
-	@Override
-	public Optional<Summary> getUserByNickname(String nickname) {
-		return Optional.empty();
 	}
 
 	// @Override
