@@ -53,12 +53,22 @@ vec2 rotateUvs(vec2 uv, float angle) {
 vec3 getGradientColor(float t) {
   vec3 color = vec3(0.0);
   float totalWeight = 0.0;
+  float acc = 0.0;
 
   for (int i = 0; i < 6; i++) {
-    float dist = abs(t - (float(i) / 5.0));   // 색상 기준 위치와 거리
-    float w = uWeights[i] * exp(-dist * 10.0); // 거리 기반 가중치 (부드러운 종 모양)
-    color += uColors[i] * w;
-    totalWeight += w;
+    float w = uWeights[i];
+    float from = acc;
+    float to = acc + w;
+    acc = to;
+
+    float mid = (from + to) * 0.5;
+    float range = (to - from) * 0.5;
+
+    float dist = abs(t - mid) / max(range, 0.0001);
+    float influence = exp(-dist * 2.5);
+
+    color += uColors[i] * influence;
+    totalWeight += influence;
   }
 
   return color / max(totalWeight, 0.0001);
@@ -71,7 +81,6 @@ void main() {
   float tOffset    = uSpeed * uTime;
   tex.y += 0.03 * sin(8.0 * tex.x - tOffset);
 
-  // ✅ 패턴 값 안정화 (0.9 ~ 1.0 범위 유지 → 검정 방지)
   float pattern = 0.9 + 0.1 * sin(
       5.0 * (tex.x + tex.y +
              cos(3.0 * tex.x + 5.0 * tex.y) +
@@ -79,16 +88,13 @@ void main() {
       sin(20.0 * (tex.x + tex.y - 0.1 * tOffset))
   );
 
-  // ✅ 대각선 그라데이션 위치 (0~1)
   float gradPos = clamp((vUv.x + vUv.y) * 0.5, 0.0, 1.0);
   vec3 gradColor = getGradientColor(gradPos);
 
-  // ✅ 노이즈는 약간만 더하기 (음수 제거 → 검정 방지)
   vec3 finalColor = gradColor * pattern + vec3(abs(rnd) * 0.02 * uNoiseIntensity);
 
   gl_FragColor = vec4(finalColor, 1.0);
 }
-
 `;
 
 const SilkPlane = forwardRef(function SilkPlane({uniforms}, ref) {
@@ -120,9 +126,6 @@ const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotatio
     const uniforms = useMemo(() => {
         const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
 
-        // 감정 비율 보정
-
-
         const colors = order.map(k =>
             new Color(...hexToNormalizedRGB(palette?.[k] || "#7B7481"))
         );
@@ -135,10 +138,24 @@ const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotatio
             uRotation: {value: rotation},
             uTime: {value: 0},
             uColors: {value: colors},
-            uWeights: {value: weights},   // ✅ 추가
+            uWeights: {value: weights},
         };
-    }, [speed, scale, noiseIntensity, rotation, palette, mix]);
+    }, [speed, scale, noiseIntensity, rotation, palette]);
 
+    /* ✅ 실시간 업데이트 */
+    useEffect(() => {
+        if (!meshRef.current?.material) return;
+        const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
+        meshRef.current.material.uniforms.uWeights.value =
+            order.map(k => (mix?.[k] || 0) / 100);
+    }, [mix]);
+
+    useEffect(() => {
+        if (!meshRef.current?.material) return;
+        const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
+        meshRef.current.material.uniforms.uColors.value =
+            order.map(k => new Color(...hexToNormalizedRGB(palette?.[k] || "#7B7481")));
+    }, [palette]);
 
     return (
         <Canvas
@@ -158,7 +175,6 @@ const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotatio
         </Canvas>
     );
 };
-
 
 /* ========= 유틸 함수 ========= */
 function hexToRgba(hex, alpha = 0.55) {
@@ -228,8 +244,8 @@ function alphaForPct(pct) {
 function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
-    const smooth = gammaSmooth(mix, 0.8);
-    const adjusted = clampAndRedistribute(smooth, {min: 6, max: 65});
+    const smooth = gammaSmooth(mix, 1.0);
+    const adjusted = clampAndRedistribute(smooth, {min: 2, max: 80});
 
     let acc = 0;
     const conicStops = [];
