@@ -8,8 +8,9 @@ import lombok.Value;
 public class AdminPostRow {
     Long id;
     String title;
-    String authorNickname;
-    String authorEmail;
+    String userNickname;
+    String userEmail;
     String visibility; // public|private
     String createdAt;
+    int likeCount;
 }

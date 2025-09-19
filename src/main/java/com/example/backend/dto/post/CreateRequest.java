@@ -1,6 +1,8 @@
 // dto/post/CreateRequest.java
 package com.example.backend.dto.post;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.*;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -16,5 +18,5 @@ public class CreateRequest {
     private String content;
 
     @Pattern(regexp = "^(public|private|friends)$", message = "공개 설정은 public, private, friends 중 하나여야 합니다")
-    private String visibility = "public";
+    private String visibility = PUBLIC;
 }

@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -111,8 +113,8 @@ public class PostController {
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<Object>> getPostStats(Authentication authentication) {
         String userEmail = securityUtil.requirePrincipalEmail(authentication);
-        long publicCount = postService.getPostCountByVisibility(userEmail, "public");
-        long privateCount = postService.getPostCountByVisibility(userEmail, "private");
+        long publicCount = postService.getPostCountByVisibility(userEmail, PUBLIC);
+        long privateCount = postService.getPostCountByVisibility(userEmail, PRIVATE);
         long friendsCount = postService.getPostCountByVisibility(userEmail, "friends");
         Object stats = Map.of(
             "publicCount", publicCount,
