@@ -99,7 +99,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
-            "https://mind-bridge-zeta.vercel.app"
+            "https://mind-bridge-zeta.vercel.app",
+            "https://nasejong.shop/"
         ));
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
