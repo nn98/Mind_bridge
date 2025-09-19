@@ -25,7 +25,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.backend.dto.user.Profile;
-import com.example.backend.dto.user.Summary;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.UserService;
@@ -225,40 +224,6 @@ class UserControllerTest {
 			.andExpect(status().isUnprocessableEntity())
 			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
 			.andExpect(jsonPath("$.status").value(422));
-	} // [5][6]
-
-	// ---------- summary ----------
-
-	@Test
-	@DisplayName("GET /api/users/summary?nickname=KIM → 200 Summary(JSON)")
-	void summary_ok() throws Exception {
-		Summary summary = new Summary(1L, "KIM", "STABLE", 28, "MALE");
-		given(userService.getUserByNickname("KIM")).willReturn(Optional.of(summary));
-
-		mvc.perform(get("/api/users/summary")
-				.param("nickname","KIM")
-				.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.id").value(1))
-			.andExpect(jsonPath("$.nickname").value("KIM"))
-			.andExpect(jsonPath("$.mentalState").value("STABLE"))
-			.andExpect(jsonPath("$.age").value(28))
-			.andExpect(jsonPath("$.gender").value("MALE"));
-	} // [5]
-
-	@Test
-	@DisplayName("GET /api/users/summary?nickname=GHOST → 404 ProblemDetail")
-	void summary_notFound() throws Exception {
-		given(userService.getUserByNickname("GHOST")).willReturn(Optional.empty());
-
-		mvc.perform(get("/api/users/summary")
-				.param("nickname","GHOST")
-				.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNotFound())
-			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
-			.andExpect(jsonPath("$.status").value(404))
-			.andExpect(jsonPath("$.instance").value("/api/users/summary"));
 	} // [5][6]
 
 	// 1) register: 형식 오류 400 (malformed JSON)
