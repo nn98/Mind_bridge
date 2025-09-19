@@ -5,14 +5,19 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.entity.CounsellingEntity;
-import com.example.backend.entity.ChatHistoryEntity;
 import com.example.backend.dto.chat.ChatMessageRequest;
+import com.example.backend.entity.ChatMessageEntity;
+import com.example.backend.entity.ChatSessionEntity;
+import com.example.backend.service.ChatService;
 import com.example.backend.service.CounsellingService;
 import com.example.backend.service.DailyMetricsService;
-import com.example.backend.service.ChatHistoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,31 +31,32 @@ public class ChatController {
     @Autowired
     private CounsellingService counsellingService;
     private final DailyMetricsService dailyMetricsService;
-    private final ChatHistoryService chatHistoryService;
+    private final ChatService chatService;
 
     // 저장
     @PostMapping("/analysis/save")
-    public ResponseEntity<CounsellingEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<ChatSessionEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
         log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", payload);
-        CounsellingEntity saved = counsellingService.saveAnalysis(payload);
-        log.info("💾 [Spring] DB 저장 완료: {}", saved.getCounselId());
+        ChatSessionEntity saved = chatService.saveAnalysis(payload);
+        log.info("💾 [Spring] DB 저장 완료: {}", saved.getSessionId());
         dailyMetricsService.increaseChatCount();
         return ResponseEntity.ok(saved);
     }
 
     // db에서 이메일 + 이름으로 상담내역 조회
     @GetMapping("/analysis/search")
-    public ResponseEntity<List<CounsellingEntity>> getCounsellings(
+    public ResponseEntity<List<ChatSessionEntity>> getCounsellings(
             @RequestParam String email,
             @RequestParam String name) {
-        List<CounsellingEntity> result = counsellingService.getCounsellingsByEmailAndName(email, name);
+        List<ChatSessionEntity> result = chatService.getSessionsByEmailAndName(email, name);
         return ResponseEntity.ok(result);
     }
 
     // ✅ 메시지 저장 (FastAPI → Spring)
     @PostMapping("/message/save")
-    public ResponseEntity<ChatHistoryEntity> saveMessage(@RequestBody ChatMessageRequest dto) {
-        ChatHistoryEntity saved = chatHistoryService.saveMessage(dto);
+    public ResponseEntity<ChatMessageEntity> saveMessage(@RequestBody ChatMessageRequest dto) {
+        log.info("dto: " + dto.toString());
+        ChatMessageEntity saved = chatService.saveMessage(dto);
         return ResponseEntity.ok(saved);
     }
 

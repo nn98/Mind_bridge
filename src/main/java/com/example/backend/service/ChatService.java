@@ -1,22 +1,38 @@
-// service/ChatService.java
 package com.example.backend.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import com.example.backend.dto.chat.MessageResponse;
+import com.example.backend.dto.chat.ChatMessageRequest;
+import com.example.backend.dto.chat.SessionRequest;
+import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.entity.ChatMessageEntity;
+import com.example.backend.entity.ChatSessionEntity;
 
+/**
+ * 통합 채팅 서비스 인터페이스
+ * - 개별 메시지 관리 (기존 ChatHistoryService)
+ * - 세션 전체 관리 (기존 ChatSessionService)
+ * - 상담 분석 관리 (기존 CounsellingService)
+ */
 public interface ChatService {
 
-    // OpenAI 호출 포함 메시지 처리(세션ID 포함)
-    MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage, Long sessionId);
+    // === 메시지 관련 ===
+    ChatMessageEntity saveMessage(ChatMessageRequest request);
 
-    // 새로운 채팅 세션 생성
-    Long createNewSession(String email); 
+    // === 세션 관련 ===
+    ChatSessionEntity saveSession(SessionRequest request);
+    ChatSessionEntity saveAnalysis(Map<String, Object> payload);
+    ChatSessionEntity updateSession(Long sessionId, SessionRequest request);
 
-    // 채팅 세션 완료 처리
-    void completeSession(Long sessionId, String summary, String emotion, String aiSummary, Integer score);
+    // === 조회 관련 ===
+    List<SessionHistory> getAllSessions();
+    List<SessionHistory> getSessionsByUserEmail(String userEmail);
+    List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName);
+    Optional<ChatSessionEntity> getSessionById(Long sessionId);
 
-    // 세션의 모든 메시지 조회
-    List<ChatMessageEntity> getSessionMessages(Long sessionId);
+    // === 상태 관련 ===
+    long getCompletedSessionCount(String userEmail);
+    Optional<SessionHistory> getActiveSession(String userEmail);
 }

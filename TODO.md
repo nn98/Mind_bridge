@@ -1,4 +1,4 @@
-<details><summary><h1>🛠️ 개선 : 보안·설정·구조</h1></summary>
+<details><summary><h1>1️⃣🛠️ 개선 : 보안·설정·구조</h1></summary>
 
 > ## 설계 원칙/기준
 > - 실패는 RFC7807(JSON), 성공은 도메인 DTO 직반환(래퍼 제거 지향)
@@ -141,9 +141,9 @@
 - Access/Refresh 분리(회전·블랙리스트), 재발급/탈취 대응 강화
 </details> 
 
+----------------------------------------------------------------------------------------------
 
-
-<details><summary><h1>🧪 기능 : 추가·보완·이관</h1></summary>
+<details><summary><h1>2️⃣🧪 기능 : 추가·보완·이관</h1></summary>
 
 # 원칙
 - 책임, 역할, 효율에 따라 정해진 기능을 분리 분담
@@ -158,5 +158,156 @@
 - [X] #### d. 채팅 통계
 > 전 : 전체 리스트를 요청한 클라이언트가 직접 조작  
 > 후 : 정해진 기준과 조건에 맞춰 서버가 응답 
+
+</details>
+
+----------------------------------------------------------------------------------------------
+
+<details><summary><h1>3️⃣🛠️ 개선 : 최신화</h1></summary>
+
+# TODO 최신화 및 우선순위 재설정
+
+## 🚨 High Priority (즉시 개선 필요)
+
+### N1) 성능 모니터링 체계 구축
+**application.properties 추가 설정:**
+
+```
+# HTTP 서버 요청 퍼센타일과 히스토그램 활성화 (Spring Boot 3.x 권장)
+management.metrics.distribution.percentiles.http.server.requests=0.5,0.95,0.99
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+
+# 분포 범위 힌트 (퍼센타일 수렴 안정화)
+management.metrics.distribution.minimum-expected-value.http.server.requests=1ms
+management.metrics.distribution.maximum-expected-value.http.server.requests=5s
+
+# URI 태그 제한 완화
+management.metrics.web.server.max-uri-tags=200
+```
+
+- **근거**: 현재 p95/p99가 null로 긴 꼬리 분석 불가, 성능 병목점 식별 제한
+- **목표**: 백분위수 기반 성능 대시보드 구축, SLA 기준선 설정 (p95 < 100ms, p99 < 200ms)
+
+### N2) 인증 경로 성능 최적화
+**현재 성능 이슈:**
+- `/api/auth/login` POST 200: 평균 196ms → 목표 50ms 이하
+- `/api/users/account/password` PATCH 500: 평균 180ms, 8건 에러 → 원인 분석 필요
+
+**작업 항목:**
+- [ ] 비밀번호 해시 비용 조정 (BCrypt rounds 검토)
+- [ ] 인증 관련 DB 쿼리 최적화 및 인덱스 확인
+- [ ] 불필요한 I/O 제거 (외부 API 호출 최적화)
+- [ ] 500 에러 상세 로깅 및 원인 분석
+
+### N3) 에러 처리 강화
+**식별된 문제점:**
+- **UNKNOWN URI** (20건 401, 2건 403): 보안 필터 정책 검토 필요
+- **RequestRejectedException** (10건 400): 요청 검증 규칙 최적화 필요
+- 500 에러에 대한 상세 모니터링 부족
+
+**작업 항목:**
+- [ ] 보안 필터 체인 분석 및 UNKNOWN 매핑 개선
+- [ ] 요청 거부 정책 세밀화 (불필요한 차단 제거)
+- [ ] 500 에러 실시간 알림 체계 구축
+- [ ] 에러 로그 PII 마스킹 적용
+
+## 🔧 Medium Priority (단계적 개선)
+
+### M1) 기존 TODO A~C 우선 진행
+- **A) 외부 API 에러 변환 표준화**: OpenAI API 실패 시 502/503 매핑
+- **B) MapStruct 도입**: UserMapper 성능 개선
+- **C) PII 마스킹 전면 적용**: 로그인 실패 로그 보안 강화
+
+### M2) 테스트 커버리지 향상
+- [ ] 현재 JaCoCo 설정 활용하여 80% 커버리지 달성
+- [ ] 성능 회귀 방지를 위한 응답시간 테스트 추가
+- [ ] 500 에러 시나리오 재현 테스트 작성
+- [ ] 부하 테스트 JMeter 스크립트 작성
+
+### M3) CORS/보안 정책 세밀화
+- [ ] 현재 SameSite=None, Secure=true 설정 운영 환경 검증
+- [ ] 허용 Origin 명시적 제한 (와일드카드 제거)
+- [ ] 레이트 리미팅 도입 (로그인 시도, 비밀번호 재설정)
+
+## 📊 New Priority (성능 기반 추가)
+
+### N4) 실시간 성능 대시보드
+**HttpMetricsDumpController 활용한 성능 알림:**
+
+```
+@Scheduled(fixedRate = 300000) // 5분마다
+public void checkPerformanceThresholds() {
+    // p95 > 100ms 또는 에러율 > 5% 시 알림
+    // Slack/Email 통합
+}
+```
+
+### N5) 데이터베이스 성능 최적화
+**현재 설정 검토:**
+- HikariCP: max=20, min=5 → 부하에 따른 튜닝 필요
+- 커넥션 풀 모니터링 강화
+- 느린 쿼리 로깅 활성화 (>100ms)
+- 인덱스 최적화 (특히 인증/사용자 조회 쿼리)
+
+### N6) 캐싱 전략 도입
+- [ ] 사용자 프로필 조회 Redis 캐싱 (TTL 15분)
+- [ ] 공개 게시글 목록 캐싱 (TTL 5분)
+- [ ] JWT 토큰 블랙리스트 Redis 캐싱
+- [ ] OpenAI API 응답 캐싱 (동일 요청 1시간)
+
+## 📋 기존 TODO 우선순위 조정
+
+### 상향 조정 (성능 영향도 高)
+- **F) OSIV=off 성능 최적화** → High Priority
+  - fetch join/projection/DTO 전용 조회로 N+1 방지
+  - Hibernate 로깅으로 핵심 API 최적화
+- **I) 레이트리밋** → Medium Priority
+  - IP/계정 기반 제한, 429 응답
+
+### 유지 (기존 우선순위)
+- **D) 보호 정책 문서 자동화** → Medium Priority
+- **E) 입력 검증/비즈니스 제약 강화** → Medium Priority
+- **G) CORS/쿠키 운영 가이드** → Medium Priority
+- **H) 감사 로깅(Audit)** → Medium Priority
+- **J~M) 테스트/문서화/JWT 개선** → Low Priority
+
+## 🎯 단기 실행 계획 (2주)
+
+### Week 1
+- **Day 1-2**: N1 완료 (퍼센타일 모니터링 구축)
+- **Day 3-5**: N2 진행 (인증 경로 성능 최적화)
+
+### Week 2
+- **Day 1-3**: N3 완료 (에러 처리 강화)
+- **Day 4-5**: M1 시작 (외부 API 에러 표준화)
+
+## 📈 성공 지표
+
+### 성능 목표
+- **평균 응답시간**: 90% 이상 엔드포인트 50ms 이하
+- **백분위수**: p95 < 100ms, p99 < 200ms
+- **인증 경로**: 로그인 평균 50ms 이하
+
+### 가용성 목표
+- **5xx 에러율**: 1% 이하 유지
+- **4xx 에러**: 불필요한 차단 50% 감소
+
+### 보안/품질 목표
+- **PII 노출**: 0건 유지
+- **테스트 커버리지**: 80% 이상 달성
+- **모니터링**: 실시간 성능 알림 체계 구축
+
+## 🔄 지속적 개선
+
+### 주간 검토
+- 성능 지표 트렌드 분석
+- 에러율 및 신규 병목점 식별
+- 사용자 피드백 반영
+
+### 월간 검토
+- SLA 달성률 평가
+- 아키텍처 개선 방향 논의
+- 기술 부채 우선순위 재조정
+```
 
 </details>

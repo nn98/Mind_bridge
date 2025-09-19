@@ -94,7 +94,7 @@ public class UserController {
         HttpServletResponse httpRes) {
         String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
-            email, request.currentPassword(), request.password(), request.confirmPassword()
+            email, request.getCurrentPassword(), request.getPassword(), request.getConfirmPassword()
         );
         jwtUtil.clearJwtCookie(httpRes);
         return ResponseEntity.noContent()

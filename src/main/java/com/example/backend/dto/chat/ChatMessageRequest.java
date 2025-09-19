@@ -1,19 +1,51 @@
-// dto/chat/MessageRequest.java
 package com.example.backend.dto.chat;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.example.backend.entity.ChatMessageEntity;
+import com.example.backend.entity.ChatMessageEntity.MessageType;
 
-@Getter
-@Setter
-@ToString
-public class MessageRequest {
+/**
+ * 채팅 메시지 요청 DTO
+ */
+public class ChatMessageRequest {
 
-    @NotBlank(message = "시스템 프롬프트는 필수입니다")
-    private String systemPrompt;
+    private Long sessionId;
+    private String messageContent;
+    private MessageType messageType;
+    private String emotion;
+    private String userEmail;
+    private String chatStyle;
 
-    private String userMessage; // 사용자가 직접 입력한 메시지 (선택사항)
-    private Long sessionId; // 세션 관리용
+    // 기본 생성자
+    public ChatMessageRequest() {}
+
+    // toEntity 메소드 (MapStruct 사용 시 제거 가능)
+    public ChatMessageEntity toEntity() {
+        ChatMessageEntity entity = new ChatMessageEntity();
+        entity.setSessionId(this.sessionId);
+        entity.setMessageContent(this.messageContent);
+        entity.setMessageType(this.messageType);
+        entity.setEmotion(this.emotion);
+        entity.setUserEmail(this.userEmail);
+        entity.setChatStyle(this.chatStyle);
+        return entity;
+    }
+
+    // Getters and Setters
+    public Long getSessionId() { return sessionId; }
+    public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
+
+    public String getMessageContent() { return messageContent; }
+    public void setMessageContent(String messageContent) { this.messageContent = messageContent; }
+
+    public MessageType getMessageType() { return messageType; }
+    public void setMessageType(MessageType messageType) { this.messageType = messageType; }
+
+    public String getEmotion() { return emotion; }
+    public void setEmotion(String emotion) { this.emotion = emotion; }
+
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getChatStyle() { return chatStyle; }
+    public void setChatStyle(String chatStyle) { this.chatStyle = chatStyle; }
 }
