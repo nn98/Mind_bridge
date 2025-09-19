@@ -139,20 +139,6 @@ export default function EmotionAnalysisPage({
                     <option value="personal">개인적</option>
                 </select>
             </div>
-
-            <div className="ea-option-group">
-                <label className="ea-checkbox-label">
-                    <input
-                        type="checkbox"
-                        checked={showWordCloud}
-                        onChange={(e) => setShowWordCloud(e.target.checked)}
-                        className="ea-checkbox"
-                        disabled={isLoading}
-                    />
-                    워드클라우드 포함
-                </label>
-            </div>
-
             {/* 초기화 버튼 */}
             <div className="ea-inline-reset">
                 <button
@@ -196,13 +182,6 @@ export default function EmotionAnalysisPage({
 
     const content = (
         <div className="emotion-container" aria-live="polite">
-            {/* 🔥 페이지 전체 로딩 오버레이 */}
-            {isLoading && (
-                <div className="ea-global-spinner-overlay">
-                    <div className="ea-spinner"></div>
-                    <span className="ea-spinner-text">이미지를 생성 중입니다…</span>
-                </div>
-            )}
 
             {/* 왼쪽 사이드바 */}
             <aside className="ea-sidebar" aria-label="설정 및 통계 사이드바">
