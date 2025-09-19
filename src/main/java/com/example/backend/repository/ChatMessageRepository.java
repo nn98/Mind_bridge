@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, Long> {
 
-    List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAsc(Long sessionId);
+    List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAsc(String sessionId);
 
-    long countBySessionId(Long sessionId);
+    long countBySessionId(String sessionId);
 }

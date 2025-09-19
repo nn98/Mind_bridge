@@ -23,11 +23,11 @@ public interface ChatMapper {
 
 	// === DTO to Entity 매핑 ===
 
-	@Mapping(target = "messageId", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	ChatMessageEntity toEntity(ChatMessageRequest request);
 
-	@Mapping(target = "sessionId", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
 	ChatSessionEntity toEntity(SessionRequest request);
@@ -40,7 +40,7 @@ public interface ChatMapper {
 
 	// === Map to Entity 매핑 (분석 결과용) ===
 
-	@Mapping(target = "sessionId", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
 	@Mapping(target = "userEmail", source = "email")
@@ -48,12 +48,11 @@ public interface ChatMapper {
 	@Mapping(target = "riskFactors", expression = "java(mapToString(payload.get(\"riskFactors\")))")
 	@Mapping(target = "protectiveFactors", expression = "java(mapToString(payload.get(\"protectiveFactors\")))")
 	@Mapping(target = "summaryEmotion", source = "clientEmotion")
-	@Mapping(target = "sessionStatus", constant = "COMPLETED")
 	ChatSessionEntity toAnalysisEntity(Map<String, Object> payload);
 
 	// === 업데이트 매핑 ===
 
-	@Mapping(target = "sessionId", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
 	void updateEntity(@MappingTarget ChatSessionEntity entity, SessionRequest request);

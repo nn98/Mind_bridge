@@ -8,7 +8,7 @@ import com.example.backend.entity.ChatMessageEntity.MessageType;
  */
 public class ChatMessageRequest {
 
-    private Long sessionId;
+    private String sessionId;
     private String messageContent;
     private MessageType messageType;
     private String emotion;
@@ -31,8 +31,8 @@ public class ChatMessageRequest {
     }
 
     // Getters and Setters
-    public Long getSessionId() { return sessionId; }
-    public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
+    public String getId() { return sessionId; }
+    public void setSessionId(String sessionId) { this.sessionId = sessionId; }
 
     public String getMessageContent() { return messageContent; }
     public void setMessageContent(String messageContent) { this.messageContent = messageContent; }
