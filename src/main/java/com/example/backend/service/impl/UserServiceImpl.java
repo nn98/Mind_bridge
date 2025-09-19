@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.common.error.BadRequestException;
 import com.example.backend.common.error.ConflictException;
 import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.user.ChangePasswordRequest;
@@ -131,12 +132,10 @@ public class UserServiceImpl implements UserService {
 	public void changePassword(String email, ChangePasswordRequest request) {
 		UserEntity user = findUserByEmail(email);
 
-		// 현재 비밀번호 검증
 		if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
+			throw new BadRequestException("현재 비밀번호가 일치하지 않습니다.", "INVALID_CURRENT_PASSWORD", "currentPassword");
 		}
 
-		// 새 비밀번호 설정
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		userRepository.save(user);
 
@@ -204,12 +203,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void setEncodedPassword(UserEntity user, String plainPassword) {
-		if (plainPassword != null && !plainPassword.isBlank()) {
-			user.setPassword(passwordEncoder.encode(plainPassword));
-		} else {
-			throw new IllegalArgumentException("password is required for local registration");
+		if (plainPassword == null || plainPassword.isBlank()) {
+			throw new BadRequestException("비밀번호는 필수입니다.", "MISSING_PASSWORD", "password");
 		}
+		user.setPassword(passwordEncoder.encode(plainPassword));
 	}
+
 
 	private void setTermsFields(UserEntity user, RegistrationRequest request) {
 		if (Boolean.TRUE.equals(request.getTermsAccepted())) {
