@@ -1,7 +1,7 @@
 // src/components/dashboard/ChatConsult.jsx
-import {useEffect, useMemo, useRef, useState, useLayoutEffect} from "react";
-import {useChatFlow} from "../chat/hooks/useChatFlow";
-import {useAuth} from "../../AuthContext";
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
+import { useChatFlow } from "../chat/hooks/useChatFlow";
+import { useAuth } from "../../AuthContext";
 
 /* ========= 기존 유틸 ========= */
 function hexToRgba(hex, alpha = 0.55) {
@@ -22,9 +22,9 @@ function gammaSmooth(mix, gamma = 0.8) {
     return out;
 }
 
-function clampAndRedistribute(mix, {min = 6, max = 65}) {
+function clampAndRedistribute(mix, { min = 6, max = 65 }) {
     const keys = Object.keys(mix ?? {});
-    const src = {...mix};
+    const src = { ...mix };
     const nonZero = keys.filter((k) => (src[k] ?? 0) > 0);
     nonZero.forEach((k) => {
         if (src[k] < min) src[k] = min;
@@ -73,7 +73,7 @@ function buildCompositeBackground(mix, palette) {
     if (!mix) return null;
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
     const smooth = gammaSmooth(mix, 0.8);
-    const adjusted = clampAndRedistribute(smooth, {min: 6, max: 65});
+    const adjusted = clampAndRedistribute(smooth, { min: 6, max: 65 });
 
     let acc = 0;
     const conicStops = [];
@@ -131,9 +131,9 @@ const ONE_MIN = 60 * 1000;
 
 function persistSession(payload) {
     try {
-        const toSave = {...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN};
+        const toSave = { ...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN };
         localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-        window.dispatchEvent(new CustomEvent("mb:chat:persisted", {detail: toSave}));
+        window.dispatchEvent(new CustomEvent("mb:chat:persisted", { detail: toSave }));
     } catch (_) {
     }
 }
@@ -158,8 +158,13 @@ export function clearSession() {
 }
 
 /* ========= 메인 컴포넌트 ========= */
-function ChatConsultInner({profile}) {
+function ChatConsultInner({ profile }) {
     const saved = readSession();
+
+    const [formData, setFormData] = useState({
+        chatStyle: saved?.chatStyle || "심플한",
+    });
+
     const {
         chatInput, setChatInput,
         chatHistory,
@@ -170,6 +175,7 @@ function ChatConsultInner({profile}) {
         __internal,
     } = useChatFlow({
         customUser: profile,
+        chatStyle: formData.chatStyle,   // ✅ 안전하게 참조 가능
         initialHistory: saved?.chatHistory || [],
         initialInput: saved?.chatInput || "",
         initialStep: typeof saved?.step === "number" ? saved.step : null,
@@ -183,7 +189,7 @@ function ChatConsultInner({profile}) {
 
     const [openInfo, setOpenInfo] = useState(false);
     const anchorRef = useRef(null);
-    const [popPos, setPopPos] = useState({top: 0, left: 0});
+    const [popPos, setPopPos] = useState({ top: 0, left: 0 });
     const popoverRef = useRef(null);
 
     const [showIdleToast, setShowIdleToast] = useState(false);
@@ -195,27 +201,24 @@ function ChatConsultInner({profile}) {
 
     /* === 스타일 선택 === */
     const styleOptions = [
-        {name: '따뜻한', desc: '공감하고 위로하는'},
-        {name: '차가운', desc: '냉정하고 객관적인'},
-        {name: '쾌활한', desc: '밝고 긍정적인'},
-        {name: '진중한', desc: '깊이 있게 생각하는'},
-        {name: '심플한', desc: '간결하고 명확한'},
-        {name: '전문적', desc: '전문성 있는'}
+        { name: '따뜻한', desc: '공감하고 위로하는' },
+        { name: '차가운', desc: '냉정하고 객관적인' },
+        { name: '쾌활한', desc: '밝고 긍정적인' },
+        { name: '진중한', desc: '깊이 있게 생각하는' },
+        { name: '심플한', desc: '간결하고 명확한' },
+        { name: '전문적', desc: '전문성 있는' }
     ];
-    const [formData, setFormData] = useState({
-        chatStyle: saved?.chatStyle || "심플한",
-    });
     const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const handleStyleSelect = (style) => {
-        setFormData((prev) => ({...prev, chatStyle: style.name}));
+        setFormData((prev) => ({ ...prev, chatStyle: style.name }));
         setStyleDropdownOpen(false);
     };
 
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
-        window.dispatchEvent(new CustomEvent("mb:chat:style", {detail: formData.chatStyle}));
+        window.dispatchEvent(new CustomEvent("mb:chat:style", { detail: formData.chatStyle }));
     }, [formData.chatStyle]);
 
     useEffect(() => {
@@ -267,7 +270,7 @@ function ChatConsultInner({profile}) {
 
     /* === 스크롤 유지 === */
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         const parent = chatEndRef.current?.parentNode;
         if (parent && typeof parent.scrollTop === "number") parent.scrollTop = parent.scrollHeight;
     }, [chatHistory, isTyping, chatEndRef]);
@@ -283,14 +286,14 @@ function ChatConsultInner({profile}) {
         const el = anchorRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
-        setPopPos({top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX});
+        setPopPos({ top: r.bottom + 10 + window.scrollY, left: r.left + r.width / 2 + window.scrollX });
     };
     useLayoutEffect(() => {
         if (!openInfo) return;
         recalcPopover();
         const onWin = () => recalcPopover();
         window.addEventListener("resize", onWin);
-        window.addEventListener("scroll", onWin, {passive: true});
+        window.addEventListener("scroll", onWin, { passive: true });
         return () => {
             window.removeEventListener("resize", onWin);
             window.removeEventListener("scroll", onWin);
@@ -383,7 +386,7 @@ function ChatConsultInner({profile}) {
     useEffect(() => {
         if (!chatHistory.some(m => m.sender === "user")) return;
         startIdleWatchers();
-        const opts = {passive: true};
+        const opts = { passive: true };
         window.addEventListener("mousemove", onAnyActivity, opts);
         window.addEventListener("click", onAnyActivity, opts);
         window.addEventListener("keydown", onAnyActivity, false);
@@ -409,15 +412,15 @@ function ChatConsultInner({profile}) {
     }, [emotionMix, dominantEmotion]);
 
     /* === 레전드 === */
-    const LegendItem = ({k}) => {
+    const LegendItem = ({ k }) => {
         const color = EMOTION_PALETTE?.[k] || "#ccc";
         const pct = emotionMix && typeof emotionMix[k] === "number"
             ? Math.round(Math.max(0, Math.min(100, emotionMix[k])))
             : 0;
         return (
             <div className="legend-item" key={k} title={`${k} ${pct}%`}>
-                <span className="legend-swatch" style={{backgroundColor: color}}/>
-                <span className="legend-label" style={{color: color}}>{k.toUpperCase()}</span>
+                <span className="legend-swatch" style={{ backgroundColor: color }} />
+                <span className="legend-label" style={{ color: color }}>{k.toUpperCase()}</span>
                 <span className="legend-pct">{pct}%</span>
                 <div className="legend-desc">{EMOTION_DESCRIPTIONS[k]}</div>
             </div>
@@ -428,9 +431,9 @@ function ChatConsultInner({profile}) {
         <div className="consult-wrap">
             {/* 배경 */}
             <div className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
-                 style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined} aria-hidden/>
+                style={bgLayer[0] ? { backgroundImage: bgLayer[0] } : undefined} aria-hidden />
             <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
-                 style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined} aria-hidden/>
+                style={bgLayer[1] ? { backgroundImage: bgLayer[1] } : undefined} aria-hidden />
 
             {/* 헤더 */}
             <div className="consult-header">
@@ -448,21 +451,21 @@ function ChatConsultInner({profile}) {
                 title="감정 안내 보기" aria-label="감정 안내 열기" aria-expanded={openInfo}
             >
                 <svg className="icon-info" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor"/>
+                    <path d="M12 7a1.25 1.25 0 110-2.5A1.25 1.25 0 0112 7zm-1 3h2v9h-2v-9z" fill="currentColor" />
                 </svg>
             </button>
 
             {/* 팝오버 */}
             {openInfo && (
                 <div className="emotion-popover"
-                     ref={popoverRef}
-                     style={{
-                         position: "fixed",
-                         top: `${popPos.top}px`,
-                         left: `${popPos.left}px`,
-                         transform: "translate(-50%,0)"
-                     }}
-                     role="dialog" aria-modal="true">
+                    ref={popoverRef}
+                    style={{
+                        position: "fixed",
+                        top: `${popPos.top}px`,
+                        left: `${popPos.left}px`,
+                        transform: "translate(-50%,0)"
+                    }}
+                    role="dialog" aria-modal="true">
                     <div className="emotion-popover-inner">
                         <div className="popover-header-row">
                             <strong>감정 색상 안내</strong>
@@ -470,12 +473,12 @@ function ChatConsultInner({profile}) {
                         </div>
                         <div className="legend-grid">
                             {["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"].map(k => <LegendItem
-                                k={k} key={k}/>)}
+                                k={k} key={k} />)}
                         </div>
                         <div className="current-line">
                             {dominantEmotion ? (
                                 <>
-                                    <span className="dot" style={{background: EMOTION_PALETTE[dominantEmotion]}}/>
+                                    <span className="dot" style={{ background: EMOTION_PALETTE[dominantEmotion] }} />
                                     <span className="state">
                                         지금은 <b>{EMOJI[dominantEmotion]} {dominantEmotion}</b> 상태예요
                                         {typeof dominantPct === "number" ? ` (${Math.round(dominantPct)}%)` : ""}.
@@ -493,7 +496,7 @@ function ChatConsultInner({profile}) {
                     <div key={i} className={`consult-bubble ${msg.sender}`}>{msg.message}</div>
                 ))}
                 {isTyping && <div className="consult-bubble ai typing">AI 응답 생성 중</div>}
-                <div ref={chatEndRef}/>
+                <div ref={chatEndRef} />
             </div>
 
             {/* 입력창 */}
@@ -579,11 +582,11 @@ function ChatConsultInner({profile}) {
                         }}
                         readOnly={isTyping || isChatEnded || isEnding}
                         rows={1}
-                        style={{flex: 1}}
+                        style={{ flex: 1 }}
                     />
 
                     {/* 버튼들 (입력창 오른쪽) */}
-                    <div className="consult-actions" style={{display: "flex", gap: "6px"}}>
+                    <div className="consult-actions" style={{ display: "flex", gap: "6px" }}>
                         {!isChatEnded ? (
                             <>
                                 <button
@@ -632,7 +635,7 @@ function ChatConsultInner({profile}) {
 }
 
 export default function ChatConsult() {
-    const {profile} = useAuth();
+    const { profile } = useAuth();
     useEffect(() => {
         if (!profile) {
             clearSession();
@@ -640,5 +643,5 @@ export default function ChatConsult() {
     }, [profile]);
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
-    return <ChatConsultInner key={modeKey} profile={profile}/>;
+    return <ChatConsultInner key={modeKey} profile={profile} />;
 }
