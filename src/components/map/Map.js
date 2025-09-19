@@ -8,6 +8,7 @@ import useGeolocation from "./hooks/useGeolocation";
 import useHospitals from "./hooks/useHospitals";
 import {fetchFootRoute} from "./services/directions";
 import HospitalInfoPanel from "./HospitalInfoPanel";
+import AnimatedHospitalList from "./AnimatedHospitalList"; // 새로운 애니메이션 컴포넌트
 import {haversineDistance} from "./utils/geo";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -260,32 +261,17 @@ export default function Map() {
                                 <h3>병원 목록 ({sortedHospitals.length}개)</h3>
                                 {userLoc && <span className="sort-info">거리순 정렬</span>}
                             </div>
-                            <div className="hospital-list">
-                                {paginatedHospitals.map((hospital, idx) => (
-                                    <button
-                                        key={`${hospital.name}-${idx}`}
-                                        className="hospital-card"
-                                        onClick={() => handleListClick(hospital)}
-                                    >
-                                        <div className="hospital-number">
-                                            {(currentPage - 1) * itemsPerPage + idx + 1}
-                                        </div>
-                                        <h3>{hospital.name}</h3>
-                                        <p><strong>📍 주소:</strong> {hospital.address}</p>
-                                        <p><strong>📞 전화번호:</strong> {hospital.phone || "정보 없음"}</p>
-                                        {userLoc && hospital.distance && (
-                                            <div className="hospital-distance">
-                                                <span className="distance-badge">
-                                                    🚗 {hospital.distance} km
-                                                </span>
-                                                <span className="time-badge">
-                                                    ⏱️ 약 {hospital.drivingTime}분
-                                                </span>
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
+
+                            {/* 애니메이션 병원 목록 컴포넌트 */}
+                            <AnimatedHospitalList
+                                hospitals={paginatedHospitals}
+                                onHospitalSelect={handleListClick}
+                                showGradients={true}
+                                enableArrowNavigation={true}
+                                currentPage={currentPage}
+                                userLoc={userLoc}
+                            />
+
                             {/* 페이지네이션 */}
                             <div className="hospital-pagination">
                                 <button

@@ -189,7 +189,49 @@
 }
 
 /* =======================
-   병원 목록
+   애니메이션 병원 목록 컨테이너
+======================= */
+.hospital-list-container {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.hospital-list.animated-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px;
+    padding-right: 12px;
+    max-height: 100%;
+    scroll-behavior: smooth;
+}
+
+/* 스크롤바 스타일링 */
+.hospital-list.animated-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.hospital-list.animated-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.hospital-list.animated-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+.hospital-list.animated-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* =======================
+   병원 목록 (기존 + 애니메이션)
 ======================= */
 .hospital-list {
     display: flex;
@@ -204,36 +246,97 @@
 .hospital-card {
     background: #fff;
     padding: 1rem;
+    padding-bottom: 9rem;
     border: 1px solid #ddd;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    transition: none !important;
     cursor: pointer;
     text-align: left;
     width: 100%;
     position: relative;
+    overflow: hidden;
 }
 
-/* hover 시 강조 효과 (올라감 제거) */
-.hospital-card:hover {
-    background: #faf9ff;
-    border: 1px solid #6c63ff;
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.25);
+/* 애니메이션이 적용된 카드 */
+.hospital-card.animated {
+    transform-origin: center;
+    will-change: transform, box-shadow;
+    padding: 1rem;
+    padding-bottom: 9rem;
+}
+
+/* 호버 효과 완전 제거 - 모든 가능한 선택자 차단 */
+.hospital-card:hover,
+.hospital-card.animated:hover,
+.hospital-card:focus,
+.hospital-card.animated:focus,
+button.hospital-card:hover,
+button.hospital-card.animated:hover,
+.hospital-list .hospital-card:hover,
+.hospital-list .hospital-card.animated:hover,
+.hospital-list-container .hospital-card:hover,
+.hospital-list-container .hospital-card.animated:hover {
+    background: #fff !important;
+    background-color: #fff !important;
+    border: 1px solid #ddd !important;
+    border-color: #ddd !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
     transform: none !important;
+    color: inherit !important;
+    transition: none !important;
+}
+
+/* 카드 내부 요소들 호버 차단 */
+.hospital-card:hover h3,
+.hospital-card:hover p,
+.hospital-card:hover span,
+.hospital-card:hover .hospital-number,
+.hospital-card:hover .distance-badge,
+.hospital-card:hover .time-badge,
+.hospital-card.animated:hover h3,
+.hospital-card.animated:hover p,
+.hospital-card.animated:hover span,
+.hospital-card.animated:hover .hospital-number,
+.hospital-card.animated:hover .distance-badge,
+.hospital-card.animated:hover .time-badge {
+    color: inherit !important;
+    background: inherit !important;
+    transform: none !important;
+    transition: none !important;
 }
 
 /* 선택된 카드 (active) */
-.hospital-card.active {
-    background: #6c63ff !important;
-    border: 1px solid #6c63ff !important;
-    color: #fff !important;
+
+/* 병원 번호 */
+.hospital-number {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
 }
 
-.hospital-card.active h3,
-.hospital-card.active p,
-.hospital-card.active span,
-.hospital-card.active .detail-value {
-    color: #fff !important;
+
+.hospital-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding-right: 30px;
+}
+
+.hospital-card p {
+    margin: 0.3rem 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
 }
 
 /* =======================
@@ -258,6 +361,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: none !important;
 }
 
 .distance-badge {
@@ -271,11 +375,6 @@
 }
 
 /* active 카드 안에서도 배지 가독성 유지 */
-.hospital-card.active .distance-badge,
-.hospital-card.active .time-badge {
-    background: #fff !important;
-    color: #6c63ff !important;
-}
 
 /* 아이콘 컬러 */
 .hospital-card svg {
@@ -284,9 +383,88 @@
     color: inherit;
 }
 
-.hospital-card.active .distance-badge svg,
-.hospital-card.active .time-badge svg {
-    color: #6c63ff !important;
+/* =======================
+   스크롤 그라데이션 효과
+======================= */
+.scroll-gradient-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    border-radius: 8px 8px 0 0;
+}
+
+.scroll-gradient-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    border-radius: 0 0 8px 8px;
+}
+
+/* =======================
+   헤더 스타일
+======================= */
+.hospital-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #eee;
+}
+
+.hospital-header h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+
+.sort-info {
+    font-size: 12px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+/* =======================
+   빈 상태 스타일
+======================= */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: #666;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+    font-size: 16px;
+}
+
+.empty-sub {
+    font-size: 14px;
+    color: #999;
 }
 
 /* =======================
@@ -298,6 +476,8 @@
     align-items: center;
     gap: 12px;
     margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .hospital-pagination button {
@@ -310,12 +490,14 @@
     background: #fff;
     color: #6c63ff;
     font-weight: 600;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .hospital-pagination button:hover:not(:disabled) {
     background: #f3f0ff;
     border-color: #6c63ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(108, 99, 255, 0.2);
 }
 
 .hospital-pagination button:disabled {
@@ -329,6 +511,37 @@
     font-size: 14px;
     color: #333;
     font-weight: 500;
+}
+
+/* =======================
+   로딩 스타일
+======================= */
+.map-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #6c63ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* =======================
@@ -358,5 +571,28 @@
 
     .hospital-list {
         max-height: calc(500px - 120px);
+    }
+
+    .hospital-card {
+        padding: 0.8rem;
+        padding-bottom: 7rem;
+    }
+
+    .hospital-card.animated {
+        padding: 0.8rem;
+        padding-bottom: 7rem;
+    }
+    
+
+    .hospital-card h3 {
+        font-size: 15px;
+        padding-right: 25px;
+    }
+
+    .hospital-number {
+        top: 6px;
+        right: 8px;
+        font-size: 11px;
+        padding: 3px 6px;
     }
 }
