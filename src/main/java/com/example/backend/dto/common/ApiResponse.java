@@ -1,13 +1,13 @@
 package com.example.backend.dto.common;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.Map;
-
-import java.time.LocalDateTime;
 
 /**
  * 통일된 API 응답 형식을 위한 공통 응답 DTO
@@ -45,18 +45,6 @@ public class ApiResponse<T> {
                 true,
                 message,
                 data,
-                null,
-                LocalDateTime.now());
-    }
-
-    /**
-     * 성공 응답 생성 (메시지만, 데이터 없음) - 수정됨
-     */
-    public static ApiResponse<String> successMessage(String message) {
-        return new ApiResponse<>(
-                true,
-                message,
-                message, // data 필드에도 메시지를 넣어서 String 타입으로 만듦
                 null,
                 LocalDateTime.now());
     }
