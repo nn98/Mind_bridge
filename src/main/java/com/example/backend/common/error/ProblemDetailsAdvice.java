@@ -118,6 +118,25 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.badRequest().body(pd); // 400
 	}
 
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ProblemDetail> handleBadRequest(BadRequestException ex, HttpServletRequest req) {
+		log.warn("BadRequest: {}", ex.getMessage());
+
+		ProblemDetail pd = ProblemDetailFactory.createBadRequest(ex.getMessage(), req);
+		pd.setProperty("code", ex.getCode());
+		pd.setProperty("field", ex.getField());
+
+		return ResponseEntity.badRequest().body(pd);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ProblemDetail handleConstraint(ConstraintViolationException ex, HttpServletRequest req) {
+		ProblemDetail pd = ProblemDetailFactory.createBadRequest("제약 조건 위반", req);
+		pd.setProperty("code", "CONSTRAINT_VIOLATION");
+		pd.setProperty("violations", ex.getConstraintViolations());
+		return pd;
+	}
+
 	/** 추가: 비즈니스 상태 충돌/불변 위반 등 */
 	@ExceptionHandler(IllegalStateException.class)
 	public ResponseEntity<ProblemDetail> handleIllegalState(IllegalStateException ex, HttpServletRequest req) {
