@@ -30,7 +30,7 @@ public class ChatController {
     private final ChatService chatService;
 
     // 저장
-    @PostMapping("/analysis/save")
+    @PostMapping("/session/save")
     public ResponseEntity<ChatSessionEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
         log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", payload);
         ChatSessionEntity saved = chatService.saveAnalysis(payload);
