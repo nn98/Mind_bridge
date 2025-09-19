@@ -3,7 +3,6 @@ package com.example.backend.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,6 @@ import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.service.ChatService;
-import com.example.backend.service.CounsellingService;
 import com.example.backend.service.DailyMetricsService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    @Autowired
-    private CounsellingService counsellingService;
     private final DailyMetricsService dailyMetricsService;
     private final ChatService chatService;
 
