@@ -1,5 +1,7 @@
 package com.example.backend.service.impl;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.*;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -136,7 +138,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
                 ));
             }
             if (StringUtils.hasText(request.getVisibility()) && !"all".equalsIgnoreCase(request.getVisibility())) {
-                boolean isPublic = "public".equalsIgnoreCase(request.getVisibility());
+                boolean isPublic = PUBLIC.equalsIgnoreCase(request.getVisibility());
                 predicates.add(cb.equal(root.get("isPublic"), isPublic));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -284,10 +286,11 @@ public class AdminQueryServiceImpl implements AdminQueryService {
         return AdminPostRow.builder()
             .id(p.getId())
             .title(p.getTitle())
-            .authorNickname(p.getAuthor().getNickname())
-            .authorEmail(p.getAuthor().getEmail())
-            .visibility(p.isPublic() ? "public" : "private")
+            .userEmail(p.getUserEmail())           // ✅ 직접 접근 (0쿼리)
+            .userNickname(p.getUserNickname())     // ✅ 직접 접근 (0쿼리)
+            .visibility(p.getVisibility())
             .createdAt(toIso(p.getCreatedAt()))
+            .likeCount(p.getLikeCount())
             .build();
     }
 
@@ -296,9 +299,9 @@ public class AdminQueryServiceImpl implements AdminQueryService {
             .id(p.getId())
             .title(p.getTitle())
             .content(p.getContent())
-            .authorNickname(p.getAuthor().getNickname())
-            .authorEmail(p.getAuthor().getEmail())
-            .visibility(p.isPublic() ? "public" : "private")
+            .userEmail(p.getUserEmail())           // ✅ N+1 해결
+            .userNickname(p.getUserNickname())     // ✅ N+1 해결
+            .visibility(p.getVisibility())
             .createdAt(toIso(p.getCreatedAt()))
             .updatedAt(toIso(p.getUpdatedAt()))
             .build();

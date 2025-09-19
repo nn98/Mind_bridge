@@ -1,6 +1,8 @@
 // service/impl/PostServiceImpl.java
 package com.example.backend.service.impl;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.*;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,7 +82,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public List<Summary> getPublicPosts() {
-        List<PostEntity> posts = postRepository.findByVisibilityOrderByCreatedAtDesc("public");
+        List<PostEntity> posts = postRepository.findByVisibilityOrderByCreatedAtDesc(PUBLIC);
         return posts.stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 
