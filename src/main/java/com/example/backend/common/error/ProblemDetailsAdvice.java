@@ -223,4 +223,64 @@ public class ProblemDetailsAdvice {
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
 	}
+
+	// 1) JSON 역직렬화/본문 읽기 실패
+	@ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+	public ResponseEntity<ProblemDetail> handleNotReadable(
+		org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest req) {
+
+		Throwable root = (ex.getCause() != null) ? ex.getCause() : ex;
+		log.warn("400 NotReadable: req={}, ex={}, msg={}, rootEx={}, rootMsg={}",
+			req(req), ex.getClass().getSimpleName(), ex.getMessage(),
+			root.getClass().getSimpleName(), root.getMessage());
+
+		ProblemDetail pd = ProblemDetailFactory.createBadRequest("요청 본문(JSON)을 해석할 수 없습니다.", req);
+		pd.setProperty("code", "MALFORMED_JSON");
+		pd.setProperty("detailMessage", root.getMessage());
+		return ResponseEntity.badRequest().body(pd);
+	}
+
+	// 2) @RequestParam/@PathVariable 타입 변환 실패
+	@ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ProblemDetail> handleTypeMismatch(
+		org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+
+		String name = ex.getName();
+		String required = (ex.getRequiredType() != null) ? ex.getRequiredType().getSimpleName() : "Unknown";
+		log.warn("400 TypeMismatch: req={}, param={}, requiredType={}, msg={}",
+			req(req), name, required, ex.getMessage());
+
+		ProblemDetail pd = ProblemDetailFactory.createBadRequest("요청 파라미터 타입이 올바르지 않습니다.", req);
+		pd.setProperty("code", "TYPE_MISMATCH");
+		pd.setProperty("param", name);
+		pd.setProperty("requiredType", required);
+		return ResponseEntity.badRequest().body(pd);
+	}
+
+	// 3) 필수 파라미터 누락
+	@ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+	public ResponseEntity<ProblemDetail> handleMissingParam(
+		org.springframework.web.bind.MissingServletRequestParameterException ex, HttpServletRequest req) {
+
+		log.warn("400 MissingParam: req={}, name={}, type={}, msg={}",
+			req(req), ex.getParameterName(), ex.getParameterType(), ex.getMessage());
+
+		ProblemDetail pd = ProblemDetailFactory.createBadRequest("필수 요청 파라미터가 누락되었습니다.", req);
+		pd.setProperty("code", "MISSING_PARAMETER");
+		pd.setProperty("param", ex.getParameterName());
+		pd.setProperty("requiredType", ex.getParameterType());
+		return ResponseEntity.badRequest().body(pd);
+	}
+
+	// 4) 미지원 미디어타입/메서드 (선택)
+	@ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+	public ResponseEntity<ProblemDetail> handleUnsupportedMedia(
+		org.springframework.web.HttpMediaTypeNotSupportedException ex, HttpServletRequest req) {
+
+		log.warn("415 UnsupportedMedia: req={}, msg={}", req(req), ex.getMessage());
+		ProblemDetail pd = ProblemDetailFactory.create(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+			Errors.TYPE_BAD_REQUEST, "Unsupported Media Type", ex.getMessage(), req);
+		pd.setProperty("code", "UNSUPPORTED_MEDIA_TYPE");
+		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(pd);
+	}
 }
