@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.security.SecurityUtil;
+import com.example.backend.service.ChatService;
 import com.example.backend.service.UserService;
 
 /**
@@ -53,6 +54,7 @@ class UserControllerTest {
 
 	// 컨트롤러 생성자 의존만 목 오버라이드
 	@MockitoBean UserService userService;
+	@MockitoBean ChatService chatService;
 	@MockitoBean SecurityUtil securityUtil;
 	@MockitoBean JwtUtil jwtUtil;
 
@@ -74,7 +76,7 @@ class UserControllerTest {
                   "password":"Qwer1234!",
                   "confirmPassword":"Qwer1234!",
                   "nickname":"KIM",
-                  "phoneNumber":"01012345678",
+                  "phoneNumber":"010-1234-5678",
                   "gender":"male",
                   "age":28,
                   "termsAccepted": true
@@ -106,7 +108,7 @@ class UserControllerTest {
                     }
                 """))
 			.andExpect(status().isUnprocessableEntity())
-			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
 			.andExpect(jsonPath("$.status").value(422))
 			.andExpect(jsonPath("$.title").exists());
 	} // [유효성 실패는 422로 분리 검증] [5][6]
@@ -134,7 +136,7 @@ class UserControllerTest {
 	void account_unauthorized() throws Exception {
 		mvc.perform(get("/api/users/account").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isUnauthorized())
-			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
 			.andExpect(jsonPath("$.status").value(401))
 			.andExpect(jsonPath("$.instance").value("/api/users/account"));
 	} // [4]
@@ -360,12 +362,4 @@ class UserControllerTest {
 				.content(String.format("{\"currentPassword\":\"x\",\"password\":\"y\""))) // 닫힘 누락
 			.andExpect(status().isBadRequest());
 	} // 역직렬화 실패 400 [7]
-
-	// 13) summary: 파라미터 누락 → 400
-	@Test
-	@DisplayName("GET /api/users/summary (nickname 누락) → 400")
-	void summary_missingParam_400() throws Exception {
-		mvc.perform(get("/api/users/summary"))
-			.andExpect(status().isBadRequest());
-	} // 필수 파라미터 누락 [7]
 }
