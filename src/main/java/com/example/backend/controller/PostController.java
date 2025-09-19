@@ -22,6 +22,7 @@ import com.example.backend.dto.post.CreateRequest;
 import com.example.backend.dto.post.Detail;
 import com.example.backend.dto.post.Summary;
 import com.example.backend.dto.post.UpdateRequest;
+import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.PostService;
 
 import jakarta.validation.Valid;
@@ -39,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PostController {
 
     private final PostService postService;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Detail>>> getAllPosts() {
@@ -66,10 +68,7 @@ public class PostController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<Detail>>> getMyPosts(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException("Authentication required");
-        }
-        String userEmail = authentication.getName();
+        String userEmail = securityUtil.requirePrincipalEmail(authentication);
         List<Detail> myPosts = postService.getPostsByUser(userEmail);
         return ResponseEntity.ok(ApiResponse.success(myPosts));
     }
@@ -84,7 +83,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Detail>> createPost(@Valid @RequestBody CreateRequest request, Authentication authentication) {
-        String userEmail = authentication.getName();
+        String userEmail = securityUtil.requirePrincipalEmail(authentication);
         Detail createdPost = postService.createPost(request, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success(createdPost, "게시글이 성공적으로 작성되었습니다."));
@@ -96,7 +95,7 @@ public class PostController {
         @PathVariable Long id,
         @Valid @RequestBody UpdateRequest request,
         Authentication authentication) {
-        Detail updatedPost = postService.updatePost(id, request, authentication.getName());
+        Detail updatedPost = postService.updatePost(id, request, securityUtil.requirePrincipalEmail(authentication));
         return ResponseEntity.ok(ApiResponse.success(updatedPost, "게시글이 성공적으로 수정되었습니다."));
     }
 
@@ -105,13 +104,13 @@ public class PostController {
     public ResponseEntity<ApiResponse<String>> deletePost(
         @PathVariable Long id,
         Authentication authentication) {
-        postService.deletePost(id, authentication.getName());
+        postService.deletePost(id, securityUtil.requirePrincipalEmail(authentication));
         return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 삭제되었습니다."));
     }
 
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<Object>> getPostStats(Authentication authentication) {
-        String userEmail = authentication.getName();
+        String userEmail = securityUtil.requirePrincipalEmail(authentication);
         long publicCount = postService.getPostCountByVisibility(userEmail, "public");
         long privateCount = postService.getPostCountByVisibility(userEmail, "private");
         long friendsCount = postService.getPostCountByVisibility(userEmail, "friends");
