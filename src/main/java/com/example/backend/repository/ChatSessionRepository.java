@@ -29,4 +29,7 @@ public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, 
 	List<ChatSessionEntity> findAllByUserEmailAndUserNameOrderBySessionIdDesc(String userEmail, String userName);
 
     long countByUserEmailAndSessionStatus(String userEmail, String completed);
+
+    //리스크 펙터/디비전 조회
+    List<RiskAssessment> findRiskAssessmentByUserEmail(String userEmail);
 }
