@@ -23,7 +23,7 @@ export default function EmotionAnalysisPage({
         history: analysisHistory, clearHistory, removeHistoryItem, compareWithPrevious,
     } = useEmotionAnalysis();
 
-    // === 추가 상태(로직 변경 없음) ===
+    // === 추가 상태 ===
     const [showAdvancedOptions] = useState(true); // 고급 옵션은 항상 표시
     const [analysisDepth, setAnalysisDepth] = useState('standard'); // standard, deep, quick
     const [focusArea, setFocusArea] = useState('overall'); // overall, relationships, work, personal
@@ -72,7 +72,7 @@ export default function EmotionAnalysisPage({
         handleAnalyze(options);
     };
 
-    // 텍스트 통계 계산(없어도 0으로 표시)
+    // 텍스트 통계 계산
     const textStats = useMemo(() => {
         if (!text) return {words: 0, sentences: 0, avgWordsPerSentence: 0};
         const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
@@ -81,7 +81,7 @@ export default function EmotionAnalysisPage({
         return {words, sentences, avgWordsPerSentence};
     }, [text]);
 
-    // 퍼센트 포맷(0~1 또는 0~100 입력 모두 대응, 필요 시 AnalysisCard에서 재사용 가능)
+    // 퍼센트 포맷
     const fmtPct = (v) => {
         if (v == null || isNaN(v)) return '0%';
         const n = Number(v);
@@ -90,7 +90,7 @@ export default function EmotionAnalysisPage({
         return `${rounded.toFixed(1)}%`;
     };
 
-    // 프리셋 칩(사이드바)
+    // 프리셋 칩
     const PresetChips = useMemo(() => (
         <div className="ea-presets">
             {presets.map((p) => (
@@ -108,7 +108,7 @@ export default function EmotionAnalysisPage({
         </div>
     ), [presets, isLoading, setText]);
 
-    // 고급 옵션 패널(오른쪽 하단에 텍스트 링크 "초기화")
+    // 고급 옵션 패널
     const AdvancedOptionsPanel = useMemo(() => (
         <div className={`ea-advanced-panel ${showAdvancedOptions ? '' : 'is-collapsed'}`}>
             <div className="ea-option-group">
@@ -153,7 +153,7 @@ export default function EmotionAnalysisPage({
                 </label>
             </div>
 
-            {/* 오른쪽 하단 "초기화" 텍스트 링크 */}
+            {/* 초기화 버튼 */}
             <div className="ea-inline-reset">
                 <button
                     type="button"
@@ -168,7 +168,7 @@ export default function EmotionAnalysisPage({
         </div>
     ), [showAdvancedOptions, isLoading, analysisDepth, focusArea, showWordCloud, reset]);
 
-    // 텍스트 통계 패널(항상 표시)
+    // 텍스트 통계 패널
     const TextStatsPanel = useMemo(() => (
         <div className="ea-stats-panel">
             <div className="ea-stats-item">
@@ -196,6 +196,14 @@ export default function EmotionAnalysisPage({
 
     const content = (
         <div className="emotion-container" aria-live="polite">
+            {/* 🔥 페이지 전체 로딩 오버레이 */}
+            {isLoading && (
+                <div className="ea-global-spinner-overlay">
+                    <div className="ea-spinner"></div>
+                    <span className="ea-spinner-text">이미지를 생성 중입니다…</span>
+                </div>
+            )}
+
             {/* 왼쪽 사이드바 */}
             <aside className="ea-sidebar" aria-label="설정 및 통계 사이드바">
                 {PresetChips}
@@ -203,7 +211,7 @@ export default function EmotionAnalysisPage({
                 {TextStatsPanel}
             </aside>
 
-            {/* 오른쪽 메인: 분석기만 */}
+            {/* 오른쪽 메인 */}
             <div className="ea-main">
                 <AnalysisCard
                     text={text}

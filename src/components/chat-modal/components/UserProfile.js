@@ -1,15 +1,16 @@
 // src/components/UserProfile.jsx
 import {useEffect, useState} from "react";
 import axios from "axios";
-import SessionHistory from "./SessionHistory";
+import SessionHistory from "./SessionHistory"; // (기존) 사용 안 하면 제거 가능
 import {BACKEND_URL, MENTAL_STATES} from "../constants";
 import PasswordChangeModal from "./PasswordChangeModal";
 import {toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {useAuth} from "../../../AuthContext";
 
-// ✅ 추가: Redirect 안내 페이지
+// ✅ 추가
 import RedirectLayout from "../../layout/RedirectLayout";
+import SessionList from "./SessionList"; // ⭐ 오른쪽 리스트뷰 추가
 
 const UserProfile = () => {
     const {profile, applyProfileUpdate, logoutSuccess} = useAuth();
@@ -106,10 +107,8 @@ const UserProfile = () => {
         }
     };
 
-    // ✅ 로딩 처리
     if (isLoading) return <div>로딩 중...</div>;
 
-    // ✅ 로그인 안 된 경우: Redirect 안내 페이지 보여주고 2초 뒤 "/" 로 이동
     if (!isLoggedIn) {
         return (
             <RedirectLayout
@@ -121,7 +120,8 @@ const UserProfile = () => {
 
     return (
         <>
-            <div className="user-profile">
+            {/* ⭐ 전체를 좌측(프로필) - 우측(세션리스트) 2열 레이아웃으로 */}
+            <div className="user-profile profile-two-col">
                 {/* ===== 상단 프로필 카드 ===== */}
                 <div className="profile-card">
                     <div className="avatar">👤</div>
@@ -142,147 +142,158 @@ const UserProfile = () => {
                             </select>
                         </div>
                         <span className="badge">
-                            {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
-                        </span>
+              {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
+            </span>
                     </div>
                 </div>
 
-                {/* ===== 기본 정보 ===== */}
-                <div className="profile-section">
-                    <h3>기본 정보</h3>
+                {/* ===== 본문 2열: 좌측 정보 / 우측 세션리스트 ===== */}
+                <div className="profile-main">
+                    {/* 왼쪽: 기본 정보 섹션 */}
+                    <div className="profile-left">
+                        <div className="profile-section">
+                            <h3>기본 정보</h3>
 
-                    {/* 성명 */}
-                    <div className="profile-field">
-                        <span>성명</span>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                name="fullName"
-                                value={editedInfo.fullName}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{userInfo.fullName || "─"}</p>
-                        )}
-                    </div>
+                            {/* 성명 */}
+                            <div className="profile-field">
+                                <span>성명</span>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        value={editedInfo.fullName}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    <p>{userInfo.fullName || "─"}</p>
+                                )}
+                            </div>
 
-                    {/* 닉네임 */}
-                    <div className="profile-field">
-                        <span>닉네임</span>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                name="nickname"
-                                value={editedInfo.nickname}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{userInfo.nickname || "─"}</p>
-                        )}
-                    </div>
+                            {/* 닉네임 */}
+                            <div className="profile-field">
+                                <span>닉네임</span>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="nickname"
+                                        value={editedInfo.nickname}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    <p>{userInfo.nickname || "─"}</p>
+                                )}
+                            </div>
 
-                    {/* 이메일 */}
-                    <div className="profile-field">
-                        <span>이메일</span>
-                        {isEditing ? (
-                            <input
-                                type="email"
-                                name="email"
-                                value={editedInfo.email}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{userInfo.email}</p>
-                        )}
-                    </div>
+                            {/* 이메일 */}
+                            <div className="profile-field">
+                                <span>이메일</span>
+                                {isEditing ? (
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={editedInfo.email}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    <p>{userInfo.email}</p>
+                                )}
+                            </div>
 
-                    {/* 전화번호 */}
-                    <div className="profile-field">
-                        <span>전화번호</span>
-                        {isEditing ? (
-                            <input
-                                type="tel"
-                                name="phoneNumber"
-                                value={editedInfo.phoneNumber}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{userInfo.phoneNumber || "─"}</p>
-                        )}
-                    </div>
+                            {/* 전화번호 */}
+                            <div className="profile-field">
+                                <span>전화번호</span>
+                                {isEditing ? (
+                                    <input
+                                        type="tel"
+                                        name="phoneNumber"
+                                        value={editedInfo.phoneNumber}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    <p>{userInfo.phoneNumber || "─"}</p>
+                                )}
+                            </div>
 
-                    {/* 성별 */}
-                    <div className="profile-field">
-                        <span>성별</span>
-                        {isEditing ? (
-                            <select name="gender" value={editedInfo.gender} onChange={handleChange}>
-                                <option value="">선택</option>
-                                <option value="male">남성</option>
-                                <option value="female">여성</option>
-                                <option value="other">기타</option>
-                            </select>
-                        ) : (
-                            <p>{userInfo.gender || "─"}</p>
-                        )}
-                    </div>
+                            {/* 성별 */}
+                            <div className="profile-field">
+                                <span>성별</span>
+                                {isEditing ? (
+                                    <select name="gender" value={editedInfo.gender} onChange={handleChange}>
+                                        <option value="">선택</option>
+                                        <option value="male">남성</option>
+                                        <option value="female">여성</option>
+                                        <option value="other">기타</option>
+                                    </select>
+                                ) : (
+                                    <p>{userInfo.gender || "─"}</p>
+                                )}
+                            </div>
 
-                    {/* 나이 */}
-                    <div className="profile-field">
-                        <span>나이</span>
-                        {isEditing ? (
-                            <input
-                                type="number"
-                                name="age"
-                                value={editedInfo.age}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{userInfo.age || "─"}</p>
-                        )}
-                    </div>
+                            {/* 나이 */}
+                            <div className="profile-field">
+                                <span>나이</span>
+                                {isEditing ? (
+                                    <input
+                                        type="number"
+                                        name="age"
+                                        value={editedInfo.age}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    <p>{userInfo.age || "─"}</p>
+                                )}
+                            </div>
 
-                    {/* 나의 상태 */}
-                    <div className="profile-field">
-                        <span>나의 상태</span>
-                        {isEditing ? (
-                            <select
-                                name="mentalState"
-                                value={editedInfo.mentalState}
-                                onChange={handleChange}
+                            {/* 나의 상태 */}
+                            <div className="profile-field">
+                                <span>나의 상태</span>
+                                {isEditing ? (
+                                    <select
+                                        name="mentalState"
+                                        value={editedInfo.mentalState}
+                                        onChange={handleChange}
+                                    >
+                                        {MENTAL_STATES.map((s) => (
+                                            <option key={s} value={s}>
+                                                {s}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <p>{userInfo.mentalState}</p>
+                                )}
+                            </div>
+
+                            {isEditing && (
+                                <div className="profile-actions">
+                                    <button className="chat-button save" onClick={handleSave}>
+                                        저장
+                                    </button>
+                                    <button className="chat-button cancel" onClick={handleCancel}>
+                                        취소
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 계정 관리 */}
+                        <div className="account-actions">
+                            <button
+                                className="account-button"
+                                onClick={() => setIsPasswordModalOpen(true)}
                             >
-                                {MENTAL_STATES.map((s) => (
-                                    <option key={s} value={s}>
-                                        {s}
-                                    </option>
-                                ))}
-                            </select>
-                        ) : (
-                            <p>{userInfo.mentalState}</p>
-                        )}
-                    </div>
-
-                    {isEditing && (
-                        <div className="profile-actions">
-                            <button className="chat-button save" onClick={handleSave}>
-                                저장
+                                비밀번호 변경
                             </button>
-                            <button className="chat-button cancel" onClick={handleCancel}>
-                                취소
+                            <button className="account-button danger" onClick={handleDeleteAccount}>
+                                회원 탈퇴
                             </button>
                         </div>
-                    )}
-                </div>
-                {/* ===== 계정 관리 ===== */}
-                <div className="account-actions">
-                    <button
-                        className="account-button"
-                        onClick={() => setIsPasswordModalOpen(true)}
-                    >
-                        비밀번호 변경
-                    </button>
-                    <button className="account-button danger" onClick={handleDeleteAccount}>
-                        회원 탈퇴
-                    </button>
+                    </div>
+
+                    {/* 오른쪽: 최근 채팅 세션 리스트뷰 */}
+                    <div className="profile-right">
+                        <SessionList userId={userId}/>
+                    </div>
                 </div>
             </div>
 
