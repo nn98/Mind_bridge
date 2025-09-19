@@ -100,6 +100,7 @@ function normalizeEmotionMix(raw) {
 /** 메인 훅 */
 export function useChatFlow({
     customUser,
+    chatStyle,
     initialHistory = [],
     initialInput = "",
     initialStep = null,
@@ -173,9 +174,15 @@ export function useChatFlow({
     }, [customUser, isLoggedIn]);
 
     // === 메시지 전송 ===
+    // === 메시지 전송 ===
     const handleSubmit = useCallback(async () => {
         if (!chatInput.trim() || isTyping || isChatEnded) return;
         const input = chatInput.trim();
+
+        // ✅ chatStyle prop → guestForm → customUser 순으로 우선 적용
+        const effectiveChatStyle =
+            chatStyle || guestForm["chatStyle"] || customUser?.chatStyle || "심플한";
+
         setChatHistory((prev) => [...prev, { sender: "user", message: input }]);
         setChatInput("");
 
@@ -215,12 +222,6 @@ export function useChatFlow({
                     guestForm["이름"] ||
                     "게스트";
 
-                // ✅ chatStyle 기본값 추가
-                const chatStyle =
-                    guestForm["chatStyle"] ||
-                    customUser?.chatStyle ||
-                    "심플한";
-
                 currentSessionId = await startNewSession(
                     email,
                     name,
@@ -228,7 +229,7 @@ export function useChatFlow({
                     guestForm["상담내용"] || "",
                     guestForm["성별"] || "미상",
                     guestForm["상태"] || "",
-                    chatStyle
+                    effectiveChatStyle   // ✅ 수정: 프론트에서 전달받은 스타일 그대로 사용
                 );
 
                 if (!currentSessionId) {
@@ -238,11 +239,8 @@ export function useChatFlow({
                 setSessionId(currentSessionId);
             }
 
-            // ✅ 메시지 전송할 때도 chatStyle 같이 전달
-            const chatStyle =
-                guestForm["chatStyle"] || customUser?.chatStyle || "심플한";
-
-            const result = await sendMessage(currentSessionId, input, chatStyle);
+            // ✅ 메시지 전송할 때도 동일한 chatStyle 전달
+            const result = await sendMessage(currentSessionId, input, effectiveChatStyle);
 
             if (result) {
                 setChatHistory((prev) => [
@@ -261,7 +259,9 @@ export function useChatFlow({
         } finally {
             setIsTyping(false);
         }
-    }, [chatInput, sessionId, isTyping, isChatEnded, step, guestForm, customUser, isLoggedIn]);
+    }, [chatInput, sessionId, isTyping, isChatEnded, step, guestForm, customUser, isLoggedIn, chatStyle]);
+
+
 
 
     // === 세션 종료 ===
