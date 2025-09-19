@@ -1,193 +1,123 @@
-// service/impl/ChatServiceImpl.java
 package com.example.backend.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
-import com.example.backend.dto.chat.MessageResponse;
+import com.example.backend.common.error.NotFoundException;
+import com.example.backend.dto.chat.ChatMessageRequest;
+import com.example.backend.dto.chat.SessionRequest;
+import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
+import com.example.backend.mapper.ChatMapper;
 import com.example.backend.repository.ChatMessageRepository;
 import com.example.backend.repository.ChatSessionRepository;
 import com.example.backend.service.ChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 통합 채팅 서비스 구현체
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChatServiceImpl implements ChatService {
 
-	private final RestTemplate restTemplate;
 	private final ChatMessageRepository chatMessageRepository;
 	private final ChatSessionRepository chatSessionRepository;
-	private final ObjectMapper objectMapper;
+	private final ChatMapper chatMapper;
 
-	@Value("${openai.api.key}")
-	private String apiKey;
+	// === 메시지 관련 ===
 
-	@Value("${openai.api.url}")
-	private String apiUrl;
-
-	// OpenAI API 호출하여 메시지 처리 (세션ID 포함)
 	@Override
-	@Transactional
-	public MessageResponse processMessage(String systemPrompt, String userEmail, String userMessage, Long sessionId) {
-
-		// 2) 사용자 메시지 저장
-		if (userMessage != null && !userMessage.isBlank()) {
-			saveUserMessage(sessionId, userMessage);
-		}
-
-		// 3) OpenAI 호출
-		String openAiResponse = callOpenAiApi(systemPrompt, userMessage);
-
-		// 4) 파싱 + AI 메시지 저장
-		MessageResponse parsed = parseOpenAiResponse(openAiResponse);
-		parsed.setSessionId(sessionId);
-		saveAiMessage(sessionId, parsed);
-
-		return parsed;
+	public ChatMessageEntity saveMessage(ChatMessageRequest request) {
+		ChatMessageEntity entity = chatMapper.toEntity(request);
+		ChatMessageEntity saved = chatMessageRepository.save(entity);
+		log.debug("Saved chat message ID: {} for session: {}", saved.getMessageId(), saved.getSessionId());
+		return saved;
 	}
 
-	// 새로운 채팅 세션 생성
+	// === 세션 관련 ===
+
 	@Override
-	@Transactional 
-	public Long createNewSession(String userEmail) {
-		ChatSessionEntity session = new ChatSessionEntity();
-		session.setUserEmail(userEmail);
-		session.setSessionStatus("IN_PROGRESS");
-		ChatSessionEntity savedSession = chatSessionRepository.save(session);
-		log.info("새 채팅 세션 생성 - ID: {}, 사용자: {}", savedSession.getSessionId(), userEmail);
-		return savedSession.getSessionId();
+	public ChatSessionEntity saveSession(SessionRequest request) {
+		ChatSessionEntity entity = chatMapper.toEntity(request);
+		ChatSessionEntity saved = chatSessionRepository.save(entity);
+		log.info("Saved chat session ID: {} for user: {}", saved.getSessionId(), saved.getUserEmail());
+		return saved;
 	}
 
-	// 채팅 세션 완료 처리
 	@Override
-	@Transactional
-	public void completeSession(Long sessionId, String summary, String emotion, String aiSummary, Integer score) {
-		Optional<ChatSessionEntity> sessionOpt = chatSessionRepository.findById(sessionId);
-		if (sessionOpt.isPresent()) {
-			ChatSessionEntity session = sessionOpt.get();
-			session.setUserChatSummary(summary);
-			session.setUserEmotionAnalysis(emotion);
-			session.setAiResponseSummary(aiSummary);
-			session.setConversationScore(score);
-			session.setSessionStatus("COMPLETED");
-			chatSessionRepository.save(session);
-			log.info("채팅 세션 완료 - ID: {}", sessionId);
-		}
+	public ChatSessionEntity saveAnalysis(Map<String, Object> payload) {
+		ChatSessionEntity entity = chatMapper.toAnalysisEntity(payload);
+		ChatSessionEntity saved = chatSessionRepository.save(entity);
+		log.info("Saved analysis session ID: {} for user: {}", saved.getSessionId(), saved.getUserEmail());
+		return saved;
 	}
 
-	// 세션의 모든 메시지 조회
+	@Override
+	public ChatSessionEntity updateSession(Long sessionId, SessionRequest request) {
+		ChatSessionEntity entity = chatSessionRepository.findById(sessionId)
+			.orElseThrow(() -> new NotFoundException("Session not found with ID: " + sessionId));
+
+		chatMapper.updateEntity(entity, request);
+		ChatSessionEntity updated = chatSessionRepository.save(entity);
+		log.info("Updated chat session ID: {}", updated.getSessionId());
+		return updated;
+	}
+
+	// === 조회 관련 ===
+
 	@Override
 	@Transactional(readOnly = true)
-	public List<ChatMessageEntity> getSessionMessages(Long sessionId) {
-		return chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+	public List<SessionHistory> getAllSessions() {
+		return chatSessionRepository.findAll()
+			.stream()
+			.map(chatMapper::toSessionHistory)
+			.collect(Collectors.toList());
 	}
 
-	// ===== private methods =====
-
-	private void saveUserMessage(Long sessionId, String userMessage) {
-		try {
-			ChatMessageEntity message = new ChatMessageEntity();
-			message.setSessionId(sessionId);
-			message.setMessageContent(userMessage);
-			message.setMessageType(ChatMessageEntity.MessageType.USER);
-			chatMessageRepository.save(message);
-			log.debug("사용자 메시지 저장 완료 - 세션ID: {}", sessionId);
-		} catch (Exception e) {
-			log.error("사용자 메시지 저장 중 오류: {}", e.getMessage(), e);
-		}
+	@Override
+	@Transactional(readOnly = true)
+	public List<SessionHistory> getSessionsByUserEmail(String userEmail) {
+		return chatSessionRepository.findByUserEmailOrderByCreatedAtDesc(userEmail)
+			.stream()
+			.map(chatMapper::toSessionHistory)
+			.collect(Collectors.toList());
 	}
 
-	private void saveAiMessage(Long sessionId, MessageResponse response) {
-		try {
-			ChatMessageEntity message = new ChatMessageEntity();
-			message.setSessionId(sessionId);
-			message.setMessageContent(response.getCounselorResponse());
-			message.setMessageType(ChatMessageEntity.MessageType.AI);
-			message.setEmotion(response.getEmotion());
-			chatMessageRepository.save(message);
-			log.debug("AI 응답 저장 완료 - 세션ID: {}, 감정: {}", sessionId, response.getEmotion());
-		} catch (Exception e) {
-			log.error("AI 응답 저장 중 오류: {}", e.getMessage(), e);
-		}
+	@Override
+	@Transactional(readOnly = true)
+	public List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName) {
+		return chatSessionRepository.findAllByUserEmailAndUserNameOrderBySessionIdDesc(userEmail, userName);
 	}
 
-	private String callOpenAiApi(String systemPrompt, String userMessage) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setBearerAuth(apiKey);
-
-		List<Map<String, String>> messages = List.of(
-			Map.of("role", "system", "content", systemPrompt),
-			Map.of("role", "user", "content", userMessage != null ? userMessage : "상담을 시작해 주세요.")
-		);
-
-		Map<String, Object> requestBody = new HashMap<>();
-		requestBody.put("model", "gpt-4o-mini");
-		requestBody.put("messages", messages);
-		requestBody.put("temperature", 0.7);
-		requestBody.put("max_tokens", 1000);
-
-		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-		ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-
-		if (!response.getStatusCode().is2xxSuccessful()) {
-			throw new RuntimeException("OpenAI API 호출 실패: " + response.getStatusCode());
-		}
-		return response.getBody();
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<ChatSessionEntity> getSessionById(Long sessionId) {
+		return chatSessionRepository.findById(sessionId);
 	}
 
-	private MessageResponse parseOpenAiResponse(String responseBody) {
-		try {
-			JsonNode rootNode = objectMapper.readTree(responseBody);
-			String content = rootNode.path("choices").get(0).path("message").path("content").asText();
-			try {
-				return objectMapper.readValue(content, MessageResponse.class);
-			} catch (Exception e) {
-				log.warn("OpenAI 응답 JSON 파싱 실패: {}", e.getMessage());
-				return createPlainTextResponse(content);
-			}
-		} catch (Exception e) {
-			log.error("OpenAI 응답 처리 중 오류: {}", e.getMessage());
-			return createPlainTextResponse("응답 처리 오류");
-		}
+	// === 상태 관련 ===
+
+	@Override
+	@Transactional(readOnly = true)
+	public long getCompletedSessionCount(String userEmail) {
+		return chatSessionRepository.countByUserEmailAndSessionStatus(userEmail, "COMPLETED");
 	}
 
-	private MessageResponse createPlainTextResponse(String content) {
-		MessageResponse response = new MessageResponse();
-		response.setEmotion("중립");
-		response.setCounselorResponse(content);
-		response.setSummary("텍스트 응답");
-		response.setSessionEnd(false);
-		return response;
-	}
-
-	@SuppressWarnings("unused")
-	private MessageResponse createErrorResponse(String errorMessage, Long sessionId) {
-		MessageResponse errorResponse = new MessageResponse();
-		errorResponse.setEmotion("오류");
-		errorResponse.setCounselorResponse(errorMessage);
-		errorResponse.setSummary("시스템 오류");
-		errorResponse.setSessionEnd(false);
-		errorResponse.setSessionId(sessionId != null ? sessionId : -1);
-		return errorResponse;
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<SessionHistory> getActiveSession(String userEmail) {
+		return chatSessionRepository.findByUserEmailAndSessionStatus(userEmail, "IN_PROGRESS")
+			.map(chatMapper::toSessionHistory);
 	}
 }

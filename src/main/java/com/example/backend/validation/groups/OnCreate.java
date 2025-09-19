@@ -1,4 +1,7 @@
-package com.example.backend.validation.group;
+package com.example.backend.validation.groups;
 
-public class OnCreate {
+/**
+ * 생성 시 검증 그룹
+ */
+public interface OnCreate {
 }

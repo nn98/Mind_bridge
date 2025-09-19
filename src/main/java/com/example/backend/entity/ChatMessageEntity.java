@@ -12,18 +12,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 개별 채팅 메시지 엔티티
+ * 통합 채팅 메시지 엔티티
  */
 @Entity
 @Table(name = "chat_messages")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessageEntity {
 
     @Id
@@ -31,21 +35,27 @@ public class ChatMessageEntity {
     @Column(name = "message_id")
     private Long messageId;
 
-    @Column(name = "session_id", nullable = false)
+    @Column(name = "session_id", nullable = true)
     private Long sessionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type", nullable = false, columnDefinition = "enum('AI','USER')")
+    private MessageType messageType;
 
     @Column(name = "message_content", columnDefinition = "TEXT", nullable = false)
     private String messageContent;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false)
-    private MessageType messageType;
-
-    @Column(name = "emotion", columnDefinition = "TEXT", nullable = false)  // 감정 컬럼 추가
+    @Column(name = "emotion", columnDefinition = "TEXT", nullable = false)
     private String emotion;
 
+    @Column(name = "user_email", nullable = false, length = 255)
+    private String userEmail;
+
+    @Column(name = "chat_style", nullable = false, length = 45)
+    private String chatStyle;
+
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = true, updatable = false)
     private LocalDateTime createdAt;
 
     public enum MessageType {
