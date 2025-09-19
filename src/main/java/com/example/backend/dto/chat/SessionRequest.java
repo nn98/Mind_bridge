@@ -26,7 +26,5 @@ public class SessionRequest {
     @Size(max = 1000, message = "AI 응답 요약은 1000자 이내로 입력해주세요")
     private String aiResponseSummary; // counselorSummation → aiResponseSummary
 
-    private String sessionStatus = "COMPLETED"; // 기본값: 완료
-
     private Integer conversationScore; // 대화 점수 (1-10)
 }

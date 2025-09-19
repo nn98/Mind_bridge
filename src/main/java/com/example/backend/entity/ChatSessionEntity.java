@@ -31,8 +31,8 @@ public class ChatSessionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "session_id")
-    private Long sessionId;
+    @Column(name = "id")
+    private String id;
 
     @Column(name = "user_email", nullable = true, length = 255)
     private String userEmail;

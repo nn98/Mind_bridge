@@ -42,7 +42,7 @@ public class ChatServiceImpl implements ChatService {
 	public ChatMessageEntity saveMessage(ChatMessageRequest request) {
 		ChatMessageEntity entity = chatMapper.toEntity(request);
 		ChatMessageEntity saved = chatMessageRepository.save(entity);
-		log.debug("Saved chat message ID: {} for session: {}", saved.getMessageId(), saved.getSessionId());
+		log.debug("Saved chat message ID: {} for session: {}", saved.getId(), saved.getSessionId());
 		return saved;
 	}
 
@@ -52,7 +52,7 @@ public class ChatServiceImpl implements ChatService {
 	public ChatSessionEntity saveSession(SessionRequest request) {
 		ChatSessionEntity entity = chatMapper.toEntity(request);
 		ChatSessionEntity saved = chatSessionRepository.save(entity);
-		log.info("Saved chat session ID: {} for user: {}", saved.getSessionId(), saved.getUserEmail());
+		log.info("Saved chat session ID: {} for user: {}", saved.getId(), saved.getUserEmail());
 		return saved;
 	}
 
@@ -60,18 +60,18 @@ public class ChatServiceImpl implements ChatService {
 	public ChatSessionEntity saveAnalysis(Map<String, Object> payload) {
 		ChatSessionEntity entity = chatMapper.toAnalysisEntity(payload);
 		ChatSessionEntity saved = chatSessionRepository.save(entity);
-		log.info("Saved analysis session ID: {} for user: {}", saved.getSessionId(), saved.getUserEmail());
+		log.info("Saved analysis session ID: {} for user: {}", saved.getId(), saved.getUserEmail());
 		return saved;
 	}
 
 	@Override
-	public ChatSessionEntity updateSession(Long sessionId, SessionRequest request) {
+	public ChatSessionEntity updateSession(String sessionId, SessionRequest request) {
 		ChatSessionEntity entity = chatSessionRepository.findById(sessionId)
 			.orElseThrow(() -> new NotFoundException("Session not found with ID: " + sessionId));
 
 		chatMapper.updateEntity(entity, request);
 		ChatSessionEntity updated = chatSessionRepository.save(entity);
-		log.info("Updated chat session ID: {}", updated.getSessionId());
+		log.info("Updated chat session ID: {}", updated.getId());
 		return updated;
 	}
 
@@ -103,24 +103,11 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<ChatSessionEntity> getSessionById(Long sessionId) {
+	public Optional<ChatSessionEntity> getSessionById(String sessionId) {
 		return chatSessionRepository.findById(sessionId);
 	}
 
 	// === 상태 관련 ===
-
-	@Override
-	@Transactional(readOnly = true)
-	public long getCompletedSessionCount(String userEmail) {
-		return chatSessionRepository.countByUserEmailAndSessionStatus(userEmail, "COMPLETED");
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<SessionHistory> getActiveSession(String userEmail) {
-		return chatSessionRepository.findByUserEmailAndSessionStatus(userEmail, "IN_PROGRESS")
-			.map(chatMapper::toSessionHistory);
-	}
 
 	@Override
 	public List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail) {
@@ -131,7 +118,7 @@ public class ChatServiceImpl implements ChatService {
 			session.getRiskFactors(),
 			session.getDivision(),
 			session.getCreatedAt().toString(), // LocalDateTime -> String
-			session.getSessionId(),
+			session.getId(),
 			session.getUserEmail()
 		)).toList();
 	}
