@@ -210,6 +210,10 @@
     scroll-behavior: smooth;
 }
 
+.hospital-list::-webkit-scrollbar {
+    display: none;
+}
+
 /* 스크롤바 스타일링 */
 .hospital-list.animated-scroll::-webkit-scrollbar {
     width: 6px;
@@ -266,7 +270,7 @@
     padding-bottom: 9rem;
 }
 
-/* 호버 효과 완전 제거 - 모든 가능한 선택자 차단 */
+/* 호버 효과 완전 제거 */
 .hospital-card:hover,
 .hospital-card.animated:hover,
 .hospital-card:focus,
@@ -278,9 +282,7 @@ button.hospital-card.animated:hover,
 .hospital-list-container .hospital-card:hover,
 .hospital-list-container .hospital-card.animated:hover {
     background: #fff !important;
-    background-color: #fff !important;
     border: 1px solid #ddd !important;
-    border-color: #ddd !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
     transform: none !important;
     color: inherit !important;
@@ -291,22 +293,34 @@ button.hospital-card.animated:hover,
 .hospital-card:hover h3,
 .hospital-card:hover p,
 .hospital-card:hover span,
-.hospital-card:hover .hospital-number,
-.hospital-card:hover .distance-badge,
-.hospital-card:hover .time-badge,
 .hospital-card.animated:hover h3,
 .hospital-card.animated:hover p,
-.hospital-card.animated:hover span,
-.hospital-card.animated:hover .hospital-number,
-.hospital-card.animated:hover .distance-badge,
-.hospital-card.animated:hover .time-badge {
+.hospital-card.animated:hover span {
     color: inherit !important;
     background: inherit !important;
     transform: none !important;
     transition: none !important;
 }
 
-/* 선택된 카드 (active) */
+/* ✅ 거리/시간 배지는 hover 시에도 원래 색상 유지 */
+.hospital-card:hover .distance-badge,
+.hospital-card.animated:hover .distance-badge {
+    background: #e3f2fd !important;
+    color: #1976d2 !important;
+}
+
+.hospital-card:hover .time-badge,
+.hospital-card.animated:hover .time-badge {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+}
+
+/* ✅ 병원 번호 뱃지도 hover 시 색상 유지 */
+.hospital-card:hover .hospital-number,
+.hospital-card.animated:hover .hospital-number {
+    background: #e3f2fd !important;
+    color: #1976d2 !important;
+}
 
 /* 병원 번호 */
 .hospital-number {
@@ -322,7 +336,6 @@ button.hospital-card.animated:hover,
     min-width: 20px;
     text-align: center;
 }
-
 
 .hospital-card h3 {
     margin: 0 0 0.5rem 0;
@@ -374,15 +387,12 @@ button.hospital-card.animated:hover,
     color: #2e7d32;
 }
 
-/* active 카드 안에서도 배지 가독성 유지 */
-
 /* 아이콘 컬러 */
 .hospital-card svg {
     flex-shrink: 0;
     font-size: 14px;
     color: inherit;
 }
-
 
 /* =======================
    스크롤 그라데이션 효과
@@ -469,7 +479,7 @@ button.hospital-card.animated:hover,
 }
 
 /* =======================
-   페이지네이션 (가로 정렬)
+   페이지네이션
 ======================= */
 .hospital-pagination {
     display: flex;
@@ -583,7 +593,6 @@ button.hospital-card.animated:hover,
         padding: 0.8rem;
         padding-bottom: 7rem;
     }
-
 
     .hospital-card h3 {
         font-size: 15px;
