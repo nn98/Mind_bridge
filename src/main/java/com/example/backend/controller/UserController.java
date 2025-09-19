@@ -62,7 +62,10 @@ public class UserController {
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
         Profile profile = userService.getUserByEmail(email)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        List<RiskAssessment> assessments = chatSessionService.getRiskAssessmentByUserEmail(email);
+        profile.setRiskAssessments(assessments);
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")
