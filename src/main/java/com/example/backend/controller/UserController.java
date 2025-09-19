@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.CacheControl;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.common.error.NotFoundException;
+import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.dto.user.AvailabilityType;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
@@ -25,6 +27,7 @@ import com.example.backend.dto.user.Summary;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.security.SecurityUtil;
+import com.example.backend.service.ChatSessionService;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +44,7 @@ public class UserController {
     private final UserService userService;
     private final SecurityUtil securityUtil;
     private final JwtUtil jwtUtil;
+    private final ChatSessionService chatSessionService;
 
     @PostMapping("/register")
     public ResponseEntity<Profile> register(@Valid @RequestBody RegistrationRequest request) {
@@ -51,8 +55,10 @@ public class UserController {
     @GetMapping("/availability")
     public ResponseEntity<Map<String, Boolean>> checkAvailability(@RequestParam AvailabilityType type, @RequestParam String value) {
         boolean isAvailable = switch (type) {
-            case NICKNAME -> userService.isNicknameAvailable(value);
-            case EMAIL    -> userService.isEmailAvailable(value);
+            case NICKNAME ->
+                userService.isNicknameAvailable(value);
+            case EMAIL ->
+                userService.isEmailAvailable(value);
         };
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
@@ -62,11 +68,14 @@ public class UserController {
     public ResponseEntity<Profile> getAccount(Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
         Profile profile = userService.getUserByEmail(email)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        List<RiskAssessment> assessments = chatSessionService.getRiskAssessmentByUserEmail(email);
+        profile.setRiskAssessments(assessments);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.noStore())
-            .header("Pragma", "no-cache").header("Expires", "0")
-            .body(profile);
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache").header("Expires", "0")
+                .body(profile);
     }
 
     @PatchMapping("/account")
@@ -90,24 +99,24 @@ public class UserController {
     @PatchMapping("/account/password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
-        Authentication authentication,
-        HttpServletResponse httpRes) {
+            Authentication authentication,
+            HttpServletResponse httpRes) {
         String email = securityUtil.requirePrincipalEmail(authentication);
         userService.changePasswordWithCurrentCheck(
-            email, request.currentPassword(), request.password(), request.confirmPassword()
+                email, request.currentPassword(), request.password(), request.confirmPassword()
         );
         jwtUtil.clearJwtCookie(httpRes);
         return ResponseEntity.noContent()
-            .header("Cache-Control", "no-store")
-            .header("Pragma", "no-cache")
-            .header("Expires", "0")
-            .build();
+                .header("Cache-Control", "no-store")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .build();
     }
 
     @GetMapping("/summary")
     public ResponseEntity<Summary> getSummary(@RequestParam String nickname) {
         return userService.getUserByNickname(nickname)
-            .map(ResponseEntity::ok)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

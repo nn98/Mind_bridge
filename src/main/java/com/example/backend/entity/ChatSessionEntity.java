@@ -60,7 +60,8 @@ public class ChatSessionEntity {
     @Column(name = "division")
     private String division;
 
-
+    @Column(name = "risk_factors")
+    private String riskFactors;
 
     @PrePersist
     public void prePersist() {
