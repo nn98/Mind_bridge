@@ -10,8 +10,8 @@ public class AdminPostDetail {
     Long id;
     String title;
     String content;
-    String authorNickname;
-    String authorEmail;
+    String userNickname;
+    String userEmail;
     String visibility;
     String createdAt;
     String updatedAt;

@@ -5,5 +5,5 @@ import lombok.Value;
 
 @Value
 public class VisibilityUpdateRequest {
-    @NotBlank String visibility; // "public" | "private"
+    @NotBlank String visibility; // PUBLIC | PRIVATE
 }
