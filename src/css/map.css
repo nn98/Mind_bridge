@@ -383,6 +383,7 @@ button.hospital-card.animated:hover,
     color: inherit;
 }
 
+
 /* =======================
    스크롤 그라데이션 효과
 ======================= */
@@ -582,7 +583,7 @@ button.hospital-card.animated:hover,
         padding: 0.8rem;
         padding-bottom: 7rem;
     }
-    
+
 
     .hospital-card h3 {
         font-size: 15px;

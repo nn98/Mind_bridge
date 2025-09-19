@@ -182,7 +182,6 @@ export default function EmotionAnalysisPage({
 
     const content = (
         <div className="emotion-container" aria-live="polite">
-
             {/* 왼쪽 사이드바 */}
             <aside className="ea-sidebar" aria-label="설정 및 통계 사이드바">
                 {PresetChips}

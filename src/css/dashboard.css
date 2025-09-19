@@ -264,11 +264,22 @@ body {
     background: #0c1426;
 }
 
+.plain-content {
+    flex: 1 1 auto;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: radial-gradient(1200px 600px at 70% 20%, rgba(161, 140, 209, .25), transparent 60%),
+    radial-gradient(900px 500px at 30% 80%, rgba(194, 178, 255, .25), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f6f3ff 100%); /* 흰색 배경 */
+}
+
 /* 중앙 컨텐츠 */
 .dash-content {
     flex: 1 1 auto;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: linear-gradient(25deg, #ffb39a 0%, #ffe8b0 42%, #b18cff 100%);
 }
 
@@ -284,6 +295,7 @@ body {
     mix-blend-mode: screen;
     opacity: .95;
     pointer-events: none;
+    z-index: -1;
 }
 
 /* Cards */
