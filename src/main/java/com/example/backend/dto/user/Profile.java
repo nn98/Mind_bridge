@@ -1,6 +1,9 @@
 package com.example.backend.dto.user;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.example.backend.dto.chat.RiskAssessment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,4 +29,6 @@ public class Profile {
     private LocalDateTime updatedAt;
     private String provider;
     private String chatStyle; //채팅스타일 추가
+
+    private List<RiskAssessment> riskAssessments; //리스크 / 디비전
 }
