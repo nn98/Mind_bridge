@@ -25,16 +25,13 @@ public interface ChatService {
     // === 세션 관련 ===
     ChatSessionEntity saveSession(SessionRequest request);
     ChatSessionEntity saveAnalysis(Map<String, Object> payload);
-    ChatSessionEntity updateSession(Long sessionId, SessionRequest request);
+    ChatSessionEntity updateSession(String sessionId, SessionRequest request);
 
     // === 조회 관련 ===
     List<SessionHistory> getAllSessions();
     List<SessionHistory> getSessionsByUserEmail(String userEmail);
     List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName);
-    Optional<ChatSessionEntity> getSessionById(Long sessionId);
+    Optional<ChatSessionEntity> getSessionById(String sessionId);
 
-    // === 상태 관련 ===
-    long getCompletedSessionCount(String userEmail);
-    Optional<SessionHistory> getActiveSession(String userEmail);
     List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail);
 }
