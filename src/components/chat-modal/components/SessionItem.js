@@ -2,28 +2,28 @@
 import TriangleGraph from "./TriangleGraph";
 
 export default function SessionItem({item, onClick}) {
-    const {createdAt, summary, riskFactor = 0, metrics = {}} = item ?? {};
-    const d = metrics.depression ?? 0;
-    const a = metrics.addiction ?? 0;
-    const x = metrics.anxiety ?? 0;
+    const {createdAt, primaryRisk = "", protectiveFactors = 0, riskFactors = {}} = item ?? {};
+    const depression = riskFactors?.depression ?? 0;
+    const addiction = riskFactors?.addiction ?? 0;
+    const anxiety = riskFactors?.anxiety ?? 0;
 
     return (
         <li className="session-item" onClick={onClick}>
             <div className="item-top">
                 <div className="item-title-row">
                     <strong className="item-date">{formatDate(createdAt)}</strong>
-                    <span className={`risk-badge ${riskTone(riskFactor)}`}>Risk {Math.round(riskFactor)}%</span>
+                    <span className={`risk-badge ${riskTone(protectiveFactors)}`}>Risk {Math.round(protectiveFactors)}%</span>
                 </div>
-                <p className="item-summary">{summary || "요약 없음"}</p>
+                <p className="item-summary">{primaryRisk || "위험 없음"}</p>
             </div>
 
             {/* 그래프: 수평/수직 어디든 배치 가능. 여기선 오른쪽 미니 뷰 */}
             <div className="item-graph">
                 <TriangleGraph
-                    size={80}
-                    depression={d}
-                    addiction={a}
-                    anxiety={x}
+                    size={120}
+                    depression={depression}
+                    addiction={addiction}
+                    anxiety={anxiety}
                     showLabels={true}
                     compact
                 />
@@ -38,9 +38,7 @@ function formatDate(ts) {
         const d = new Date(ts);
         const mm = `${d.getMonth() + 1}`.padStart(2, "0");
         const dd = `${d.getDate()}`.padStart(2, "0");
-        const hh = `${d.getHours()}`.padStart(2, "0");
-        const mi = `${d.getMinutes()}`.padStart(2, "0");
-        return `${d.getFullYear()}.${mm}.${dd} ${hh}:${mi}`;
+        return `${mm}/${dd}`;
     } catch {
         return "-";
     }

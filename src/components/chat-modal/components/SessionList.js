@@ -5,29 +5,34 @@ import SessionItem from "./SessionItem";
 import SessionDetailModal from "./SessionDetailModal";
 import { BACKEND_URL } from "../constants";
 
-export default function SessionList({ userId }) {
+export default function SessionList({userId}) {
 
     const [sessions, setSessions] = useState([]);
     const [sel, setSel] = useState(null);
 
     useEffect(() => {
-        const fetchSessions = async () => { 
+        const fetchSessions = async () => {
             try {
-                const res = await axios.get(`${BACKEND_URL}/api/users/account`, {
+                const res = await axios.get(`${BACKEND_URL}/api/chat/sessions`, {
                     withCredentials: true, // ✅ UserProfile과 동일하게 쿠키 기반 인증 유지
                 });
 
-                const riskAssessments = res.data.riskAssessments || [];
+                console.log(res);
 
-                const mapped = riskAssessments.map((it) => ({
-                    id: it.sessionId,
-                    createdAt: it.createdAt,
-                    summary: it.riskFactors,
-                    riskFactor: 0, // 필요하다면 백엔드에서 추가
-                    metrics: {},   // 필요시 확장
-                }));
+                const userSessions = res.data;
 
-                setSessions(mapped);
+                const sessions = userSessions.map((session) => ({
+                        sessionId: session.sessionId,
+                        emotions: session.emotions,
+                        primaryRisk: session.primaryRisk,
+                        riskFactors: session.riskFactors,
+                        createdAt: session.createdAt,
+                        updatedAt: session.updatedAt,
+                        protectiveFactors: session.protectiveFactors,
+                    }
+                ));
+
+                setSessions(sessions);
             } catch (err) {
                 console.error("세션 불러오기 실패:", err);
             }
@@ -39,29 +44,27 @@ export default function SessionList({ userId }) {
     // ⭐ 더미 데이터
     const dummySessions = [
         {
-            id: 1,
+            sessionId: 1,
+            primaryRisk: "최근 업무 스트레스와 불면 증상",
+            protectiveFactors: 65,
+            riskFactors: { depression: 40, addiction: 20, anxiety: 40 },
             createdAt: "2025-09-15T14:30:00Z",
-            summary: "최근 업무 스트레스와 불면 증상",
-            riskFactor: 65,
-            metrics: { depression: 40, addiction: 20, anxiety: 40 },
         },
         {
             id: 2,
+            primaryRisk: "SNS 과사용과 집중력 저하",
+            protectiveFactors: 45,
+            riskFactors: { depression: 20, addiction: 60, anxiety: 20 },
             createdAt: "2025-09-10T20:15:00Z",
-            summary: "SNS 과사용과 집중력 저하",
-            riskFactor: 45,
-            metrics: { depression: 20, addiction: 60, anxiety: 20 },
         },
         {
             id: 3,
+            primaryRisk: "최근 컨디션 양호, 불안감 감소",
+            protectiveFactors: 25,
+            riskFactors: { depression: 10, addiction: 15, anxiety: 75 },
             createdAt: "2025-09-05T10:00:00Z",
-            summary: "최근 컨디션 양호, 불안감 감소",
-            riskFactor: 25,
-            metrics: { depression: 10, addiction: 15, anxiety: 75 },
         },
     ];
-
-
 
     return (
         <div className="session-list-card">
@@ -71,8 +74,8 @@ export default function SessionList({ userId }) {
             </div>
 
             <ul className="session-list">
-                {sessions.map((it) => (
-                    <SessionItem key={it.id} item={it} onClick={() => setSel(it)} />
+                {sessions.map((session) => (
+                    <SessionItem key={session.sessionId} item={session} onClick={() => setSel(session)} />
                 ))}
             </ul>
 
