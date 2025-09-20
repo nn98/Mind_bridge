@@ -9,8 +9,8 @@ const AuthContext = createContext(null);
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const requiredFields = [
-    'id', 'email', 'fullName', 'nickname', 'gender',
-    'age', 'phoneNumber', 'mentalState',
+    'email', 'fullName', 'nickname', 'gender',
+    'age', 'phoneNumber',
 ];
 const isFilled = (v) => v !== null && v !== undefined && v !== '';
 const isProfileComplete = (p) => !!p && requiredFields.every((f) => isFilled(p[f]));
