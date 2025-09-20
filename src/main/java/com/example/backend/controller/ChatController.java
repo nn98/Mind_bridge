@@ -3,7 +3,9 @@ package com.example.backend.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.chat.ChatMessageRequest;
+import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
+import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.ChatService;
 import com.example.backend.service.DailyMetricsService;
 
@@ -27,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ChatController {
 
     private final DailyMetricsService dailyMetricsService;
+    private final SecurityUtil securityUtil;
     private final ChatService chatService;
 
     // 저장
@@ -56,4 +61,14 @@ public class ChatController {
         return ResponseEntity.ok(saved);
     }
 
+    @GetMapping("/sessions")
+    public ResponseEntity<List<RiskAssessment>> getRecentSessions(Authentication authentication) {
+        String email = securityUtil.requirePrincipalEmail(authentication);
+        List<RiskAssessment> assessments = chatService.getRiskAssessmentByUserEmail(email);
+        log.info("email: {} / data: {}", email, assessments);
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
+            .header("Pragma", "no-cache").header("Expires", "0")
+            .body(assessments);
+    }
 }
