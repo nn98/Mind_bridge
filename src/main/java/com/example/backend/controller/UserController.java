@@ -1,7 +1,6 @@
 package com.example.backend.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.CacheControl;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.common.error.NotFoundException;
-import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.dto.user.AvailabilityType;
 import com.example.backend.dto.user.ChangePasswordRequest;
 import com.example.backend.dto.user.Profile;
@@ -26,7 +24,6 @@ import com.example.backend.dto.user.RegistrationRequest;
 import com.example.backend.dto.user.UpdateRequest;
 import com.example.backend.security.JwtUtil;
 import com.example.backend.security.SecurityUtil;
-import com.example.backend.service.ChatService;
 import com.example.backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +39,6 @@ public class UserController {
 
     private final UserService userService;
     private final SecurityUtil securityUtil;
-    private final ChatService chatService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
@@ -66,9 +62,6 @@ public class UserController {
         String email = securityUtil.requirePrincipalEmail(authentication);
         Profile profile = userService.getUserByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-
-        List<RiskAssessment> assessments = chatService.getRiskAssessmentByUserEmail(email);
-        profile.setRiskAssessments(assessments);
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .header("Pragma", "no-cache").header("Expires", "0")
