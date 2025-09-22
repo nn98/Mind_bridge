@@ -157,9 +157,10 @@ public class AdminQueryServiceImpl implements AdminQueryService {
     @Transactional
     @Override
     public void updatePostVisibility(Long id, String visibility) {
-        PostEntity p = postRepository.findById(id)
+        PostEntity post = postRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Post not found"));
-        p.setVisibility(visibility);
+        post.setVisibility(visibility);
+        postRepository.save(post); // ← 테스트가 기대하는 save 호출
     }
 
     @Transactional
