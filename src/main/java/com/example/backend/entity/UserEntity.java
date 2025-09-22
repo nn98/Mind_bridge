@@ -32,7 +32,8 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "user_id")  // ❌ "userid" → ✅ "user_id"
+    private Long userId;  // ❌ id → ✅ userId
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
@@ -40,7 +41,7 @@ public class UserEntity {
     @Column(length = 255)
     private String password;
 
-    @Column(length = 100)
+    @Column(name = "full_name", length = 100)
     private String fullName;
 
     @Column(length = 100, unique = true)
@@ -51,10 +52,10 @@ public class UserEntity {
     @Column(length = 20)
     private String gender;
 
-    @Column(length = 50)
+    @Column(name = "mental_state", length = 50)
     private String mentalState;
 
-    @Column(length = 20)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Column(nullable = false, length = 20)
@@ -64,35 +65,35 @@ public class UserEntity {
     @Column(length = 50)
     private String provider;
 
-    @Column(length = 100)
+    @Column(name = "social_id", length = 100)
     private String socialId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "chat_goal", columnDefinition = "TEXT")
     private String chatGoal;
 
-    @Column(name = "chat_style")
+    @Column(name = "chat_style")  // ❌ "chatstyle" → ✅ "chat_style"
     private String chatStyle;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)  // ❌ "createdat" → ✅ "created_at"
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "last_login_at")
-    private LocalDateTime lastLoginAt;
-
-    @Column(name = "terms_accepted", nullable = false)
+    @Column(name = "terms_accepted", nullable = false)  // ❌ "termsaccepted" → ✅ "terms_accepted"
     @Builder.Default
     private Boolean termsAccepted = Boolean.FALSE;
 
-    @Column(name = "terms_accepted_at", columnDefinition = "datetime(3)")
+    @Column(name = "terms_accepted_at", columnDefinition = "datetime(3)")  // ❌ "termsacceptedat" → ✅ "terms_accepted_at"
     private LocalDateTime termsAcceptedAt;
 
-    @Column(name = "terms_version", length = 32)
+    @Column(name = "terms_version", length = 32)  // ❌ "termsversion" → ✅ "terms_version"
     private String termsVersion;
+
+    @Column(name = "last_login_at")  // ❌ "lastloginat" → ✅ "last_login_at"
+    private LocalDateTime lastLoginAt;
 
     @PrePersist
     protected void onCreate() {

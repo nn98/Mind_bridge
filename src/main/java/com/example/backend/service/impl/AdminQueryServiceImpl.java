@@ -255,7 +255,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
 
     private AdminUserRow toUserRow(UserEntity u) {
         return AdminUserRow.builder()
-            .id(u.getId())
+            .id(u.getUserId())
             .nickname(u.getNickname())
             .email(u.getEmail())
             .phoneNumber(u.getPhoneNumber())
@@ -268,7 +268,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
 
     private AdminUserDetail toUserDetail(UserEntity u) {
         return AdminUserDetail.builder()
-            .id(u.getId())
+            .id(u.getUserId())
             .nickname(u.getNickname())
             .email(u.getEmail())
             .phoneNumber(u.getPhoneNumber())
@@ -284,7 +284,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
 
     private AdminPostRow toPostRow(PostEntity p) {
         return AdminPostRow.builder()
-            .id(p.getId())
+            .id(p.getPostId())
             .title(p.getTitle())
             .userEmail(p.getUserEmail())           // ✅ 직접 접근 (0쿼리)
             .userNickname(p.getUserNickname())     // ✅ 직접 접근 (0쿼리)
@@ -296,7 +296,7 @@ public class AdminQueryServiceImpl implements AdminQueryService {
 
     private AdminPostDetail toPostDetail(PostEntity p) {
         return AdminPostDetail.builder()
-            .id(p.getId())
+            .id(p.getPostId())
             .title(p.getTitle())
             .content(p.getContent())
             .userEmail(p.getUserEmail())           // ✅ N+1 해결

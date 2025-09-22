@@ -3,7 +3,6 @@ package com.example.backend.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.common.error.NotFoundException;
 import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.dto.chat.RiskAssessment;
-import com.example.backend.dto.chat.SessionHistory;
 import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
@@ -65,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public ChatSessionEntity updateSession(Long sessionId, SessionRequest request) {
+	public ChatSessionEntity updateSession(String sessionId, SessionRequest request) {
 		ChatSessionEntity entity = chatSessionRepository.findById(sessionId)
 			.orElseThrow(() -> new NotFoundException("Session not found with ID: " + sessionId));
 
@@ -79,48 +77,17 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<SessionHistory> getAllSessions() {
-		return chatSessionRepository.findAll()
-			.stream()
-			.map(chatMapper::toSessionHistory)
-			.collect(Collectors.toList());
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<SessionHistory> getSessionsByUserEmail(String userEmail) {
-		return chatSessionRepository.findByUserEmailOrderByCreatedAtDesc(userEmail)
-			.stream()
-			.map(chatMapper::toSessionHistory)
-			.collect(Collectors.toList());
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName) {
 		return chatSessionRepository.findAllByUserEmailAndUserNameOrderBySessionIdDesc(userEmail, userName);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<ChatSessionEntity> getSessionById(Long sessionId) {
+	public Optional<ChatSessionEntity> getSessionById(String sessionId) {
 		return chatSessionRepository.findById(sessionId);
 	}
 
 	// === 상태 관련 ===
-
-	@Override
-	@Transactional(readOnly = true)
-	public long getCompletedSessionCount(String userEmail) {
-		return chatSessionRepository.countByUserEmailAndSessionStatus(userEmail, "COMPLETED");
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<SessionHistory> getActiveSession(String userEmail) {
-		return chatSessionRepository.findByUserEmailAndSessionStatus(userEmail, "IN_PROGRESS")
-			.map(chatMapper::toSessionHistory);
-	}
 
 	@Override
 	public List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail) {
@@ -129,8 +96,8 @@ public class ChatServiceImpl implements ChatService {
 		// Entity -> DTO 변환
 		return sessions.stream().map(session -> new RiskAssessment(
 			session.getRiskFactors(),
-			session.getDivision(),
-			session.getCreatedAt().toString(), // LocalDateTime -> String
+			session.getPrimaryRisk(),
+			session.getCreatedAt(),
 			session.getSessionId(),
 			session.getUserEmail()
 		)).toList();

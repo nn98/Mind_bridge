@@ -25,5 +25,5 @@ public class MessageResponse {
     @JsonProperty("세션_종료")
     private boolean sessionEnd;
 
-    private Long sessionId;
+    private String sessionId;
 }

@@ -32,11 +32,11 @@ public class ChatMessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id")
-    private Long messageId;
+    @Column(name = "message_id")  // "id" → "message_id"
+    private Long messageId;       // id → messageId
 
-    @Column(name = "session_id", nullable = true)
-    private Long sessionId;
+    @Column(name = "session_id")
+    private String sessionId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false, columnDefinition = "enum('AI','USER')")
