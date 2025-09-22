@@ -1,3 +1,4 @@
+/* ========== Global Styles ========== */
 html,
 body,
 #root {
@@ -6,296 +7,443 @@ body,
     width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', sans-serif;
-    background-color: #f5f7fb;
-    color: #333;
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+    color: #2d3748;
+    line-height: 1.6;
 }
 
-/* 페이지 컨테이너 */
+/* ========== Page Container ========== */
 .user-profile {
-    max-width: 800px; /* ✅ 요청: 창(컨테이너) 크기만 통일 */
-    margin: 0 auto; /* 가운데 정렬 */
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 32px;
+    min-height: 100vh;
 }
 
-/* 상단 프로필 카드 */
+/* ========== Top Profile Card ========== */
 .profile-card {
-    width: 100%; /* 컨테이너 폭에 맞춤 */
-    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-    border-radius: 12px;
-    padding: 2rem;
-    color: white;
-    display: flex;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    color: #ffffff;
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
     align-items: center;
-    gap: 1.5rem;
-    box-shadow: 0 6px 16px rgba(161, 140, 209, 0.25);
+    gap: 24px;
+    box-shadow: 0 20px 60px rgba(118, 75, 162, 0.4),
+    0 8px 32px rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="60" cy="80" r="1" fill="rgba(255,255,255,0.06)"/></svg>') repeat;
+    pointer-events: none;
 }
 
 .profile-card .avatar {
-    width: 80px;
-    height: 80px;
-    background: white;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #888;
-    font-size: 2rem;
+    color: #ffffff;
+    font-size: 3rem;
+    font-weight: 700;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.profile-card .info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .profile-card .info h2 {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 2rem;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.5px;
 }
 
 .profile-card .info p {
-    margin: 4px 0;
-    font-size: 0.95rem;
+    margin: 0;
+    font-size: 1.1rem;
     opacity: 0.9;
+    font-weight: 500;
 }
 
-.profile-card .badge {
+/* ========== Status & Badges ========== */
+.badge {
     display: inline-block;
     padding: 4px 10px;
-    font-size: 0.8rem;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.2);
+    font-size: 0.75rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.25);
     margin-right: 6px;
+    color: #ffffff;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+    max-width: 80px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
-/* 배지 스타일 드롭다운(활동중/자리비움/숨김) */
 .status-badge {
     position: relative;
     display: inline-block;
-    margin-right: 6px; /* 기존 badge와 동일한 간격 */
+    margin-right: 6px;
 }
 
 .status-badge select {
-    display: inline-block;
-    padding: 4px 28px 4px 10px; /* 우측 화살표 공간 확보 */
-    font-size: 0.8rem;
+    appearance: none;
+    padding: 6px 28px 6px 12px;
+    font-size: 0.85rem;
     font-weight: 600;
     border-radius: 20px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2); /* ✅ 기존 badge와 동일 배경 */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
     cursor: pointer;
-    appearance: none; /* 기본 화살표 제거 */
     outline: none;
+    line-height: 1.4;
+    backdrop-filter: blur(4px);
+    min-width: 100px;
+    box-sizing: border-box;
 }
 
 .status-badge::after {
     content: "▼";
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     color: #fff;
     position: absolute;
-    right: 10px;
+    right: 27.8vw;
     top: 50%;
-    transform: translateY(-52%);
+    transform: translateY(-50%);
     pointer-events: none;
 }
 
-/* 이름 + 수정 버튼 한 줄 */
+.status-badge select option {
+    background: #667eea;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+}
+
+/* ========== Buttons ========== */
 .name-row {
     display: flex;
     align-items: center;
-    gap: 8px; /* 이름과 버튼 사이 간격 */
+    gap: 12px;
 }
 
-/* 수정 버튼 */
 .edit-btn {
-    background: white;
-    color: #a18cd1;
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
     border: none;
-    border-radius: 8px;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-
-.profile-card .edit-btn:hover {
-    background: #f3e9ff;
-}
-
-/* 프로필 섹션 */
-.profile-section {
-    width: 100%; /* 카드와 동일 폭 */
-    background: #fff;
     border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.edit-btn:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
+}
+
+.profile-actions-top {
+    display: flex;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-card .profile-actions-top .account-button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+.profile-card .profile-actions-top .account-button.danger {
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.account-button {
+    padding: 12px 20px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #667eea;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.account-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.account-button:hover::before {
+    left: 100%;
+}
+
+.account-button:hover {
+    background: #667eea;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+}
+
+.account-button.danger {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
+.account-button.danger:hover {
+    background: #dc2626;
+    box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+}
+
+/* ========== Content Cards ========== */
+.profile-section,
+.session-list-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-section::before,
+.session-list-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-size: 300% 100%;
+    animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.profile-section:hover,
+.session-list-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16),
+    0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .user-profile h3,
 .user-profile h4 {
-    margin-top: 0;
-    margin-bottom: 1.2rem;
-    font-weight: 600;
-    color: #333;
+    margin: 0 0 1.5rem 0;
+    font-weight: 800;
+    color: #2d3748;
+    font-size: 1.4rem;
+    position: relative;
 }
 
-/* 프로필 필드 */
+.user-profile h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+/* ========== Profile Fields ========== */
 .profile-field {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* 라벨은 왼쪽에 */
-    gap: 15px;
-    margin-bottom: 16px;
+    gap: 20px;
+    margin-bottom: 18px;
     font-size: 15px;
+    transition: all 0.3s ease;
+    padding: 8px 0;
+    border-radius: 12px;
+}
+
+.profile-field:hover {
+    background: rgba(102, 126, 234, 0.05);
+    padding: 8px 16px;
 }
 
 .profile-field span {
-    font-weight: bold;
-    color: #555;
-    width: 90px;
-    flex-shrink: 0;
+    font-weight: 700;
+    color: #4a5568;
+    width: 120px;
     text-align: left;
+    flex-shrink: 0;
+    font-size: 0.95rem;
 }
 
 .profile-field p,
 .profile-field input,
 .profile-field select {
-    width: 60%; /* 입력 칸 넓이 */
-    margin: 0 auto; /* 가운데 배치 */
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    flex: 1;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
     font-size: 15px;
-    background: #f9fafc;
-    text-align: center; /* 글씨도 가운데 */
-    box-sizing: border-box; /* ✅ 크기 계산 일관 */
+    background: #ffffff;
+    text-align: center;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
-/* ✅ 보기모드(p)를 입력창과 '같은 크기'로 맞춤(디자인 변화 없음) */
+.profile-field input:focus,
+.profile-field select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #fafbff;
+}
+
 .profile-field p {
-    border: 1px solid transparent; /* 눈에 안 보이는 동일 두께 보더 */
-    padding: 8px 10px; /* 입력과 동일 패딩 */
-    min-height: 38px; /* 입력과 동일 높이대 (필요시 40px로) */
-    background: #f9fafc; /* 입력과 동일 배경 (기존 느낌 유지) */
-    color: #555;
-}
-
-/* 상담 목표 필드 */
-.profile-field.full-width {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.profile-field.full-width span {
-    width: auto;
-}
-
-/* 저장/취소 버튼 */
-.profile-actions {
+    border: 2px solid transparent;
+    min-height: 48px;
+    color: #2d3748;
+    background: #f7fafc;
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.chat-button {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s;
-}
-
-.chat-button:hover {
-    transform: translateY(-2px);
-}
-
-.chat-button.save {
-    background: #a18cd1;
-    color: white;
-}
-
-.chat-button.save:hover {
-    background: #a14fff;
-}
-
-.chat-button.cancel {
-    background: #ddd;
-    color: #333;
-}
-
-/* 계정 관리 */
-.account-actions {
-    width: 100%; /* 동일 폭 */
-    display: flex;
-    gap: 12px;
+    align-items: center;
     justify-content: center;
 }
 
-.account-button {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    background: #a18cd1;
-    border-radius: 6px;
+/* ========== Action Buttons ========== */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.chat-button {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: background 0.2s;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-.account-button:hover {
-    background: #a14fff;
+.chat-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%);
 }
 
-.account-button.danger {
-    border-color: #d9534f;
-    color: #d9534f;
-    background: #fff5f5;
+.chat-button:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
-.account-button.danger:hover {
-    background: #fce8e8;
+.chat-button:hover {
+    transform: translateY(-3px);
 }
 
-/* 상담 이력 */
-.session-history ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.chat-button.save {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
 }
 
-.session-history li {
-    background: #fafafa;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border: 1px solid #eee;
+.chat-button.save:hover {
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
 }
 
-.session-history .history-date {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
+.chat-button.cancel {
+    background: #e5e7eb;
+    color: #4b5563;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-.session-history .history-summary {
-    font-size: 0.95rem;
-    color: #666;
+.chat-button.cancel:hover {
+    background: #d1d5db;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
 }
 
-/* ====== UserProfile 2열 레이아웃 ====== */
+/* ========== Layout ========== */
 .profile-two-col {
-    max-width: 1000px; /* 컨테이너는 그대로, 우측 패널 고려해 약간 확장해도 OK */
+    max-width: 1200px;
 }
 
 .profile-main {
     display: grid;
-    grid-template-columns: 1fr 360px; /* 좌측 정보 / 우측 세션 */
-    gap: 16px;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+    align-items: start;
 }
 
 .profile-left {
@@ -304,44 +452,34 @@ body,
 
 .profile-right {
     position: sticky;
-    top: 16px;
+    top: 24px;
     align-self: start;
 }
 
-/* ====== Session List Card ====== */
+/* ========== Session List ========== */
 .session-list-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    padding: 1rem;
-    border: 1px solid #eee;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .session-list-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: .5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
 }
 
 .session-list-head h4 {
     margin: 0;
+    color: #2d3748;
+    font-size: 1.3rem;
 }
 
 .session-list-head .muted {
-    color: #888;
-    font-size: .9rem;
-}
-
-.list-skel {
-    padding: .75rem;
-    color: #666;
-}
-
-.list-empty {
-    padding: 1rem;
-    color: #888;
-    text-align: center;
+    color: #718096;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .session-list {
@@ -350,246 +488,458 @@ body,
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: .75rem;
+    gap: 16px;
 }
 
 .session-item {
     display: grid;
-    grid-template-columns: 1fr 92px; /* 텍스트 / 그래프 */
-    gap: .75rem;
-    padding: .75rem;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    background: #fafafa;
+    grid-template-columns: 1fr 100px;
+    gap: 16px;
+    padding: 1.25rem;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.session-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.session-item:hover::before {
+    opacity: 1;
 }
 
 .session-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+    transform: translateY(-4px);
+    border-color: #667eea;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .item-top {
     min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .item-title-row {
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .item-date {
-    font-weight: 600;
+    font-weight: 800;
+    color: #2d3748;
+    font-size: 1rem;
 }
 
 .item-summary {
-    margin: .25rem 0 0;
-    color: #555;
+    margin: 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.5;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
-.risk-badge {
-    font-size: .75rem;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-}
-
-.risk-badge.ok {
-    background: #eafaf1;
-    color: #0b7a3a;
-    border-color: #caeed7;
-}
-
-.risk-badge.warn {
-    background: #fff6e6;
-    color: #a66300;
-    border-color: #ffe0b3;
-}
-
-.risk-badge.danger {
-    background: #ffecec;
-    color: #b00020;
-    border-color: #ffc9c9;
-}
-
 .item-graph {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
 }
 
-/* ====== Triangle Graph ====== */
-.triangle-graph {
+/* ========== Risk Badges ========== */
+.risk-badge {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 2px solid;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.risk-badge.ok {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.risk-badge.warn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    border-color: #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.risk-badge.danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* ========== Empty States ========== */
+.list-skel,
+.list-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #718096;
+    font-style: italic;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+}
+
+/* ========== Pagination ========== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    gap: 8px;
+}
+
+.pagination button {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    font-weight: 700;
+    background: #ffffff;
+    color: #4a5568;
+    transition: all 0.3s ease;
+    min-width: 44px;
+}
+
+.pagination button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: #667eea;
+    color: #667eea;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+}
+
+.pagination button.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #ffffff;
+    border-color: #667eea;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========== Graphs - 완성된 부분 ========== */
+.triangle-graph,
+.polygon-graph {
     display: block;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+    width: 90px;
+    height: 90px;
 }
 
 .tri-outline {
     fill: none;
-    stroke: #d9e1f2;
-    stroke-width: 2;
+    stroke: #cbd5e0;
+    stroke-width: 2.5;
 }
 
 .tri-grid {
     fill: none;
-    stroke: #eef2ff;
+    stroke: #e2e8f0;
     stroke-width: 1;
 }
 
 .tri-dot {
-    fill: #a18cd1;
+    fill: #667eea;
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+    r: 3.5;
 }
 
-.tri-dot.halo {
-    fill: rgba(161, 140, 209, .25);
+.tri-area {
+    fill: rgba(102, 126, 234, 0.3);
+    stroke: #667eea;
+    stroke-width: 2.5;
 }
 
 .tri-label {
-    fill: #444;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.tri-label.small {
-    font-size: 10px;
+    fill: #2d3748;
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
 }
 
 .tri-pct {
-    fill: #666;
+    fill: #4a5568;
+    font-size: 10px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+/* Polygon Graph */
+.polygon-graph.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: 12px;
+    color: #718096;
     font-size: 11px;
+    font-weight: 500;
+    width: 90px;
+    height: 90px;
 }
 
-.tri-pct.small {
+.poly-outline {
+    fill: none;
+    stroke: #cbd5e0;
+    stroke-width: 1.5;
+}
+
+.poly-axis {
+    stroke: #e2e8f0;
+    stroke-width: 0.8;
+    opacity: 0.7;
+}
+
+.poly-area {
+    fill: rgba(102, 126, 234, 0.25);
+    stroke: #667eea;
+    stroke-width: 2;
+}
+
+.poly-point {
+    fill: #667eea;
+    stroke: #ffffff;
+    stroke-width: 1.5;
+    r: 3;
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+}
+
+.poly-center {
+    fill: #718096;
+    r: 1.5;
+}
+
+.poly-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: #2d3748;
+    text-anchor: middle;
+}
+
+.poly-value {
     font-size: 9px;
+    font-weight: 700;
+    fill: #667eea;
+    text-anchor: middle;
 }
 
-/* ====== Modal ====== */
+/* ========== Modal ========== */
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .35);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-card {
-    width: min(720px, 92vw);
-    max-height: 86vh;
+    width: min(800px, 92vw);
+    max-height: 90vh;
     overflow: auto;
-    background: #fff;
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(32px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .modal-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.modal-head h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 800;
 }
 
 .modal-close {
-    background: transparent;
+    background: #f1f5f9;
     border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     font-size: 18px;
     cursor: pointer;
+    color: #4a5568;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+    transform: rotate(90deg);
 }
 
 .modal-meta {
     display: grid;
-    gap: 6px;
-    margin: 10px 0 16px;
-    color: #444;
+    gap: 12px;
+    margin: 20px 0;
+    color: #4a5568;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 .modal-graph {
     display: flex;
     justify-content: center;
-    margin: 8px 0 16px;
+    margin: 24px 0;
+}
+
+.modal-graph .triangle-graph,
+.modal-graph .polygon-graph {
+    width: 200px;
+    height: 200px;
 }
 
 .modal-notes h5 {
-    margin: .25rem 0 .5rem;
+    margin: 20px 0 8px;
+    color: #2d3748;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
-.tri-area {
-    fill: rgba(161, 140, 209, 0.35); /* 보라 반투명 영역 */
-    stroke: #a18cd1;
-    stroke-width: 2;
+.modal-notes p {
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 8px 0;
 }
 
-.tri-outline {
-    fill: none;
-    stroke: #d9e1f2;
-    stroke-width: 2;
+/* ========== Responsive Design ========== */
+@media (max-width: 1024px) {
+    .profile-card {
+        grid-template-columns: 100px 1fr;
+        row-gap: 16px;
+        padding: 2rem;
+    }
+
+    .profile-actions-top {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+
+    .profile-main {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .profile-right {
+        position: static;
+        order: -1;
+    }
+
+    .user-profile {
+        padding: 24px 16px;
+        gap: 24px;
+    }
 }
 
-.polygon-graph {
-    display: block;
-}
+@media (max-width: 768px) {
+    .profile-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 1.5rem;
+    }
 
-.polygon-graph.empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-    border-radius: 8px;
-    color: #6c757d;
-    font-size: 12px;
-}
+    .profile-card .avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+        margin: 0 auto;
+    }
 
-.poly-outline {
-    fill: none;
-    stroke: #dee2e6;
-    stroke-width: 1;
-}
+    .profile-field {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
 
-.poly-axis {
-    stroke: #e9ecef;
-    stroke-width: 0.5;
-    opacity: 0.6;
-}
+    .profile-field span {
+        width: 100%;
+        text-align: center;
+    }
 
-.poly-area {
-    fill: rgba(0, 123, 255, 0.2);
-    stroke: rgba(0, 123, 255, 0.6);
-    stroke-width: 1.5;
-}
+    .session-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 
-.poly-point {
-    fill: #007bff;
-    stroke: white;
-    stroke-width: 1;
-}
+    .item-graph {
+        justify-content: flex-start;
+        margin-top: 8px;
+    }
 
-.poly-center {
-    fill: #6c757d;
-}
-
-.poly-label {
-    font-size: 11px;
-    font-weight: 500;
-    fill: #495057;
-}
-
-.poly-label.small {
-    font-size: 9px;
-}
-
-.poly-value {
-    font-size: 10px;
-    font-weight: 600;
-    fill: #007bff;
-}
-
-.poly-value.small {
-    font-size: 8px;
+    .triangle-graph,
+    .polygon-graph {
+        width: 70px;
+        height: 70px;
+    }
 }
