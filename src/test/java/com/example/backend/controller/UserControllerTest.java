@@ -64,7 +64,7 @@ class UserControllerTest {
 	@DisplayName("POST /api/users/register → 201 Created + Profile(JSON)")
 	void register_created() throws Exception {
 		Profile profile = Profile.builder()
-			.id(1L).email("kim@ex.com").nickname("KIM").build();
+			.userId(1L).email("kim@ex.com").nickname("KIM").build();
 		given(userService.register(any())).willReturn(profile);
 
 		mvc.perform(post("/api/users/register")
@@ -146,7 +146,7 @@ class UserControllerTest {
 	void account_ok() throws Exception {
 		given(securityUtil.requirePrincipalEmail(any())).willReturn("me@ex.com");
 		Profile profile = Profile.builder()
-			.id(10L).email("me@ex.com").nickname("ME").build();
+			.userId(10L).email("me@ex.com").nickname("ME").build();
 		given(userService.getUserByEmail("me@ex.com")).willReturn(Optional.of(profile));
 
 		mvc.perform(get("/api/users/account")
