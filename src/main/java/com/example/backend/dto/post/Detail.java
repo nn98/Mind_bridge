@@ -1,11 +1,11 @@
 package com.example.backend.dto.post;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class Detail {
 
     private Long id;
+    private String title;
     private String content;
     private String userEmail;
     private String userNickname;

@@ -8,8 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -32,7 +30,6 @@ import lombok.Setter;
 public class ChatSessionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // BIGINT AUTO_INCREMENT 기대
     @Column(name = "session_id")
     private String sessionId;  // id → sessionId로 변경
 
