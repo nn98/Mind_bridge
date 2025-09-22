@@ -16,58 +16,78 @@ import com.example.backend.entity.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
 
+    // === 기본 조회 ===
     Optional<UserEntity> findByEmail(String email);
-
     Optional<UserEntity> findByNickname(String nickname);
-
     Optional<UserEntity> findByPhoneNumberAndNickname(String phoneNumber, String nickname);
 
+    // === 중복 확인 ===
     boolean existsByEmail(String email);
-
     boolean existsByNickname(String nickname);
 
+    // === 통계 쿼리 ===
+    long countByRole(String role);
+
+    // === 최근 사용자 조회 ===
+    List<UserEntity> findTop10ByOrderByCreatedAtDesc();
+
+    @Query("SELECT u FROM UserEntity u ORDER BY u.createdAt DESC LIMIT :limit")
+    List<UserEntity> findTopNByOrderByCreatedAtDesc(@Param("limit") int limit);
+
+    // === 로그인 시간 업데이트 ===
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserEntity u SET u.lastLoginAt = CURRENT_TIMESTAMP WHERE u.email = :email")
+    int touchLastLogin(@Param("email") String email);
+
+    // === 통계용 인터페이스 ===
     interface GenderCount {
         String getGender();
         Long getCnt();
     }
+
     interface AgeBucketCount {
         String getBucket();
         Long getCnt();
     }
 
-    @Modifying
-    @Transactional
-    @Query("update UserEntity u set u.lastLoginAt = CURRENT_TIMESTAMP where u.email = :email")
-    int touchLastLogin(@Param("email") String email);
-
-    @Query("select u.gender as gender, count(u.id) as cnt " +
-        "from UserEntity u where u.gender is not null group by u.gender")
+    // === 성별 통계 ===
+    @Query("SELECT u.gender as gender, count(u.userId) as cnt " +
+        "FROM UserEntity u WHERE u.gender IS NOT NULL GROUP BY u.gender")
     List<GenderCount> countByGenderGroup();
 
+    // === 연령대 통계 ===
     @Query("""
-       select 
-         case 
-           when u.age between 10 and 19 then '10s'
-           when u.age between 20 and 29 then '20s'
-           when u.age between 30 and 39 then '30s'
-           when u.age between 40 and 49 then '40s'
-           when u.age between 50 and 59 then '50s'
-           when u.age >= 60 then '60s'
-           else 'Unknown'
-         end as bucket,
-         count(u.id) as cnt
-       from UserEntity u
-       group by 
-         case 
-           when u.age between 10 and 19 then '10s'
-           when u.age between 20 and 29 then '20s'
-           when u.age between 30 and 39 then '30s'
-           when u.age between 40 and 49 then '40s'
-           when u.age between 50 and 59 then '50s'
-           when u.age >= 60 then '60s'
-           else 'Unknown'
-         end
+       SELECT 
+         CASE 
+           WHEN u.age BETWEEN 10 AND 19 THEN '10s'
+           WHEN u.age BETWEEN 20 AND 29 THEN '20s'
+           WHEN u.age BETWEEN 30 AND 39 THEN '30s'
+           WHEN u.age BETWEEN 40 AND 49 THEN '40s'
+           WHEN u.age BETWEEN 50 AND 59 THEN '50s'
+           WHEN u.age >= 60 THEN '60s'
+           ELSE 'Unknown'
+         END as bucket,
+         count(u.userId) as cnt
+       FROM UserEntity u
+       GROUP BY 
+         CASE 
+           WHEN u.age BETWEEN 10 AND 19 THEN '10s'
+           WHEN u.age BETWEEN 20 AND 29 THEN '20s'
+           WHEN u.age BETWEEN 30 AND 39 THEN '30s'
+           WHEN u.age BETWEEN 40 AND 49 THEN '40s'
+           WHEN u.age BETWEEN 50 AND 59 THEN '50s'
+           WHEN u.age >= 60 THEN '60s'
+           ELSE 'Unknown'
+         END
        """)
     List<AgeBucketCount> countByAgeBucketGroup();
-}
 
+    // === 소셜 사용자 조회 ===
+    @Query("SELECT u FROM UserEntity u WHERE u.provider = :provider AND u.socialId = :socialId")
+    Optional<UserEntity> findByProviderAndSocialId(@Param("provider") String provider, @Param("socialId") String socialId);
+
+    // === 활성/비활성 사용자 조회 ===
+    @Query("SELECT u FROM UserEntity u WHERE u.lastLoginAt > :since ORDER BY u.lastLoginAt DESC")
+    List<UserEntity> findActiveUsersSince(@Param("since") java.time.LocalDateTime since);
+}
