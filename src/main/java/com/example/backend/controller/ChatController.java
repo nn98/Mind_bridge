@@ -1,7 +1,6 @@
 package com.example.backend.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.dto.chat.ChatSessionDto;
+import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.security.SecurityUtil;
@@ -36,9 +36,9 @@ public class ChatController {
 
     // 저장
     @PostMapping("/session/save")
-    public ResponseEntity<ChatSessionEntity> receiveAnalysis(@RequestBody Map<String, Object> payload) {
-        log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", payload);
-        ChatSessionEntity saved = chatService.saveAnalysis(payload);
+    public ResponseEntity<ChatSessionEntity> receiveAnalysis(@RequestBody SessionRequest sessionRequest) {
+        log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", sessionRequest);
+        ChatSessionEntity saved = chatService.saveSession(sessionRequest);
         log.info("💾 [Spring] DB 저장 완료: {}", saved.getSessionId());
         dailyMetricsService.increaseChatCount();
         return ResponseEntity.ok(saved);
