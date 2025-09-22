@@ -1,52 +1,69 @@
 /* ========================================
-   HelpPage CSS - 완전히 새로운 모던 디자인
-   네오모피즘 + 글래스모피즘 스타일
+   HelpPage CSS - 모던 & 깔끔한 디자인
 ======================================== */
 
-/* CSS 변수 - Aurora 테마 */
+/* CSS 변수 */
 :root {
-    --bg-primary: #f6f7fb;
+    --bg-primary: #f6f3ff;
     --bg-secondary: #ffffff;
     --glass-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(139, 92, 246, 0.2);
-    --glass-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+    --glass-border: rgba(161, 140, 209, 0.25);
 
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-accent: #8b5cf6;
+    --text-primary: #2d1b69;
+    --text-secondary: #6366f1;
+    --text-accent: #7c3aed;
+    --text-muted: #a78bfa;
 
-    --aurora-purple: #8b5cf6;
-    --aurora-mint: #22d3ee;
-    --aurora-green: #34d399;
-    --aurora-pink: #ec4899;
+    --accent-primary: #7c3aed;
+    --accent-secondary: #8b5cf6;
+    --accent-light: #a78bfa;
+    --accent-pink: #d946ef;
 
-    --gradient-1: linear-gradient(135deg, var(--aurora-purple) 0%, var(--aurora-mint) 100%);
-    --gradient-2: linear-gradient(45deg, var(--aurora-pink) 0%, var(--aurora-green) 100%);
-    --gradient-3: linear-gradient(225deg, var(--aurora-mint) 0%, var(--aurora-purple) 100%);
+    --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #c2b2ff 100%);
 
-    --border-radius: 24px;
-    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 다크모드 지원 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1e1b4b;
+        --bg-secondary: #312e81;
+        --glass-bg: rgba(49, 46, 129, 0.9);
+        --glass-border: rgba(161, 140, 209, 0.2);
+
+        --text-primary: #f1f5f9;
+        --text-secondary: #c2b2ff;
+        --text-accent: #a78bfa;
+        --text-muted: #8b5cf6;
+    }
 }
 
 /* ===================
-   전체 레이아웃 - Aurora 라이트 테마
+   전체 레이아웃
 =================== */
 .help-page {
     min-height: 100vh;
-    padding: 3rem 2rem;
-    background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(52, 211, 153, 0.06) 0%, transparent 50%),
+    padding: 2rem;
+    background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
     var(--bg-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: var(--text-primary);
-    overflow-x: hidden;
+    line-height: 1.6;
 }
 
 .help-page > * {
     max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
 }
 
 /* ===================
@@ -57,224 +74,157 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    box-shadow: var(--glass-shadow);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
     margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
     transition: var(--transition);
 }
 
-.help-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--gradient-1);
-    opacity: 0.8;
-}
-
 .help-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(124, 58, 237, 0.4);
 }
 
 .help-card > * {
-    padding: 2.5rem;
+    padding: 2rem;
     position: relative;
     z-index: 1;
 }
 
 /* ===================
-   히어로 섹션 - 네온 효과
+   히어로 섹션
 =================== */
+.hero {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
 .hero .help-title {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    margin: 0 0 1rem;
-    background: var(--gradient-1);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.5rem;
+    background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-align: center;
-    line-height: 1.1;
-    position: relative;
-    text-shadow: 0 0 30px rgba(187, 134, 252, 0.5);
-}
-
-.hero .help-title::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 4px;
-    background: var(--gradient-1);
-    border-radius: 2px;
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    line-height: 1.2;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .hero .help-subtitle {
     font-size: 1.125rem;
     color: var(--text-secondary);
-    text-align: center;
-    margin: 0 0 3rem;
+    margin: 0 0 2.5rem;
     font-weight: 400;
-    line-height: 1.6;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 /* ===================
-   네온 버튼 그리드
+   액션 버튼
 =================== */
 .help-actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1rem;
     margin: 2rem 0;
 }
 
 .help-btn {
-    position: relative;
-    padding: 1rem 2.5rem;
-    background: transparent;
-    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1.75rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--glass-border);
     border-radius: 50px;
     color: var(--text-primary);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-decoration: none;
     cursor: pointer;
     transition: var(--transition);
-    overflow: hidden;
-    min-width: 200px;
-    text-align: center;
-}
-
-.help-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 2px;
-    background: var(--gradient-1);
-    border-radius: inherit;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-}
-
-.help-btn::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    background: var(--bg-secondary);
-    border-radius: calc(var(--border-radius) - 2px);
-    transition: var(--transition);
-    z-index: -1;
-}
-
-.help-btn:nth-child(even)::before {
-    background: var(--gradient-2);
+    min-width: 140px;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+    word-break: keep-all;
 }
 
 .help-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    text-shadow: 0 0 20px currentColor;
-    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
-.help-btn:hover::after {
-    background: rgba(139, 92, 246, 0.1);
+.help-btn:nth-child(2):hover {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+.help-btn:nth-child(3):hover {
+    background: var(--accent-light);
+    border-color: var(--accent-light);
 }
 
 /* ===================
-   섹션 타이틀 - 홀로그램 효과
+   섹션 타이틀
 =================== */
 .help-section-title {
     font-size: 1.75rem;
     font-weight: 700;
     margin: 0 0 2rem;
     text-align: center;
+    color: var(--text-primary);
     position: relative;
-    color: var(--text-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.help-section-title::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-            90deg,
-            transparent 0%,
-            var(--aurora-mint) 25%,
-            var(--aurora-purple) 50%,
-            var(--aurora-mint) 75%,
-            transparent 100%
-    );
-    z-index: -1;
+    padding-bottom: 1rem;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .help-section-title::after {
-    content: attr(data-text);
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    background: var(--bg-primary);
-    padding: 0 2rem;
-    margin: 0 auto;
-    display: block;
-    width: fit-content;
-    margin-left: 50%;
+    bottom: 0;
+    left: 50%;
     transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
 }
 
 /* ===================
-   Aurora 아코디언
+   아코디언 (FAQ)
 =================== */
 .help-details {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    border-radius: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
     margin: 1rem 0;
     overflow: hidden;
     transition: var(--transition);
-    position: relative;
-}
-
-.help-details::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.help-details:hover::before {
-    left: 100%;
+    box-shadow: var(--shadow-sm);
 }
 
 .help-details:hover {
-    border-color: var(--aurora-purple);
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
-    transform: translateX(10px);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .help-details summary {
-    padding: 1.25rem;
+    padding: 1.5rem;
     cursor: pointer;
     font-weight: 600;
     list-style: none;
@@ -282,31 +232,47 @@
     color: var(--text-primary);
     transition: var(--transition);
     border-left: 4px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
-.help-details summary::before {
-    content: '▶';
-    position: absolute;
-    right: 1.25rem;
-    color: var(--aurora-purple);
+.help-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.help-details summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    color: var(--accent-primary);
     transition: var(--transition);
+    font-weight: 300;
 }
 
-.help-details[open] summary::before {
-    transform: rotate(90deg);
+.help-details[open] summary::after {
+    transform: rotate(45deg);
+    color: var(--accent-secondary);
 }
 
 .help-details[open] summary {
     color: var(--text-accent);
-    border-left-color: var(--aurora-purple);
-    background: rgba(139, 92, 246, 0.05);
+    border-left-color: var(--accent-primary);
+    background: rgba(124, 58, 237, 0.05);
 }
 
 .help-details div {
-    padding: 0 1.25rem 1.25rem;
+    padding: 0 1.5rem 1.5rem;
     color: var(--text-secondary);
     line-height: 1.8;
-    animation: slideDown 0.3s ease;
+    animation: slideDown 0.3s ease-out;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 @keyframes slideDown {
@@ -321,11 +287,11 @@
 }
 
 /* ===================
-   문의하기 - 비대칭 레이아웃
+   연락처 섹션
 =================== */
 .help-contact {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: 1fr 400px;
     gap: 2rem;
     align-items: start;
 }
@@ -335,62 +301,42 @@
     background: var(--glass-bg);
     backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-lg);
     padding: 2rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.help-contact-form::before,
-.help-contact-info::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(from 0deg, transparent, var(--aurora-purple), transparent);
-    animation: rotate 4s linear infinite;
-    opacity: 0.15;
-    z-index: -1;
-}
-
-@keyframes rotate {
-    to {
-        transform: rotate(360deg);
-    }
+    box-shadow: var(--shadow-lg);
 }
 
 .help-contact-info h3 {
     margin: 0 0 1.5rem;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-accent);
+    color: var(--text-primary);
 }
 
 /* ===================
-   연락처 정보 - Aurora 스타일
+   연락처 정보
 =================== */
 .info-row {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    border-left: 3px solid var(--aurora-mint);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--glass-border);
     transition: var(--transition);
 }
 
 .info-row:hover {
-    background: rgba(34, 211, 238, 0.1);
-    transform: translateX(8px);
+    background: rgba(124, 58, 237, 0.08);
+    border-color: var(--accent-primary);
+    transform: translateX(5px);
 }
 
 .icon {
-    font-size: 1.5rem;
-    color: var(--aurora-mint);
+    font-size: 1.25rem;
+    color: var(--accent-primary);
     min-width: 2rem;
     text-align: center;
 }
@@ -399,6 +345,7 @@
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 0.25rem;
+    font-size: 0.95rem;
 }
 
 .sub-text {
@@ -410,7 +357,7 @@
 .social-icons {
     display: flex;
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     justify-content: center;
 }
 
@@ -418,21 +365,20 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    border: 2px solid var(--aurora-purple);
+    border: 2px solid var(--glass-border);
     padding: 0.25rem;
     transition: var(--transition);
-    filter: grayscale(0.3) brightness(1.1);
+    background: var(--bg-secondary);
 }
 
 .social-icons img:hover {
-    transform: scale(1.2) rotate(10deg);
-    border-color: var(--aurora-mint);
-    filter: grayscale(0);
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+    transform: translateY(-3px);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 /* ===================
-   Aurora 모달
+   모달
 =================== */
 .hp-modal-backdrop {
     position: fixed;
@@ -441,29 +387,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(139, 92, 246, 0.2);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
     padding: 2rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .hp-modal {
     width: 100%;
-    max-width: 900px;
+    max-width: 800px;
     max-height: calc(100vh - 4rem);
     background: var(--bg-secondary);
-    border: 2px solid var(--aurora-purple);
-    border-radius: var(--border-radius);
-    box-shadow: 0 0 50px rgba(139, 92, 246, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
     overflow: hidden;
     position: relative;
-    animation: modalSlideIn 0.4s ease-out;
+    animation: modalSlideIn 0.3s ease-out;
 }
 
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: scale(0.9) translateY(20px);
+        transform: scale(0.95) translateY(20px);
     }
     to {
         opacity: 1;
@@ -471,37 +426,25 @@
     }
 }
 
-.hp-modal::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--gradient-1);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-}
-
 .hp-modal-title {
     padding: 2rem 4rem 1rem 2rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-accent);
+    color: var(--text-primary);
     margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .hp-modal-close {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    width: 3rem;
-    height: 3rem;
-    border: 2px solid var(--aurora-pink);
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--glass-border);
     border-radius: 50%;
-    background: transparent;
-    color: var(--aurora-pink);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 1.25rem;
     transition: var(--transition);
@@ -511,18 +454,16 @@
 }
 
 .hp-modal-close:hover {
-    background: var(--aurora-pink);
+    background: var(--accent-pink);
     color: white;
-    transform: rotate(90deg);
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+    border-color: var(--accent-pink);
+    transform: scale(1.1);
 }
 
 .hp-modal-content {
-    padding: 0 2rem 2rem;
+    padding: 1rem 2rem 2rem;
     max-height: calc(100vh - 12rem);
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--neon-cyan) transparent;
 }
 
 .hp-modal-content::-webkit-scrollbar {
@@ -534,30 +475,44 @@
 }
 
 .hp-modal-content::-webkit-scrollbar-thumb {
-    background: var(--aurora-purple);
+    background: var(--accent-primary);
     border-radius: 3px;
 }
 
 .hp-pre {
     white-space: pre-wrap;
     word-break: break-word;
-    line-height: 1.8;
+    line-height: 1.6;
     font-size: 0.875rem;
     color: var(--text-secondary);
     margin: 0;
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    background: rgba(139, 92, 246, 0.05);
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    background: rgba(124, 58, 237, 0.06);
     padding: 1.5rem;
-    border-radius: 12px;
-    border-left: 4px solid var(--aurora-purple);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--glass-border);
 }
 
 /* ===================
-   반응형 & 애니메이션
+   반응형 디자인
 =================== */
 @media (max-width: 768px) {
     .help-page {
+        padding: 1rem;
+    }
+
+    .hero {
         padding: 2rem 1rem;
+    }
+
+    .hero .help-title {
+        font-size: clamp(1.75rem, 6vw, 2.5rem);
+        margin-bottom: 1rem;
+    }
+
+    .hero .help-subtitle {
+        font-size: 1rem;
+        margin-bottom: 2rem;
     }
 
     .help-contact {
@@ -567,35 +522,78 @@
 
     .help-actions {
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    .hero .help-title {
-        font-size: clamp(2rem, 8vw, 3rem);
+    .help-btn {
+        min-width: auto;
+        font-size: 0.85rem;
+        padding: 0.875rem 1.5rem;
     }
 
     .help-card > * {
         padding: 1.5rem;
     }
+
+    .help-contact-form,
+    .help-contact-info {
+        padding: 1.5rem;
+    }
+
+    .help-section-title {
+        font-size: 1.5rem;
+    }
 }
 
 @media (max-width: 480px) {
+    .hp-modal-backdrop {
+        padding: 1rem;
+    }
+
     .hp-modal-title {
-        padding-right: 3rem;
+        padding: 1.5rem 3rem 1rem 1.5rem;
         font-size: 1.25rem;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+
+    .hp-modal-content {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+
+    .help-details summary,
+    .help-details div {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .hero .help-title {
+        font-size: clamp(1.5rem, 7vw, 2rem);
+    }
+
+    .hero .help-subtitle {
+        font-size: 0.9rem;
     }
 
     .help-btn {
-        min-width: 180px;
-        padding: 0.875rem 2rem;
+        font-size: 0.8rem;
+        padding: 0.75rem 1.25rem;
     }
 }
 
-/* 스크롤 애니메이션 */
+/* ===================
+   스크롤 애니메이션
+=================== */
 @media (prefers-reduced-motion: no-preference) {
     .help-card {
-        animation: fadeInUp 0.6s ease-out;
-        animation-fill-mode: both;
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .help-card:nth-child(1) {
+        animation-delay: 0s;
     }
 
     .help-card:nth-child(2) {
@@ -614,10 +612,43 @@
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ===================
+   접근성 개선
+=================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for accessibility */
+.help-btn:focus-visible,
+.help-details summary:focus-visible,
+.hp-modal-close:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --glass-bg: var(--bg-secondary);
+        --glass-border: var(--text-secondary);
+    }
+
+    .help-card {
+        border-width: 2px;
     }
 }

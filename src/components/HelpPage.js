@@ -181,10 +181,6 @@ export default function HelpPage() {
             {/* 문의하기 */}
             <section className="help-card">
                 <h2 className="help-section-title">문의하기</h2>
-                <p className="help-subtitle">
-                    서비스 이용 중 불편 사항이나 개선 제안을 보내주세요.
-                </p>
-
                 <div className="help-contact">
                     <div className="help-contact-form">
                         <ContactForm/>
