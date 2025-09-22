@@ -1,5 +1,7 @@
 package com.example.backend.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,13 +39,12 @@ public class UserServiceImpl implements UserService {
 	private final RecentAuthenticationService recentAuthenticationService;
 
 	// === 사용자 등록 ===
-
 	@Override
 	public Profile register(RegistrationRequest request) {
-		// 1) 중복 검사
+		// 1) 첫 번째 중복 검사
 		validateDuplicates(request.getEmail(), request.getNickname());
 
-		// 2) 데이터 정규화
+		// 2) 데이터 정규화 (일부만 수행, 주요한 것은 mapper에서)
 		normalizeRegistrationRequest(request);
 
 		// 3) 엔티티 생성 및 비밀번호 설정
@@ -51,7 +52,15 @@ public class UserServiceImpl implements UserService {
 		setEncodedPassword(user, request.getPassword());
 		setTermsFields(user, request);
 
-		// 4) 저장
+		// 4) ✅ 두 번째 중복 검사 (동시성 대응) - 정규화된 값으로 재검사
+		if (userRepository.existsByEmail(user.getEmail())) {
+			throw new ConflictException("이미 사용중인 이메일입니다.", "DUPLICATE_EMAIL", "email");
+		}
+		if (userRepository.existsByNickname(user.getNickname())) {
+			throw new ConflictException("이미 사용중인 닉네임입니다.", "DUPLICATE_NICKNAME", "nickname");
+		}
+
+		// 5) 저장
 		UserEntity saved = userRepository.save(user);
 		log.info("새 사용자 가입 완료: {}", saved.getEmail());
 
@@ -59,7 +68,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// === 사용자 정보 수정 ===
-
 	@Override
 	public Profile updateUser(String email, UpdateRequest request) {
 		UserEntity user = findUserByEmail(email);
@@ -73,29 +81,41 @@ public class UserServiceImpl implements UserService {
 
 		// 매퍼를 통한 부분 업데이트
 		userMapper.applyUpdate(user, request);
-
 		UserEntity updated = userRepository.save(user);
-		log.info("사용자 정보 업데이트 완료: {}", email);
 
+		log.info("사용자 정보 업데이트 완료: {}", email);
 		return userMapper.toProfile(updated);
 	}
 
 	// === 사용자 조회 ===
-
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserByEmail(String email) {
+		if (email == null || email.isBlank()) {
+			return Optional.empty();
+		}
 		return userRepository.findByEmail(email).map(userMapper::toProfile);
 	}
 
-	// @Override
-	// @Transactional(readOnly = true)
-	// public Optional<Summary> getUserByNickname(String nickname) {
-	// 	return userRepository.findByNickname(nickname).map(userMapper::toSummary);
-	// }
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Profile> getUserById(Long userId) {
+		if (userId == null || userId <= 0) {
+			return Optional.empty();
+		}
+		return userRepository.findById(userId).map(userMapper::toProfile);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Profile> getUserByNickname(String nickname) {
+		if (nickname == null || nickname.isBlank()) {
+			return Optional.empty();
+		}
+		return userRepository.findByNickname(nickname).map(userMapper::toProfile);
+	}
 
 	// === 사용자 삭제 ===
-
 	@Override
 	public void deleteUser(String email) {
 		UserEntity user = findUserByEmail(email);
@@ -107,33 +127,46 @@ public class UserServiceImpl implements UserService {
 	public void deleteAccountWithReAuth(String email, String currentPassword) {
 		UserEntity user = findUserByEmail(email);
 		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
-
 		userRepository.delete(user);
 		log.info("재인증 후 계정 삭제 완료: {}", email);
 	}
 
-	// === 가용성 확인 ===
-
 	@Override
 	@Transactional(readOnly = true)
 	public boolean isEmailAvailable(String email) {
-		return !userRepository.existsByEmail(email);
+		if (email == null || email.isBlank()) {
+			return false;
+		}
+		// ✅ UserMapper 사용으로 변경
+		String normalizedEmail = userMapper.normalizeEmail(email);
+		return !userRepository.existsByEmail(normalizedEmail);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public boolean isNicknameAvailable(String nickname) {
-		return !userRepository.existsByNickname(nickname);
+		if (nickname == null || nickname.isBlank()) {
+			return false;
+		}
+		// ✅ UserMapper 사용으로 변경
+		String normalizedNickname = userMapper.normalizeString(nickname);
+		if (normalizedNickname == null || normalizedNickname.isBlank()) {
+			return false;
+		}
+		return !userRepository.existsByNickname(normalizedNickname);
 	}
 
 	// === 비밀번호 관리 ===
-
 	@Override
 	public void changePassword(String email, ChangePasswordRequest request) {
 		UserEntity user = findUserByEmail(email);
 
 		if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
 			throw new BadRequestException("현재 비밀번호가 일치하지 않습니다.", "INVALID_CURRENT_PASSWORD", "currentPassword");
+		}
+
+		if (!request.getPassword().equals(request.getConfirmPassword())) {
+			throw new BadRequestException("비밀번호와 확인 비밀번호가 일치하지 않습니다.", "PASSWORD_MISMATCH", "confirmPassword");
 		}
 
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -146,14 +179,28 @@ public class UserServiceImpl implements UserService {
 	public void changePasswordWithReAuth(String email, String currentPassword, String newPassword) {
 		UserEntity user = findUserByEmail(email);
 		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+		log.info("재인증 후 비밀번호 변경 완료: {}", email);
+	}
+
+	@Override
+	public void changePasswordWithCurrentCheck(String email, String currentPassword, String newPassword, String confirmPassword) {
+		UserEntity user = findUserByEmail(email);
+
+		if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+			throw new BadRequestException("현재 비밀번호가 일치하지 않습니다.", "INVALID_CURRENT_PASSWORD", "currentPassword");
+		}
+
+		if (!newPassword.equals(confirmPassword)) {
+			throw new BadRequestException("비밀번호와 확인 비밀번호가 일치하지 않습니다.", "PASSWORD_MISMATCH", "confirmPassword");
+		}
 
 		user.setPassword(passwordEncoder.encode(newPassword));
 		userRepository.save(user);
 
-		log.info("재인증 후 비밀번호 변경 완료: {}", email);
+		log.info("현재 비밀번호 확인 후 변경 완료: {}", email);
 	}
-
-	// === 소셜 사용자 관리 ===
 
 	@Override
 	public UserEntity findOrCreateSocialUser(String email, String nickname, String provider) {
@@ -161,44 +208,91 @@ public class UserServiceImpl implements UserService {
 			.orElseGet(() -> createSocialUser(email, nickname, provider));
 	}
 
+	// === 통계 및 유틸리티 ===
 	@Override
-	public void changePasswordWithCurrentCheck(String email, String currentPassword, String newPassword,
-		String confirmPassword) {
+	@Transactional(readOnly = true)
+	public long getUserCount() {
+		return userRepository.count();
+	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public long getUserCountByRole(String role) {
+		if (role == null || role.isBlank()) {
+			return 0L;
+		}
+		return userRepository.countByRole(role);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Profile> getRecentUsers() {
+		return userRepository.findTop10ByOrderByCreatedAtDesc()
+			.stream()
+			.map(userMapper::toProfile)
+			.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Profile> getRecentUsers(int limit) {
+		if (limit <= 0 || limit > 100) {
+			throw new BadRequestException("조회 개수는 1~100 사이여야 합니다.", "INVALID_LIMIT", "limit");
+		}
+
+		return userRepository.findTopNByOrderByCreatedAtDesc(limit)
+			.stream()
+			.map(userMapper::toProfile)
+			.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Profile> findUserByPhoneAndNickname(String phoneNumber, String nickname) {
+		if (phoneNumber == null || phoneNumber.isBlank() || nickname == null || nickname.isBlank()) {
+			return Optional.empty();
+		}
+		return userRepository.findByPhoneNumberAndNickname(phoneNumber, nickname)
+			.map(userMapper::toProfile);
+	}
+
+	@Override
+	public void updateLastLoginTime(String email) {
+		int updated = userRepository.touchLastLogin(email);
+		if (updated > 0) {
+			log.debug("마지막 로그인 시간 업데이트: {}", email);
+		}
 	}
 
 	// === Private Helper Methods ===
-
 	private void validateDuplicates(String email, String nickname) {
-		if (userRepository.existsByEmail(email)) {
+		String normalizedEmail = email != null ? userMapper.normalizeEmail(email) : null;
+		String normalizedNickname = nickname != null ? userMapper.normalizeString(nickname) : null;
+
+		if (normalizedEmail != null && userRepository.existsByEmail(normalizedEmail)) {
 			throw new ConflictException("이미 사용중인 이메일입니다.", "DUPLICATE_EMAIL", "email");
 		}
-		if (nickname != null && userRepository.existsByNickname(nickname)) {
+		if (normalizedNickname != null && userRepository.existsByNickname(normalizedNickname)) {
 			throw new ConflictException("이미 사용중인 닉네임입니다.", "DUPLICATE_NICKNAME", "nickname");
 		}
 	}
 
 	private void normalizeRegistrationRequest(RegistrationRequest request) {
-		if (request.getEmail() != null) {
-			request.setEmail(request.getEmail().trim().toLowerCase());
-		}
-		if (request.getNickname() != null) {
-			request.setNickname(request.getNickname().trim());
-		}
 		if (request.getFullName() != null) {
-			request.setFullName(request.getFullName().trim());
+			request.setFullName(userMapper.normalizeString(request.getFullName()));
 		}
 		if (request.getGender() != null) {
-			request.setGender(request.getGender().trim().toLowerCase());
+			String normalizedGender = userMapper.normalizeString(request.getGender());
+			request.setGender(normalizedGender != null ? normalizedGender.toLowerCase() : null);
 		}
 		if (request.getPhoneNumber() != null) {
-			request.setPhoneNumber(request.getPhoneNumber().trim());
+			request.setPhoneNumber(userMapper.normalizeString(request.getPhoneNumber()));
 		}
 		if (request.getMentalState() != null) {
-			request.setMentalState(request.getMentalState().trim());
+			request.setMentalState(userMapper.normalizeString(request.getMentalState()));
 		}
 		if (request.getChatStyle() != null) {
-			request.setChatStyle(request.getChatStyle().trim());
+			request.setChatStyle(userMapper.normalizeString(request.getChatStyle()));
 		}
 	}
 
@@ -209,11 +303,10 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(passwordEncoder.encode(plainPassword));
 	}
 
-
 	private void setTermsFields(UserEntity user, RegistrationRequest request) {
 		if (Boolean.TRUE.equals(request.getTermsAccepted())) {
 			user.setTermsAccepted(Boolean.TRUE);
-			user.setTermsAcceptedAt(java.time.LocalDateTime.now());
+			user.setTermsAcceptedAt(LocalDateTime.now());
 			user.setTermsVersion(request.getTermsVersion());
 		} else {
 			user.setTermsAccepted(Boolean.FALSE);
@@ -224,7 +317,7 @@ public class UserServiceImpl implements UserService {
 
 	private UserEntity findUserByEmail(String email) {
 		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+			.orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "email"));
 	}
 
 	private UserEntity createSocialUser(String email, String nickname, String provider) {
@@ -232,9 +325,14 @@ public class UserServiceImpl implements UserService {
 		String displayName = nickname != null && !nickname.isBlank()
 			? nickname : provider + " User";
 
-		UserEntity user = userMapper.createSocialUser(email, displayName, uniqueNickname, provider, null);
+		// socialId는 내부적으로 생성 (provider + timestamp 조합 등)
+		String internalSocialId = provider + "_" + System.currentTimeMillis();
 
-		return userRepository.save(user);
+		UserEntity user = userMapper.createSocialUser(email, displayName, uniqueNickname, provider, internalSocialId);
+		UserEntity saved = userRepository.save(user);
+
+		log.info("새 소셜 사용자 생성 완료: email={}, provider={}, nickname={}", email, provider, uniqueNickname);
+		return saved;
 	}
 
 	private String generateUniqueNickname(String preferredName, String provider) {
@@ -248,12 +346,14 @@ public class UserServiceImpl implements UserService {
 		String nickname = base;
 		int suffix = 1;
 
-		while (!isNicknameAvailable(nickname)) {
+		// ✅ 안전 장치 추가 - 최대 10번만 시도
+		while (nickname != null && userRepository.existsByNickname(nickname) && suffix <= 10) {
 			nickname = base + "_" + suffix++;
-			if (suffix > 100) {
-				nickname = provider + "_" + System.currentTimeMillis();
-				break;
-			}
+		}
+
+		// ✅ 10번 시도해도 실패하면 타임스탬프 사용
+		if (suffix > 10) {
+			nickname = provider + "_" + System.currentTimeMillis();
 		}
 
 		return nickname;

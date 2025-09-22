@@ -224,19 +224,19 @@ class AdminQueryServiceImplTest {
 		assertThat(result.getUserNickname()).isEqualTo("사용자닉네임");
 	}
 
-	// @Test
-	// @DisplayName("포스트 가시성 업데이트 성공")
-	// void updatePostVisibility_성공() {
-	// 	// given
-	// 	given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-	//
-	// 	// when
-	// 	adminQueryService.updatePostVisibility(1L, "private");
-	//
-	// 	// then
-	// 	assertThat(testPost.getVisibility()).isEqualTo("private");
-	// 	verify(postRepository).save(testPost);
-	// }
+	@Test
+	@DisplayName("포스트 가시성 업데이트 성공")
+	void updatePostVisibility_성공() {
+		// given
+		given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+
+		// when
+		adminQueryService.updatePostVisibility(1L, "private");
+
+		// then
+		assertThat(testPost.getVisibility()).isEqualTo("private");
+		verify(postRepository).save(testPost);
+	}
 
 	@Test
 	@DisplayName("포스트 삭제 성공")
