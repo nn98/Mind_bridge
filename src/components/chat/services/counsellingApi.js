@@ -38,7 +38,7 @@ export async function sendMessage(sessionId, userMessage, chatStyleOptions) {
       감정: data["감정"] || "감정 분석 실패",
       세션_종료: data["세션_종료"] || false,
     };
-
+    console.log(result.감정);
     
     if (result.세션_종료) {
       console.log("세션 종료 감지 → completeSession 실행");

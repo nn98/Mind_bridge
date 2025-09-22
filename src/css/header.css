@@ -531,3 +531,65 @@ body,
     stroke: #d9e1f2;
     stroke-width: 2;
 }
+
+.polygon-graph {
+    display: block;
+}
+
+.polygon-graph.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+.poly-outline {
+    fill: none;
+    stroke: #dee2e6;
+    stroke-width: 1;
+}
+
+.poly-axis {
+    stroke: #e9ecef;
+    stroke-width: 0.5;
+    opacity: 0.6;
+}
+
+.poly-area {
+    fill: rgba(0, 123, 255, 0.2);
+    stroke: rgba(0, 123, 255, 0.6);
+    stroke-width: 1.5;
+}
+
+.poly-point {
+    fill: #007bff;
+    stroke: white;
+    stroke-width: 1;
+}
+
+.poly-center {
+    fill: #6c757d;
+}
+
+.poly-label {
+    font-size: 11px;
+    font-weight: 500;
+    fill: #495057;
+}
+
+.poly-label.small {
+    font-size: 9px;
+}
+
+.poly-value {
+    font-size: 10px;
+    font-weight: 600;
+    fill: #007bff;
+}
+
+.poly-value.small {
+    font-size: 8px;
+}
