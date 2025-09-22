@@ -49,8 +49,9 @@ public class ChatServiceImpl implements ChatService {
 	@Override
 	public ChatSessionEntity saveSession(SessionRequest request) {
 		ChatSessionEntity entity = chatMapper.toEntity(request);
+        log.info("Chat Session Request: {} / entity: {}", request.getSessionId(), entity.getSessionId());
 		ChatSessionEntity saved = chatSessionRepository.save(entity);
-		log.info("Saved chat session ID: {} for user: {}", saved.getSessionId(), saved.getUserEmail());
+		log.info("Saved chat session ID: {} \n\tfor user: {}", saved.getSessionId(), saved);
 		return saved;
 	}
 

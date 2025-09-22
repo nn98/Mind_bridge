@@ -50,7 +50,7 @@ public abstract class ChatMapper {
 	@Mapping(target = "createdAt", ignore = true)
 	public abstract ChatMessageEntity toEntity(ChatMessageRequest request);
 
-	@Mapping(target = "sessionId", ignore = true)
+	@Mapping(target = "sessionId", ignore = false)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
 	public abstract ChatSessionEntity toEntity(SessionRequest request);
