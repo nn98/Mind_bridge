@@ -245,38 +245,65 @@ function clampAndRedistribute(mix, {min = 6, max = 65}) {
 }
 
 function alphaForPct(pct) {
-    if (pct >= 60) return 0.38;
-    if (pct >= 30) return 0.48;
-    return 0.6;
+    // 파스텔톤을 위해 전체적으로 더 투명하게 조정
+    if (pct >= 60) return 0.15;
+    if (pct >= 30) return 0.25;
+    return 0.35;
 }
 
 /* ========= 배경 빌드 ========= */
 function buildCompositeBackground(mix, palette) {
     if (!mix) {
-        return "linear-gradient(180deg, #ffffff 0%, #ffffff 30%, #e0d7ff 65%, #6c63ff 100%)";
+        // 기본 배경 - 부드러운 파스텔 그라데이션
+        const baseGradient = "linear-gradient(135deg, #e8d5ff 0%, #d4c5f9 25%, #f5c2e7 50%, #ffc9dd 75%, #c2e9fb 100%)";
+        const overlayGradient = "linear-gradient(45deg, rgba(255,255,255,0.3) 0%, transparent 30%, rgba(255,255,255,0.15) 70%, transparent 100%)";
+        const radialLight = "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.2) 0%, transparent 50%)";
+        const radialSoft = "radial-gradient(ellipse at 70% 80%, rgba(255, 220, 255, 0.15) 0%, transparent 60%)";
+
+        return `${radialLight}, ${radialSoft}, ${overlayGradient}, ${baseGradient}`;
     }
+
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
     const smooth = gammaSmooth(mix, 1.0);
     const adjusted = clampAndRedistribute(smooth, {min: 2, max: 80});
 
+    // 감정별 그라데이션 생성 (파스텔 버전)
     let acc = 0;
-    const conicStops = [];
+    const gradientStops = [];
+    const emotionColors = [];
+
     for (const key of order) {
         const pct = Math.max(0, Math.min(100, adjusted[key] || 0));
         if (pct < 1) continue;
-        const alpha = alphaForPct(pct);
-        const col = hexToRgba(palette[key] || "#ffffff", alpha);
+
+        const color = palette[key] || "#ffffff";
+        emotionColors.push({color, pct, key});
+
+        // 파스텔톤으로 alpha 값 조정
+        const alpha = Math.min(0.4, alphaForPct(pct) * 0.7); // 더 투명하게
+        const col = hexToRgba(color, alpha);
         const from = acc;
         const to = acc + pct;
-        conicStops.push(`${col} ${Math.max(0, from - 2)}% ${Math.min(100, to + 2)}%`);
+        gradientStops.push(`${col} ${Math.max(0, from - 2)}% ${Math.min(100, to + 2)}%`);
         acc = to;
     }
 
-    const radialA = `radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.08), transparent 75%)`;
-    const radialB = `radial-gradient(50% 50% at 80% 10%, rgba(255,255,255,.05), transparent 70%)`;
-    const conic = `conic-gradient(from 180deg at 50% 50%, ${conicStops.join(", ")})`;
+    // 지배적인 감정 색상으로 파스텔 메인 그라데이션 생성
+    const dominantEmotion = emotionColors.reduce((a, b) => (b.pct > a.pct ? b : a), emotionColors[0]);
+    const dominantColor = dominantEmotion?.color || "#e8d5ff";
 
-    return `${radialA}, ${radialB}, ${conic}`;
+    // 다층 파스텔 그라데이션 구성
+    const baseGradient = `linear-gradient(135deg, ${dominantColor}30 0%, ${dominantColor}40 30%, ${dominantColor}20 70%, ${dominantColor}35 100%)`;
+    const meshGradient = `radial-gradient(ellipse at 20% 30%, ${dominantColor}20 0%, transparent 60%), radial-gradient(ellipse at 80% 70%, ${dominantColor}25 0%, transparent 50%)`;
+    const overlayGradient = "linear-gradient(45deg, rgba(255,255,255,0.15) 0%, transparent 25%, rgba(255,255,255,0.08) 60%, transparent 100%)";
+    const conicGradient = gradientStops.length > 0 ? `conic-gradient(from 180deg at 50% 50%, ${gradientStops.join(", ")})` : "";
+
+    // 최종 조합
+    const layers = [overlayGradient, meshGradient];
+    if (conicGradient) layers.push(conicGradient);
+    layers.push(baseGradient);
+
+    return layers.join(", ");
 }
 
 /* ========= 감정 텍스트 ========= */
@@ -330,7 +357,6 @@ export function clearSession() {
     }
 }
 
-
 /* ========= 메인 컴포넌트 ========= */
 function ChatConsultInner({profile}) {
     const saved = readSession();
@@ -338,7 +364,6 @@ function ChatConsultInner({profile}) {
     const [formData, setFormData] = useState({
         chatStyle: saved?.chatStyle || "심플한",
     });
-
     const {
         chatInput, setChatInput,
         chatHistory,
@@ -349,18 +374,23 @@ function ChatConsultInner({profile}) {
         __internal,
     } = useChatFlow({
         customUser: profile,
-        chatStyle: formData.chatStyle,   // ✅ 안전하게 참조 가능
+        chatStyle: formData.chatStyle,
         initialHistory: saved?.chatHistory || [],
         initialInput: saved?.chatInput || "",
         initialStep: typeof saved?.step === "number" ? saved.step : null,
         initialGuestForm: saved?.guestForm || null,
         initialIsChatEnded: typeof saved?.isChatEnded === "boolean" ? saved.isChatEnded : null,
     });
+    // ✅ 감정 결과 유무 체크
+    const hasEmotionResult = useMemo(
+        () => emotionMix && Object.values(emotionMix).some(v => v > 0),
+        [emotionMix]
+    );
 
     const [isEnding, setIsEnding] = useState(false);
-    const [activeLayer, setActiveLayer] = useState(0);
-    const [bgLayer, setBgLayer] = useState(["", ""]);
     const [useSilkBg, setUseSilkBg] = useState(false); // Silk 배경 토글
+    const [cssBackground, setCssBackground] = useState(""); // 단일 CSS 배경
+    const [isTransitioning, setIsTransitioning] = useState(false); // 배경 전환 상태
 
     const [openInfo, setOpenInfo] = useState(false);
     const anchorRef = useRef(null);
@@ -425,29 +455,30 @@ function ChatConsultInner({profile}) {
         };
     }, [openInfo]);
 
-    /* === Silk 배경용 색상 계산 === */
-    const silkColor = useMemo(() => {
-        if (!emotionMix) return '#7B7481';
-        const dominantEmotion = Object.entries(emotionMix).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
-        return EMOTION_PALETTE[dominantEmotion] || '#7B7481';
-    }, [emotionMix, EMOTION_PALETTE]);
-
-    /* === 배경 === */
+    /* === 단일 CSS 배경 업데이트 === */
     const nextBackground = useMemo(
         () => buildCompositeBackground(emotionMix, EMOTION_PALETTE),
         [emotionMix, EMOTION_PALETTE]
     );
+
     useEffect(() => {
         if (!nextBackground || useSilkBg) return;
-        const inactive = activeLayer ^ 1;
-        setBgLayer((prev) => {
-            const next = [...prev];
-            next[inactive] = nextBackground;
-            return next;
-        });
-        const t = requestAnimationFrame(() => setActiveLayer(inactive));
-        return () => cancelAnimationFrame(t);
+        setCssBackground(nextBackground);
     }, [nextBackground, useSilkBg]);
+
+    /* === 배경 전환 애니메이션 === */
+    const handleBgToggle = () => {
+        setIsTransitioning(true);
+
+        // 전환 애니메이션 시작
+        setTimeout(() => {
+            setUseSilkBg(!useSilkBg);
+            // 전환 완료 후 잠시 후 상태 리셋
+            setTimeout(() => {
+                setIsTransitioning(false);
+            }, 100);
+        }, 300); // 페이드아웃 시간과 맞춤
+    };
 
     /* === 스크롤 유지 === */
     useEffect(() => {
@@ -489,8 +520,8 @@ function ChatConsultInner({profile}) {
             step: __internal?.step ?? null,
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
-            chatStyle: formData.chatStyle,           // ← 저장
-            useSilkBg,                              // ← Silk 설정도 저장
+            chatStyle: formData.chatStyle,
+            useSilkBg,
         });
     }, [chatHistory, chatInput, isChatEnded, isEnding, __internal?.step, __internal?.guestForm, formData.chatStyle, useSilkBg]);
 
@@ -559,8 +590,8 @@ function ChatConsultInner({profile}) {
             step: __internal?.step ?? null,
             guestForm: __internal?.guestForm ?? null,
             isChatEnded,
-            chatStyle: formData.chatStyle,           // ← 저장
-            useSilkBg,                              // ← Silk 설정도 저장
+            chatStyle: formData.chatStyle,
+            useSilkBg,
         });
         startIdleWatchers();
     };
@@ -620,36 +651,45 @@ function ChatConsultInner({profile}) {
     return (
         <div className="consult-wrap" style={{position: 'relative'}}>
             {/* Silk 배경 - 전체 화면에 고정 */}
-            {useSilkBg && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    zIndex: -10,
-                    pointerEvents: 'none'
-                }}>
-                    <Silk
-                        speed={10}
-                        scale={1.2}
-                        palette={EMOTION_PALETTE}
-                        mix={emotionMix}   // ✅ 감정 비율 전달
-                        noiseIntensity={0.8}
-                        rotation={0}
-                    />
-                </div>
-            )}
+            <div style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                zIndex: -10,
+                pointerEvents: "none",
+                opacity: useSilkBg ? 1 : 0,
+                transition: "opacity 0.6s ease-in-out",
+                visibility: isTransitioning || useSilkBg ? "visible" : "hidden"
+            }}>
+                <Silk
+                    speed={10}
+                    scale={1.2}
+                    palette={EMOTION_PALETTE}
+                    mix={emotionMix}
+                    noiseIntensity={0.8}
+                    rotation={180}
+                />
+            </div>
 
-            {/* 기존 배경 (Silk가 비활성화일 때만) */}
-            {!useSilkBg && (
-                <>
-                    <div className={`emotion-bg layerA ${activeLayer === 0 ? "active" : ""}`}
-                         style={bgLayer[0] ? {backgroundImage: bgLayer[0]} : undefined} aria-hidden/>
-                    <div className={`emotion-bg layerB ${activeLayer === 1 ? "active" : ""}`}
-                         style={bgLayer[1] ? {backgroundImage: bgLayer[1]} : undefined} aria-hidden/>
-                </>
-            )}
+            {/* CSS 배경 */}
+            <div
+                className="emotion-bg"
+                style={{
+                    backgroundImage: hasEmotionResult
+                        ? cssBackground
+                        : "linear-gradient(270deg, #ffd6a5, #cfe1ff, #ffc9c9, #e3d1ff, #c9f4e5, #ffecb3)",
+                    backgroundSize: hasEmotionResult ? "200% 200%" : "1200% 100%",
+                    animation: hasEmotionResult
+                        ? "gradientShift 10s ease infinite"
+                        : "slideColors 30s linear infinite",
+                    transition: 'background-image 1.5s ease-in-out, opacity 0.6s ease-in-out',
+                    opacity: !useSilkBg ? 1 : 0,
+                    visibility: isTransitioning || !useSilkBg ? "visible" : "hidden"
+                }}
+                aria-hidden
+            />
 
             {/* 헤더 */}
             <div className="consult-header">
@@ -661,23 +701,26 @@ function ChatConsultInner({profile}) {
                 {/* 배경 토글 버튼 */}
                 <button
                     className="bg-toggle-btn"
-                    onClick={() => setUseSilkBg(!useSilkBg)}
+                    onClick={handleBgToggle}
+                    disabled={isTransitioning}
                     title={`${useSilkBg ? '기본' : '실크'} 배경으로 변경`}
                     style={{
                         position: 'absolute',
                         top: '20px',
                         right: '20px',
-                        background: '#c4b5fd',
+                        background: isTransitioning ? '#9ca3af' : '#c4b5fd',
                         border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '8px',
                         padding: '10px 14px',
                         color: 'white',
-                        cursor: 'pointer',
+                        cursor: isTransitioning ? 'not-allowed' : 'pointer',
                         fontSize: '14px',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.3s ease',
+                        transform: isTransitioning ? 'scale(0.95)' : 'scale(1)',
+                        opacity: isTransitioning ? 0.7 : 1
                     }}
                 >
-                    {useSilkBg ? '🎨 기본' : '✨ 실크'}
+                    {isTransitioning ? '🔄 전환중' : useSilkBg ? '🎨 기본' : '✨ 실크'}
                 </button>
             </div>
 
@@ -878,7 +921,54 @@ export default function ChatConsult() {
         if (!profile) {
             clearSession();
         }
+
+        // CSS 애니메이션 키프레임 추가
+        if (!document.getElementById('gradient-animation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'gradient-animation-styles';
+            style.textContent = `
+                @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    25% { background-position: 100% 50%; }
+                    50% { background-position: 100% 100%; }
+                    75% { background-position: 0% 100%; }
+                    100% { background-position: 0% 50%; }
+                }
+                
+                .emotion-bg {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: -5;
+                    pointer-events: none;
+                }
+                
+                .emotion-bg::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 30%, transparent 70%);
+                    animation: pulseLight 8s ease-in-out infinite alternate;
+                }
+                @keyframes slideColors {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 100% 50%; }
+                }
+                
+                @keyframes pulseLight {
+                    0% { opacity: 0.3; transform: scale(1); }
+                    100% { opacity: 0.8; transform: scale(1.1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }, [profile]);
+
     const isLoggedIn = !!profile;
     const modeKey = isLoggedIn ? "logged-in" : "logged-out";
     return <ChatConsultInner key={modeKey} profile={profile}/>;
