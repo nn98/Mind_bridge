@@ -5,11 +5,9 @@ import java.time.LocalDateTime;
 /**
  * 세션 이력 응답용 DTO
  */
-public record SessionHistory(
-    Long sessionId,
+public record SessionHistory(String sessionId,
     String userEmail,
     String userName,
-    String sessionStatus,
     Integer conversationScore,
     String userChatSummary,
     String userEmotionAnalysis,
