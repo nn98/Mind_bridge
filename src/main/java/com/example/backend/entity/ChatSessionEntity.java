@@ -3,6 +3,8 @@ package com.example.backend.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,15 +13,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 통합 채팅 세션 엔티티
  */
+@Slf4j
 @Entity
 @Table(name = "chat_sessions")
 @Getter
@@ -27,6 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ChatSessionEntity {
 
     @Id
@@ -64,7 +63,8 @@ public class ChatSessionEntity {
 
     @PrePersist
     protected void onCreate() {
-        if (this.sessionId == null) {
+        log.info("\t In Entity: Creating Chat Session Entity {}", sessionId);
+        if (this.sessionId == null || this.sessionId.isBlank()) {
             this.sessionId = UUID.randomUUID().toString();
         }
     }
