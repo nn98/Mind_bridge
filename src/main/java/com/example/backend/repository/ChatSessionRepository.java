@@ -12,25 +12,11 @@ import com.example.backend.dto.chat.RiskAssessment;
 import com.example.backend.entity.ChatSessionEntity;
 
 @Repository
-public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, Long> {
-
-    // 특정 사용자의 채팅 세션 목록 조회 (최신순)
+public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, String> {  // ❌ Long → ✅ String
+    Optional<ChatSessionEntity> findBySessionId(String sessionId);  // ❌ findById → ✅ findBySessionId
     List<ChatSessionEntity> findByUserEmailOrderByCreatedAtDesc(String userEmail);
+    List<ChatSessionEntity> findAllByUserEmailAndUserNameOrderBySessionIdDesc(String userEmail, String userName);
 
-    // 완료된 채팅 세션 수
-    @Query("SELECT COUNT(c) FROM ChatSessionEntity c WHERE c.userEmail = :userEmail AND c.sessionStatus = 'COMPLETED'")
-    long countCompletedSessionsByUserEmail(@Param("userEmail") String userEmail);
-
-    // 진행 중 세션 조회
-    Optional<ChatSessionEntity> findByUserEmailAndSessionStatus(String userEmail, String sessionStatus);
-
-    // 특정 점수 이상의 세션
-    List<ChatSessionEntity> findByUserEmailAndConversationScoreGreaterThanEqual(String userEmail, Integer minScore);
-
-	List<ChatSessionEntity> findAllByUserEmailAndUserNameOrderBySessionIdDesc(String userEmail, String userName);
-
-    long countByUserEmailAndSessionStatus(String userEmail, String completed);
-
-    //리스크 펙터/디비전 조회
-    List<RiskAssessment> findRiskAssessmentByUserEmail(String userEmail);
+    @Query("SELECT new com.example.backend.dto.chat.RiskAssessment(c.riskFactors, c.primaryRisk, c.createdAt, c.sessionId, c.userEmail) FROM ChatSessionEntity c WHERE c.userEmail = :userEmail")
+    List<RiskAssessment> findRiskAssessmentByUserEmail(@Param("userEmail") String userEmail);
 }
