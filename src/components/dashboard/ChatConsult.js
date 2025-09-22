@@ -126,10 +126,17 @@ const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotatio
     const uniforms = useMemo(() => {
         const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
 
+        // ✅ mix가 비어있을 때 fallback weight 지정
+        const hasMix = mix && Object.values(mix).some(v => v > 0);
+        const weights = hasMix
+            ? order.map(k => (mix?.[k] || 0) / 100)
+            : [1, 0, 0, 0, 0, 0];   // → 기본값: happiness 100%
+
+        // ✅ palette 없거나 mix가 비었을 때 fallback 색상 (파스텔 보라)
+        const fallbackColor = "#d8b4fe"; // 파스텔 보라
         const colors = order.map(k =>
-            new Color(...hexToNormalizedRGB(palette?.[k] || "#7B7481"))
+            new Color(...hexToNormalizedRGB(hasMix ? (palette?.[k] || fallbackColor) : fallbackColor))
         );
-        const weights = order.map(k => (mix?.[k] || 0) / 100);
 
         return {
             uSpeed: {value: speed},
@@ -146,16 +153,19 @@ const Silk = ({speed = 5, scale = 1, palette, mix, noiseIntensity = 1.5, rotatio
     useEffect(() => {
         if (!meshRef.current?.material) return;
         const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
-        meshRef.current.material.uniforms.uWeights.value =
-            order.map(k => (mix?.[k] || 0) / 100);
-    }, [mix]);
+        const hasMix = mix && Object.values(mix).some(v => v > 0);
+        const fallbackColor = "#C9A7EB";
 
-    useEffect(() => {
-        if (!meshRef.current?.material) return;
-        const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
+        // Weights 업데이트
+        meshRef.current.material.uniforms.uWeights.value =
+            hasMix ? order.map(k => (mix?.[k] || 0) / 100) : [1, 0, 0, 0, 0, 0];
+
+        // Colors 업데이트
         meshRef.current.material.uniforms.uColors.value =
-            order.map(k => new Color(...hexToNormalizedRGB(palette?.[k] || "#7B7481")));
-    }, [palette]);
+            hasMix
+                ? order.map(k => new Color(...hexToNormalizedRGB(palette?.[k] || fallbackColor)))
+                : order.map(() => new Color(...hexToNormalizedRGB(fallbackColor)));
+    }, [mix, palette]);
 
     return (
         <Canvas
@@ -242,7 +252,9 @@ function alphaForPct(pct) {
 
 /* ========= 배경 빌드 ========= */
 function buildCompositeBackground(mix, palette) {
-    if (!mix) return null;
+    if (!mix) {
+        return "linear-gradient(180deg, #ffffff 0%, #ffffff 30%, #e0d7ff 65%, #6c63ff 100%)";
+    }
     const order = ["happiness", "calmness", "neutral", "sadness", "anxiety", "anger"];
     const smooth = gammaSmooth(mix, 1.0);
     const adjusted = clampAndRedistribute(smooth, {min: 2, max: 80});
@@ -650,22 +662,22 @@ function ChatConsultInner({profile}) {
                 <button
                     className="bg-toggle-btn"
                     onClick={() => setUseSilkBg(!useSilkBg)}
-                    title={`${useSilkBg ? '기본' : 'Silk'} 배경으로 변경`}
+                    title={`${useSilkBg ? '기본' : '실크'} 배경으로 변경`}
                     style={{
                         position: 'absolute',
                         top: '20px',
                         right: '20px',
-                        background: 'rgba(255,255,255,0.1)',
+                        background: '#c4b5fd',
                         border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '8px',
-                        padding: '8px 12px',
+                        padding: '10px 14px',
                         color: 'white',
                         cursor: 'pointer',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         transition: 'all 0.2s'
                     }}
                 >
-                    {useSilkBg ? '🎨 기본' : '✨ Silk'}
+                    {useSilkBg ? '🎨 기본' : '✨ 실크'}
                 </button>
             </div>
 

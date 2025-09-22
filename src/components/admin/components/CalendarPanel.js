@@ -65,9 +65,9 @@ const CalendarPanel = ({date, setDate}) => {
 
         const fetchWeekly = async () => {
             try {
-                const { data } = await axios.get(
+                const {data} = await axios.get(
                     `${BACKEND_URL}/api/admin/metrics/range`,
-                    { params: { start: startStr, end: endStr }, withCredentials: true }
+                    {params: {start: startStr, end: endStr}, withCredentials: true}
                 ); // [21][20]
                 console.log(data);
                 const arr = Array.isArray(data?.data ?? data) ? (data?.data ?? data) : []; // ApiResponse 대응 [21]
@@ -111,9 +111,9 @@ const CalendarPanel = ({date, setDate}) => {
     useEffect(() => {
         const fetchToday = async () => {
             try {
-                const { data: todayRes } = await axios.get(
+                const {data: todayRes} = await axios.get(
                     `${BACKEND_URL}/api/admin/metrics/today`,
-                    { withCredentials: true }
+                    {withCredentials: true}
                 ); // [21]
                 const todayBody = todayRes?.data ?? todayRes;
                 setTodayVisitors(Number(todayBody?.visitCount ?? 0)); // [21]
@@ -133,9 +133,9 @@ const CalendarPanel = ({date, setDate}) => {
     /* ───────── /api/admin/stats에서 유저 성별·나이 불러오기 ───────── */
     useEffect(() => {
         const fetchAllUsers = async () => {
-            const { data: distRes } = await axios.get(
+            const {data: distRes} = await axios.get(
                 `${BACKEND_URL}/api/admin/metrics/users/distribution`,
-                { withCredentials: true }
+                {withCredentials: true}
             ); // [21]
             const dist = distRes?.data ?? distRes;
             console.log(`dist: ${JSON.stringify(dist)}`);
@@ -241,6 +241,7 @@ const CalendarPanel = ({date, setDate}) => {
                                 dataKey="counselling"
                                 fill="#a18cd1"
                                 radius={[6, 6, 0, 0]}
+                                isAnimationActive={false}
                             />
                             <Bar
                                 yAxisId="right"
@@ -248,6 +249,7 @@ const CalendarPanel = ({date, setDate}) => {
                                 dataKey="visitors"
                                 fill="#c9a5ff"
                                 radius={[6, 6, 0, 0]}
+                                isAnimationActive={false}
                             />
                         </ComposedChart>
                     </ResponsiveContainer>
