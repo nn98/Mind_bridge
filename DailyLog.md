@@ -282,3 +282,14 @@
 |  `주제`   | `Front` / `Back`                           |
 | `Front` | 최근 `채팅 세션` 요약 조회 기능, 세션 필드명 정상화            |
 | `Back`  | 잘못된 응답구조(별개의 데이터를 하나의 DTO에 중첩된 구조로 삽입) 정상화 |
+
+|     `구분`      | `내용`                                                                                                               |
+|:-------------:|:-------------------------------------------------------------------------------------------------------------------|
+|     `작성`      | `김윤서`                                                                                                              |
+|     `날짜`      | `2025-09-22`                                                                                                       |
+|     `주제`      | `Back`                                                                                                             |
+|    `Back`     | `Test` / `Domain Model Consistency` / `Service Logic Robustness` / `Test Stub Flexibility`                         |
+|    `Test`     | - NPE, Stubbing 불일치, 무한루프 등 모든 에러 해결 <br/>- 103개 테스트 케이스 전체 통과 달성 <br/>- Mockito ArgumentCaptor 활용한 정확한 검증         |
+| `Consistency` | - Profile DTO id → userId 필드명 통일 ({테이블}Id 규칙) <br/>- UserMapper에서 명시적 userId 매핑 추가                                 |
+| `Robustness`  | - null 안전성 처리 및 normalize 결과 검증 강화 <br/>- generateUniqueNickname 무한루프 방지 (최대 10회 시도) <br/>- 동시성 대응 2차 중복 검사 로직 안정화 |
+| `Flexibility` | - 3개 매개변수 인터페이스 유지 (email, nickname, provider) <br/>- anyString() 활용한 유연한 테스트 스텁 처리                                |
