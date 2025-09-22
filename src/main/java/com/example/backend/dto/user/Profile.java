@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter @Setter @ToString @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class Profile {
-    private Long id;
+    private Long userId;
     private String email;
     private String fullName;
     private String nickname;
