@@ -48,7 +48,6 @@ public interface ChatMapper {
 	@Mapping(target = "riskFactors", expression = "java(mapToString(payload.get(\"riskFactors\")))")
 	@Mapping(target = "protectiveFactors", expression = "java(mapToString(payload.get(\"protectiveFactors\")))")
 	@Mapping(target = "summaryEmotion", source = "clientEmotion")
-	@Mapping(target = "sessionStatus", constant = "COMPLETED")
 	ChatSessionEntity toAnalysisEntity(Map<String, Object> payload);
 
 	// === 업데이트 매핑 ===
