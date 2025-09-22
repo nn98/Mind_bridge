@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.example.backend.dto.chat.ChatMessageRequest;
-import com.example.backend.dto.chat.RiskAssessment;
+import com.example.backend.dto.chat.ChatSessionDto;
 import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
@@ -30,5 +30,5 @@ public interface ChatService {
     List<ChatSessionEntity> getSessionsByEmailAndName(String userEmail, String userName);
     Optional<ChatSessionEntity> getSessionById(String sessionId);
 
-    List<RiskAssessment> getRiskAssessmentByUserEmail(String userEmail);
+    public List<ChatSessionDto> getChatSessionsByUserEmail(String userEmail);
 }
