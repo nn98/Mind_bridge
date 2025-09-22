@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.chat.ChatMessageRequest;
-import com.example.backend.dto.chat.RiskAssessment;
+import com.example.backend.dto.chat.ChatSessionDto;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.security.SecurityUtil;
@@ -62,13 +62,14 @@ public class ChatController {
     }
 
     @GetMapping("/sessions")
-    public ResponseEntity<List<RiskAssessment>> getRecentSessions(Authentication authentication) {
+    public ResponseEntity<List<ChatSessionDto>> getChatSessions(Authentication authentication) {
         String email = securityUtil.requirePrincipalEmail(authentication);
-        List<RiskAssessment> assessments = chatService.getRiskAssessmentByUserEmail(email);
-        log.info("email: {} / data: {}", email, assessments);
+        List<ChatSessionDto> sessions = chatService.getChatSessionsByUserEmail(email);
+
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
-            .header("Pragma", "no-cache").header("Expires", "0")
-            .body(assessments);
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .body(sessions);
     }
 }
