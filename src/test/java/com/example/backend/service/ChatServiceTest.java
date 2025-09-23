@@ -294,7 +294,7 @@ class ChatServiceTest {
 		// When & Then
 		assertThatThrownBy(() -> chatService.updateSession(sessionId, request))
 			.isInstanceOf(NotFoundException.class)
-			.hasMessageContaining("Session not found with ID: " + sessionId);
+			.hasMessageContaining("세션을 찾을 수 없습니다: " + sessionId); // ✅ 실제 메시지에 맞게 수정
 
 		verify(chatSessionRepository).findById(sessionId);
 	}
