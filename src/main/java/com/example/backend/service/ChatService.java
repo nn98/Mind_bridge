@@ -81,6 +81,11 @@ public class ChatService {
         return chatSessionRepository.findById(sessionId);
     }
 
+    @Transactional(readOnly = true)
+    public List<ChatMessageEntity> getMessagesBySessionId(String sessionId) {
+        return chatMessageRepository.findAllBySessionId(sessionId);
+    }
+
     // === 상태 관련 ===
 
     public List<ChatSessionDto> getChatSessionsByUserEmail(String userEmail) {
