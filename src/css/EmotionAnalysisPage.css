@@ -469,6 +469,10 @@ html, body, .emotion-page {
     box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
 }
 
+.ea-clear-all-btn:hover{
+    background: #dc2626;
+}
+
 .ea-clear-all-btn:disabled {
     opacity: .5;
     cursor: not-allowed;
@@ -490,6 +494,9 @@ html, body, .emotion-page {
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+}
+.ea-remove-item-btn:hover{
+    background: #d97706;
 }
 
 .ea-remove-item-btn:disabled {

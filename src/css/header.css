@@ -178,6 +178,7 @@ body,
     background: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
+    color: #667eea;
 }
 
 .profile-actions-top {

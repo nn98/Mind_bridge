@@ -126,37 +126,44 @@ body {
 }
 
 .menu-section {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--sidebar-muted);
-    padding: 4px 8px;
-    letter-spacing: .02em;
+    display: flex;
+    align-items: center;
+    font-size: 15px; /* ⬆️ 기존보다 크고 강조 */
+    font-weight: 800; /* 두껍게 */
+    color: var(--sidebar-muted); /* 브랜드 블루/보라 계열 */
+    margin: 24px 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+.menu-section::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--sidebar-line);
+    margin-left: 10px;
 }
 
 .menu-item {
-    display: block;
-    padding: 10px 12px;
-    border-radius: 10px;
+    font-size: 15px; /* ⬇️ 섹션보다 작게 */
+    font-weight: 500;
     color: var(--sidebar-text);
-    text-decoration: none;
-    transition: background .15s ease, color .15s ease, outline-color .15s ease, transform .05s ease;
-    outline: 1px solid transparent;
+    padding: 10px 14px;
+    border-radius: 6px;
+    transition: all 0.25s ease;
 }
 
 .menu-item:hover {
     background: var(--sidebar-hover-bg);
     color: var(--sidebar-hover-text);
-}
-
-.menu-item:active {
-    transform: scale(.99);
+    transform: translateX(3px); /* 살짝 이동 */
 }
 
 .menu-item.active {
-    background: var(--sidebar-active-bg);
-    outline: 1px solid var(--sidebar-active-outline);
-    color: #fff;
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, .15) inset;
+    background: rgba(168, 85, 247, 0.2);   /* 네온 퍼플 배경 (연보라 빛) */
+    color: #c084fc;                        /* 네온 라벤더 텍스트 */
+    outline: 1px solid rgba(192, 132, 252, 0.55); /* 라벤더 글로우 */
+    box-shadow: 0 0 6px rgba(99, 102, 241, .35); /* 보라빛 glow */
 }
 
 /* --- 사이드바 상/하단 래퍼 --- */
@@ -456,7 +463,7 @@ body {
 .consult-bubble.ai {
     align-self: flex-start;
     margin-left: 8px;
-    background: var(--bubble-ai-bg);
+    background: var(--sidebar-bg);
     border: 1px solid var(--bubble-ai-bd);
     color: var(--bubble-ai-text);
 }

@@ -505,7 +505,7 @@ button.hospital-card.animated:hover,
 }
 
 .hospital-pagination button:hover:not(:disabled) {
-    background: #f3f0ff;
+    background: #6c63ff;
     border-color: #6c63ff;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(108, 99, 255, 0.2);

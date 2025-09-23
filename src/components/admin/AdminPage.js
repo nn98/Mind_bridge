@@ -30,6 +30,13 @@ export default function AdminPage() {
     // 🔥 기본 섹션은 "users"
     const [section, setSection] = useState("users");
 
+    // ✅ 로고 로딩 최적화
+    const [showMetallicLogo, setShowMetallicLogo] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => setShowMetallicLogo(true), 400); // 약간 지연 뒤 교체
+        return () => clearTimeout(timer);
+    }, []);
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -110,10 +117,32 @@ export default function AdminPage() {
             {/* 🔥 사이드바 */}
             <aside className="admin-sidebar">
                 <Link to="/" className="admin-logo-link">
-                    <div style={{width: 200, height: 200, marginLeft: "-15px"}}>
-                        <MetallicPaintWrapper/>
+                    <div
+                        style={{
+                            width: 200,
+                            height: 200,
+                            marginLeft: "-15px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        {showMetallicLogo ? (
+                            <MetallicPaintWrapper/>
+                        ) : (
+                            <img
+                                src="/img/로고3.png"
+                                alt="Mind Bridge 로고"
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                }}
+                            />
+                        )}
                     </div>
                 </Link>
+
                 <button
                     className={`side-btn ${section === "users" ? "active" : ""}`}
                     onClick={() => setSection("users")}
