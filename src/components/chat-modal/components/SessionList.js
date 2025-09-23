@@ -5,9 +5,8 @@ import SessionItem from "./SessionItem";
 import SessionDetailModal from "./SessionDetailModal";
 import {BACKEND_URL} from "../constants";
 
-export default function SessionList({userId}) {
+export default function SessionList({openModal}) {
     const [sessions, setSessions] = useState([]);
-    const [sel, setSel] = useState(null);
 
     // 페이지네이션 상태
     const [page, setPage] = useState(1);
@@ -93,7 +92,7 @@ export default function SessionList({userId}) {
                     <SessionItem
                         key={session.sessionId}
                         item={session}
-                        onClick={() => setSel(session)} // ✅ 세션 전체 선택
+                        onClick={(e) => {openModal(session, e)}} // ✅ 세션 전체 선택
                     />
                 ))}
             </ul>
@@ -111,12 +110,6 @@ export default function SessionList({userId}) {
                 </div>
             )}
 
-            {/* ✅ sessionId → session으로 변경 */}
-            <SessionDetailModal
-                open={!!sel}
-                onClose={() => setSel(null)}
-                session={sel}
-            />
         </div>
     );
 }

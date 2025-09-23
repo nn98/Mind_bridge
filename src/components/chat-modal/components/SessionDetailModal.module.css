@@ -1,0 +1,171 @@
+/* SessionDetailModal.module.css */
+/* 기존 modal-backdrop 스타일 참조 */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);  /* 기존 값과 동일 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;  /* 기존 modal-backdrop과 동일 */
+    opacity: 1;
+    transition: opacity 0.3s ease;  /* 기존 fade 효과 참조 */
+}
+
+/* 기존 modal-box 스타일 참조 */
+.modalCard {
+    background: white;  /* 기존과 동일 */
+    padding: 1.5rem;   /* 기존 modal-box와 동일 */
+    border-radius: 10px;  /* 기존과 동일 */
+    max-width: 90%;    /* 기존과 동일 */
+    max-height: 90%;   /* 기존과 동일 */
+    position: relative; /* 기존과 동일 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);  /* 기존 close-modal-btn 참조 */
+    overflow: auto;
+    opacity: 1;
+    transition: opacity 0.3s ease;  /* 기존 fade 효과와 동일 */
+}
+
+.modalHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modalHead h4 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 기존 close-modal-btn 스타일 참조해서 작은 버전으로 */
+.modalClose {
+    background: transparent;  /* 기존과 동일 */
+    border: none;            /* 기존과 동일 */
+    border-radius: 10%;      /* 기존과 동일 */
+    cursor: pointer;         /* 기존과 동일 */
+    display: flex;           /* 기존과 동일 */
+    align-items: center;     /* 기존과 동일 */
+    justify-content: center; /* 기존과 동일 */
+    transition: background 0.2s;  /* 기존과 동일 */
+    padding: 4px 8px;
+    font-size: 20px;
+    color: #666;
+    width: 32px;
+    height: 32px;
+}
+
+.modalClose:hover {
+    background: rgba(0, 0, 0, 0.1);  /* 기존 hover 효과 참조 */
+    color: #000;
+}
+
+.modalMeta {
+    margin-bottom: 1.5rem;  /* 기존 padding과 비슷 */
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.modalMeta div {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.modalMeta div:last-child {
+    margin-bottom: 0;
+}
+
+.modalMeta b {
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+.modalGraph {
+    margin-bottom: 1.5rem;  /* 기존 padding 값 참조 */
+    text-align: center;
+    padding: 1rem;
+    background: #fafafa;
+    border-radius: 8px;
+}
+
+.emotionList {
+    margin-top: 1.5rem;     /* 기존 padding 값 참조 */
+}
+
+.emotionList h5 {
+    margin-bottom: 0.75rem;  /* 기존과 비슷 */
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.emotionList ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);  /* 기존 box-shadow 참조 */
+}
+
+.emotionList li {
+    padding: 0.75rem 1rem;   /* 기존 padding 스타일 참조 */
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;  /* 기존 transition 참조 */
+}
+
+.emotionList li:last-child {
+    border-bottom: none;
+}
+
+.emotionList li:hover {
+    background: #f8f9fa;
+}
+
+.emotionList li b {
+    color: #495057;
+    font-weight: 600;
+}
+
+.emotionValue {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* 기존 fade 효과 클래스들 */
+.fadeIn {
+    opacity: 1;
+}
+
+.fadeOut {
+    opacity: 0;
+}
+
+/* 반응형 - 기존 미디어 쿼리 참조 */
+@media (max-width: 768px) {
+    .modalCard {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+        max-height: calc(100% - 2rem);
+        padding: 1rem;  /* 모바일에서 패딩 축소 */
+    }
+
+    .modalGraph {
+        padding: 0.5rem;
+    }
+
+    .emotionList li {
+        padding: 0.5rem 0.75rem;  /* 모바일에서 패딩 축소 */
+    }
+}

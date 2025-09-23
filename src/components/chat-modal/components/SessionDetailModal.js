@@ -1,30 +1,30 @@
 import TriangleGraph from "./TriangleGraph";
+import styles from "./SessionDetailModal.module.css";
 
 export default function SessionDetailModal({open, onClose, session}) {
     if (!open || !session) return null;
 
-    // ✅ props로 받은 session에서 직접 꺼내기
     const m = session.riskFactors ?? {};
     const d = m.depression ?? 0;
     const a = m.addiction ?? 0;
     const x = m.anxiety ?? 0;
 
     return (
-        <div className="modal-backdrop" onClick={onClose}>
-            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-head">
+        <div className={`${styles.modalBackdrop} ${styles.fadeIn}`} onClick={onClose}>
+            <div className={`${styles.modalCard} ${styles.fadeIn}`} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHead}>
                     <h4>세션 상세</h4>
-                    <button className="modal-close" onClick={onClose}>✕</button>
+                    <button className={styles.modalClose} onClick={onClose}>✕</button>
                 </div>
 
-                <div className="modal-meta">
+                <div className={styles.modalMeta}>
                     <div><b>일시</b> {formatDate(session.createdAt)}</div>
                     <div><b>위험도</b> {Math.round(session.primaryRisk ?? 0)}%</div>
                 </div>
 
-                <div className="modal-graph">
+                <div className={styles.modalGraph}>
                     <TriangleGraph
-                        size={300}   // ✅ 더 크게
+                        size={300}
                         depression={d}
                         addiction={a}
                         anxiety={x}
@@ -32,13 +32,13 @@ export default function SessionDetailModal({open, onClose, session}) {
                     />
                 </div>
 
-                {/* ✅ 감정 퍼센트 리스트 */}
-                <div className="emotion-list">
+                <div className={styles.emotionList}>
                     <h5>상담 중 감정 비율</h5>
                     <ul>
                         {Object.entries(session.emotions ?? {}).map(([emo, val]) => (
                             <li key={emo}>
-                                <b>{emo}</b>: {val}%
+                                <b>{emo}</b>
+                                <span className={styles.emotionValue}>{val}%</span>
                             </li>
                         ))}
                     </ul>
