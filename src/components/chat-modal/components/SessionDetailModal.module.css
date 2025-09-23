@@ -1,81 +1,102 @@
 /* SessionDetailModal.module.css */
 /* 기존 modal-backdrop 스타일 참조 */
+/* z-index를 더 높게 설정 */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);  /* 기존 값과 동일 */
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;  /* 기존 modal-backdrop과 동일 */
+    z-index: 10000;
     opacity: 1;
-    transition: opacity 0.3s ease;  /* 기존 fade 효과 참조 */
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
 }
 
-/* 기존 modal-box 스타일 참조 */
 .modalCard {
-    background: white;  /* 기존과 동일 */
-    padding: 1.5rem;   /* 기존 modal-box와 동일 */
-    border-radius: 10px;  /* 기존과 동일 */
-    max-width: 90%;    /* 기존과 동일 */
-    max-height: 90%;   /* 기존과 동일 */
-    position: relative; /* 기존과 동일 */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);  /* 기존 close-modal-btn 참조 */
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    width: 95%;
+    max-width: 1200px;
+    max-height: 95vh;
+    position: relative;
+    z-index: 10001;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     overflow: auto;
     opacity: 1;
-    transition: opacity 0.3s ease;  /* 기존 fade 효과와 동일 */
+    transition: all 0.3s ease;
+    transform: scale(1);
+
+    /* 스크롤바 숨기기 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.modalCard::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.modalCard:hover {
+    transform: scale(1.002);
 }
 
 .modalHead {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
 }
 
 .modalHead h4 {
     margin: 0;
-    color: #333;
-    font-weight: 600;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.025em;
 }
 
-/* 기존 close-modal-btn 스타일 참조해서 작은 버전으로 */
 .modalClose {
-    background: transparent;  /* 기존과 동일 */
-    border: none;            /* 기존과 동일 */
-    border-radius: 10%;      /* 기존과 동일 */
-    cursor: pointer;         /* 기존과 동일 */
-    display: flex;           /* 기존과 동일 */
-    align-items: center;     /* 기존과 동일 */
-    justify-content: center; /* 기존과 동일 */
-    transition: background 0.2s;  /* 기존과 동일 */
-    padding: 4px 8px;
+    background: #f8fafc;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 8px;
     font-size: 20px;
-    color: #666;
-    width: 32px;
-    height: 32px;
+    color: #64748b;
+    width: 40px;
+    height: 40px;
 }
 
 .modalClose:hover {
-    background: rgba(0, 0, 0, 0.1);  /* 기존 hover 효과 참조 */
-    color: #000;
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
 }
 
 .modalMeta {
-    margin-bottom: 1.5rem;  /* 기존 padding과 비슷 */
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
 }
 
 .modalMeta div {
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
 }
 
 .modalMeta div:last-child {
@@ -83,27 +104,51 @@
 }
 
 .modalMeta b {
-    color: #495057;
-    margin-right: 0.5rem;
+    color: #374151;
+    margin-right: 1rem;
+    font-weight: 600;
+    min-width: 60px;
 }
 
 .modalGraph {
-    margin-bottom: 1.5rem;  /* 기존 padding 값 참조 */
+    margin-bottom: 2rem;
     text-align: center;
-    padding: 1rem;
-    background: #fafafa;
-    border-radius: 8px;
+    padding: 2rem;
+    background: linear-gradient(135deg, #fafbff 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalGraph h4 {
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1.25rem;
 }
 
 .emotionList {
-    margin-top: 1.5rem;     /* 기존 padding 값 참조 */
+    margin-top: 2rem;
 }
 
 .emotionList h5 {
-    margin-bottom: 0.75rem;  /* 기존과 비슷 */
-    color: #333;
-    font-weight: 600;
-    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emotionList h5::before {
+    content: "📊";
+    font-size: 1.2rem;
 }
 
 .emotionList ul {
@@ -111,18 +156,20 @@
     padding: 0;
     margin: 0;
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);  /* 기존 box-shadow 참조 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
 }
 
 .emotionList li {
-    padding: 0.75rem 1rem;   /* 기존 padding 스타일 참조 */
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f8fafc;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background 0.2s;  /* 기존 transition 참조 */
+    transition: all 0.2s;
+    position: relative;
 }
 
 .emotionList li:last-child {
@@ -130,17 +177,25 @@
 }
 
 .emotionList li:hover {
-    background: #f8f9fa;
+    background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+    transform: translateX(4px);
+    box-shadow: 4px 0 0 0 #3b82f6;
 }
 
 .emotionList li b {
-    color: #495057;
+    color: #374151;
     font-weight: 600;
+    font-size: 1rem;
 }
 
 .emotionValue {
-    color: #007bff;
-    font-weight: 600;
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* 기존 fade 효과 클래스들 */
@@ -156,16 +211,175 @@
 @media (max-width: 768px) {
     .modalCard {
         margin: 1rem;
-        max-width: calc(100% - 2rem);
-        max-height: calc(100% - 2rem);
-        padding: 1rem;  /* 모바일에서 패딩 축소 */
+        width: calc(100% - 2rem);
+        max-height: calc(100vh - 2rem);
+        padding: 1.5rem;
+    }
+
+    .modalHead h4 {
+        font-size: 1.25rem;
     }
 
     .modalGraph {
-        padding: 0.5rem;
+        padding: 1rem;
+        min-height: 300px;
     }
 
     .emotionList li {
-        padding: 0.5rem 0.75rem;  /* 모바일에서 패딩 축소 */
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
+
+    .emotionValue {
+        align-self: flex-end;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modalCard {
+        padding: 1rem;
+    }
+
+    .modalMeta {
+        padding: 1rem;
+    }
+
+    .modalGraph {
+        padding: 0.75rem;
+        min-height: 250px;
+    }
+}
+
+/* 그래프 스타일 개선 */
+.polygon-graph {
+    width: 100%;
+    height: 350px;
+    max-width: 500px;
+}
+
+.poly-axis {
+    stroke: #d1d5db;
+    stroke-width: 1.5;
+}
+
+.poly-outline {
+    fill: none;
+    stroke: #9ca3af;
+    stroke-width: 2;
+    opacity: 0.7;
+}
+
+.poly-area {
+    fill: rgba(59, 130, 246, 0.2);
+    stroke: #3b82f6;
+    stroke-width: 3;
+    filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.1));
+}
+
+.poly-point {
+    fill: #3b82f6;
+    stroke: white;
+    stroke-width: 2;
+    r: 5;
+    transition: all 0.2s;
+}
+
+.poly-point:hover {
+    r: 7;
+    fill: #1d4ed8;
+    stroke-width: 3;
+}
+
+.poly-label {
+    font-size: 0.875rem;
+    fill: #374151;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.poly-label.small {
+    font-size: 0.75rem;
+}
+
+.poly-value {
+    font-size: 0.8rem;
+    fill: #3b82f6;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.poly-value.small {
+    font-size: 0.7rem;
+}
+
+.poly-center {
+    fill: #6b7280;
+    font-size: 0.75rem;
+    text-anchor: middle;
+}
+
+/* 로딩 상태나 빈 데이터 표시 개선 */
+.modalGraph .empty-state {
+    color: #9ca3af;
+    font-size: 1rem;
+    font-style: italic;
+    padding: 2rem;
+    text-align: center;
+    background: #f9fafb;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* 애니메이션 효과 추가 */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modalCard {
+    animation: slideUp 0.3s ease-out;
+}
+
+.emotionList li {
+    animation: slideUp 0.3s ease-out;
+    animation-fill-mode: both;
+}
+
+.emotionList li:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.emotionList li:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.emotionList li:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.emotionList li:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.emotionList li:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.emotionList li:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.triangle-graph, .polygon-graph {
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
 }

@@ -1,5 +1,4 @@
-// src/components/PolygonGraph.js
-import { useMemo } from "react";
+import {useMemo} from "react";
 
 export default function PolygonGraph({
                                          emotions = {},
@@ -14,11 +13,11 @@ export default function PolygonGraph({
             .sort(([a], [b]) => a.localeCompare(b)); // 일관된 순서
 
         if (emotionEntries.length === 0) {
-            return { vertices: [], dataPoints: [], center: { x: size/2, y: size/2 } };
+            return {vertices: [], dataPoints: [], center: {x: size / 2, y: size / 2}};
         }
 
         const pad = compact ? 20 : 32;
-        const center = { x: size / 2, y: size / 2 };
+        const center = {x: size / 2, y: size / 2};
         const radius = (size - pad * 2) / 2;
         const angleStep = (2 * Math.PI) / emotionEntries.length;
 
@@ -48,10 +47,10 @@ export default function PolygonGraph({
             };
         });
 
-        return { vertices, dataPoints, center };
+        return {vertices, dataPoints, center};
     }, [emotions, size, compact]);
 
-    const { vertices, dataPoints, center } = graphData;
+    const {vertices, dataPoints, center} = graphData;
 
     if (vertices.length === 0) {
         return (

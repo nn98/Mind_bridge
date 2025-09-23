@@ -1,4 +1,3 @@
-// src/components/UserProfile.jsx
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {BACKEND_URL, MENTAL_STATES} from "../constants";
@@ -274,7 +273,7 @@ const UserProfile = () => {
             />
             <ToastContainer position="top-center"/>
 
-            {/* ✅ sessionId → session으로 변경 */}
+            {/* ✅ 세션 상세 모달 */}
             <SessionDetailModal
                 open={!!sel}
                 onClose={() => {

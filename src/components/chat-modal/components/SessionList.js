@@ -1,8 +1,6 @@
-// src/components/SessionList.js
 import {useState, useEffect} from "react";
 import axios from "axios";
 import SessionItem from "./SessionItem";
-import SessionDetailModal from "./SessionDetailModal";
 import {BACKEND_URL} from "../constants";
 
 export default function SessionList({openModal}) {
@@ -92,7 +90,9 @@ export default function SessionList({openModal}) {
                     <SessionItem
                         key={session.sessionId}
                         item={session}
-                        onClick={(e) => {openModal(session, e)}} // ✅ 세션 전체 선택
+                        onClick={(e) => {
+                            openModal(session, e)
+                        }} // ✅ 세션 전체 선택
                     />
                 ))}
             </ul>
