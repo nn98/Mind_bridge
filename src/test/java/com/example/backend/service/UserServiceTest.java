@@ -1,4 +1,4 @@
-package com.example.backend.service.impl;
+package com.example.backend.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -29,7 +29,6 @@ import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.security.RecentAuthenticationService;
-import com.example.backend.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserServiceImpl 통합 테스트")
