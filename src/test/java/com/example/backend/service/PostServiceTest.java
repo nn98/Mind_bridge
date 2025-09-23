@@ -1,0 +1,357 @@
+package com.example.backend.service.impl;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.backend.common.error.BadRequestException;
+import com.example.backend.common.error.ForbiddenException;
+import com.example.backend.common.error.NotFoundException;
+import com.example.backend.dto.post.CreateRequest;
+import com.example.backend.dto.post.Detail;
+import com.example.backend.dto.post.Summary;
+import com.example.backend.dto.post.UpdateRequest;
+import com.example.backend.entity.PostEntity;
+import com.example.backend.entity.UserEntity;
+import com.example.backend.repository.PostRepository;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.service.PostService;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("PostService 테스트")
+class PostServiceTest {
+
+	@InjectMocks
+	private PostService postService;
+
+	@Mock
+	private PostRepository postRepository;
+
+	@Mock
+	private UserRepository userRepository;
+
+	private UserEntity testUser;
+	private PostEntity testPost;
+
+	@BeforeEach
+	void setUp() {
+		testUser = UserEntity.builder()
+			.userId(1L)
+			.email("user@example.com")
+			.nickname("테스트사용자")
+			.fullName("테스트 사용자")
+			.role("USER")
+			.build();
+
+		testPost = PostEntity.builder()
+			.postId(1L)
+			.title("테스트 게시글")
+			.content("테스트 내용입니다.")
+			.userId(1L)
+			.visibility("public")
+			.status("active")
+			.likeCount(10)
+			.commentCount(5)
+			.viewCount(100)
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
+
+	@Nested
+	@DisplayName("게시글 생성")
+	class CreatePostTest {
+
+		@Test
+		@DisplayName("정상적인 게시글 생성")
+		void createPost() {
+			// given
+			CreateRequest request = CreateRequest.builder()
+				.title("새 게시글")
+				.content("새로운 내용")
+				.visibility("public")
+				.build();
+
+			given(userRepository.findByEmail("user@example.com"))
+				.willReturn(Optional.of(testUser));
+			given(userRepository.findById(1L))
+				.willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock
+
+			ArgumentCaptor<PostEntity> captor = ArgumentCaptor.forClass(PostEntity.class);
+			willAnswer(invocation -> {
+				PostEntity entity = invocation.getArgument(0);
+				entity.setPostId(1L);
+				entity.setCreatedAt(LocalDateTime.now());
+				entity.setUpdatedAt(LocalDateTime.now());
+				return entity;
+			}).given(postRepository).save(captor.capture());
+
+			// when
+			Detail result = postService.createPost(request, "user@example.com");
+
+			// then
+			assertThat(result.getUserEmail()).isEqualTo("user@example.com");
+			assertThat(result.getUserNickname()).isEqualTo("테스트사용자");
+		}
+
+		@Test
+		@DisplayName("사용자없음_NotFoundException")
+		void createPost_사용자없음_NotFoundException() {
+			// given
+			CreateRequest request = CreateRequest.builder()
+				.title("새 게시글")
+				.content("새로운 내용")
+				.build();
+
+			given(userRepository.findByEmail("nonexistent@example.com"))
+				.willReturn(Optional.empty());
+
+			// when & then
+			assertThatThrownBy(() -> postService.createPost(request, "nonexistent@example.com"))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessage("사용자를 찾을 수 없습니다.")
+				.satisfies(ex -> {
+					NotFoundException notFoundEx = (NotFoundException) ex;
+					assertThat(notFoundEx.getCode()).isEqualTo("USER_NOT_FOUND");  // ✅ getCode() 사용
+				});
+		}
+	}
+
+	@Nested
+	@DisplayName("게시글 조회")
+	class ReadPostTest {
+
+		@Test
+		@DisplayName("사용자별 게시글 조회 성공")
+		void getPostsByUser_성공() {
+			// given
+			given(userRepository.findByEmail("user@example.com"))
+				.willReturn(Optional.of(testUser));
+			given(postRepository.findByUserIdOrderByCreatedAtDesc(1L))  // ✅ userId 메서드
+				.willReturn(List.of(testPost));
+			given(userRepository.findById(1L))
+				.willReturn(Optional.of(testUser));
+
+			// when
+			List<Detail> result = postService.getPostsByUser("user@example.com");
+
+			// then
+			assertThat(result).hasSize(1);
+			Detail detail = result.get(0);
+			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
+			assertThat(detail.getUserNickname()).isEqualTo("테스트사용자");
+		}
+
+		@Test
+		@DisplayName("전체 게시글 조회 성공")
+		void getAllPosts_성공() {
+			// given
+			given(postRepository.findAllByOrderByCreatedAtDesc())
+				.willReturn(List.of(testPost));
+			given(userRepository.findById(1L))
+				.willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock
+
+			// when
+			List<Detail> result = postService.getAllPosts();
+
+			// then
+			assertThat(result).hasSize(1);
+			Detail detail = result.get(0);
+			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
+		}
+
+		@Test
+		@DisplayName("공개 게시글 조회 성공")
+		void getPublicPosts_성공() {
+			// given
+			given(postRepository.findByVisibilityOrderByCreatedAtDesc("PUBLIC"))
+				.willReturn(List.of(testPost));
+			given(userRepository.findById(1L))
+				.willReturn(Optional.of(testUser));
+
+			// when
+			List<Summary> result = postService.getPublicPosts();
+
+			// then
+			assertThat(result).hasSize(1);
+			Summary summary = result.get(0);
+			assertThat(summary.getUserNickname()).isEqualTo("테스트사용자");
+		}
+
+		@Test
+		@DisplayName("게시글 상세 조회 성공")
+		void getPostDetail_성공() {
+			// given
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+
+			// when
+			Optional<Detail> result = postService.getPostDetail(1L);
+
+			// then
+			assertThat(result).isPresent();
+			Detail detail = result.get();
+			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
+		}
+	}
+
+	@Nested
+	@DisplayName("게시글 수정")
+	class UpdatePostTest {
+
+		@Test
+		@DisplayName("부분수정 성공")
+		void updatePost_부분수정_성공() {
+			// given
+			UpdateRequest request = UpdateRequest.builder()
+				.content("수정된 내용")
+				.build();
+
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findByEmail("user@example.com"))  // ✅ 권한 검증용
+				.willReturn(Optional.of(testUser));
+			given(userRepository.findById(1L)).willReturn(Optional.of(testUser));  // ✅ JOIN용
+			given(postRepository.save(testPost)).willReturn(testPost);
+
+			// when
+			Detail result = postService.updatePost(1L, request, "user@example.com");
+
+			// then
+			assertThat(testPost.getContent()).isEqualTo("수정된 내용");
+		}
+
+		@Test
+		@DisplayName("권한없음_ForbiddenException")
+		void updatePost_권한없음_ForbiddenException() {
+			// given
+			UpdateRequest request = UpdateRequest.builder()
+				.content("수정된 내용")
+				.build();
+
+			UserEntity otherUser = UserEntity.builder()
+				.userId(2L)
+				.email("other@example.com")
+				.nickname("다른사용자")
+				.build();
+
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findByEmail("other@example.com"))  // ✅ 다른 사용자
+				.willReturn(Optional.of(otherUser));
+
+			// when & then
+			assertThatThrownBy(() -> postService.updatePost(1L, request, "other@example.com"))
+				.isInstanceOf(ForbiddenException.class)
+				.hasMessage("게시글 수정 권한이 없습니다.");
+		}
+
+		@Test
+		@DisplayName("빈내용_BadRequestException")
+		void updatePost_빈내용_BadRequestException() {
+			// given
+			UpdateRequest request = UpdateRequest.builder()
+				.content("")  // 빈 내용
+				.build();
+
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findByEmail("user@example.com"))
+				.willReturn(Optional.of(testUser));
+
+			// when & then
+			assertThatThrownBy(() -> postService.updatePost(1L, request, "user@example.com"))
+				.isInstanceOf(BadRequestException.class)
+				.hasMessage("내용을 입력해주세요.");
+		}
+	}
+
+	@Nested
+	@DisplayName("게시글 삭제")
+	class DeletePostTest {
+
+		@Test
+		@DisplayName("삭제 성공")
+		void deletePost_성공() {
+			// given
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findByEmail("user@example.com"))  // ✅ 권한 검증용
+				.willReturn(Optional.of(testUser));
+
+			// when
+			postService.deletePost(1L, "user@example.com");
+
+			// then
+			verify(postRepository).deleteById(1L);
+		}
+
+		@Test
+		@DisplayName("권한없음_ForbiddenException")
+		void deletePost_권한없음_ForbiddenException() {
+			// given
+			UserEntity otherUser = UserEntity.builder()
+				.userId(2L)
+				.email("other@example.com")
+				.nickname("다른사용자")
+				.build();
+
+			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+			given(userRepository.findByEmail("other@example.com"))  // ✅ 다른 사용자
+				.willReturn(Optional.of(otherUser));
+
+			// when & then
+			assertThatThrownBy(() -> postService.deletePost(1L, "other@example.com"))
+				.isInstanceOf(ForbiddenException.class)
+				.hasMessage("게시글 삭제 권한이 없습니다.");
+		}
+	}
+
+	@Nested
+	@DisplayName("유틸리티")
+	class UtilityTest {
+
+		@Test
+		@DisplayName("게시글 개수 조회 성공")
+		void getPostCountByVisibility_성공() {
+			// given
+			given(userRepository.findByEmail("user@example.com"))
+				.willReturn(Optional.of(testUser));
+			given(postRepository.countByUserIdAndVisibility(1L, "public"))  // ✅ userId 메서드
+				.willReturn(5L);
+
+			// when
+			long result = postService.getPostCountByVisibility("user@example.com", "public");
+
+			// then
+			assertThat(result).isEqualTo(5L);
+		}
+
+		@Test
+		@DisplayName("최근 게시글 조회 성공")
+		void getRecentPosts_성공() {
+			// given
+			given(postRepository.findTopNByOrderByCreatedAtDesc(5))
+				.willReturn(List.of(testPost));
+			given(userRepository.findById(1L))
+				.willReturn(Optional.of(testUser));
+
+			// when
+			List<Summary> result = postService.getRecentPosts(5);
+
+			// then
+			assertThat(result).hasSize(1);
+			Summary summary = result.get(0);
+			assertThat(summary.getUserNickname()).isEqualTo("테스트사용자");
+		}
+	}
+}
