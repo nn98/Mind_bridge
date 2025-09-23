@@ -37,8 +37,9 @@ public class ChatController {
     // 저장
     @PostMapping("/session/save")
     public ResponseEntity<ChatSessionEntity> receiveAnalysis(@RequestBody SessionRequest sessionRequest) {
-        log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}", sessionRequest.getSessionId());
+        log.info("📩 [Spring] FastAPI에서 받은 분석 결과: {}\n\t SessionRequest 객체: {}", sessionRequest.getSessionId(), sessionRequest);
         ChatSessionEntity saved = chatService.saveSession(sessionRequest);
+        log.info("\t\t만들어진 엔티티: {}", saved);
         log.info("💾 [Spring] DB 저장 완료: {}", saved.getSessionId());
         dailyMetricsService.increaseChatCount();
         return ResponseEntity.ok(saved);
