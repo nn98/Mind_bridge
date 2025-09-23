@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity(prePostEnabled = true)  // ✅ 이게 있나요?
+@EnableMethodSecurity(prePostEnabled = true)
 @Slf4j
 public class SecurityConfig {
 
@@ -40,48 +40,37 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 공개 엔드포인트
                 .requestMatchers(
                     "/api/users/register",
                     "/api/users/availability",
                     "/api/auth/find-id",
                     "/api/auth/login",
                     "/api/auth/reset-password",
-                    "/api/auth/social/**",   // login, callback 포함
+                    "/api/auth/social/**",
                     "/api/posts/public",
                     "/api/posts/recent",
                     "/actuator/health",
                     "/error",
                     "/favicon.ico",
-                    "/api/emotion/analyze",  // 감정 분석 엔드포인트 공개
-                    "/api/chat/message/save", // 채팅 메시지 저장 엔드포인트 공개
-                    "/api/chat/session/save" // 상담 분석 저장 엔드포인트 공개
+                    "/api/emotion/analyze",
+                    "/api/chat/message/save",
+                    "/api/chat/session/save"
                 ).permitAll()
 
-                // ✅ 게시글 조회만 공개 (GET 요청만)
-                .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
-
-                // ✅ 게시글 쓰기/수정/삭제는 인증 필요
+                .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()  // 개별 게시글 조회
                 .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/api/posts/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+                .requestMatchers("/api/posts/**").authenticated()  // 나머지 모든 게시글 관련
 
-                // 관리자 URL (다음 단계에서 @PreAuthorize로 보강)
                 .requestMatchers("/api/admin/**").authenticated()
 
-                // 사용자 계정 관련
                 .requestMatchers("/api/users/account/**").authenticated()
                 .requestMatchers("/api/users/account").authenticated()
 
-                // 채팅 관련
                 .requestMatchers("/api/chat/**").authenticated()
 
-                // 게시글 쓰기/수정/삭제는 인증 필요
-                .requestMatchers("/api/posts/my").authenticated()
-                .requestMatchers("/api/posts/**").authenticated()
-
-                // 기타는 기본 허용 범위에서 제외하고 보호
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
