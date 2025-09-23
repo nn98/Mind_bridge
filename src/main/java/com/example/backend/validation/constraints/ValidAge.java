@@ -10,9 +10,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotNull;
 
-@NotNull(message = "나이는 필수입니다")
 @Min(value = 1, message = "나이는 1세 이상이어야 합니다")
 @Max(value = 150, message = "나이는 150세 이하여야 합니다")
 @Constraint(validatedBy = {})
@@ -20,7 +18,7 @@ import jakarta.validation.constraints.NotNull;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAge {
-	String message() default "유효하지 않은 나이입니다";
+	String message() default "올바른 나이를 입력해주세요";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
 }
