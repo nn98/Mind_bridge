@@ -1,15 +1,18 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.ChatMessageEntity;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.backend.entity.ChatMessageEntity;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, Long> {
 
     List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAsc(String sessionId);
+
+    List<ChatMessageEntity> findAllBySessionId(String sessionId);
 
     long countBySessionId(String sessionId);
 }
