@@ -183,11 +183,21 @@ public class PostService {
     }
 
     private void validateUserPermission(PostEntity post, String userEmail, String action) {
-        UserEntity author = userRepository.findById(post.getUserId())
-            .orElse(createDeletedUserPlaceholder());
-        if (!userEmail.equals(author.getEmail())) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
+
+        // ✅ ADMIN 권한 체크 - 모든 게시글 접근 가능
+        if ("admin".equalsIgnoreCase(user.getRole())) {
+            log.info("ADMIN 권한으로 {} 허용 - 사용자: {}, 게시글: {}", action, userEmail, post.getPostId());
+            return;
+        }
+
+        // 일반 사용자는 본인 게시글만 접근 가능
+        if (!post.getUserId().equals(user.getUserId())) {
             throw new ForbiddenException("게시글 " + action + " 권한이 없습니다.");
         }
+
+        log.debug("게시글 {} 권한 확인 완료 - 사용자: {}, 게시글: {}", action, userEmail, post.getPostId());
     }
 
     private Detail mapToDetail(PostEntity post) {
