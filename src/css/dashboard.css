@@ -280,23 +280,11 @@ body {
     position: relative;
     overflow-y: hidden;
     overflow-x: hidden;
-    background: linear-gradient(25deg, #ffb39a 0%, #ffe8b0 42%, #b18cff 100%);
+
+    /* ✅ 관리자 페이지는 단순 다크색 */
+    background: var(--bg);
 }
 
-.dash-content::before {
-    content: "";
-    position: absolute;
-    inset: -20%;
-    background: radial-gradient(600px 520px at 18% 32%, rgba(255, 150, 120, 1) 0 30%, transparent 60%),
-    radial-gradient(720px 560px at 70% 30%, rgba(255, 255, 200, 1) 0 30%, transparent 60%),
-    radial-gradient(760px 760px at 80% 78%, rgba(120, 95, 255, 1) 0 28%, transparent 60%),
-    radial-gradient(520px 700px at 32% 82%, rgba(255, 95, 190, 1) 0 28%, transparent 62%);
-    filter: blur(60px) saturate(110%);
-    mix-blend-mode: screen;
-    opacity: .95;
-    pointer-events: none;
-    z-index: -1;
-}
 
 /* Cards */
 .grid {
@@ -649,10 +637,10 @@ body {
 }
 
 /* Emotion Background */
-.emotion-bg {
+.consult-wrap .emotion-bg {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    z-index: -5;
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease;
@@ -662,15 +650,15 @@ body {
     filter: blur(20px) saturate(1.2);
 }
 
-.emotion-bg.active {
+.consult-wrap .emotion-bg.active {
     opacity: 1;
 }
 
-.emotion-bg.layerA.active {
+.consult-wrap .emotion-bg.layerA.active {
     animation: waveMotionA 16s ease-in-out infinite;
 }
 
-.emotion-bg.layerB.active {
+.consult-wrap .emotion-bg.layerB.active {
     animation: waveMotionB 28s ease-in-out infinite alternate;
 }
 

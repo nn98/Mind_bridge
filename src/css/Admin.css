@@ -230,7 +230,7 @@ body {
 }
 
 .admin-table tr:hover {
-    background: var(--mb-hover);
+    background: #e6e0f5;
 }
 
 .admin-table .empty {
@@ -614,6 +614,7 @@ body {
 .admin-main {
     flex: 1;
     padding: 20px;
+    background: #ececec;
 }
 
 .admin-section {
