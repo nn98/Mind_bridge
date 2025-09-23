@@ -1,8 +1,11 @@
-// src/components/SessionItem.js
 import PolygonGraph from "./PolygonGraph";
 
 export default function SessionItem({item, onClick}) {
-    const {createdAt, primaryRisk = "", protectiveFactors = 0, emotions = {}} = item ?? {};
+    const {
+        createdAt,
+        primaryRisk = 0,
+        emotions = {},
+    } = item ?? {};
 
     return (
         <li className="session-item" onClick={onClick}>
@@ -11,8 +14,9 @@ export default function SessionItem({item, onClick}) {
                     <strong className="item-date">{formatDate(createdAt)}</strong>
                 </div>
 
-                <span className={`risk-badge ${riskTone(protectiveFactors)}`}>
-                    {primaryRisk || "위험 없음"}
+                {/* primaryRisk 기반으로 위험 레벨 표시 */}
+                <span className={`risk-badge ${riskTone(primaryRisk)}`}>
+                    위험도 {primaryRisk}%
                 </span>
             </div>
 
