@@ -85,6 +85,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Detail>> createPost(@Valid @RequestBody CreateRequest request, Authentication authentication) {
+        log.info("createPost request: {}", request);
         String userEmail = securityUtil.requirePrincipalEmail(authentication);
         Detail createdPost = postService.createPost(request, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -92,7 +93,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')")
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN') or hasRole('admin')")
     public ResponseEntity<ApiResponse<Detail>> updatePost(
         @PathVariable Long id,
         @Valid @RequestBody UpdateRequest request,
@@ -102,7 +103,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')")
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN') or hasRole('admin')")
     public ResponseEntity<ApiResponse<String>> deletePost(
         @PathVariable Long id,
         Authentication authentication) {
