@@ -59,7 +59,8 @@ class UserControllerTest {
 	@Autowired MockMvc mvc;
 
 	// 컨트롤러 생성자 의존만 목 오버라이드
-	@MockitoBean UserService userService;
+	@MockitoBean
+	UserService userService;
 	@MockitoBean ChatService chatService;
 	@MockitoBean SecurityUtil securityUtil;
 	@MockitoBean JwtUtil jwtUtil;

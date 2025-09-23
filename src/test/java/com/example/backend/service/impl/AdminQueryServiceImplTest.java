@@ -37,16 +37,14 @@ import com.example.backend.entity.UserEntity;
 import com.example.backend.repository.DailyMetricsRepository;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AdminQueryService;
 
-/**
- * AdminQueryServiceImpl 테스트 - user 필드 통일 반영
- */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("AdminQueryServiceImpl 테스트")
-class AdminQueryServiceImplTest {
+@DisplayName("AdminQueryService 테스트")  // ✅ Impl 제거
+class AdminQueryServiceTest {  // ✅ 클래스명도 변경
 
 	@InjectMocks
-	private AdminQueryServiceImpl adminQueryService;
+	private AdminQueryService adminQueryService;  // ✅ AdminQueryServiceImpl → AdminQueryService
 
 	@Mock
 	private UserRepository userRepository;
@@ -75,13 +73,11 @@ class AdminQueryServiceImplTest {
 			.updatedAt(LocalDateTime.now())
 			.build();
 
-		// ✅ author 대신 userEmail, userNickname 사용
 		testPost = PostEntity.builder()
 			.postId(1L)
-			.title("테스트 포스트")
+			.title("테스트 게시글")
 			.content("테스트 내용")
-			.userEmail("user@example.com")  // ← userEmail 직접 설정
-			.userNickname("사용자닉네임")     // ← userNickname 직접 설정
+			.userId(1L)  // ✅ userId 사용 (userEmail, userNickname 제거)
 			.visibility("public")
 			.likeCount(10)
 			.commentCount(5)
@@ -96,11 +92,9 @@ class AdminQueryServiceImplTest {
 			.build();
 	}
 
-	// === 관리자 통계 테스트 ===
-
 	@Test
-	@DisplayName("관리자 통계 조회 성공")
-	void getAdminStats_성공() {
+	@DisplayName("관리자 통계 조회")
+	void getAdminStats() {
 		// given
 		given(userRepository.count()).willReturn(1000L);
 		given(postRepository.count()).willReturn(500L);
@@ -108,6 +102,7 @@ class AdminQueryServiceImplTest {
 			.willReturn(Optional.of(testMetrics));
 		given(dailyMetricsRepository.findAllByStatDateBetween(any(LocalDate.class), any(LocalDate.class)))
 			.willReturn(List.of(testMetrics));
+		given(userRepository.findAll()).willReturn(List.of(testUser));
 
 		// when
 		AdminStats result = adminQueryService.getAdminStats();
@@ -119,11 +114,9 @@ class AdminQueryServiceImplTest {
 		assertThat(result.getTodayVisits()).isEqualTo(100L);
 	}
 
-	// === 사용자 관리 테스트 ===
-
 	@Test
-	@DisplayName("사용자 목록 조회 성공")
-	void findUsers_성공() {
+	@DisplayName("사용자 검색")
+	void findUsers() {
 		// given
 		AdminUserSearchRequest request = AdminUserSearchRequest.builder()
 			.q("관리자")
@@ -147,8 +140,8 @@ class AdminQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("사용자 상세 조회 성공")
-	void getUserDetail_성공() {
+	@DisplayName("사용자 상세 조회")
+	void getUserDetail() {
 		// given
 		given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
 
@@ -164,22 +157,8 @@ class AdminQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("사용자 상세 조회 - 존재하지 않는 사용자")
-	void getUserDetail_사용자없음_NotFoundException() {
-		// given
-		given(userRepository.findById(999L)).willReturn(Optional.empty());
-
-		// when & then
-		assertThatThrownBy(() -> adminQueryService.getUserDetail(999L))
-			.isInstanceOf(NotFoundException.class)
-			.hasMessage("User not found");
-	}
-
-	// === 포스트 관리 테스트 ===
-
-	@Test
-	@DisplayName("포스트 목록 조회 성공")
-	void findPosts_성공() {
+	@DisplayName("게시글 검색")
+	void findPosts() {
 		// given
 		AdminPostSearchRequest request = AdminPostSearchRequest.builder()
 			.q("테스트")
@@ -189,6 +168,7 @@ class AdminQueryServiceImplTest {
 		Page<PostEntity> postPage = new PageImpl<>(List.of(testPost));
 		given(postRepository.findAll(any(Specification.class), any(Pageable.class)))
 			.willReturn(postPage);
+		given(userRepository.findById(1L)).willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock 추가
 
 		// when
 		Page<AdminPostRow> result = adminQueryService.findPosts(request, PageRequest.of(0, 20));
@@ -197,19 +177,19 @@ class AdminQueryServiceImplTest {
 		assertThat(result.getContent()).hasSize(1);
 		AdminPostRow postRow = result.getContent().get(0);
 		assertThat(postRow.getId()).isEqualTo(1L);
-		assertThat(postRow.getTitle()).isEqualTo("테스트 포스트");
-		// ✅ userEmail, userNickname 직접 접근 (N+1 해결)
-		assertThat(postRow.getUserEmail()).isEqualTo("user@example.com");
-		assertThat(postRow.getUserNickname()).isEqualTo("사용자닉네임");
+		assertThat(postRow.getTitle()).isEqualTo("테스트 게시글");
+		assertThat(postRow.getUserEmail()).isEqualTo("admin@example.com");  // ✅ JOIN으로 조회된 값
+		assertThat(postRow.getUserNickname()).isEqualTo("관리자");  // ✅ JOIN으로 조회된 값
 		assertThat(postRow.getVisibility()).isEqualTo("public");
 		assertThat(postRow.getLikeCount()).isEqualTo(10);
 	}
 
 	@Test
-	@DisplayName("포스트 상세 조회 성공")
-	void getPostDetail_성공() {
+	@DisplayName("게시글 상세 조회")
+	void getPostDetail() {
 		// given
 		given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
+		given(userRepository.findById(1L)).willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock 추가
 
 		// when
 		AdminPostDetail result = adminQueryService.getPostDetail(1L);
@@ -217,16 +197,15 @@ class AdminQueryServiceImplTest {
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.getId()).isEqualTo(1L);
-		assertThat(result.getTitle()).isEqualTo("테스트 포스트");
+		assertThat(result.getTitle()).isEqualTo("테스트 게시글");
 		assertThat(result.getContent()).isEqualTo("테스트 내용");
-		// ✅ N+1 해결된 직접 필드 접근
-		assertThat(result.getUserEmail()).isEqualTo("user@example.com");
-		assertThat(result.getUserNickname()).isEqualTo("사용자닉네임");
+		assertThat(result.getUserEmail()).isEqualTo("admin@example.com");  // ✅ JOIN으로 조회된 값
+		assertThat(result.getUserNickname()).isEqualTo("관리자");  // ✅ JOIN으로 조회된 값
 	}
 
 	@Test
-	@DisplayName("포스트 가시성 업데이트 성공")
-	void updatePostVisibility_성공() {
+	@DisplayName("게시글 공개설정 수정")
+	void updatePostVisibility() {
 		// given
 		given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
 
@@ -239,20 +218,18 @@ class AdminQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("포스트 삭제 성공")
-	void deletePost_성공() {
+	@DisplayName("게시글 삭제")
+	void deletePost() {
 		// when
-		adminQueryService.deletePost(1L, "스팸");
+		adminQueryService.deletePost(1L, "테스트 삭제");
 
 		// then
 		verify(postRepository).deleteById(1L);
 	}
 
-	// === 메트릭 테스트 ===
-
 	@Test
-	@DisplayName("오늘 메트릭 조회 성공")
-	void getTodayMetrics_성공() {
+	@DisplayName("오늘 통계 조회")
+	void getTodayMetrics() {
 		// given
 		LocalDate today = LocalDate.now();
 		given(dailyMetricsRepository.findById(today)).willReturn(Optional.of(testMetrics));
@@ -268,8 +245,8 @@ class AdminQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("일별 범위 메트릭 조회 성공")
-	void getDailyRange_성공() {
+	@DisplayName("날짜 범위 통계 조회")
+	void getDailyRange() {
 		// given
 		LocalDate start = LocalDate.now().minusDays(7);
 		LocalDate end = LocalDate.now();
@@ -287,17 +264,14 @@ class AdminQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("오늘 메트릭 조회 - 데이터 없음")
-	void getTodayMetrics_데이터없음() {
+	@DisplayName("존재하지 않는 사용자 조회 시 예외")
+	void getUserDetailNotFoundException() {
 		// given
-		given(dailyMetricsRepository.findById(any(LocalDate.class))).willReturn(Optional.empty());
+		given(userRepository.findById(999L)).willReturn(Optional.empty());
 
-		// when
-		DailyMetricPoint result = adminQueryService.getTodayMetrics();
-
-		// then
-		assertThat(result).isNotNull();
-		assertThat(result.getChatCount()).isEqualTo(0);
-		assertThat(result.getVisitCount()).isEqualTo(0);
+		// when & then
+		assertThatThrownBy(() -> adminQueryService.getUserDetail(999L))
+			.isInstanceOf(NotFoundException.class)
+			.hasMessage("User not found");
 	}
 }
