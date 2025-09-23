@@ -1,4 +1,4 @@
-package com.example.backend.service.impl;
+package com.example.backend.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +19,6 @@ import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.security.RecentAuthenticationService;
-import com.example.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserServiceImpl implements UserService {
+public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -39,7 +38,6 @@ public class UserServiceImpl implements UserService {
 	private final RecentAuthenticationService recentAuthenticationService;
 
 	// === 사용자 등록 ===
-	@Override
 	public Profile register(RegistrationRequest request) {
 		// 1) 첫 번째 중복 검사
 		validateDuplicates(request.getEmail(), request.getNickname());
@@ -68,7 +66,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// === 사용자 정보 수정 ===
-	@Override
 	public Profile updateUser(String email, UpdateRequest request) {
 		UserEntity user = findUserByEmail(email);
 
@@ -88,7 +85,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// === 사용자 조회 ===
-	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserByEmail(String email) {
 		if (email == null || email.isBlank()) {
@@ -97,7 +93,6 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByEmail(email).map(userMapper::toProfile);
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserById(Long userId) {
 		if (userId == null || userId <= 0) {
@@ -106,7 +101,6 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findById(userId).map(userMapper::toProfile);
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> getUserByNickname(String nickname) {
 		if (nickname == null || nickname.isBlank()) {
@@ -116,14 +110,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// === 사용자 삭제 ===
-	@Override
 	public void deleteUser(String email) {
 		UserEntity user = findUserByEmail(email);
 		userRepository.delete(user);
 		log.info("사용자 삭제 완료: {}", email);
 	}
 
-	@Override
 	public void deleteAccountWithReAuth(String email, String currentPassword) {
 		UserEntity user = findUserByEmail(email);
 		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
@@ -131,7 +123,6 @@ public class UserServiceImpl implements UserService {
 		log.info("재인증 후 계정 삭제 완료: {}", email);
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public boolean isEmailAvailable(String email) {
 		if (email == null || email.isBlank()) {
@@ -142,7 +133,6 @@ public class UserServiceImpl implements UserService {
 		return !userRepository.existsByEmail(normalizedEmail);
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public boolean isNicknameAvailable(String nickname) {
 		if (nickname == null || nickname.isBlank()) {
@@ -157,7 +147,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// === 비밀번호 관리 ===
-	@Override
 	public void changePassword(String email, ChangePasswordRequest request) {
 		UserEntity user = findUserByEmail(email);
 
@@ -175,7 +164,6 @@ public class UserServiceImpl implements UserService {
 		log.info("비밀번호 변경 완료: {}", email);
 	}
 
-	@Override
 	public void changePasswordWithReAuth(String email, String currentPassword, String newPassword) {
 		UserEntity user = findUserByEmail(email);
 		recentAuthenticationService.requirePasswordReauth(user.getEmail(), currentPassword);
@@ -184,7 +172,6 @@ public class UserServiceImpl implements UserService {
 		log.info("재인증 후 비밀번호 변경 완료: {}", email);
 	}
 
-	@Override
 	public void changePasswordWithCurrentCheck(String email, String currentPassword, String newPassword, String confirmPassword) {
 		UserEntity user = findUserByEmail(email);
 
@@ -202,20 +189,17 @@ public class UserServiceImpl implements UserService {
 		log.info("현재 비밀번호 확인 후 변경 완료: {}", email);
 	}
 
-	@Override
 	public UserEntity findOrCreateSocialUser(String email, String nickname, String provider) {
 		return userRepository.findByEmail(email)
 			.orElseGet(() -> createSocialUser(email, nickname, provider));
 	}
 
 	// === 통계 및 유틸리티 ===
-	@Override
 	@Transactional(readOnly = true)
 	public long getUserCount() {
 		return userRepository.count();
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public long getUserCountByRole(String role) {
 		if (role == null || role.isBlank()) {
@@ -224,7 +208,6 @@ public class UserServiceImpl implements UserService {
 		return userRepository.countByRole(role);
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public List<Profile> getRecentUsers() {
 		return userRepository.findTop10ByOrderByCreatedAtDesc()
@@ -233,7 +216,6 @@ public class UserServiceImpl implements UserService {
 			.toList();
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public List<Profile> getRecentUsers(int limit) {
 		if (limit <= 0 || limit > 100) {
@@ -246,7 +228,6 @@ public class UserServiceImpl implements UserService {
 			.toList();
 	}
 
-	@Override
 	@Transactional(readOnly = true)
 	public Optional<Profile> findUserByPhoneAndNickname(String phoneNumber, String nickname) {
 		if (phoneNumber == null || phoneNumber.isBlank() || nickname == null || nickname.isBlank()) {
@@ -256,7 +237,6 @@ public class UserServiceImpl implements UserService {
 			.map(userMapper::toProfile);
 	}
 
-	@Override
 	public void updateLastLoginTime(String email) {
 		int updated = userRepository.touchLastLogin(email);
 		if (updated > 0) {
