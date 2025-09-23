@@ -21,11 +21,14 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.backend.common.error.validation.ValidationErrorProcessor;
 import com.example.backend.dto.user.Profile;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.security.PIIMaskingUtils;
 import com.example.backend.security.SecurityUtil;
 import com.example.backend.service.ChatService;
 import com.example.backend.service.UserService;
@@ -48,6 +51,9 @@ import com.example.backend.service.UserService;
 @AutoConfigureMockMvc(addFilters = true) // 핵심 보안 필터 활성(WithMockUser 동작)
 @Import({TestSecurityConfig.class})
 @EnableMethodSecurity(prePostEnabled = true)
+@TestPropertySource(properties = {
+	"spring.mvc.problemdetails.enabled=false"  // 중요: 기본 ProblemDetail 비활성화
+})
 class UserControllerTest {
 
 	@Autowired MockMvc mvc;
@@ -57,6 +63,10 @@ class UserControllerTest {
 	@MockitoBean ChatService chatService;
 	@MockitoBean SecurityUtil securityUtil;
 	@MockitoBean JwtUtil jwtUtil;
+
+	// ValidationErrorProcessor 의존성 추가
+	@MockitoBean PIIMaskingUtils piiMaskingUtils;
+	@MockitoBean ValidationErrorProcessor validationErrorProcessor;
 
 	// ---------- register ----------
 
@@ -170,12 +180,20 @@ class UserControllerTest {
 				.with(user("me@ex.com"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
-                    {"nickname":"NEWME","phoneNumber":"010-1111-2222"}
-                """))
+                {
+                  "nickname":"NEWME",
+                  "fullName":"김테스트",
+                  "age":28,
+                  "gender":"male",
+                  "phoneNumber":"010-1111-2222",
+                  "mentalState":"우울증",
+                  "chatGoal":"상담받기"
+                }
+                """)) // ✅ 모든 필수 필드 포함
 			.andExpect(status().isNoContent());
 
 		then(userService).should().updateUser(eq("me@ex.com"), any());
-	} // [4]
+	}
 
 	// ---------- deleteAccount (보호) ----------
 
@@ -233,7 +251,7 @@ class UserControllerTest {
 	@DisplayName("POST /api/users/register (Malformed JSON) → 400 Bad Request")
 	void register_malformedJson_400() throws Exception {
 		mvc.perform(post("/api/users/register")
-				.contentType(MediaType.APPLICATION_JSON)
+			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"age\":\"xx\"}")
 		).andExpect(status().isBadRequest());
 	} // 역직렬화 실패는 400 경로가 맞다 [7]
@@ -327,11 +345,38 @@ class UserControllerTest {
 				.with(user("me@ex.com"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
-					{"nickname":""}
-					""")) // @Size(min=2) 위반
+                {"nickname":""}
+                """)) // ✅ 부분 필드만 전송 → 422 발생
 			.andExpect(status().isUnprocessableEntity())
-			.andExpect(header().string("Content-Type", startsWith("application/problem+json")));
-	} // Bean Validation 실패는 422 정책 [9]
+			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
+			.andExpect(jsonPath("$.status").value(422))
+			.andExpect(jsonPath("$.errors").exists())
+			.andExpect(jsonPath("$.errors.nickname").exists()) // 빈 닉네임 에러
+			.andExpect(jsonPath("$.errors.age").exists())      // 누락된 나이 에러
+			.andExpect(jsonPath("$.errors.fullName").exists()) // 누락된 성명 에러
+			.andExpect(jsonPath("$.errors.gender").exists())   // 누락된 성별 에러
+			.andExpect(jsonPath("$.errors.mentalState").exists()); // 누락된 현재상태 에러
+	}
+
+	@Test
+	@DisplayName("PATCH /api/users/account (일부 필드만 전송) → 422 Validation")
+	void update_account_partial_422() throws Exception {
+		given(securityUtil.requirePrincipalEmail(any())).willReturn("me@ex.com");
+		mvc.perform(patch("/api/users/account")
+				.with(user("me@ex.com"))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+                {"nickname":"NEWME","phoneNumber":"010-1111-2222"}
+                """)) // ✅ 일부 필드만 → 나머지 필드 누락 에러
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(header().string("Content-Type", startsWith("application/problem+json")))
+			.andExpect(jsonPath("$.status").value(422))
+			.andExpect(jsonPath("$.errors.mentalState").exists())
+			.andExpect(jsonPath("$.errors.gender").exists())
+			.andExpect(jsonPath("$.errors.fullName").exists())
+			.andExpect(jsonPath("$.errors.chatGoal").exists())
+			.andExpect(jsonPath("$.errors.age").exists());
+	}
 
 	// 10) deleteAccount: 미인증 → 401
 	@Test

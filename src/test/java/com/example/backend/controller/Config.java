@@ -5,6 +5,7 @@ import java.net.URI;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.backend.common.error.validation.ValidationErrorProcessor;
+import com.example.backend.security.PIIMaskingUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +49,18 @@ class TestSecurityConfig {
 		res.setStatus(status.value());
 		res.setContentType("application/problem+json");
 		om.writeValue(res.getOutputStream(), pd);
+	}
+
+	@Bean
+	@Primary  // 테스트에서 우선 사용
+	public PIIMaskingUtils testPIIMaskingUtils() {
+		return new PIIMaskingUtils();
+	}
+
+	@Bean
+	@Primary
+	public ValidationErrorProcessor testValidationErrorProcessor() {
+		return new ValidationErrorProcessor(testPIIMaskingUtils());
 	}
 }
 
