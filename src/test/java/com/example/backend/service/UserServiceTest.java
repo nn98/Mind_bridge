@@ -33,7 +33,7 @@ import com.example.backend.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserServiceImpl 통합 테스트")
-class UserServiceImplTest {
+class UserServiceTest {
 
 	@InjectMocks
 	private UserService userService;

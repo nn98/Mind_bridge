@@ -44,7 +44,7 @@ import com.example.backend.service.AdminQueryService;
 class AdminQueryServiceTest {  // ✅ 클래스명도 변경
 
 	@InjectMocks
-	private AdminQueryService adminQueryService;  // ✅ AdminQueryServiceImpl → AdminQueryService
+	private AdminQueryService adminQueryService;  // ✅ AdminQueryService → AdminQueryService
 
 	@Mock
 	private UserRepository userRepository;
