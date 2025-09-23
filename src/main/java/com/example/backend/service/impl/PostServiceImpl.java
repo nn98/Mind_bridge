@@ -42,26 +42,21 @@ public class PostServiceImpl implements PostService {
         }
 
         UserEntity user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
+            .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
         PostEntity post = PostEntity.builder()
             .title(normalizeTitle(request.getTitle()))
             .content(request.getContent().trim())
-            .userEmail(user.getEmail())
-            .userNickname(user.getNickname())
-            .visibility(request.getVisibility() != null ? request.getVisibility() : PUBLIC)
+            .userId(user.getUserId())  // ✅ userId 저장 (정규화)
+            .visibility(request.getVisibility() != null ? request.getVisibility() : "PUBLIC")
             .status("active")
             .likeCount(0)
             .commentCount(0)
             .viewCount(0)
             .build();
 
-        log.debug("[Post#create] entity before save: {}", post);
-
         PostEntity savedPost = postRepository.save(post);
-
-        log.info("새 게시글 작성 완료 - ID: {}, 작성자: {}, 제목: {}",
-            savedPost.getPostId(), userEmail, savedPost.getTitle());
+        log.info("게시글 생성 완료 - ID: {}, 사용자: {}", savedPost.getPostId(), userEmail);
 
         return mapToDetail(savedPost);
     }
@@ -203,33 +198,46 @@ public class PostServiceImpl implements PostService {
     }
 
     private Detail mapToDetail(PostEntity post) {
+        UserEntity author = userRepository.findById(post.getUserId())
+            .orElse(createDeletedUserPlaceholder());
+
         Detail detail = new Detail();
         detail.setId(post.getPostId());
-        detail.setTitle(post.getTitle()); // ✅ title 매핑 추가
+        detail.setTitle(post.getTitle());
         detail.setContent(post.getContent());
-        detail.setUserEmail(post.getUserEmail());
-        detail.setUserNickname(post.getUserNickname());
+        detail.setUserEmail(author.getEmail());
+        detail.setUserNickname(author.getNickname());
         detail.setVisibility(post.getVisibility());
         detail.setCreatedAt(post.getCreatedAt());
         detail.setUpdatedAt(post.getUpdatedAt());
         detail.setLikeCount(post.getLikeCount() != null ? post.getLikeCount() : 0);
         detail.setCommentCount(post.getCommentCount() != null ? post.getCommentCount() : 0);
-        detail.setLikedByCurrentUser(false); // TODO: 실제 좋아요 상태 확인
-
+        detail.setLikedByCurrentUser(false); // TODO: 구현
         return detail;
     }
 
     private Summary mapToSummary(PostEntity post) {
+        UserEntity author = userRepository.findById(post.getUserId())
+            .orElse(createDeletedUserPlaceholder());
+
         Summary summary = new Summary();
         summary.setId(post.getPostId());
         summary.setContentPreview(truncateContent(post.getContent(), 100));
-        summary.setUserNickname(post.getUserNickname());
+        summary.setUserNickname(author.getNickname());  // ✅ JOIN으로 실시간 조회
         summary.setVisibility(post.getVisibility());
         summary.setCreatedAt(post.getCreatedAt());
         summary.setLikeCount(post.getLikeCount() != null ? post.getLikeCount() : 0);
         summary.setCommentCount(post.getCommentCount() != null ? post.getCommentCount() : 0);
-
         return summary;
+    }
+
+    private UserEntity createDeletedUserPlaceholder() {
+        return UserEntity.builder()
+            .userId(-1L)
+            .email("deleted@user.com")
+            .nickname("탈퇴한 사용자")
+            .fullName("탈퇴한 사용자")
+            .build();
     }
 
     private String truncateContent(String content, int maxLength) {
