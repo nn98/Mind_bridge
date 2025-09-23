@@ -1,4 +1,3 @@
-// src/components/UserProfile.jsx
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {BACKEND_URL, MENTAL_STATES} from "../constants";
@@ -9,7 +8,8 @@ import {useAuth} from "../../../AuthContext";
 
 // 추가
 import RedirectLayout from "../../layout/RedirectLayout";
-import SessionList from "./SessionList"; // 오른쪽 세션 리스트뷰
+import SessionList from "./SessionList";
+import SessionDetailModal from "./SessionDetailModal"; // 오른쪽 세션 리스트뷰
 
 const UserProfile = () => {
     const {profile, applyProfileUpdate, logoutSuccess} = useAuth();
@@ -36,7 +36,7 @@ const UserProfile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-    const userId = profile?.id;
+    const [sel, setSel] = useState(null);
 
     const normalizeUser = (raw, fallback = {}) => {
         const data = raw?.data ?? raw;
@@ -178,6 +178,13 @@ const UserProfile = () => {
         }
     };
 
+    const openModal = (session, e) => {
+        console.log('sel 상태:', sel);
+        console.log('모달 open 상태:', !!sel);
+        e.stopPropagation();
+        setSel(session);
+    }
+
     if (isLoading) return <div>로딩 중...</div>;
 
     if (!isLoggedIn) {
@@ -278,6 +285,7 @@ const UserProfile = () => {
                                                 name={key}
                                                 value={editedInfo[key]}
                                                 onChange={handleChange}
+                                                disabled={key === "email"}
                                             />
                                         )
                                     ) : (
@@ -305,7 +313,7 @@ const UserProfile = () => {
 
                     {/* 오른쪽: 최근 채팅 세션 */}
                     <div className="profile-right">
-                        <SessionList userId={userId}/>
+                        <SessionList openModal={openModal}/>
                     </div>
                 </div>
             </div>
@@ -316,6 +324,16 @@ const UserProfile = () => {
                 onLogout={handleLogout}
             />
             <ToastContainer position="top-center"/>
+
+            {/* ✅ 세션 상세 모달 */}
+            <SessionDetailModal
+                open={!!sel}
+                onClose={() => {
+                    console.log('onClose 호출됨, sel을 null로 설정');
+                    setSel(false)
+                }}
+                session={sel}
+            />
         </>
     );
 };
