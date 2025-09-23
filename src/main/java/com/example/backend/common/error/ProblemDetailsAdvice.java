@@ -1,4 +1,3 @@
-// common/error/ProblemDetailsAdvice.java
 package com.example.backend.common.error;
 
 import java.util.List;
@@ -17,17 +16,24 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.backend.common.error.validation.ValidationErrorProcessor;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 전역 예외 처리 - RFC 7807 ProblemDetail JSON 응답
+ * 기존 로직 완전 보장 + ValidationErrorProcessor 상세 로깅 추가
  */
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ProblemDetailsAdvice {
+
+	private final ValidationErrorProcessor validationErrorProcessor;
 
 	private String req(HttpServletRequest req) {
 		String qs = req.getQueryString();
@@ -46,9 +52,11 @@ public class ProblemDetailsAdvice {
 		return t;
 	}
 
-	// === 검증 예외들 ===
+	// === 검증 예외들 (기존 로직 완전 보장 + 상세 로깅 추가) ===
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+		// ✅ 기존 로직 완전 유지
 		Map<String, List<String>> errors = ex.getBindingResult().getFieldErrors()
 			.stream()
 			.collect(Collectors.groupingBy(
@@ -56,10 +64,14 @@ public class ProblemDetailsAdvice {
 				Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())
 			));
 
-		// 상세 로그
+		// ✅ 기존 로그 유지
 		log.warn("422 Validation failed: req={}, ex={}, msg={}, errors={}",
 			req(req), ex.getClass().getSimpleName(), ex.getMessage(), errors);
 
+		// ✅ 추가 상세 로깅
+		validationErrorProcessor.processBindingResult(ex.getBindingResult(), req(req));
+
+		// ✅ 기존 응답 구조 완전 유지
 		ProblemDetail pd = ProblemDetailFactory.createValidation("하나 이상의 필드가 유효하지 않습니다.", req);
 		pd.setProperty("code", "VALIDATION_FAILED");
 		pd.setProperty("errors", errors);
@@ -69,6 +81,7 @@ public class ProblemDetailsAdvice {
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
+		// ✅ 기존 로직 완전 유지
 		Map<String, List<String>> errors = ex.getConstraintViolations()
 			.stream()
 			.collect(Collectors.groupingBy(
@@ -76,9 +89,14 @@ public class ProblemDetailsAdvice {
 				Collectors.mapping(ConstraintViolation::getMessage, Collectors.toList())
 			));
 
+		// ✅ 기존 로그 유지
 		log.warn("400 Constraint violation: req={}, ex={}, msg={}, errors={}",
 			req(req), ex.getClass().getSimpleName(), ex.getMessage(), errors);
 
+		// ✅ 추가 상세 로깅
+		validationErrorProcessor.processConstraintViolations(ex.getConstraintViolations(), req(req));
+
+		// ✅ 기존 응답 구조 완전 유지
 		ProblemDetail pd = ProblemDetailFactory.createBadRequest("하나 이상의 매개변수가 유효하지 않습니다.", req);
 		pd.setProperty("code", "CONSTRAINT_VIOLATION");
 		pd.setProperty("errors", errors);
@@ -88,6 +106,7 @@ public class ProblemDetailsAdvice {
 
 	@ExceptionHandler(BindException.class)
 	public ResponseEntity<ProblemDetail> handleBind(BindException ex, HttpServletRequest req) {
+		// ✅ 기존 로직 완전 유지
 		Map<String, List<String>> errors = ex.getBindingResult().getFieldErrors()
 			.stream()
 			.collect(Collectors.groupingBy(
@@ -95,9 +114,14 @@ public class ProblemDetailsAdvice {
 				Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())
 			));
 
+		// ✅ 기존 로그 유지
 		log.warn("400 Bind failed: req={}, ex={}, msg={}, errors={}",
 			req(req), ex.getClass().getSimpleName(), ex.getMessage(), errors);
 
+		// ✅ 추가 상세 로깅
+		validationErrorProcessor.processBindingResult(ex.getBindingResult(), req(req));
+
+		// ✅ 기존 응답 구조 완전 유지
 		ProblemDetail pd = ProblemDetailFactory.createBadRequest("바인딩에 실패했습니다.", req);
 		pd.setProperty("code", "BINDING_FAILED");
 		pd.setProperty("errors", errors);
@@ -105,7 +129,8 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.badRequest().body(pd);
 	}
 
-	// === 도메인 예외들 ===
+	// === 모든 기존 예외 핸들러들 완전 동일 유지 ===
+
 	@ExceptionHandler(ConflictException.class)
 	public ResponseEntity<ProblemDetail> handleConflict(ConflictException ex, HttpServletRequest req) {
 		log.info("409 Conflict: req={}, code={}, field={}, msg={}",
@@ -176,7 +201,6 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd);
 	}
 
-	// === 일반 예외들 ===
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
 		log.info("400 IllegalArgument: req={}, msg={}", req(req), ex.getMessage());
@@ -210,29 +234,21 @@ public class ProblemDetailsAdvice {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
 	}
 
-	// === 최종 fallback ===
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, HttpServletRequest req) {
-		Throwable root = rootCause(ex);
-		log.error("500 Internal error: req={}, ex={}, msg={}, rootEx={}, rootMsg={}",
-			req(req), ex.getClass().getName(), ex.getMessage(),
-			root.getClass().getName(), root.getMessage(), ex);
-
-		ProblemDetail pd = ProblemDetailFactory.createInternalError(req);
-		pd.setProperty("code", "INTERNAL_ERROR");
-
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
-	}
-
 	// 1) JSON 역직렬화/본문 읽기 실패
 	@ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
 	public ResponseEntity<ProblemDetail> handleNotReadable(
 		org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest req) {
 
 		Throwable root = (ex.getCause() != null) ? ex.getCause() : ex;
-		log.warn("400 NotReadable: req={}, ex={}, msg={}, rootEx={}, rootMsg={}",
-			req(req), ex.getClass().getSimpleName(), ex.getMessage(),
-			root.getClass().getSimpleName(), root.getMessage());
+
+		// ✅ 더 상세한 디버깅 로그
+		log.warn("400 NotReadable DETAILS: req={}", req(req));
+		log.warn("400 NotReadable Exception: {}", ex.getClass().getName());
+		log.warn("400 NotReadable Message: {}", ex.getMessage());
+		log.warn("400 NotReadable Root Cause: {} - {}", root.getClass().getName(), root.getMessage());
+
+		// ✅ 스택 트레이스도 로깅 (임시)
+		log.warn("400 NotReadable Stack Trace:", ex);
 
 		ProblemDetail pd = ProblemDetailFactory.createBadRequest("요청 본문(JSON)을 해석할 수 없습니다.", req);
 		pd.setProperty("code", "MALFORMED_JSON");
@@ -282,5 +298,20 @@ public class ProblemDetailsAdvice {
 			Errors.TYPE_BAD_REQUEST, "Unsupported Media Type", ex.getMessage(), req);
 		pd.setProperty("code", "UNSUPPORTED_MEDIA_TYPE");
 		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(pd);
+	}
+
+	// === 최종 fallback (완전 동일) ===
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, HttpServletRequest req) {
+		Throwable root = rootCause(ex);
+		log.error("500 Internal error: req={}, ex={}, msg={}, rootEx={}, rootMsg={}",
+			req(req), ex.getClass().getName(), ex.getMessage(),
+			root.getClass().getName(), root.getMessage(), ex);
+
+		ProblemDetail pd = ProblemDetailFactory.createInternalError(req);
+		pd.setProperty("code", "INTERNAL_ERROR");
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
 	}
 }
