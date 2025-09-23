@@ -64,8 +64,6 @@ public interface UserMapper {
     @Mapping(target = "gender", source = "gender", qualifiedByName = "normalizeString")
     @Mapping(target = "phoneNumber", source = "phoneNumber", qualifiedByName = "normalizeString")
     @Mapping(target = "mentalState", source = "mentalState", qualifiedByName = "normalizeString")
-    @Mapping(target = "chatGoal", source = "chatGoal", qualifiedByName = "normalizeString")
-    @Mapping(target = "chatStyle", source = "chatStyle", qualifiedByName = "normalizeString")
     void applyUpdate(@MappingTarget UserEntity entity, UpdateRequest request);
 
     // === 소셜 사용자 생성 매핑 ===
