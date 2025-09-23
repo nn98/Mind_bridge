@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.example.backend.dto.chat.ChatMessageType; // ✅ 외부 enum import
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,33 +34,30 @@ public class ChatMessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id")  // "id" → "message_id"
-    private Long messageId;       // id → messageId
+    @Column(name = "message_id")
+    private Long messageId;
 
-    @Column(name = "session_id")
+    @Column(name = "session_id", nullable = false, length = 255)
     private String sessionId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false, columnDefinition = "enum('AI','USER')")
-    private MessageType messageType;
+    private ChatMessageType messageType; // ✅ 내부 enum 제거하고 외부 enum 사용
 
-    @Column(name = "message_content", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "message_content", columnDefinition = "TEXT")
     private String messageContent;
 
-    @Column(name = "emotion", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "emotion", columnDefinition = "TEXT")
     private String emotion;
 
-    @Column(name = "user_email", nullable = false, length = 255)
+    @Column(name = "user_email", length = 255)
     private String userEmail;
 
     @Column(name = "chat_style", nullable = false, length = 45)
-    private String chatStyle;
+    @Builder.Default
+    private String chatStyle = "default";
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = true, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    public enum MessageType {
-        USER, AI
-    }
 }
