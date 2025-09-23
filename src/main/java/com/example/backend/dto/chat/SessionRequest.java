@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 채팅 세션 저장 요청 DTO
@@ -19,6 +20,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class SessionRequest {
 
     @NotBlank(message = "세션ID는 필수입니다.")

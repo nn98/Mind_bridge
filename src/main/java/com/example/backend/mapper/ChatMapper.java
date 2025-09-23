@@ -1,4 +1,3 @@
-// ChatMapper - expression 방식으로 단순화
 package com.example.backend.mapper;
 
 import java.util.Map;
@@ -53,6 +52,8 @@ public abstract class ChatMapper {
 	@Mapping(target = "sessionId", ignore = false)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "primaryRisk", expression = "java(toStr(request.getRiskFactors()))")
+	@Mapping(target = "riskFactors", expression = "java(toStr(request.getPrimaryRisk()))")
 	public abstract ChatSessionEntity toEntity(SessionRequest request);
 
 	// === 분석 결과 Map → Entity ===
@@ -62,8 +63,8 @@ public abstract class ChatMapper {
 	@Mapping(target = "userName", expression = "java(toStr(payload.get(\"user_name\")))")
 	@Mapping(target = "summary", expression = "java(toStr(payload.get(\"summary\")))")
 	@Mapping(target = "emotions", expression = "java(toStr(payload.get(\"emotions\")))")
-	@Mapping(target = "primaryRisk", expression = "java(toStr(payload.get(\"primary_risk\")))")
-	@Mapping(target = "riskFactors", expression = "java(toStr(payload.get(\"risk_factors\")))")
+	@Mapping(target = "primaryRisk", expression = "java(toStr(payload.get(\"risk_factors\")))")
+	@Mapping(target = "riskFactors", expression = "java(toStr(payload.get(\"primary_risk\")))")
 	@Mapping(target = "protectiveFactors", expression = "java(toStr(payload.get(\"protective_factors\")))")
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
