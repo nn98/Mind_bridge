@@ -280,6 +280,9 @@ body {
     position: relative;
     overflow-y: hidden;
     overflow-x: hidden;
+
+    /* ✅ 관리자 페이지는 단순 다크색 */
+    background: var(--bg);
 }
 
 
@@ -634,10 +637,10 @@ body {
 }
 
 /* Emotion Background */
-.emotion-bg {
+.consult-wrap .emotion-bg {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    z-index: -5;
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease;
@@ -647,15 +650,15 @@ body {
     filter: blur(20px) saturate(1.2);
 }
 
-.emotion-bg.active {
+.consult-wrap .emotion-bg.active {
     opacity: 1;
 }
 
-.emotion-bg.layerA.active {
+.consult-wrap .emotion-bg.layerA.active {
     animation: waveMotionA 16s ease-in-out infinite;
 }
 
-.emotion-bg.layerB.active {
+.consult-wrap .emotion-bg.layerB.active {
     animation: waveMotionB 28s ease-in-out infinite alternate;
 }
 

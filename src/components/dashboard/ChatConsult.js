@@ -665,7 +665,7 @@ function ChatConsultInner({profile}) {
             }}>
                 <Silk
                     speed={10}
-                    scale={1.2}
+                    scale={1}
                     palette={EMOTION_PALETTE}
                     mix={emotionMix}
                     noiseIntensity={0.8}
@@ -927,46 +927,54 @@ export default function ChatConsult() {
             const style = document.createElement('style');
             style.id = 'gradient-animation-styles';
             style.textContent = `
-                @keyframes gradientShift {
-                    0% { background-position: 0% 50%; }
-                    25% { background-position: 100% 50%; }
-                    50% { background-position: 100% 100%; }
-                    75% { background-position: 0% 100%; }
-                    100% { background-position: 0% 50%; }
-                }
-                
-                .emotion-bg {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100vw;
-                    height: 100vh;
-                    z-index: -5;
-                    pointer-events: none;
-                }
-                
-                .emotion-bg::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 30%, transparent 70%);
-                    animation: pulseLight 8s ease-in-out infinite alternate;
-                }
-                @keyframes slideColors {
-                    0% { background-position: 0% 50%; }
-                    100% { background-position: 100% 50%; }
-                }
-                
-                @keyframes pulseLight {
-                    0% { opacity: 0.3; transform: scale(1); }
-                    100% { opacity: 0.8; transform: scale(1.1); }
-                }
-            `;
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      25% { background-position: 100% 50%; }
+      50% { background-position: 100% 100%; }
+      75% { background-position: 0% 100%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ✅ 상담 페이지 전용 */
+    .consult-wrap .emotion-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -5;
+      pointer-events: none;
+    }
+
+    .consult-wrap .emotion-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255,255,255,0.1) 0%,
+        rgba(255,255,255,0.05) 30%,
+        transparent 70%
+      );
+      animation: pulseLight 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes slideColors {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    @keyframes pulseLight {
+      0% { opacity: 0.3; transform: scale(1); }
+      100% { opacity: 0.8; transform: scale(1.1); }
+    }
+  `;
             document.head.appendChild(style);
         }
+
     }, [profile]);
 
     const isLoggedIn = !!profile;
