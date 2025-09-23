@@ -29,13 +29,14 @@ import com.example.backend.entity.UserEntity;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.security.RecentAuthenticationService;
+import com.example.backend.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserServiceImpl 통합 테스트")
 class UserServiceImplTest {
 
 	@InjectMocks
-	private UserServiceImpl userService;
+	private UserService userService;
 
 	@Mock
 	private UserRepository userRepository;
