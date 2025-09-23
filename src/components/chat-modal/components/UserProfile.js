@@ -21,7 +21,6 @@ const UserProfile = () => {
         other: "기타",
     };
     const [userInfo, setUserInfo] = useState({
-        id: "",
         fullName: "",
         nickname: "",
         email: "",
@@ -42,7 +41,6 @@ const UserProfile = () => {
     const normalizeUser = (raw, fallback = {}) => {
         const data = raw?.data ?? raw;
         return {
-            id: data?.id ?? fallback.id ?? userId ?? "",
             nickname: data?.nickname ?? fallback.nickname ?? "",
             email: data?.email ?? fallback.email ?? "",
             age: data?.age ?? fallback.age ?? "",
