@@ -134,11 +134,11 @@ public class ProblemDetailsAdvice {
 	@ExceptionHandler(ConflictException.class)
 	public ResponseEntity<ProblemDetail> handleConflict(ConflictException ex, HttpServletRequest req) {
 		log.info("409 Conflict: req={}, code={}, field={}, msg={}",
-			req(req), ex.code(), ex.field(), ex.getMessage());
+			req(req), ex.getCode(), ex.getField(), ex.getMessage());
 
 		ProblemDetail pd = ProblemDetailFactory.createConflict(ex.getMessage(), req);
-		pd.setProperty("code", ex.code());
-		pd.setProperty("field", ex.field());
+		pd.setProperty("code", ex.getCode());
+		pd.setProperty("field", ex.getField());
 
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(pd);
 	}
@@ -146,11 +146,11 @@ public class ProblemDetailsAdvice {
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<ProblemDetail> handleNotFound(NotFoundException ex, HttpServletRequest req) {
 		log.info("404 NotFound: req={}, code={}, field={}, msg={}",
-			req(req), ex.code(), ex.field(), ex.getMessage());
+			req(req), ex.getCode(), ex.getField(), ex.getMessage());
 
 		ProblemDetail pd = ProblemDetailFactory.createNotFound(ex.getMessage(), req);
-		pd.setProperty("code", ex.code());
-		pd.setProperty("field", ex.field());
+		pd.setProperty("code", ex.getCode());
+		pd.setProperty("field", ex.getField());
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
 	}
@@ -170,10 +170,10 @@ public class ProblemDetailsAdvice {
 	@ExceptionHandler(ForbiddenException.class)
 	public ResponseEntity<ProblemDetail> handleForbidden(ForbiddenException ex, HttpServletRequest req) {
 		log.info("403 Forbidden: req={}, code={}, msg={}",
-			req(req), ex.code(), ex.getMessage());
+			req(req), ex.getCode(), ex.getMessage());
 
 		ProblemDetail pd = ProblemDetailFactory.createForbidden(ex.getMessage(), req);
-		pd.setProperty("code", ex.code());
+		pd.setProperty("code", ex.getCode());
 
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd);
 	}
