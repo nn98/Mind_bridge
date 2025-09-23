@@ -4,17 +4,23 @@ import java.util.List;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.common.error.ForbiddenException;
+import com.example.backend.common.error.NotFoundException;
+import com.example.backend.dto.chat.ChatMessageDto;
 import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.dto.chat.ChatSessionDto;
 import com.example.backend.dto.chat.SessionRequest;
+import com.example.backend.dto.common.ApiResponse;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.security.SecurityUtil;
@@ -55,9 +61,19 @@ public class ChatController {
     }
 
     @GetMapping("messages/{sessionId}")
-    public ResponseEntity<List<ChatMessageEntity>> getMessages(@RequestParam String sessionId) {
-        List<ChatMessageEntity> result = chatService.getMessagesBySessionId(sessionId);
-        return ResponseEntity.ok(result);
+    @PreAuthorize("@chatAuth.canAccessSession(#sessionId, authentication.name)")
+    public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getMessages(
+        @PathVariable String sessionId,
+        Authentication authentication) {
+
+        try {
+            List<ChatMessageDto> result = chatService.getMessagesBySessionId(sessionId, authentication.getName());
+            return ResponseEntity.ok(ApiResponse.success(result, "메시지를 성공적으로 조회했습니다."));
+        } catch (NotFoundException e) {
+            throw new NotFoundException("세션을 찾을 수 없습니다.", "SESSION_NOT_FOUND", "sessionId");
+        } catch (ForbiddenException e) {
+            throw new ForbiddenException("세션 접근 권한이 없습니다.", "ACCESS_DENIED");
+        }
     }
 
     // ✅ 메시지 저장 (FastAPI → Spring)
