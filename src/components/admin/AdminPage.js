@@ -7,11 +7,14 @@ import "../../css/Admin.css";
 
 import AdminStats from "./components/AdminStats";
 import UsersTable from "./components/UsersTable";
-import CalendarPanel from "./components/CalendarPanel"; // ✅ 차트는 여기 안에서만 렌더링
+import CalendarPanel from "./components/CalendarPanel";
 import PostsPanel from "./components/PostsPanel";
 
 import {getAdminStats} from "./services/adminApi";
 import {useAuth} from "../../AuthContext";
+
+// ✅ MetallicPaintWrapper 로고
+import MetallicPaintWrapper from "./components/MetallicPaintWrapper";
 
 export default function AdminPage() {
     const [search, setSearch] = useState("");
@@ -55,18 +58,16 @@ export default function AdminPage() {
             case "users":
                 return (
                     <>
-                        {/* ✅ 유저 정보 섹션 헤더 */}
                         <div className="admin-section-header">
-                            <span className="admin-section-title-text">👤 유저 정보</span>
+                            <span className="admin-section-icon">👤</span>
+                            <span className="admin-section-title-text">유저 정보</span>
                         </div>
 
-                        {/* ✅ 통계 카드 */}
                         <AdminStats
                             totalUsers={stats.totalUsers}
                             totalPosts={stats.totalPosts}
                         />
 
-                        {/* ✅ 유저 닉네임 검색창 */}
                         <div className="user-search-bar">
                             <input
                                 type="text"
@@ -76,19 +77,12 @@ export default function AdminPage() {
                             />
                         </div>
 
-                        {/* ✅ 유저 테이블 */}
                         <UsersTable users={filteredUsers} showTitle={false}/>
                     </>
                 );
             case "calendar":
-                return (
-                    <>
-                        {/* 📅 캘린더 + 상담/차트 패널 (GenderAgeStats 포함) */}
-                        <CalendarPanel date={date} setDate={setDate}/>
-                    </>
-                );
+                return <CalendarPanel date={date} setDate={setDate}/>;
             case "posts":
-                // ✅ PostsPanel 은 내부에서 자체적으로 검색 처리
                 return <PostsPanel/>;
             default:
                 return (
@@ -116,13 +110,10 @@ export default function AdminPage() {
             {/* 🔥 사이드바 */}
             <aside className="admin-sidebar">
                 <Link to="/" className="admin-logo-link">
-                    <img
-                        src="/img/로고1.png"
-                        alt="Mind Bridge 로고"
-                        className="admin-logo"
-                    />
+                    <div style={{width: 200, height: 200, marginLeft: "-15px"}}>
+                        <MetallicPaintWrapper/>
+                    </div>
                 </Link>
-
                 <button
                     className={`side-btn ${section === "users" ? "active" : ""}`}
                     onClick={() => setSection("users")}
