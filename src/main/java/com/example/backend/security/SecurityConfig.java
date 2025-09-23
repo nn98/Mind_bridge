@@ -5,10 +5,11 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)  // ✅ 이게 있나요?
 @Slf4j
 public class SecurityConfig {
 
@@ -49,7 +50,6 @@ public class SecurityConfig {
                     "/api/auth/social/**",   // login, callback 포함
                     "/api/posts/public",
                     "/api/posts/recent",
-                    "/api/posts/*",          // /api/posts/{id} 공개 조회
                     "/actuator/health",
                     "/error",
                     "/favicon.ico",
@@ -57,6 +57,15 @@ public class SecurityConfig {
                     "/api/chat/message/save", // 채팅 메시지 저장 엔드포인트 공개
                     "/api/chat/session/save" // 상담 분석 저장 엔드포인트 공개
                 ).permitAll()
+
+                // ✅ 게시글 조회만 공개 (GET 요청만)
+                .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
+
+                // ✅ 게시글 쓰기/수정/삭제는 인증 필요
+                .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/posts/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
 
                 // 관리자 URL (다음 단계에서 @PreAuthorize로 보강)
                 .requestMatchers("/api/admin/**").authenticated()

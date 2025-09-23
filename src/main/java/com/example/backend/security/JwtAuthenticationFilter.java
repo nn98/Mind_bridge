@@ -129,6 +129,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("[JWT] Auth success for {}", email);
             filterChain.doFilter(request, response);
+            System.out.println("=== JWT 필터에서 설정된 권한 ===");
+            System.out.println("사용자: " + email);
+            userDetails.getAuthorities().forEach(auth ->
+                System.out.println("권한: " + auth.getAuthority()));
         } catch (Exception e) {
             log.warn("[JWT] Exception: {}", e.getMessage());
             ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
