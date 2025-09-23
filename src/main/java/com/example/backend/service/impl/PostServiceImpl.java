@@ -1,13 +1,12 @@
 package com.example.backend.service.impl;
 
-import static com.example.backend.common.constant.PostConstants.Visibility.*;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.backend.common.constant.PostConstants.Visibility.PUBLIC;
 import com.example.backend.common.error.BadRequestException;
 import com.example.backend.common.error.ForbiddenException;
 import com.example.backend.common.error.NotFoundException;
@@ -42,26 +41,26 @@ public class PostServiceImpl implements PostService {
         }
 
         UserEntity user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
 
         PostEntity post = PostEntity.builder()
-            .title(normalizeTitle(request.getTitle()))
-            .content(request.getContent().trim())
-            .userEmail(user.getEmail())
-            .userNickname(user.getNickname())
-            .visibility(request.getVisibility() != null ? request.getVisibility() : PUBLIC)
-            .status("active")
-            .likeCount(0)
-            .commentCount(0)
-            .viewCount(0)
-            .build();
+                .title(normalizeTitle(request.getTitle()))
+                .content(request.getContent().trim())
+                .userEmail(user.getEmail())
+                .userNickname(user.getNickname())
+                .visibility(request.getVisibility() != null ? request.getVisibility() : PUBLIC)
+                .status("active")
+                .likeCount(0)
+                .commentCount(0)
+                .viewCount(0)
+                .build();
 
         log.debug("[Post#create] entity before save: {}", post);
 
         PostEntity savedPost = postRepository.save(post);
 
         log.info("새 게시글 작성 완료 - ID: {}, 작성자: {}, 제목: {}",
-            savedPost.getPostId(), userEmail, savedPost.getTitle());
+                savedPost.getPostId(), userEmail, savedPost.getTitle());
 
         return mapToDetail(savedPost);
     }
@@ -76,9 +75,11 @@ public class PostServiceImpl implements PostService {
         }
 
         PostEntity post = postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
+                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
 
-        validateUserPermission(post, userEmail, "수정");
+        validateUserPermission(post, user, userEmail, "수정");
         updatePostFields(post, request);
 
         PostEntity updatedPost = postRepository.save(post);
@@ -97,9 +98,11 @@ public class PostServiceImpl implements PostService {
         }
 
         PostEntity post = postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
+                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", "USER_NOT_FOUND", "userEmail"));
 
-        validateUserPermission(post, userEmail, "삭제");
+        validateUserPermission(post, user, userEmail, "삭제");
         postRepository.deleteById(postId);
 
         log.info("게시글 삭제 완료 - ID: {}, 삭제자: {}", postId, userEmail);
@@ -173,7 +176,6 @@ public class PostServiceImpl implements PostService {
     }
 
     // ====== private helpers ======
-
     private String normalizeTitle(String title) {
         if (title == null || title.isBlank()) {
             return "제목 없음";
@@ -196,7 +198,12 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private void validateUserPermission(PostEntity post, String userEmail, String action) {
+    private void validateUserPermission(PostEntity post, UserEntity user, String userEmail, String action) {
+
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            return;
+        }
+
         if (!post.getUserEmail().equals(userEmail)) {
             throw new ForbiddenException("게시글 " + action + " 권한이 없습니다.", "FORBIDDEN_POST_" + action.toUpperCase());
         }
