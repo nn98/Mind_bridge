@@ -71,6 +71,7 @@ public class UserController {
     @PatchMapping("/account")
     @PreAuthorize("#request != null and isAuthenticated()")
     public ResponseEntity<Void> updateAccount(@Valid @RequestBody UpdateRequest request, Authentication authentication) {
+        log.info("request={}", request);
         String email = securityUtil.requirePrincipalEmail(authentication);
         userService.updateUser(email, request);
         return ResponseEntity.noContent().build();
