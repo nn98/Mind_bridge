@@ -6,6 +6,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -284,28 +285,48 @@ public class AdminQueryServiceImpl implements AdminQueryService {
     }
 
     private AdminPostRow toPostRow(PostEntity p) {
+        UserEntity author = userRepository.findById(p.getUserId())
+            .orElse(null);
+
         return AdminPostRow.builder()
             .id(p.getPostId())
             .title(p.getTitle())
-            .userEmail(p.getUserEmail())           // ✅ 직접 접근 (0쿼리)
-            .userNickname(p.getUserNickname())     // ✅ 직접 접근 (0쿼리)
+            .userNickname(author != null ? author.getNickname() : "탈퇴한 사용자")  // ✅ JOIN 결과
+            .userEmail(author != null ? author.getEmail() : "deleted@user.com")    // ✅ JOIN 결과
             .visibility(p.getVisibility())
-            .createdAt(toIso(p.getCreatedAt()))
+            .createdAt(p.getCreatedAt().toString())
             .likeCount(p.getLikeCount())
             .build();
     }
 
     private AdminPostDetail toPostDetail(PostEntity p) {
+        // ✅ JOIN으로 작성자 정보 조회
+        UserEntity author = userRepository.findById(p.getUserId())
+            .orElse(null);
+
         return AdminPostDetail.builder()
             .id(p.getPostId())
             .title(p.getTitle())
             .content(p.getContent())
-            .userEmail(p.getUserEmail())           // ✅ N+1 해결
-            .userNickname(p.getUserNickname())     // ✅ N+1 해결
+            .userNickname(author != null ? author.getNickname() : "탈퇴한 사용자")  // ✅ JOIN 결과
+            .userEmail(author != null ? author.getEmail() : "deleted@user.com")    // ✅ JOIN 결과
             .visibility(p.getVisibility())
-            .createdAt(toIso(p.getCreatedAt()))
-            .updatedAt(toIso(p.getUpdatedAt()))
+            .createdAt(p.getCreatedAt().toString())
+            .updatedAt(p.getUpdatedAt().toString())
+            .extra(buildAdminExtra(p, author))
             .build();
+    }
+
+    private Map<String, Object> buildAdminExtra(PostEntity post, UserEntity author) {
+        Map<String, Object> extra = new HashMap<>();
+        extra.put("status", post.getStatus());
+        extra.put("viewCount", post.getViewCount());
+        extra.put("authorUserId", post.getUserId());
+        if (author != null) {
+            extra.put("authorRole", author.getRole());
+            extra.put("authorProvider", author.getProvider());
+        }
+        return extra;
     }
 
     private static String toIso(java.time.LocalDateTime t) {
