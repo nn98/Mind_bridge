@@ -54,6 +54,12 @@ public class ChatController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("messages/{sessionId}")
+    public ResponseEntity<List<ChatMessageEntity>> getMessages(@RequestParam String sessionId) {
+        List<ChatMessageEntity> result = chatService.getMessagesBySessionId(sessionId);
+        return ResponseEntity.ok(result);
+    }
+
     // ✅ 메시지 저장 (FastAPI → Spring)
     @PostMapping("/message/save")
     public ResponseEntity<ChatMessageEntity> saveMessage(@RequestBody ChatMessageRequest dto) {
