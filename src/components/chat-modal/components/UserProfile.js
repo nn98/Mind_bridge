@@ -1,20 +1,25 @@
 // src/components/UserProfile.jsx
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import axios from "axios";
-import { BACKEND_URL, MENTAL_STATES } from "../constants";
+import {BACKEND_URL, MENTAL_STATES} from "../constants";
 import PasswordChangeModal from "./PasswordChangeModal";
-import { toast, ToastContainer } from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../../../AuthContext";
+import {useAuth} from "../../../AuthContext";
 
 // 추가
 import RedirectLayout from "../../layout/RedirectLayout";
 import SessionList from "./SessionList"; // 오른쪽 세션 리스트뷰
 
 const UserProfile = () => {
-    const { profile, applyProfileUpdate, logoutSuccess } = useAuth();
+    const {profile, applyProfileUpdate, logoutSuccess} = useAuth();
     const isLoggedIn = !!profile;
 
+    const GENDER_MAP = {
+        male: "남성",
+        female: "여성",
+        other: "기타",
+    };
     const [userInfo, setUserInfo] = useState({
         id: "",
         fullName: "",
@@ -26,7 +31,7 @@ const UserProfile = () => {
         chatGoal: "",
     });
 
-    const [editedInfo, setEditedInfo] = useState({ ...userInfo });
+    const [editedInfo, setEditedInfo] = useState({...userInfo});
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -60,8 +65,8 @@ const UserProfile = () => {
     }, [isLoggedIn, profile]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setEditedInfo((prev) => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setEditedInfo((prev) => ({...prev, [name]: value}));
     };
 
     const handleEdit = () => setIsEditing(true);
@@ -72,11 +77,11 @@ const UserProfile = () => {
 
     const handleSave = async () => {
         try {
-            const payload = { ...editedInfo, userId };
+            const payload = {...editedInfo, userId};
             console.log("payload", payload);
             await axios.patch(`${BACKEND_URL}/api/users/account`, payload, {
                 withCredentials: true,
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
             });
             setUserInfo(payload);
             applyProfileUpdate(payload);
@@ -89,7 +94,7 @@ const UserProfile = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
+            await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, {withCredentials: true});
             logoutSuccess();
             window.location.href = "/";
         } catch (err) {
@@ -99,7 +104,7 @@ const UserProfile = () => {
 
     const handleDeleteAccount = async () => {
         try {
-            await axios.delete(`${BACKEND_URL}/api/users/account`, { withCredentials: true });
+            await axios.delete(`${BACKEND_URL}/api/users/account`, {withCredentials: true});
             logoutSuccess();
             toast.success("회원 탈퇴가 완료되었습니다.");
             window.location.href = "/";
@@ -197,7 +202,9 @@ const UserProfile = () => {
                                                 onChange={handleChange}
                                             >
                                                 {MENTAL_STATES.map((s) => (
-                                                    <option key={s} value={s}>{s}</option>
+                                                    <option key={s} value={s}>
+                                                        {s}
+                                                    </option>
                                                 ))}
                                             </select>
                                         ) : (
@@ -209,7 +216,11 @@ const UserProfile = () => {
                                             />
                                         )
                                     ) : (
-                                        <p>{userInfo[key] || "─"}</p>
+                                        <p>
+                                            {key === "gender"
+                                                ? GENDER_MAP[userInfo.gender] || "─"
+                                                : userInfo[key] || "─"}
+                                        </p>
                                     )}
                                 </div>
                             ))}
@@ -229,7 +240,7 @@ const UserProfile = () => {
 
                     {/* 오른쪽: 최근 채팅 세션 */}
                     <div className="profile-right">
-                        <SessionList userId={userId} />
+                        <SessionList userId={userId}/>
                     </div>
                 </div>
             </div>
@@ -239,7 +250,7 @@ const UserProfile = () => {
                 onClose={() => setIsPasswordModalOpen(false)}
                 onLogout={handleLogout}
             />
-            <ToastContainer position="top-center" />
+            <ToastContainer position="top-center"/>
         </>
     );
 };
