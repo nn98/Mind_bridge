@@ -24,6 +24,7 @@ const UserProfile = () => {
         id: "",
         fullName: "",
         nickname: "",
+        email: "",
         phoneNumber: "",
         gender: "",
         age: "",
@@ -77,8 +78,12 @@ const UserProfile = () => {
 
     const handleSave = async () => {
         try {
-            const payload = {...editedInfo, userId};
-            console.log("payload", payload);
+            const payload = Object.fromEntries(
+                Object.entries({...editedInfo}).map(([key, value]) => [
+                    key,
+                    value === "" ? null : value
+                ])
+            );
             await axios.patch(`${BACKEND_URL}/api/users/account`, payload, {
                 withCredentials: true,
                 headers: {"Content-Type": "application/json"},
@@ -88,7 +93,17 @@ const UserProfile = () => {
             setIsEditing(false);
             toast.success("회원 정보가 저장되었습니다.");
         } catch (err) {
-            toast.error(err.response?.data?.message || "저장 실패");
+            handleSaveError(err);
+        }
+    };
+
+// ✅ 에러 처리 전용 함수
+    const handleSaveError = (error) => {
+        const response = error.response?.data;
+
+        if (!response) {
+            toast.error("네트워크 연결을 확인해주세요.");
+            return;
         }
     };
 
@@ -147,8 +162,8 @@ const UserProfile = () => {
                             </select>
                         </div>
                         <span className="badge">
-                            {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
-                        </span>
+              {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
+            </span>
                     </div>
 
                     {/* 우측 버튼 */}

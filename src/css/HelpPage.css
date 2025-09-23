@@ -32,21 +32,6 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 다크모드 지원 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: #1e1b4b;
-        --bg-secondary: #312e81;
-        --glass-bg: rgba(49, 46, 129, 0.9);
-        --glass-border: rgba(161, 140, 209, 0.2);
-
-        --text-primary: #f1f5f9;
-        --text-secondary: #c2b2ff;
-        --text-accent: #a78bfa;
-        --text-muted: #8b5cf6;
-    }
-}
-
 /* ===================
    전체 레이아웃
 =================== */

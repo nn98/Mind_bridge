@@ -612,43 +612,45 @@ body,
 
 /* ========== Pagination ========== */
 .pagination {
-    display: flex;
+    display: flex !important; /* 강제 flex */
+    flex-direction: row !important; /* ✅ 무조건 가로 */
     justify-content: center;
+    align-items: center;
+    gap: 12px;
     margin-top: 1.5rem;
-    gap: 8px;
 }
 
 .pagination button {
-    padding: 8px 16px;
-    border-radius: 10px;
-    border: 2px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
     cursor: pointer;
-    font-weight: 700;
-    background: #ffffff;
-    color: #4a5568;
-    transition: all 0.3s ease;
-    min-width: 44px;
-}
-
-.pagination button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    border-color: #667eea;
-    color: #667eea;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
-}
-
-.pagination button.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #ffffff;
-    border-color: #667eea;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: #ede9fe;
+    color: #5b21b6;
+    flex-shrink: 0; /* ✅ 버튼 크기 줄어드는 거 방지 */
 }
 
 .pagination button:disabled {
-    opacity: 0.4;
+    background: #f1f5f9;
+    color: #9ca3af;
     cursor: not-allowed;
-    transform: none;
 }
+
+.pagination button:hover:not(:disabled) {
+    background: #ddd6fe;
+    transform: translateY(-2px);
+}
+
+.pagination .page-info {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2d3748;
+    white-space: nowrap; /* ✅ 줄바꿈 금지 */
+}
+
 
 /* ========== Graphs - 완성된 부분 ========== */
 .triangle-graph,
@@ -761,11 +763,11 @@ body,
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000; /* ✅ 최상단 */
     animation: fadeIn 0.3s ease;
 }
 
@@ -779,22 +781,23 @@ body,
 }
 
 .modal-card {
+    position: relative;
     width: min(800px, 92vw);
     max-height: 90vh;
-    overflow: auto;
     background: #ffffff;
-    border-radius: 24px;
+    border-radius: 20px;
     padding: 2rem;
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.3),
-    0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e5e7eb;
+    overflow-y: auto;
+    z-index: 2100;
+    animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(32px) scale(0.96);
+        transform: translateY(30px) scale(0.97);
     }
     to {
         opacity: 1;
@@ -806,71 +809,118 @@ body,
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-head h3 {
+.modal-head h4 {
     margin: 0;
-    color: #2d3748;
-    font-size: 1.5rem;
-    font-weight: 800;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1f2937;
 }
 
 .modal-close {
-    background: #f1f5f9;
+    background: #f3f4f6;
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
-    color: #4a5568;
-    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    color: #4b5563;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-    background: #e2e8f0;
-    color: #2d3748;
+    background: #e5e7eb;
+    color: #111827;
     transform: rotate(90deg);
 }
 
 .modal-meta {
     display: grid;
-    gap: 12px;
-    margin: 20px 0;
-    color: #4a5568;
-    font-size: 1rem;
+    gap: 8px;
+    margin: 1rem 0 1.5rem;
+    color: #374151;
+    font-size: 0.95rem;
     line-height: 1.5;
 }
 
 .modal-graph {
     display: flex;
     justify-content: center;
-    margin: 24px 0;
+    align-items: center;
+    margin: 20px 0;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f9fafb;
 }
 
 .modal-graph .triangle-graph,
 .modal-graph .polygon-graph {
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
+}
+
+/* 그래프 라벨/퍼센트 크기 */
+.tri-label, .poly-label {
+    font-size: 13px;
+    font-weight: 700;
+    fill: #1f2937;
+}
+
+.tri-pct, .poly-value {
+    font-size: 12px;
+    font-weight: 600;
+    fill: #4b5563;
+}
+
+.modal-notes {
+    margin-top: 1.5rem;
 }
 
 .modal-notes h5 {
-    margin: 20px 0 8px;
-    color: #2d3748;
-    font-size: 1.1rem;
+    margin: 0 0 8px;
+    font-size: 1.05rem;
     font-weight: 700;
+    color: #1f2937;
 }
 
 .modal-notes p {
-    color: #4a5568;
+    margin: 6px 0;
     line-height: 1.6;
-    margin: 8px 0;
+    color: #4b5563;
+    font-size: 0.95rem;
+}
+
+/* 감정 리스트 */
+.emotion-list {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.emotion-list h5 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.emotion-list ul {
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 /* ========== Responsive Design ========== */
