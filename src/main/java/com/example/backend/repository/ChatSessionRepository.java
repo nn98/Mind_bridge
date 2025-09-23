@@ -19,4 +19,6 @@ public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, 
 
     @Query("SELECT new com.example.backend.dto.chat.RiskAssessment(c.riskFactors, c.primaryRisk, c.createdAt, c.sessionId, c.userEmail) FROM ChatSessionEntity c WHERE c.userEmail = :userEmail")
     List<RiskAssessment> findRiskAssessmentByUserEmail(@Param("userEmail") String userEmail);
+    boolean existsBySessionIdAndUserEmail(String sessionId, String userEmail);
+    Optional<ChatSessionEntity> findBySessionIdAndUserEmail(String sessionId, String userEmail);
 }

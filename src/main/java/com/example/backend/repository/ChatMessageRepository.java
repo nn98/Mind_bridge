@@ -15,4 +15,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
     List<ChatMessageEntity> findAllBySessionId(String sessionId);
 
     long countBySessionId(String sessionId);
+
+    List<ChatMessageEntity> findBySessionIdAndUserEmailOrderByCreatedAtAsc(String sessionId, String userEmail);
+
 }
