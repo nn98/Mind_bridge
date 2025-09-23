@@ -93,7 +93,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN') or hasRole('admin')")
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ROLE_ADMIN') or hasRole('admin')")
     public ResponseEntity<ApiResponse<Detail>> updatePost(
         @PathVariable Long id,
         @Valid @RequestBody UpdateRequest request,
@@ -103,7 +103,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN') or hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")  // 이것만 먼저 테스트
     public ResponseEntity<ApiResponse<String>> deletePost(
         @PathVariable Long id,
         Authentication authentication) {

@@ -21,12 +21,7 @@ public class PostAuth {
 	 * - 관리자 권한은 @PreAuthorize의 hasRole('ADMIN')에서 처리
 	 */
 	public boolean canModify(Long postId, String requesterEmail) {
-		System.out.println("=== PostAuth.canModify 호출됨 ===");
-		System.out.println("postId: " + postId);
-		System.out.println("requesterEmail: " + requesterEmail);
-
 		if (postId == null || requesterEmail == null || requesterEmail.isBlank()) {
-			System.out.println("=== 초기 검증 실패 ===");
 			return false;
 		}
 
