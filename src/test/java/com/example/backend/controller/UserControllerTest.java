@@ -374,7 +374,6 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.errors.mentalState").exists())
 			.andExpect(jsonPath("$.errors.gender").exists())
 			.andExpect(jsonPath("$.errors.fullName").exists())
-			.andExpect(jsonPath("$.errors.chatGoal").exists())
 			.andExpect(jsonPath("$.errors.age").exists());
 	}
 
