@@ -8,6 +8,6 @@ public class ConflictException extends RuntimeException {
 		this.code = code;
 		this.field = field;
 	}
-	public String code() { return code; }
-	public String field() { return field; }
+	public String getCode() { return code; }
+	public String getField() { return field; }
 }
