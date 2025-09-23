@@ -16,6 +16,11 @@ const UserProfile = () => {
     const {profile, applyProfileUpdate, logoutSuccess} = useAuth();
     const isLoggedIn = !!profile;
 
+    const GENDER_MAP = {
+        male: "남성",
+        female: "여성",
+        other: "기타",
+    };
     const [userInfo, setUserInfo] = useState({
         fullName: "",
         nickname: "",
@@ -99,58 +104,6 @@ const UserProfile = () => {
             toast.error("네트워크 연결을 확인해주세요.");
             return;
         }
-
-        // 필드별 에러 처리
-        if (response.field && response.detail) {
-            const fieldName = getFieldDisplayName(response.field);
-            toast.error(`${fieldName}: ${response.detail}`);
-
-            // 해당 필드에 포커스 (옵션)
-            focusErrorField(response.field);
-            return;
-        }
-
-        // 검증 에러 (여러 필드)
-        if (response.errors) {
-            const firstError = Object.entries(response.errors)[0];
-            if (firstError) {
-                const [field, messages] = firstError;
-                const fieldName = getFieldDisplayName(field);
-                toast.error(`${fieldName}: ${messages[0]}`);
-                focusErrorField(field);
-            }
-            return;
-        }
-
-        // 일반 메시지
-        toast.error(response.detail || "저장에 실패했습니다.");
-    };
-
-// ✅ 필드명 한글 변환
-    const getFieldDisplayName = (field) => {
-        const fieldNames = {
-            'nickname': '닉네임',
-            'email': '이메일',
-            'phoneNumber': '전화번호',
-            'age': '나이',
-            'gender': '성별',
-            'fullName': '이름',
-            'mentalState': '정신상태',
-            'chatGoal': '채팅 목표',
-            'chatStyle': '채팅 스타일'
-        };
-        return fieldNames[field] || field;
-    };
-
-// ✅ 에러 필드에 포커스 (옵션)
-    const focusErrorField = (fieldName) => {
-        setTimeout(() => {
-            const element = document.querySelector(`[name="${fieldName}"]`);
-            if (element) {
-                element.focus();
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 100);
     };
 
     const handleLogout = async () => {
@@ -270,7 +223,9 @@ const UserProfile = () => {
                                                 onChange={handleChange}
                                             >
                                                 {MENTAL_STATES.map((s) => (
-                                                    <option key={s} value={s}>{s}</option>
+                                                    <option key={s} value={s}>
+                                                        {s}
+                                                    </option>
                                                 ))}
                                             </select>
                                         ) : (
@@ -283,7 +238,11 @@ const UserProfile = () => {
                                             />
                                         )
                                     ) : (
-                                        <p>{userInfo[key] || "─"}</p>
+                                        <p>
+                                            {key === "gender"
+                                                ? GENDER_MAP[userInfo.gender] || "─"
+                                                : userInfo[key] || "─"}
+                                        </p>
                                     )}
                                 </div>
                             ))}
