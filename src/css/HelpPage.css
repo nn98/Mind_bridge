@@ -32,6 +32,13 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%; /* 화면 높이 보장 */
+}
+
 /* ===================
    전체 레이아웃
 =================== */
@@ -46,7 +53,7 @@
     line-height: 1.6;
 }
 
-.help-page > * {
+.help-page > *:not(.hp-modal-backdrop) {
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -367,14 +374,13 @@
 =================== */
 .hp-modal-backdrop {
     position: fixed;
-    inset: 0;
+    inset: 0; /* top:0, right:0, bottom:0, left:0 */
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.5); /* 반투명 검정 */
     backdrop-filter: blur(8px);
-    padding: 2rem;
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -398,6 +404,7 @@
     overflow: hidden;
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+    margin: 0 1rem; /* 🔑 작은 화면 여백은 모달에 줌 */
 }
 
 @keyframes modalSlideIn {
@@ -450,6 +457,34 @@
     max-height: calc(100vh - 12rem);
     overflow-y: auto;
 }
+
+.hp-modal-content p {
+    margin: 0 0 1rem;
+    text-align: justify; /* 양쪽 정렬 */
+}
+
+/* 제목 */
+.hp-modal-content h1,
+.hp-modal-content h2,
+.hp-modal-content h3 {
+    margin: 1.5rem 0 0.75rem;
+    font-weight: 700;
+    color: black;
+    line-height: 1.4;
+}
+
+/* 리스트 */
+.hp-modal-content ul,
+.hp-modal-content ol {
+    padding-left: 1.5rem;
+    margin: 0 0 1rem;
+}
+
+/* 리스트 아이템 */
+.hp-modal-content li {
+    margin: 0.25rem 0;
+}
+
 
 .hp-modal-content::-webkit-scrollbar {
     width: 6px;
@@ -534,10 +569,6 @@
 }
 
 @media (max-width: 480px) {
-    .hp-modal-backdrop {
-        padding: 1rem;
-    }
-
     .hp-modal-title {
         padding: 1.5rem 3rem 1rem 1.5rem;
         font-size: 1.25rem;
@@ -609,9 +640,7 @@
    접근성 개선
 =================== */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
