@@ -26,6 +26,7 @@ import com.example.backend.dto.post.Summary;
 import com.example.backend.dto.post.UpdateRequest;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.mapper.PostMapper;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
 
@@ -42,8 +43,14 @@ class PostServiceTest {
 	@Mock
 	private UserRepository userRepository;
 
+	@Mock  // ✅ PostMapper Mock 추가
+	private PostMapper postMapper;
+
 	private UserEntity testUser;
+	private UserEntity adminUser;
 	private PostEntity testPost;
+	private Detail testDetail;
+	private Summary testSummary;
 
 	@BeforeEach
 	void setUp() {
@@ -53,6 +60,14 @@ class PostServiceTest {
 			.nickname("테스트사용자")
 			.fullName("테스트 사용자")
 			.role("USER")
+			.build();
+
+		adminUser = UserEntity.builder()
+			.userId(2L)
+			.email("admin@example.com")
+			.nickname("관리자")
+			.fullName("관리자")
+			.role("ADMIN")
 			.build();
 
 		testPost = PostEntity.builder()
@@ -68,6 +83,27 @@ class PostServiceTest {
 			.createdAt(LocalDateTime.now())
 			.updatedAt(LocalDateTime.now())
 			.build();
+
+		testDetail = new Detail();
+		testDetail.setId(1L);
+		testDetail.setTitle("테스트 게시글");
+		testDetail.setContent("테스트 내용입니다.");
+		testDetail.setUserEmail("user@example.com");
+		testDetail.setUserNickname("테스트사용자");
+		testDetail.setVisibility("public");
+		testDetail.setLikeCount(10);
+		testDetail.setCommentCount(5);
+		testDetail.setCreatedAt(LocalDateTime.now());
+		testDetail.setUpdatedAt(LocalDateTime.now());
+
+		testSummary = new Summary();
+		testSummary.setId(1L);
+		testSummary.setContentPreview("테스트 내용입니다.");
+		testSummary.setUserNickname("테스트사용자");
+		testSummary.setVisibility("public");
+		testSummary.setLikeCount(10);
+		testSummary.setCommentCount(5);
+		testSummary.setCreatedAt(LocalDateTime.now());
 	}
 
 	@Nested
@@ -86,24 +122,28 @@ class PostServiceTest {
 
 			given(userRepository.findByEmail("user@example.com"))
 				.willReturn(Optional.of(testUser));
-			given(userRepository.findById(1L))
-				.willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock
 
-			ArgumentCaptor<PostEntity> captor = ArgumentCaptor.forClass(PostEntity.class);
-			willAnswer(invocation -> {
-				PostEntity entity = invocation.getArgument(0);
-				entity.setPostId(1L);
-				entity.setCreatedAt(LocalDateTime.now());
-				entity.setUpdatedAt(LocalDateTime.now());
-				return entity;
-			}).given(postRepository).save(captor.capture());
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toEntity(request, testUser))
+				.willReturn(testPost);
+
+			given(postRepository.save(testPost))
+				.willReturn(testPost);
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toDetail(testPost, userRepository))
+				.willReturn(testDetail);
 
 			// when
 			Detail result = postService.createPost(request, "user@example.com");
 
 			// then
+			assertThat(result).isNotNull();
 			assertThat(result.getUserEmail()).isEqualTo("user@example.com");
 			assertThat(result.getUserNickname()).isEqualTo("테스트사용자");
+
+			verify(postMapper).toEntity(request, testUser);
+			verify(postMapper).toDetail(testPost, userRepository);
 		}
 
 		@Test
@@ -122,7 +162,6 @@ class PostServiceTest {
 			assertThatThrownBy(() -> postService.createPost(request, "nonexistent@example.com"))
 				.isInstanceOf(NotFoundException.class)
 				.hasMessage("사용자를 찾을 수 없습니다.");
-			// ✅ getCode() 검증 제거 (PostService에서 code를 제대로 설정하지 않는 것 같음)
 		}
 	}
 
@@ -136,10 +175,12 @@ class PostServiceTest {
 			// given
 			given(userRepository.findByEmail("user@example.com"))
 				.willReturn(Optional.of(testUser));
-			given(postRepository.findByUserIdOrderByCreatedAtDesc(1L))  // ✅ userId 메서드
+			given(postRepository.findByUserIdOrderByCreatedAtDesc(1L))
 				.willReturn(List.of(testPost));
-			given(userRepository.findById(1L))
-				.willReturn(Optional.of(testUser));
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toDetailList(List.of(testPost), userRepository))
+				.willReturn(List.of(testDetail));
 
 			// when
 			List<Detail> result = postService.getPostsByUser("user@example.com");
@@ -149,6 +190,8 @@ class PostServiceTest {
 			Detail detail = result.get(0);
 			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
 			assertThat(detail.getUserNickname()).isEqualTo("테스트사용자");
+
+			verify(postMapper).toDetailList(List.of(testPost), userRepository);
 		}
 
 		@Test
@@ -157,8 +200,10 @@ class PostServiceTest {
 			// given
 			given(postRepository.findAllByOrderByCreatedAtDesc())
 				.willReturn(List.of(testPost));
-			given(userRepository.findById(1L))
-				.willReturn(Optional.of(testUser));  // ✅ JOIN용 Mock
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toDetailList(List.of(testPost), userRepository))
+				.willReturn(List.of(testDetail));
 
 			// when
 			List<Detail> result = postService.getAllPosts();
@@ -167,16 +212,20 @@ class PostServiceTest {
 			assertThat(result).hasSize(1);
 			Detail detail = result.get(0);
 			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
+
+			verify(postMapper).toDetailList(List.of(testPost), userRepository);
 		}
 
 		@Test
 		@DisplayName("공개 게시글 조회 성공")
 		void getPublicPosts_성공() {
 			// given
-			given(postRepository.findByVisibilityOrderByCreatedAtDesc("public"))  // ✅ 소문자로 변경
+			given(postRepository.findByVisibilityOrderByCreatedAtDesc("public"))
 				.willReturn(List.of(testPost));
-			given(userRepository.findById(1L))
-				.willReturn(Optional.of(testUser));
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toSummaryList(List.of(testPost), userRepository))
+				.willReturn(List.of(testSummary));
 
 			// when
 			List<Summary> result = postService.getPublicPosts();
@@ -185,14 +234,20 @@ class PostServiceTest {
 			assertThat(result).hasSize(1);
 			Summary summary = result.get(0);
 			assertThat(summary.getUserNickname()).isEqualTo("테스트사용자");
+
+			verify(postMapper).toSummaryList(List.of(testPost), userRepository);
 		}
 
 		@Test
 		@DisplayName("게시글 상세 조회 성공")
 		void getPostDetail_성공() {
 			// given
-			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-			given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+			given(postRepository.findById(1L))
+				.willReturn(Optional.of(testPost));
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toDetail(testPost, userRepository))
+				.willReturn(testDetail);
 
 			// when
 			Optional<Detail> result = postService.getPostDetail(1L);
@@ -201,6 +256,8 @@ class PostServiceTest {
 			assertThat(result).isPresent();
 			Detail detail = result.get();
 			assertThat(detail.getUserEmail()).isEqualTo("user@example.com");
+
+			verify(postMapper).toDetail(testPost, userRepository);
 		}
 	}
 
@@ -217,16 +274,22 @@ class PostServiceTest {
 				.build();
 
 			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-			given(userRepository.findByEmail("user@example.com"))  // ✅ 권한 검증용
+			given(userRepository.findByEmail("user@example.com"))
 				.willReturn(Optional.of(testUser));
-			given(userRepository.findById(1L)).willReturn(Optional.of(testUser));  // ✅ JOIN용
 			given(postRepository.save(testPost)).willReturn(testPost);
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toDetail(testPost, userRepository))
+				.willReturn(testDetail);
 
 			// when
 			Detail result = postService.updatePost(1L, request, "user@example.com");
 
 			// then
 			assertThat(testPost.getContent()).isEqualTo("수정된 내용");
+			assertThat(result).isNotNull();
+
+			verify(postMapper).toDetail(testPost, userRepository);
 		}
 
 		@Test
@@ -241,10 +304,11 @@ class PostServiceTest {
 				.userId(2L)
 				.email("other@example.com")
 				.nickname("다른사용자")
+				.role("USER")
 				.build();
 
 			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-			given(userRepository.findByEmail("other@example.com"))  // ✅ 다른 사용자
+			given(userRepository.findByEmail("other@example.com"))
 				.willReturn(Optional.of(otherUser));
 
 			// when & then
@@ -258,7 +322,7 @@ class PostServiceTest {
 		void updatePost_빈내용_BadRequestException() {
 			// given
 			UpdateRequest request = UpdateRequest.builder()
-				.content("")  // 빈 내용
+				.content("")
 				.build();
 
 			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
@@ -268,7 +332,7 @@ class PostServiceTest {
 			// when & then
 			assertThatThrownBy(() -> postService.updatePost(1L, request, "user@example.com"))
 				.isInstanceOf(BadRequestException.class)
-				.hasMessage("게시글 내용은 비워둘 수 없습니다.");  // ✅ 실제 메시지로 수정
+				.hasMessage("게시글 내용은 비워둘 수 없습니다.");
 		}
 	}
 
@@ -281,7 +345,7 @@ class PostServiceTest {
 		void deletePost_성공() {
 			// given
 			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-			given(userRepository.findByEmail("user@example.com"))  // ✅ 권한 검증용
+			given(userRepository.findByEmail("user@example.com"))
 				.willReturn(Optional.of(testUser));
 
 			// when
@@ -299,10 +363,11 @@ class PostServiceTest {
 				.userId(2L)
 				.email("other@example.com")
 				.nickname("다른사용자")
+				.role("USER")
 				.build();
 
 			given(postRepository.findById(1L)).willReturn(Optional.of(testPost));
-			given(userRepository.findByEmail("other@example.com"))  // ✅ 다른 사용자
+			given(userRepository.findByEmail("other@example.com"))
 				.willReturn(Optional.of(otherUser));
 
 			// when & then
@@ -322,7 +387,7 @@ class PostServiceTest {
 			// given
 			given(userRepository.findByEmail("user@example.com"))
 				.willReturn(Optional.of(testUser));
-			given(postRepository.countByUserIdAndVisibility(1L, "public"))  // ✅ userId 메서드
+			given(postRepository.countByUserIdAndVisibility(1L, "public"))
 				.willReturn(5L);
 
 			// when
@@ -338,8 +403,10 @@ class PostServiceTest {
 			// given
 			given(postRepository.findTopNByOrderByCreatedAtDesc(5))
 				.willReturn(List.of(testPost));
-			given(userRepository.findById(1L))
-				.willReturn(Optional.of(testUser));
+
+			// ✅ PostMapper Mock 설정
+			given(postMapper.toSummaryList(List.of(testPost), userRepository))
+				.willReturn(List.of(testSummary));
 
 			// when
 			List<Summary> result = postService.getRecentPosts(5);
@@ -348,6 +415,8 @@ class PostServiceTest {
 			assertThat(result).hasSize(1);
 			Summary summary = result.get(0);
 			assertThat(summary.getUserNickname()).isEqualTo("테스트사용자");
+
+			verify(postMapper).toSummaryList(List.of(testPost), userRepository);
 		}
 	}
 }
