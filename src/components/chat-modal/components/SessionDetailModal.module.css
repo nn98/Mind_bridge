@@ -41,9 +41,6 @@
     display: none; /* Chrome, Safari, Opera */
 }
 
-.modalCard:hover {
-    transform: scale(1.002);
-}
 
 .modalHead {
     display: flex;

@@ -58,7 +58,6 @@ const UsersTable = ({users = []}) => {
 
             {/* 페이지네이션 */}
             <div className="pagination">
-                <div className="total">총 {users.length}명</div>
                 <div className="pager">
                     <button
                         className="btn"

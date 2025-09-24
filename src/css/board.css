@@ -1445,62 +1445,6 @@ button:hover {
     }
 }
 
-/* ===== 다크모드 지원 ===== */
-@media (prefers-color-scheme: dark) {
-    .board-section {
-        background: #1a1a1a;
-        color: #e0e0e0;
-    }
-
-    .post-card, .board-controls, .pagination-bar, .featured-post, .write-form {
-        background: #2d2d2d;
-        border-color: #404040;
-    }
-
-    .post-card:hover {
-        border-color: #a18cd1;
-    }
-
-    .post-content, .featured-body {
-        color: #e0e0e0;
-    }
-
-    .search-input, .sort-select, .content-textarea, .edit-form {
-        background: #2d2d2d;
-        border-color: #404040;
-        color: #e0e0e0;
-    }
-
-    .search-input:focus, .sort-select:focus, .content-textarea:focus, .edit-form:focus {
-        border-color: #a18cd1;
-        background: #333;
-    }
-
-    .tab-btn, .view-btn {
-        color: #ccc;
-    }
-
-    .tab-btn.active, .view-btn.active {
-        background: #2d2d2d;
-        color: #a18cd1;
-    }
-
-    .page-btn {
-        background: #2d2d2d;
-        border-color: #404040;
-        color: #e0e0e0;
-    }
-
-    .page-btn:hover:not([disabled]):not(.is-active) {
-        background: #333;
-        border-color: #a18cd1;
-    }
-
-    .loading-container, .error-container, .empty-container {
-        background: #2d2d2d;
-    }
-}
-
 /* ===== 접근성 개선 ===== */
 @media (prefers-reduced-motion: reduce) {
     * {

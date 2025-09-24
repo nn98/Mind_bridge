@@ -128,7 +128,7 @@ body {
 .menu-section {
     display: flex;
     align-items: center;
-    font-size: 15px; /* ⬆️ 기존보다 크고 강조 */
+    font-size: 20px; /* ⬆️ 기존보다 크고 강조 */
     font-weight: 800; /* 두껍게 */
     color: var(--sidebar-muted); /* 브랜드 블루/보라 계열 */
     margin: 24px 0 12px 0;
@@ -145,7 +145,7 @@ body {
 }
 
 .menu-item {
-    font-size: 15px; /* ⬇️ 섹션보다 작게 */
+    font-size: 17px; /* ⬇️ 섹션보다 작게 */
     font-weight: 500;
     color: var(--sidebar-text);
     padding: 10px 14px;

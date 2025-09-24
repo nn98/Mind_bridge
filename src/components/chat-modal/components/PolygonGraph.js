@@ -9,17 +9,28 @@ export default function PolygonGraph({
     const graphData = useMemo(() => {
         // 감정 데이터를 배열로 변환하고 정렬
         const emotionEntries = Object.entries(emotions)
-            .filter(([key, value]) => key && typeof value === 'number')
+            .filter(([key, value]) => key && typeof value === "number")
             .sort(([a], [b]) => a.localeCompare(b)); // 일관된 순서
 
         if (emotionEntries.length === 0) {
-            return {vertices: [], dataPoints: [], center: {x: size / 2, y: size / 2}};
+            return {
+                vertices: [],
+                dataPoints: [],
+                center: {x: size / 2, y: size / 2},
+            };
         }
 
-        const pad = compact ? 20 : 32;
+        // 중심점, 반지름 계산
+        const pad = compact ? 12 : 20;
         const center = {x: size / 2, y: size / 2};
         const radius = (size - pad * 2) / 2;
         const angleStep = (2 * Math.PI) / emotionEntries.length;
+
+        // 합계 확인 (감정 값들이 모두 합쳐서 100인지 판단)
+        const total = emotionEntries.reduce((sum, [, v]) => sum + v, 0);
+
+        // 합계가 100 근처면 자동으로 확장 (너무 작게 보이지 않도록)
+        const scaleFactor = total >= 95 && total <= 105 ? 2 : 1; // 2배 확대
 
         const vertices = emotionEntries.map(([emotion, value], index) => {
             // 12시 방향부터 시계방향으로 배치
@@ -33,17 +44,21 @@ export default function PolygonGraph({
                 x,
                 y,
                 angle,
-                labelX: center.x + (radius + (compact ? 12 : 20)) * Math.cos(angle),
-                labelY: center.y + (radius + (compact ? 12 : 20)) * Math.sin(angle),
+                labelX:
+                    center.x +
+                    (radius + (compact ? 12 : 20)) * Math.cos(angle),
+                labelY:
+                    center.y +
+                    (radius + (compact ? 12 : 20)) * Math.sin(angle),
             };
         });
 
-        const dataPoints = vertices.map(vertex => {
-            const dataRadius = (vertex.value / 100) * radius;
+        const dataPoints = vertices.map((vertex) => {
+            const dataRadius = (vertex.value / 100) * radius * scaleFactor;
             return {
                 x: center.x + dataRadius * Math.cos(vertex.angle),
                 y: center.y + dataRadius * Math.sin(vertex.angle),
-                value: vertex.value
+                value: vertex.value,
             };
         });
 
@@ -54,25 +69,33 @@ export default function PolygonGraph({
 
     if (vertices.length === 0) {
         return (
-            <div className="polygon-graph empty" style={{width: size, height: size}}>
+            <div
+                className="polygon-graph empty"
+                style={{width: size, height: size}}
+            >
                 <span>감정 데이터 없음</span>
             </div>
         );
     }
 
     // 외곽선 점들을 문자열로 변환
-    const outlinePoints = vertices.map(v => `${v.x},${v.y}`).join(' ');
-    const dataAreaPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+    const outlinePoints = vertices.map((v) => `${v.x},${v.y}`).join(" ");
+    const dataAreaPoints = dataPoints.map((p) => `${p.x},${p.y}`).join(" ");
 
     const labelClass = compact ? "poly-label small" : "poly-label";
     const valueClass = compact ? "poly-value small" : "poly-value";
+
+    // ✅ 위쪽 라벨 잘리지 않도록 viewBox에 padding 추가
+    const topPadding = 30;
+    const viewBox = `0 -${topPadding} ${size} ${size + topPadding}`;
 
     return (
         <svg
             width={size}
             height={size}
-            viewBox={`0 0 ${size} ${size}`}
+            viewBox={viewBox}
             className="polygon-graph"
+            style={{overflow: "visible"}}
         >
             {/* 배경 격자선 (중심에서 각 꼭짓점으로) */}
             {vertices.map((vertex, index) => (
@@ -87,17 +110,11 @@ export default function PolygonGraph({
             ))}
 
             {/* 외곽 다각형 */}
-            <polygon
-                points={outlinePoints}
-                className="poly-outline"
-            />
+            <polygon points={outlinePoints} className="poly-outline" />
 
             {/* 데이터 영역 다각형 */}
             {dataPoints.length > 0 && (
-                <polygon
-                    points={dataAreaPoints}
-                    className="poly-area"
-                />
+                <polygon points={dataAreaPoints} className="poly-area" />
             )}
 
             {/* 데이터 포인트 점들 */}
@@ -112,28 +129,29 @@ export default function PolygonGraph({
             ))}
 
             {/* 라벨과 값 표시 */}
-            {showLabels && vertices.map((vertex, index) => (
-                <g key={`label-${index}`}>
-                    <text
-                        x={vertex.labelX}
-                        y={vertex.labelY}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className={labelClass}
-                    >
-                        {vertex.emotion}
-                    </text>
-                    <text
-                        x={vertex.labelX}
-                        y={vertex.labelY + (compact ? 10 : 14)}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className={valueClass}
-                    >
-                        {vertex.value}%
-                    </text>
-                </g>
-            ))}
+            {showLabels &&
+                vertices.map((vertex, index) => (
+                    <g key={`label-${index}`}>
+                        <text
+                            x={vertex.labelX}
+                            y={vertex.labelY}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className={labelClass}
+                        >
+                            {vertex.emotion}
+                        </text>
+                        <text
+                            x={vertex.labelX}
+                            y={vertex.labelY + (compact ? 10 : 14)}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className={valueClass}
+                        >
+                            {vertex.value}%
+                        </text>
+                    </g>
+                ))}
 
             {/* 중심점 */}
             <circle
