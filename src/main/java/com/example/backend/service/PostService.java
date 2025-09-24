@@ -17,6 +17,7 @@ import com.example.backend.dto.post.Summary;
 import com.example.backend.dto.post.UpdateRequest;
 import com.example.backend.entity.PostEntity;
 import com.example.backend.entity.UserEntity;
+import com.example.backend.mapper.PostMapper;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
 
@@ -30,6 +31,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostMapper postMapper; // ✅ PostMapper 주입
 
     @Transactional
     public Detail createPost(CreateRequest request, String userEmail) {
@@ -42,21 +44,14 @@ public class PostService {
         UserEntity user = userRepository.findByEmail(userEmail)
             .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        PostEntity post = PostEntity.builder()
-            .title(normalizeTitle(request.getTitle()))
-            .content(request.getContent().trim())
-            .userId(user.getUserId())  // ✅ userId 저장 (정규화)
-            .visibility(request.getVisibility() != null ? request.getVisibility() : "PUBLIC")
-            .status("active")
-            .likeCount(0)
-            .commentCount(0)
-            .viewCount(0)
-            .build();
-
+        // ✅ PostMapper 사용 (기존 로직과 완전히 동일한 결과)
+        PostEntity post = postMapper.toEntity(request, user);
         PostEntity savedPost = postRepository.save(post);
+
         log.info("게시글 생성 완료 - ID: {}, 사용자: {}", savedPost.getPostId(), userEmail);
 
-        return mapToDetail(savedPost);
+        // ✅ PostMapper 사용 (기존 mapToDetail과 완전히 동일한 결과)
+        return postMapper.toDetail(savedPost, userRepository);
     }
 
     @Transactional
@@ -71,12 +66,13 @@ public class PostService {
             .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
 
         validateUserPermission(post, userEmail, "수정");
-        updatePostFields(post, request);
+        updatePostFields(post, request); // ✅ 기존 로직 유지
 
         PostEntity updatedPost = postRepository.save(post);
         log.info("게시글 수정 완료 - ID: {}, 수정자: {}", postId, userEmail);
 
-        return mapToDetail(updatedPost);
+        // ✅ PostMapper 사용
+        return postMapper.toDetail(updatedPost, userRepository);
     }
 
     @Transactional
@@ -90,7 +86,7 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
             .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", "POST_NOT_FOUND", "postId"));
 
-        validateUserPermission(post, userEmail, "삭제");
+        validateUserPermission(post, userEmail, "삭제"); // ✅ 기존 로직 유지
         postRepository.deleteById(postId);
 
         log.info("게시글 삭제 완료 - ID: {}, 삭제자: {}", postId, userEmail);
@@ -101,7 +97,8 @@ public class PostService {
         List<PostEntity> posts = postRepository.findAllByOrderByCreatedAtDesc();
         log.debug("[Post#list] found {} posts", posts.size());
 
-        return posts.stream().map(this::mapToDetail).toList();
+        // ✅ PostMapper 사용 (기존 stream().map() 로직과 완전히 동일)
+        return postMapper.toDetailList(posts, userRepository);
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +106,8 @@ public class PostService {
         List<PostEntity> posts = postRepository.findByVisibilityOrderByCreatedAtDesc(PUBLIC);
         log.debug("[Post#publicList] found {} public posts", posts.size());
 
-        return posts.stream().map(this::mapToSummary).toList();
+        // ✅ PostMapper 사용 (기존 stream().map() 로직과 완전히 동일)
+        return postMapper.toSummaryList(posts, userRepository);
     }
 
     @Transactional(readOnly = true)
@@ -119,10 +117,11 @@ public class PostService {
         }
 
         UserEntity user = userRepository.findByEmail(userEmail).orElse(null);
-        List<PostEntity> posts = postRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId()); // ✅ userId 사용
+        List<PostEntity> posts = postRepository.findByUserIdOrderByCreatedAtDesc(user.getUserId());
         log.debug("[Post#userList] userEmail: {}, found {} posts", userEmail, posts.size());
 
-        return posts.stream().map(this::mapToDetail).toList();
+        // ✅ PostMapper 사용 (기존 stream().map() 로직과 완전히 동일)
+        return postMapper.toDetailList(posts, userRepository);
     }
 
     @Transactional(readOnly = true)
@@ -131,9 +130,11 @@ public class PostService {
             return Optional.empty();
         }
 
-        Optional<Detail> result = postRepository.findById(postId).map(this::mapToDetail);
-        log.debug("[Post#detail] postId: {}, found: {}", postId, result.isPresent());
+        // ✅ PostMapper 사용 (기존 map(this::mapToDetail) 로직과 완전히 동일)
+        Optional<Detail> result = postRepository.findById(postId)
+            .map(post -> postMapper.toDetail(post, userRepository));
 
+        log.debug("[Post#detail] postId: {}, found: {}", postId, result.isPresent());
         return result;
     }
 
@@ -155,21 +156,16 @@ public class PostService {
         List<PostEntity> posts = postRepository.findTopNByOrderByCreatedAtDesc(limit);
         log.debug("[Post#recent] limit: {}, found: {}", limit, posts.size());
 
-        return posts.stream().map(this::mapToSummary).toList();
+        // ✅ PostMapper 사용 (기존 stream().map() 로직과 완전히 동일)
+        return postMapper.toSummaryList(posts, userRepository);
     }
 
-    // ====== private helpers ======
-
-    private String normalizeTitle(String title) {
-        if (title == null || title.isBlank()) {
-            return "제목 없음";
-        }
-        return title.trim();
-    }
+    // ================== private helpers (변경 없음) ==================
 
     private void updatePostFields(PostEntity post, UpdateRequest request) {
         if (request.getTitle() != null) {
-            post.setTitle(normalizeTitle(request.getTitle()));
+            // ✅ PostMapper의 normalizeTitle 사용 (기존과 완전히 동일)
+            post.setTitle(postMapper.normalizeTitle(request.getTitle()));
         }
         if (request.getContent() != null) {
             if (request.getContent().isBlank()) {
@@ -198,55 +194,5 @@ public class PostService {
         }
 
         log.debug("게시글 {} 권한 확인 완료 - 사용자: {}, 게시글: {}", action, userEmail, post.getPostId());
-    }
-
-    private Detail mapToDetail(PostEntity post) {
-        UserEntity author = userRepository.findById(post.getUserId())
-            .orElse(createDeletedUserPlaceholder());
-
-        Detail detail = new Detail();
-        detail.setId(post.getPostId());
-        detail.setTitle(post.getTitle());
-        detail.setContent(post.getContent());
-        detail.setUserEmail(author.getEmail());
-        detail.setUserNickname(author.getNickname());
-        detail.setVisibility(post.getVisibility());
-        detail.setCreatedAt(post.getCreatedAt());
-        detail.setUpdatedAt(post.getUpdatedAt());
-        detail.setLikeCount(post.getLikeCount() != null ? post.getLikeCount() : 0);
-        detail.setCommentCount(post.getCommentCount() != null ? post.getCommentCount() : 0);
-        detail.setLikedByCurrentUser(false); // TODO: 구현
-        return detail;
-    }
-
-    private Summary mapToSummary(PostEntity post) {
-        UserEntity author = userRepository.findById(post.getUserId())
-            .orElse(createDeletedUserPlaceholder());
-
-        Summary summary = new Summary();
-        summary.setId(post.getPostId());
-        summary.setContentPreview(truncateContent(post.getContent(), 100));
-        summary.setUserNickname(author.getNickname());  // ✅ JOIN으로 실시간 조회
-        summary.setVisibility(post.getVisibility());
-        summary.setCreatedAt(post.getCreatedAt());
-        summary.setLikeCount(post.getLikeCount() != null ? post.getLikeCount() : 0);
-        summary.setCommentCount(post.getCommentCount() != null ? post.getCommentCount() : 0);
-        return summary;
-    }
-
-    private UserEntity createDeletedUserPlaceholder() {
-        return UserEntity.builder()
-            .userId(-1L)
-            .email("deleted@user.com")
-            .nickname("탈퇴한 사용자")
-            .fullName("탈퇴한 사용자")
-            .build();
-    }
-
-    private String truncateContent(String content, int maxLength) {
-        if (content == null || content.length() <= maxLength) {
-            return content;
-        }
-        return content.substring(0, maxLength) + "...";
     }
 }
