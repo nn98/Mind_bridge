@@ -1,6 +1,6 @@
 import PolygonGraph from "./PolygonGraph";
 
-export default function SessionItem({item, onClick}) {
+export default function SessionItem({sessionId, item, onClick}) {
     const {
         createdAt,
         primaryRisk = 0,

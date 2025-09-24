@@ -88,7 +88,7 @@ export default function SessionList({openModal}) {
             <ul className="session-list">
                 {sessions.map((session) => (
                     <SessionItem
-                        key={session.sessionId}
+                        sessionId={session.sessionId}
                         item={session}
                         onClick={(e) => {
                             openModal(session, e)
