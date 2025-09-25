@@ -1,69 +1,72 @@
-name: CD - Build and Deploy Snapshot JAR
+name: CD - Build and Deploy JAR
 
 on:
   push:
-    branches: [ "main" ]   # 필요 시 변경 [web:72]
-  workflow_dispatch:       # 수동 실행 허용 [web:72]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
-  contents: read           # 최소 권한 원칙 [web:72]
+  contents: read
 
 concurrency:
-  group: deploy-${{ github.ref }}   # 같은 브랜치 동시 배포 방지 [web:72]
-  cancel-in-progress: true          # 이전 실행 취소 [web:72]
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest   # GitHub 호스트 러너 [web:72]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4   # 소스 체크아웃 [web:72]
+        uses: actions/checkout@v4
 
       - name: Set up Temurin JDK 17 with Maven cache
-        uses: actions/setup-java@v4   # JDK + 캐시 [web:46]
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'     # Temurin 권장 [web:46]
-          java-version: '17'          # 프로젝트 버전으로 조정 [web:72]
-          cache: 'maven'              # Maven 의존성 캐싱 [web:43]
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
 
       - name: Build with Maven (force update snapshots)
         run: |
-          mvn -B -U clean package -DskipTests   # -U: SNAPSHOT 강제 갱신 [web:72]
+          set -e
+          mvn -B -U clean package -DskipTests
 
-      - name: Locate SNAPSHOT JAR
-        id: artifact
+      - name: Locate built JAR (multi-module safe)
+        id: locate
         shell: bash
         run: |
           set -e
-          JAR_PATH=$(ls target/*-SNAPSHOT.jar | head -n 1)
+          JAR_PATH="$(find . -type f -path '*/target/*.jar' ! -name '*sources*' ! -name '*javadoc*' | sort -r | head -n 1)"
+          echo "Found JAR: ${JAR_PATH:-<none>}"
           if [[ -z "$JAR_PATH" ]]; then
-            echo "No SNAPSHOT jar found in target/"
-            ls -al target || true
+            echo "No jar found under */target/"
             exit 1
           fi
           echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
+          echo "jar_basename=$(basename "$JAR_PATH")" >> "$GITHUB_OUTPUT"
 
-      # (선택) 디버깅용 아티팩트 업로드
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: snapshot-jar
-      #     path: ${{ steps.artifact.outputs.jar }}
+      - name: Prepare upload payload (pre-rename to server.jar.new)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p upload
+          cp -f "${{ steps.locate.outputs.jar }}" "upload/server.jar.new"
+          ls -al upload
 
-      - name: Copy JAR to server as temporary file
-        uses: appleboy/scp-action@v1   # SCP로 원격 복사 [web:35][web:39]
+      - name: Copy JAR to server directory
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "${{ steps.artifact.outputs.jar }}"
-          target: "${{ secrets.DEPLOY_PATH }}/server.jar.new"
+          source: "upload/server.jar.new"
+          target: "${{ secrets.DEPLOY_PATH }}/"
           overwrite: true
 
       - name: Activate new jar and restart systemd service
-        uses: appleboy/ssh-action@v1   # 원격 명령 실행 [web:55]
+        uses: appleboy/ssh-action@v1
         env:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
@@ -73,17 +76,16 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            set -e
+            set -euo pipefail
             cd "$DEPLOY_PATH"
-            # (선택) 백업
+            if [ ! -f server.jar.new ]; then
+              echo "server.jar.new not found in $DEPLOY_PATH"
+              ls -al
+              exit 1
+            fi
             if [ -f server.jar ]; then
               cp -f server.jar "server.jar.bak.$(date +%Y%m%d%H%M%S)"
             fi
-            # 원자적 교체
             mv -f server.jar.new server.jar
-            # 서비스 재시작 및 상태 확인
             sudo systemctl restart "$SERVICE_NAME"
             sudo systemctl --no-pager --full status "$SERVICE_NAME"
-            # (선택) 헬스체크: 엔드포인트에 맞게 변경
-            # sleep 5
-            # curl -fsS http://127.0.0.1:8080/actuator/health || (echo "Health check failed" && exit 1)
