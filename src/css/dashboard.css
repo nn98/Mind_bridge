@@ -90,13 +90,13 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 6px 8px;
+    padding: 6px 1px;
     color: var(--sidebar-text);
 }
 
 .avatar {
-    width: 34px;
-    height: 34px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     color: var(--sidebar-icon);
     display: flex;
@@ -106,6 +106,7 @@ body {
 }
 
 .brand-text .title {
+    font-size: 23px;
     font-weight: 800;
     color: var(--sidebar-text);
 }
@@ -160,8 +161,8 @@ body {
 }
 
 .menu-item.active {
-    background: rgba(168, 85, 247, 0.2);   /* 네온 퍼플 배경 (연보라 빛) */
-    color: #c084fc;                        /* 네온 라벤더 텍스트 */
+    background: rgba(168, 85, 247, 0.2); /* 네온 퍼플 배경 (연보라 빛) */
+    color: #c084fc; /* 네온 라벤더 텍스트 */
     outline: 1px solid rgba(192, 132, 252, 0.55); /* 라벤더 글로우 */
     box-shadow: 0 0 6px rgba(99, 102, 241, .35); /* 보라빛 glow */
 }
@@ -414,15 +415,39 @@ body {
 }
 
 .consult-logo {
-    font-weight: 800;
-    font-size: 56px;
-    margin: 20px 0 8px 0;
+    font-weight: 900;
+    font-size: 54px;
+    margin: 16px 0;
     text-align: center;
-    background: linear-gradient(90deg, #8b5cf6 40%, #fbcfe8 78%, #ffe4e6 100%);
+    letter-spacing: -1px;
+
+    background: linear-gradient(
+            90deg,
+            #8b5cf6 0%,
+            #fbcfe8 40%,
+            #ffe4e6 55%,
+            #8b5cf6 100%
+    );
+    background-size: 200% 200%; /* 그라데이션 크기 크게 잡기 */
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+
+    animation: gradient-move 6s ease infinite;
+}
+
+/* 애니메이션 키프레임 */
+@keyframes gradient-move {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .consult-title {
