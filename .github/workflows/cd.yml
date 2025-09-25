@@ -110,3 +110,4 @@ jobs:
             mv -f server.jar.new server.jar
             sudo systemctl restart "$SERVICE_NAME"
             sudo systemctl --no-pager --full status "$SERVICE_NAME"
+
