@@ -54,7 +54,9 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/api/emotion/analyze",
                     "/api/chat/message/save",
-                    "/api/chat/session/save"
+                    "/api/chat/session/save",
+                    "/internal/metrics/http-server-requests",
+                    "/api/metrics/**"
                 ).permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()  // 개별 게시글 조회
