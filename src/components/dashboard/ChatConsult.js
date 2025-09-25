@@ -5,6 +5,8 @@ import {useAuth} from "../../AuthContext";
 import {Canvas, useFrame, useThree} from '@react-three/fiber';
 import {forwardRef} from 'react';
 import {Color} from 'three';
+import TextType from "./TextType"
+
 
 /* ========= Silk Component ========= */
 const hexToNormalizedRGB = hex => {
@@ -331,7 +333,18 @@ const ONE_MIN = 60 * 1000;
 
 function persistSession(payload) {
     try {
-        const toSave = {...payload, savedAt: Date.now(), expiresAt: Date.now() + TWO_MIN};
+        // ✅ 모든 메시지에 isNew 기본값 보정
+        const historyWithFlags = payload.chatHistory.map(m => ({
+            ...m,
+            isNew: false
+        }));
+
+        const toSave = {
+            ...payload,
+            chatHistory: historyWithFlags,
+            savedAt: Date.now(),
+            expiresAt: Date.now() + TWO_MIN
+        };
         localStorage.setItem(LS_KEY, JSON.stringify(toSave));
         window.dispatchEvent(new CustomEvent("mb:chat:persisted", {detail: toSave}));
     } catch (_) {
@@ -359,6 +372,9 @@ export function clearSession() {
 
 /* ========= 메인 컴포넌트 ========= */
 function ChatConsultInner({profile}) {
+    const [cursorVisible, setCursorVisible] = useState(true);
+    const [completedMessages, setCompletedMessages] = useState(new Set());
+
     const saved = readSession();
 
     const [formData, setFormData] = useState({
@@ -420,6 +436,23 @@ function ChatConsultInner({profile}) {
         setFormData((prev) => ({...prev, chatStyle: style.name}));
         setStyleDropdownOpen(false);
     };
+
+    /* === 새 AI 메시지가 추가되면 직전 메시지의 커서 제거 === */
+    useEffect(() => {
+        if (chatHistory.length < 2) return;
+
+        const last = chatHistory[chatHistory.length - 1];
+        const prev = chatHistory[chatHistory.length - 2];
+
+        if (last.sender === "ai" && prev.sender === "ai" && prev.isNew) {
+            __internal.setChatHistory(prevHistory =>
+                prevHistory.map(m =>
+                    m.id === prev.id ? { ...m, isNew: false } : m
+                )
+            );
+        }
+    }, [chatHistory, __internal]);
+
 
     useEffect(() => {
         document.documentElement.setAttribute("data-mb-chat-style", formData.chatStyle);
@@ -773,10 +806,53 @@ function ChatConsultInner({profile}) {
 
             {/* 채팅 메시지 */}
             <div className="consult-stream" role="log" aria-live="polite">
-                {chatHistory.map((msg, i) => (
-                    <div key={i} className={`consult-bubble ${msg.sender}`}>{msg.message}</div>
+                {chatHistory.map((msg) => (
+                    <div key={msg.id} className={`consult-bubble ${msg.sender}`}>
+                        {msg.sender === "ai" ? (
+                            msg.isNew ? (
+                                <TextType
+                                    text={[msg.message]}
+                                    typingSpeed={60}
+                                    pauseDuration={1000}
+                                    showCursor={
+                                        msg.isNew && msg.id === chatHistory[chatHistory.length - 1]?.id
+                                    }   // ✅ 마지막 새 메시지일 때만 커서 표시
+                                    cursorCharacter="▋"
+                                    cursorBlinkSpeed={500}
+                                    onComplete={() => {
+                                        __internal.setChatHistory(prev =>
+                                            prev.map(m =>
+                                                m.id === msg.id ? {...m, isNew: false} : m
+                                            )
+                                        );
+                                        setCompletedMessages(prev => {
+                                            const next = new Set(prev);
+                                            next.add(msg.id);
+                                            return next;
+                                        });
+                                    }}
+                                />
+                            ) : (
+                                <span>{msg.message}</span>
+                            )
+                        ) : (
+                            msg.message
+                        )}
+                    </div>
                 ))}
-                {isTyping && <div className="consult-bubble ai typing">AI 응답 생성 중</div>}
+
+                {/* AI가 입력 중일 때 표시 */}
+                {isTyping && (
+                    <div className="consult-bubble ai typing">
+                        <TextType
+                            text={["AI 응답 생성 중"]}
+                            typingSpeed={80}
+                            showCursor={true}
+                            cursorCharacter="|"
+                        />
+                    </div>
+                )}
+
                 <div ref={chatEndRef}/>
             </div>
 
