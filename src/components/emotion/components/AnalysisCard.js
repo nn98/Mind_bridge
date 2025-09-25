@@ -119,11 +119,6 @@ export default function AnalysisCard({
                             </div>
                         </div>
                     </div>
-                    {typeof result.confidence === 'number' && (
-                        <div className="kpi-confidence" title="분포 기반 신뢰도">
-                            신뢰도 <strong>{Math.round(result.confidence * 100)}%</strong>
-                        </div>
-                    )}
                 </div>
             )}
 
