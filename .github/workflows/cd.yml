@@ -87,4 +87,3 @@ jobs:
             # (선택) 헬스체크: 엔드포인트에 맞게 변경
             # sleep 5
             # curl -fsS http://127.0.0.1:8080/actuator/health || (echo "Health check failed" && exit 1)
-u
