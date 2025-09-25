@@ -40,10 +40,10 @@ jobs:
           JAR_PATH="$(find . -type f -path '*/target/*.jar' ! -name '*sources*' ! -name '*javadoc*' | sort -r | head -n 1)"
           echo "Found JAR: ${JAR_PATH:-<none>}"
           if [[ -z "$JAR_PATH" ]]; then
+            echo "No jar found under */target/"
             exit 1
           fi
           echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
-          echo "jar_basename=$(basename "$JAR_PATH")" >> "$GITHUB_OUTPUT"
 
       - name: Prepare upload payload (server.jar.new)
         shell: bash
@@ -53,6 +53,25 @@ jobs:
           cp -f "${{ steps.locate.outputs.jar }}" "upload/server.jar.new"
           ls -al upload
 
+      # 1) 원격 정리: 과거에 잘못 생성된 server.jar.new 디렉터리/파일 제거
+      - name: Pre-clean conflicting path on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            mkdir -p "${{ secrets.DEPLOY_PATH }}"
+            if [ -d "${{ secrets.DEPLOY_PATH }}/server.jar.new" ]; then
+              rm -rf "${{ secrets.DEPLOY_PATH }}/server.jar.new"
+            fi
+            if [ -f "${{ secrets.DEPLOY_PATH }}/server.jar.new" ]; then
+              rm -f "${{ secrets.DEPLOY_PATH }}/server.jar.new"
+            fi
+
+      # 2) 업로드: target은 디렉터리만, 경로 평탄화(strip_components)
       - name: Copy JAR to server directory
         uses: appleboy/scp-action@v1
         with:
@@ -63,9 +82,9 @@ jobs:
           source: "upload/server.jar.new"
           target: "${{ secrets.DEPLOY_PATH }}/"
           overwrite: true
-          strip_components: 1   # upload/ 접두 디렉터리 제거
+          strip_components: 1
 
-      # 옵션 A) 원격 환경변수로 전달 (권장)
+      # 3) 활성화: 원자적 교체 및 systemd 재시작
       - name: Activate new jar and restart systemd service
         uses: appleboy/ssh-action@v1
         env:
@@ -91,26 +110,3 @@ jobs:
             mv -f server.jar.new server.jar
             sudo systemctl restart "$SERVICE_NAME"
             sudo systemctl --no-pager --full status "$SERVICE_NAME"
-
-      # 옵션 B) 직접 치환(대안)
-      # - name: Activate new jar and restart systemd service
-      #   uses: appleboy/ssh-action@v1
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     port: ${{ secrets.SSH_PORT }}
-      #     script: |
-      #       set -euo pipefail
-      #       cd "${{ secrets.DEPLOY_PATH }}"
-      #       if [ ! -f server.jar.new ]; then
-      #         echo "server.jar.new not found"
-      #         ls -al
-      #         exit 1
-      #       fi
-      #       if [ -f server.jar ]; then
-      #         cp -f server.jar "server.jar.bak.$(date +%Y%m%d%H%M%S)"
-      #       fi
-      #       mv -f server.jar.new server.jar
-      #       sudo systemctl restart "${{ secrets.SERVICE_NAME }}"
-      #       sudo systemctl --no-pager --full status "${{ secrets.SERVICE_NAME }}"
