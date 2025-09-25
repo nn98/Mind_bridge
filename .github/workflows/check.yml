@@ -1,0 +1,58 @@
+name: CI - Debug run visibility
+
+on:
+  push:
+    branches: [ "main" ]  # main에 푸시될 때만 실행
+  workflow_dispatch:       # 수동 실행 허용
+
+jobs:
+  debug-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # 리포지토리 코드 체크아웃
+      - name: Echo context
+        run: |
+          echo "event: $GITHUB_EVENT_NAME"
+          echo "ref:   $GITHUB_REF"
+          echo "sha:   $GITHUB_SHA"
+          echo "actor: $GITHUB_ACTOR"
+
+      - name: Set up Temurin JDK 17 with Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Print Java/Maven versions
+        run: |
+          java -version
+          mvn -v
+
+      - name: Build with Maven (no tests)
+        run: mvn -B -U -DskipTests clean package
+
+      - name: Locate built JAR (multi-module safe)
+        id: locate
+        shell: bash
+        run: |
+          set -e
+          JAR_PATH=$(find . -type f -path "*/target/*.jar" \
+                      ! -name "*sources*" ! -name "*javadoc*" \
+                      | sort -r | head -n 1)
+          echo "Found JAR: ${JAR_PATH:-<none>}"
+          if [[ -z "$JAR_PATH" ]]; then
+            echo "jar=" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload JAR artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-jar
+          path: ${{ steps.locate.outputs.jar }}
+          if-no-files-found: warn
