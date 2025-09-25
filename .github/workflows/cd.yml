@@ -40,13 +40,12 @@ jobs:
           JAR_PATH="$(find . -type f -path '*/target/*.jar' ! -name '*sources*' ! -name '*javadoc*' | sort -r | head -n 1)"
           echo "Found JAR: ${JAR_PATH:-<none>}"
           if [[ -z "$JAR_PATH" ]]; then
-            echo "No jar found under */target/"
             exit 1
           fi
           echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
           echo "jar_basename=$(basename "$JAR_PATH")" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare upload payload (pre-rename to server.jar.new)
+      - name: Prepare upload payload (server.jar.new)
         shell: bash
         run: |
           set -e
@@ -64,7 +63,9 @@ jobs:
           source: "upload/server.jar.new"
           target: "${{ secrets.DEPLOY_PATH }}/"
           overwrite: true
+          strip_components: 1   # upload/ 접두 디렉터리 제거
 
+      # 옵션 A) 원격 환경변수로 전달 (권장)
       - name: Activate new jar and restart systemd service
         uses: appleboy/ssh-action@v1
         env:
@@ -75,6 +76,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: DEPLOY_PATH,SERVICE_NAME
           script: |
             set -euo pipefail
             cd "$DEPLOY_PATH"
@@ -89,3 +91,26 @@ jobs:
             mv -f server.jar.new server.jar
             sudo systemctl restart "$SERVICE_NAME"
             sudo systemctl --no-pager --full status "$SERVICE_NAME"
+
+      # 옵션 B) 직접 치환(대안)
+      # - name: Activate new jar and restart systemd service
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     script: |
+      #       set -euo pipefail
+      #       cd "${{ secrets.DEPLOY_PATH }}"
+      #       if [ ! -f server.jar.new ]; then
+      #         echo "server.jar.new not found"
+      #         ls -al
+      #         exit 1
+      #       fi
+      #       if [ -f server.jar ]; then
+      #         cp -f server.jar "server.jar.bak.$(date +%Y%m%d%H%M%S)"
+      #       fi
+      #       mv -f server.jar.new server.jar
+      #       sudo systemctl restart "${{ secrets.SERVICE_NAME }}"
+      #       sudo systemctl --no-pager --full status "${{ secrets.SERVICE_NAME }}"
