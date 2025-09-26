@@ -78,9 +78,9 @@ public class PostController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Detail>> getPost(@PathVariable Long id) {
         return postService.getPostDetail(id)
-            .map(detail -> ResponseEntity.ok(ApiResponse.success(detail)))
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("게시글을 찾을 수 없습니다.", null)));
+                .map(detail -> ResponseEntity.ok(ApiResponse.success(detail)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("게시글을 찾을 수 없습니다.", null)));
     }
 
     @PostMapping
@@ -89,24 +89,24 @@ public class PostController {
         String userEmail = securityUtil.requirePrincipalEmail(authentication);
         Detail createdPost = postService.createPost(request, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(createdPost, "게시글이 성공적으로 작성되었습니다."));
+                .body(ApiResponse.success(createdPost, "게시글이 성공적으로 작성되었습니다."));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ROLE_ADMIN') or hasRole('admin')")
     public ResponseEntity<ApiResponse<Detail>> updatePost(
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateRequest request,
-        Authentication authentication) {
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRequest request,
+            Authentication authentication) {
         Detail updatedPost = postService.updatePost(id, request, securityUtil.requirePrincipalEmail(authentication));
         return ResponseEntity.ok(ApiResponse.success(updatedPost, "게시글이 성공적으로 수정되었습니다."));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")  // 이것만 먼저 테스트
+    @PreAuthorize("@postAuth.canModify(#id, authentication.name) or hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> deletePost(
-        @PathVariable Long id,
-        Authentication authentication) {
+            @PathVariable Long id,
+            Authentication authentication) {
         postService.deletePost(id, securityUtil.requirePrincipalEmail(authentication));
         return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 삭제되었습니다."));
     }
@@ -118,10 +118,10 @@ public class PostController {
         long privateCount = postService.getPostCountByVisibility(userEmail, PRIVATE);
         long friendsCount = postService.getPostCountByVisibility(userEmail, "friends");
         Object stats = Map.of(
-            "publicCount", publicCount,
-            "privateCount", privateCount,
-            "friendsCount", friendsCount,
-            "totalCount", publicCount + privateCount + friendsCount
+                "publicCount", publicCount,
+                "privateCount", privateCount,
+                "friendsCount", friendsCount,
+                "totalCount", publicCount + privateCount + friendsCount
         );
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
