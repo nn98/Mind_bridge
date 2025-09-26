@@ -9,6 +9,7 @@ export default function TriangleGraph({
                                           showLabels = true,
                                           compact = false,
                                       }) {
+    // ✅ 값 보정 (0~100, 정수 유지)
     const {A, B, C} = useMemo(() => {
         const A = clamp(depression);
         const B = clamp(addiction);
@@ -18,19 +19,27 @@ export default function TriangleGraph({
 
     const pad = 24;
     const w = size, h = size;
+
     // 꼭짓점 (위: Anxiety, 좌: Depression, 우: Addiction)
     const Ax = w / 2, Ay = pad;
     const Bx = pad, By = h - pad;
     const Cx = w - pad, Cy = h - pad;
 
-    // 각 비율에 따른 좌표 (꼭짓점 → 중심 보간)
+    // 중심점
     const cx = w / 2, cy = h / 2;
-    const pAx = lerp(cx, Ax, A / 100);
-    const pAy = lerp(cy, Ay, A / 100);
-    const pBx = lerp(cx, Bx, B / 100);
-    const pBy = lerp(cy, By, B / 100);
-    const pCx = lerp(cx, Cx, C / 100);
-    const pCy = lerp(cy, Cy, C / 100);
+
+    // ✅ 로그 스케일 적용
+    const ratioA = logScale(A);
+    const ratioB = logScale(B);
+    const ratioC = logScale(C);
+
+    // 좌표 계산
+    const pAx = lerp(cx, Ax, ratioA);
+    const pAy = lerp(cy, Ay, ratioA);
+    const pBx = lerp(cx, Bx, ratioB);
+    const pBy = lerp(cy, By, ratioB);
+    const pCx = lerp(cx, Cx, ratioC);
+    const pCy = lerp(cy, Cy, ratioC);
 
     const labelCls = compact ? "tri-label small" : "tri-label";
     const pctCls = compact ? "tri-pct small" : "tri-pct";
@@ -65,13 +74,19 @@ export default function TriangleGraph({
     );
 }
 
+/* ===== 유틸 함수 ===== */
 function clamp(v) {
     v = Number(v) || 0;
     if (v < 0) return 0;
     if (v > 100) return 100;
-    return Math.round(v);
+    return Math.round(v); // ✅ 정수로 반올림
 }
 
 function lerp(a, b, t) {
     return a + (b - a) * t;
+}
+
+function logScale(v) {
+    const value = Math.max(Number(v) || 0, 0.0001); // ✅ 최소값 낮춤
+    return Math.log10(value + 1) / Math.log10(101);
 }

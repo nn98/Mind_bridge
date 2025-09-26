@@ -675,10 +675,12 @@ body,
 }
 
 .tri-area {
-    fill: rgba(102, 126, 234, 0.3);
-    stroke: #667eea;
+    fill: rgba(99, 102, 241, 0.25); /* 연한 인디고 */
+    stroke: #4f46e5; /* 선은 진한 인디고 */
     stroke-width: 2.5;
+    transition: all 0.3s ease;
 }
+
 
 .tri-label {
     fill: #2d3748;
@@ -989,6 +991,6 @@ body,
     }
 }
 
-.Detail{
+.Detail {
     color: #a14fff;
 }
