@@ -1,6 +1,8 @@
 package com.example.backend.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import com.example.backend.dto.chat.ChatMessageRequest;
 import com.example.backend.dto.chat.ChatSessionDto;
 import com.example.backend.dto.chat.SessionRequest;
 import com.example.backend.dto.common.ApiResponse;
+import com.example.backend.dto.emotion.EmotionRequest;
 import com.example.backend.entity.ChatMessageEntity;
 import com.example.backend.entity.ChatSessionEntity;
 import com.example.backend.security.SecurityUtil;
