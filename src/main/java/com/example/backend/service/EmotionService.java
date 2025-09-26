@@ -95,7 +95,7 @@ public class EmotionService {
 
         // 4. DB 저장
         EmotionEntity entityToSave = EmotionEntity.builder()
-            .email(email)
+            .userEmail(email)
             .inputText(text)
             .happiness(emotions.getOrDefault("happiness", 0))
             .sadness(emotions.getOrDefault("sadness", 0))
