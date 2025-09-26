@@ -569,6 +569,7 @@ body,
 
 /* ========== Risk Badges ========== */
 .risk-badge {
+    max-Width: 140px;
     font-size: 0.9rem;
     padding: 4px 12px;
     border-radius: 20px;
@@ -986,4 +987,8 @@ body,
         width: 70px;
         height: 70px;
     }
+}
+
+.Detail{
+    color: #a14fff;
 }

@@ -60,18 +60,31 @@ function removeSpecialChars(text) {
 
     // 특수문자 제거 (한글, 영문, 숫자, 공백, 쉼표만 남김)
     return text.toString().replace(/[^\w\s,ㄱ-ㅎㅏ-ㅣ가-힣]/g, "");
-
 }
 
 function renderTextWithLineBreaks(text) {
     if (!text) return "";
 
     // 쉼표를 기준으로 분할하고 각 줄을 <div>로 래핑
-    return text
+    const items = text
         .split(',')
         .map((item, index) => item.trim())
-        .filter(item => item.length > 0)
-        .map((item, index) => (
-            <div key={index}>{item}</div>
-        ));
+        .filter(item => item.length > 0);
+
+    // 3개 이상이면 처음 2개만 보여주고 ...을 추가
+    if (items.length >= 3) {
+        return (
+            <>
+                {items.slice(0, 2).map((item, index) => (
+                    <div key={index}>{item}</div>
+                ))}
+                <div style={{ color: 'lightgray' }}>전체보기</div>
+            </>
+        );
+    }
+
+    // 3개 미만이면 모든 항목 표시
+    return items.map((item, index) => (
+        <div key={index}>{item}</div>
+    ));
 }

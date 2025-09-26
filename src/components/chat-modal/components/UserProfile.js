@@ -95,7 +95,7 @@ const UserProfile = () => {
         }
     };
 
-// ✅ 에러 처리 전용 함수
+    // ✅ 에러 처리 전용 함수
     const handleSaveError = (error) => {
         const response = error.response?.data;
 
@@ -104,17 +104,13 @@ const UserProfile = () => {
             return;
         }
 
-        // 필드별 에러 처리
         if (response.field && response.detail) {
             const fieldName = getFieldDisplayName(response.field);
             toast.error(`${fieldName}: ${response.detail}`);
-
-            // 해당 필드에 포커스 (옵션)
             focusErrorField(response.field);
             return;
         }
 
-        // 검증 에러 (여러 필드)
         if (response.errors) {
             const firstError = Object.entries(response.errors)[0];
             if (firstError) {
@@ -126,11 +122,9 @@ const UserProfile = () => {
             return;
         }
 
-        // 일반 메시지
         toast.error(response.detail || "저장에 실패했습니다.");
     };
 
-// ✅ 필드명 한글 변환
     const getFieldDisplayName = (field) => {
         const fieldNames = {
             'nickname': '닉네임',
@@ -146,7 +140,6 @@ const UserProfile = () => {
         return fieldNames[field] || field;
     };
 
-// ✅ 에러 필드에 포커스 (옵션)
     const focusErrorField = (fieldName) => {
         setTimeout(() => {
             const element = document.querySelector(`[name="${fieldName}"]`);
@@ -167,23 +160,90 @@ const UserProfile = () => {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        try {
-            await axios.delete(`${BACKEND_URL}/api/users/account`, {withCredentials: true});
-            logoutSuccess();
-            toast.success("회원 탈퇴가 완료되었습니다.");
-            window.location.href = "/";
-        } catch (err) {
-            toast.error("회원 탈퇴 실패");
-        }
+    const handleDeleteAccount = () => {
+        toast(
+            ({closeToast}) => (
+                <div style={{textAlign: "center"}}>
+                    <p style={{marginBottom: "10px", fontSize: "16px", fontWeight: "bold"}}>
+                        회원 탈퇴를 하시겠습니까?
+                    </p>
+                    <p style={{marginBottom: "12px", fontSize: "15px"}}>
+                        탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+                    </p>
+                    <div style={{display: "flex", justifyContent: "center", gap: "8px"}}>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    await axios.delete(`${BACKEND_URL}/api/users/account`, {
+                                        withCredentials: true,
+                                    });
+                                    logoutSuccess();
+
+                                    // ✅ 탈퇴 성공 토스트
+                                    toast.success("회원 탈퇴가 완료되었습니다.", {
+                                        position: "top-center",
+                                        autoClose: 2000,
+                                        theme: "colored",
+                                    });
+
+                                    closeToast(); // confirm toast 닫기
+
+                                    // ✅ 성공 메시지를 2초 보여준 뒤 페이지 이동
+                                    setTimeout(() => (window.location.href = "/"), 2000);
+                                } catch (err) {
+                                    toast.error("회원 탈퇴 실패", {
+                                        position: "top-center",
+                                        autoClose: 2000,
+                                        theme: "colored",
+                                    });
+                                }
+                            }}
+                            style={{
+                                background: "#d9534f",
+                                color: "white",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            확인
+                        </button>
+                        <button
+                            onClick={closeToast}
+                            style={{
+                                background: "#ccc",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            취소
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                position: "top-center",
+                autoClose: false,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false,
+
+                // ✅ 토스트 박스 자체 크기 조정
+                style: {
+                    width: "346px",
+                    maxWidth: "none",
+                },
+            }
+        );
     };
 
     const openModal = (session, e) => {
-        console.log('sel 상태:', sel);
-        console.log('모달 open 상태:', !!sel);
         e.stopPropagation();
         setSel(session);
-    }
+    };
 
     if (isLoading) return <div>로딩 중...</div>;
 
@@ -219,8 +279,8 @@ const UserProfile = () => {
                             </select>
                         </div>
                         <span className="badge">
-              {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
-            </span>
+                            {userInfo.age ? `${userInfo.age}세` : "나이 미입력"}
+                        </span>
                     </div>
 
                     {/* 우측 버튼 */}
@@ -239,11 +299,9 @@ const UserProfile = () => {
 
                 {/* ===== 본문 2열: 좌측 정보 / 우측 세션리스트 ===== */}
                 <div className="profile-main">
-                    {/* 왼쪽: 기본 정보 */}
                     <div className="profile-left">
                         <div className="profile-section">
                             <h3>기본 정보</h3>
-
                             {[
                                 ["성명", "fullName"],
                                 ["닉네임", "nickname"],
@@ -311,7 +369,6 @@ const UserProfile = () => {
                         </div>
                     </div>
 
-                    {/* 오른쪽: 최근 채팅 세션 */}
                     <div className="profile-right">
                         <SessionList openModal={openModal}/>
                     </div>
@@ -323,15 +380,12 @@ const UserProfile = () => {
                 onClose={() => setIsPasswordModalOpen(false)}
                 onLogout={handleLogout}
             />
+
             <ToastContainer position="top-center"/>
 
-            {/* ✅ 세션 상세 모달 */}
             <SessionDetailModal
                 open={!!sel}
-                onClose={() => {
-                    console.log('onClose 호출됨, sel을 null로 설정');
-                    setSel(false)
-                }}
+                onClose={() => setSel(false)}
                 session={sel}
             />
         </>

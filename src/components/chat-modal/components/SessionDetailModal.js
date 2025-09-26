@@ -8,13 +8,24 @@ import {useEffect, useState} from "react";
 // 특수문자 제거 함수
 function removeSpecialChars(text) {
     if (!text) return "";
-
-    // 특수문자 제거 (한글, 영문, 숫자, 공백, 쉼표만 남김)
     return text.toString().replace(/[^\w\s,ㄱ-ㅎㅏ-ㅣ가-힣]/g, "");
 }
 
-export default function SessionDetailModal({open, onClose, session}) {
+// ✅ riskFactors 안전 파싱 함수
+function parseRiskFactors(riskFactors) {
+    try {
+        if (!riskFactors) return {addiction: 0, depression: 0, anxiety: 0};
+        if (typeof riskFactors === "string") {
+            return JSON.parse(riskFactors);
+        }
+        return riskFactors; // 이미 객체일 경우
+    } catch (e) {
+        console.error("riskFactors 파싱 실패:", e);
+        return {addiction: 0, depression: 0, anxiety: 0};
+    }
+}
 
+export default function SessionDetailModal({open, onClose, session}) {
     const [emotionData, setEmotionData] = useState([]);
     const [emotionStats, setEmotionStats] = useState(null);
 
@@ -111,7 +122,7 @@ export default function SessionDetailModal({open, onClose, session}) {
         };
     };
 
-    // ✅ 향상된 감정 변화 그래프
+    // ✅ 감정 변화 그래프 (코드는 그대로 유지)
     const EmotionProgressGraph = ({data}) => {
         if (!data || data.length === 0) return null;
 
@@ -142,7 +153,6 @@ export default function SessionDetailModal({open, onClose, session}) {
             <div className={styles.emotionGraphContainer}>
                 <svg width={graphWidth} height={graphHeight} className={styles.emotionSvg}>
                     {gradientDefs}
-
                     {/* 배경 그리드 */}
                     {[0, 25, 50, 75, 100].map(y => (
                         <g key={y}>
@@ -168,7 +178,7 @@ export default function SessionDetailModal({open, onClose, session}) {
                         </g>
                     ))}
 
-                    {/* 영역 그래프 (그라데이션 배경) */}
+                    {/* 영역 그래프 */}
                     {emotionKeys.map(emotionKey => {
                         const hasData = data.some(item => (item.emotions[emotionKey] || 0) > 0);
                         if (!hasData) return null;
@@ -217,7 +227,6 @@ export default function SessionDetailModal({open, onClose, session}) {
                                     strokeLinejoin="round"
                                     filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))"
                                 />
-                                {/* 데이터 포인트 */}
                                 {data.map((item, index) => {
                                     const value = item.emotions[emotionKey] || 0;
                                     if (value === 0) return null;
@@ -294,7 +303,8 @@ export default function SessionDetailModal({open, onClose, session}) {
 
     if (!open || !session) return null;
 
-    const m = session.riskFactors ?? {};
+    // ✅ riskFactors 안전하게 파싱
+    const m = parseRiskFactors(session.riskFactors);
     const d = m.depression ?? 0;
     const a = m.addiction ?? 0;
     const x = m.anxiety ?? 0;
@@ -327,7 +337,7 @@ export default function SessionDetailModal({open, onClose, session}) {
                     )}
                 </div>
 
-                {/* ✅ 첫 번째 행: 위험 지표 50% + 감정 종합 50% */}
+                {/* ✅ 첫 번째 행: 위험 지표 + 감정 종합 */}
                 <div className={styles.graphRow}>
                     <div className={styles.graphHalf}>
                         <h5>🔺 주요 위험 지표</h5>
@@ -360,7 +370,6 @@ export default function SessionDetailModal({open, onClose, session}) {
                                 📝 상담 중 각 메시지에서 분석된 감정의 변화 추이를 보여줍니다
                             </p>
 
-                            {/* ✅ 종합 감정 비율을 여기로 이동 */}
                             <div className={styles.emotionSummary}>
                                 <h6>📊 상담 중 감정 비율 (종합)</h6>
                                 <div className={styles.emotionGrid}>

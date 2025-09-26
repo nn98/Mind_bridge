@@ -20,6 +20,7 @@ export default function SessionList({openModal}) {
                 );
 
                 console.log("세션 응답:", res.data);
+                console.log("세션 응답:", JSON.stringify(res.data[1].emotions));
 
                 // case1: { analysis: [...], total: n }
                 if (res.data && Array.isArray(res.data.analysis)) {

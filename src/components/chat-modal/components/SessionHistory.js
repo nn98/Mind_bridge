@@ -16,6 +16,7 @@ const SessionHistory = ({ userEmail }) => {
                     params: { email: userEmail },
                     withCredentials: true, // 쿠키 자동 전송
                 });
+                console.log(JSON.stringify(response));
                 setHistory(response.data);
             } catch (error) {
                 console.error("상담 이력 조회 실패:", error);
