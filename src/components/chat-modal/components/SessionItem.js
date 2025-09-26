@@ -15,9 +15,13 @@ export default function SessionItem({sessionId, item, onClick}) {
                 </div>
 
                 {/* primaryRisk 기반으로 위험 레벨 표시 */}
-                <span className={`risk-badge ${riskTone(primaryRisk)}`}>
-                    위험도 {primaryRisk}%
-                </span>
+                <div className={`risk-badge ${riskTone(primaryRisk)}`} style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}>
+                    {renderTextWithLineBreaks(removeSpecialChars(primaryRisk))}
+                </div>
             </div>
 
             {/* 다각형 감정 그래프 */}
@@ -49,4 +53,25 @@ function riskTone(v) {
     if (v >= 70) return "danger";
     if (v >= 40) return "warn";
     return "ok";
+}
+
+function removeSpecialChars(text) {
+    if (!text) return "";
+
+    // 특수문자 제거 (한글, 영문, 숫자, 공백, 쉼표만 남김)
+    return text.toString().replace(/[^\w\s,ㄱ-ㅎㅏ-ㅣ가-힣]/g, "");
+
+}
+
+function renderTextWithLineBreaks(text) {
+    if (!text) return "";
+
+    // 쉼표를 기준으로 분할하고 각 줄을 <div>로 래핑
+    return text
+        .split(',')
+        .map((item, index) => item.trim())
+        .filter(item => item.length > 0)
+        .map((item, index) => (
+            <div key={index}>{item}</div>
+        ));
 }

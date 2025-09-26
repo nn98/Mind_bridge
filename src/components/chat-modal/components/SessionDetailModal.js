@@ -5,6 +5,14 @@ import PolygonGraph from "./PolygonGraph";
 import styles from "./SessionDetailModal.module.css";
 import {useEffect, useState} from "react";
 
+// 특수문자 제거 함수
+function removeSpecialChars(text) {
+    if (!text) return "";
+
+    // 특수문자 제거 (한글, 영문, 숫자, 공백, 쉼표만 남김)
+    return text.toString().replace(/[^\w\s,ㄱ-ㅎㅏ-ㅣ가-힣]/g, "");
+}
+
 export default function SessionDetailModal({open, onClose, session}) {
 
     const [emotionData, setEmotionData] = useState([]);
@@ -306,8 +314,10 @@ export default function SessionDetailModal({open, onClose, session}) {
                         <span className={styles.metaValue}>{formatDate(session.createdAt)}</span>
                     </div>
                     <div>
-                        <b>⚠️ 위험도</b>
-                        <span className={styles.metaValue}>{Math.round(session.primaryRisk ?? 0)}%</span>
+                        <b>⚠️ 주요 증상</b>
+                        <span className={styles.metaValue}>
+                            {removeSpecialChars(session.primaryRisk) || "정보 없음"}
+                        </span>
                     </div>
                     {emotionStats && (
                         <div>
@@ -345,7 +355,7 @@ export default function SessionDetailModal({open, onClose, session}) {
                     <div className={styles.analysisRow}>
                         <div className={styles.graphMain}>
                             <h5>📈 메시지별 감정 변화</h5>
-                            <EmotionProgressGraph data={emotionData} />
+                            <EmotionProgressGraph data={emotionData}/>
                             <p className={styles.graphDescription}>
                                 📝 상담 중 각 메시지에서 분석된 감정의 변화 추이를 보여줍니다
                             </p>
@@ -356,7 +366,7 @@ export default function SessionDetailModal({open, onClose, session}) {
                                 <div className={styles.emotionGrid}>
                                     {Object.entries(emotions)
                                         .filter(([, val]) => val > 0)
-                                        .sort(([,a], [,b]) => b - a)
+                                        .sort(([, a], [, b]) => b - a)
                                         .map(([emo, val]) => (
                                             <div key={emo} className={styles.emotionItem}>
                                                 <span className={styles.emotionLabel}>{emo}</span>
@@ -380,7 +390,7 @@ export default function SessionDetailModal({open, onClose, session}) {
                                     <div className={styles.statsGrid}>
                                         {Object.entries(emotionStats.averages)
                                             .filter(([, percentage]) => percentage > 0)
-                                            .sort(([,a], [,b]) => b - a)
+                                            .sort(([, a], [, b]) => b - a)
                                             .slice(0, 6)
                                             .map(([emotion, percentage]) => (
                                                 <div key={emotion} className={styles.statItem}>
