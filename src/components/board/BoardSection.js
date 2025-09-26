@@ -10,10 +10,14 @@ import {useAuth} from "../../AuthContext";
 /* ---------- 공통 헬퍼 ---------- */
 const vis = (v) => (v || "").toUpperCase();
 const isAdmin = (profile) => (profile?.role || "").toUpperCase() === "ADMIN";
-const isOwner = (post, profile) => String(post?.userNickname) === String(profile?.nickname);
+const isOwner = (post, profile) =>
+    String(post?.userNickname) === String(profile?.nickname);
+
 const canViewPost = (post, profile) =>
     vis(post.visibility) === "PUBLIC" || isAdmin(profile) || isOwner(post, profile);
+
 const canEditPost = (post, profile) => isAdmin(profile) || isOwner(post, profile);
+
 const visibilityToLabel = (v) =>
     vis(v) === "PRIVATE" ? "비공개" : vis(v) === "FRIENDS" ? "친구공개" : "공개";
 
@@ -49,6 +53,7 @@ const FeaturedPost = ({post, onClose, onDelete, canEdit, canView}) => {
             <div className="featured-body">{body}</div>
             {canEdit && canView && (
                 <div className="featured-actions">
+                    {/* 수정/삭제 버튼 자리 */}
                 </div>
             )}
         </div>
@@ -162,6 +167,7 @@ const BoardSection = () => {
         [removePost, featuredPost]
     );
 
+    // 목록은 그냥 visibility 기준으로만 보여줌
     const filtered = useMemo(() => {
         const matchBoard = (p) =>
             selectedBoard === "general" ? vis(p.visibility) === "PUBLIC" : vis(p.visibility) === "PRIVATE";
@@ -286,10 +292,6 @@ const BoardSection = () => {
                                 onDelete={handleDelete}
                                 viewMode={viewMode}
                                 onFeature={(p) => {
-                                    if (!canViewPost(p, profile)) {
-                                        alert("비공개 글은 작성자와 관리자만 열람할 수 있습니다.");
-                                        return;
-                                    }
                                     setFeaturedPost(p);
                                     requestAnimationFrame(() => {
                                         document.querySelector(".board-featured-wrap")

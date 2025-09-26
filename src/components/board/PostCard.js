@@ -1,8 +1,14 @@
-// PostCard.jsx
 import React, {useMemo, useState} from "react";
 import {isOwner} from "./utils/auth";
 import {visibilityToLabel} from "./utils/visibility";
 import {useAuth} from "../../AuthContext";
+
+// canViewPost 헬퍼 (BoardSection과 동일하게)
+const vis = (v) => (v || "").toUpperCase();
+const canViewPost = (post, profile) =>
+    vis(post.visibility) === "PUBLIC" ||
+    (profile?.role?.toUpperCase() === "ADMIN") ||
+    (post?.userNickname && post.userNickname === profile?.nickname);
 
 const PostCard = ({post, onEdit, onDelete, onFeature}) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -12,6 +18,9 @@ const PostCard = ({post, onEdit, onDelete, onFeature}) => {
 
     const role = profile?.role?.toUpperCase();
     const canEdit = isOwner(post, profile) || role === "ADMIN";
+
+    // 글 열람 권한
+    const canView = canViewPost(post, profile);
 
     // 길면 '더보기' 노출(대략 2~3줄 기준으로 100~120자)
     const SHOW_MORE_THRESHOLD = 110;
@@ -63,11 +72,11 @@ const PostCard = ({post, onEdit, onDelete, onFeature}) => {
 
             {isEditing ? (
                 <>
-          <textarea
-              className="edit-form"
-              value={editingContent}
-              onChange={(e) => setEditingContent(e.target.value)}
-          />
+                    <textarea
+                        className="edit-form"
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                    />
                     <button className="post-edit1" disabled={saving} onClick={save}>
                         {saving ? "저장 중..." : "저장"}
                     </button>
@@ -77,11 +86,13 @@ const PostCard = ({post, onEdit, onDelete, onFeature}) => {
                 </>
             ) : (
                 <>
-                    {/* 본문 2줄만 노출 */}
-                    <p className="post-content line-clamp-2">{post.content}</p>
+                    {/* 본문 (권한 없으면 "내용은 비공개입니다.") */}
+                    <p className="post-content line-clamp-2">
+                        {canView ? post.content : "내용은 비공개입니다."}
+                    </p>
 
-                    {/* 길면 '더보기' → 텍스트 링크 */}
-                    {isLong && (
+                    {/* 길면 '더보기' → 텍스트 링크 (권한 없는 경우는 표시 X) */}
+                    {isLong && canView && (
                         <button
                             className="post-more-link"
                             onClick={() => onFeature?.(post)}
@@ -93,11 +104,11 @@ const PostCard = ({post, onEdit, onDelete, onFeature}) => {
                     )}
 
                     <span>
-            {created} | {visibilityToLabel(post.visibility)}
-          </span>
+                        {created} | {visibilityToLabel(post.visibility)}
+                    </span>
                     <span>작성자: {post.userNickname || "익명"}</span>
 
-                    {/* 수정 버튼은 편집 중이 아닐 때만 노출 → 저장/취소와 겹침 방지 */}
+                    {/* 수정 버튼은 편집 중이 아닐 때만 노출 */}
                     {canEdit && !isEditing && (
                         <button className="post-edit" onClick={() => setIsEditing(true)}>
                             수정
