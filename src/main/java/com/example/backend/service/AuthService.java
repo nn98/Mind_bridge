@@ -1,29 +1,25 @@
-// service/impl/AuthServiceImpl.java
 package com.example.backend.service;
-
-import static com.example.backend.dto.auth.LoginResponse.*;
 
 import java.util.Optional;
 import java.util.Random;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.example.backend.common.error.NotFoundException;
+import com.example.backend.common.error.UnauthorizedException;
 import com.example.backend.dto.auth.FindIdRequest;
 import com.example.backend.dto.auth.LoginRequest;
-import com.example.backend.dto.auth.LoginResponse;
 import com.example.backend.dto.auth.ResetPasswordRequest;
-import com.example.backend.dto.user.Profile;
 import com.example.backend.entity.UserEntity;
-import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.service.DailyMetricsService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,53 +32,65 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final JavaMailSender mailSender;
-    private final UserMapper userMapper; // 추가
-
-    // 로그인: 인증 → JWT 발급 → Profile 생성 → 응답 구성
-    @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest request) {
-        UserEntity user = authenticateUser(request);
-        String accessToken = jwtUtil.generateToken(user.getEmail());
-        Profile profile = userMapper.toProfile(user); // 매퍼 사용
-        return ofAccess(profile, accessToken, 84000000L);
-    }
+    private final DailyMetricsService dailyMetricsService;
 
     @Transactional
-    public boolean updateLastLogin(LoginRequest request) {
+    public void loginAndSetCookie(LoginRequest request, HttpServletResponse response) {
+        // 1. 사용자 인증
         UserEntity user = authenticateUser(request);
-        int result = userRepository.touchLastLogin(user.getEmail());
-        return result != 1;
+
+        // 2. JWT 토큰 생성 및 쿠키 설정
+        String token = jwtUtil.generateToken(user.getEmail());
+        jwtUtil.setJwtCookie(response, token);
+
+        // 3. 마지막 로그인 시간 업데이트
+        updateLastLogin(user.getEmail());
+
+        // 4. 일일 접속자 수 카운트 증가
+        dailyMetricsService.increaseUserCount();
+
+        log.info("로그인 성공: {}", user.getEmail());
     }
 
-    // 아이디(이메일) 찾기 + 마스킹
+    public void logout(HttpServletResponse response) {
+        jwtUtil.clearJwtCookie(response);
+        log.info("로그아웃 처리 완료");
+    }
+
     @Transactional(readOnly = true)
     public String findAndMaskUserEmail(FindIdRequest request) {
         Optional<UserEntity> optionalUser = userRepository
             .findByPhoneNumberAndNickname(request.getPhoneNumber(), request.getNickname());
+
         if (optionalUser.isEmpty()) {
-            log.warn("아이디 찾기 실패 - 전화번호: {}, 닉네임: {}", request.getPhoneNumber(), request.getNickname());
-            return null;
+            log.warn("아이디 찾기 실패 - 전화번호: {}, 닉네임: {}",
+                request.getPhoneNumber(), request.getNickname());
+            throw new NotFoundException("일치하는 회원 정보를 찾을 수 없습니다.");
         }
+
         String email = optionalUser.get().getEmail();
         String maskedEmail = maskEmail(email);
         log.info("아이디 찾기 성공: {}", email);
         return maskedEmail;
     }
 
-    // 비밀번호 재설정(임시 비밀번호 발급 및 메일 전송)
     @Transactional
     public String resetPassword(ResetPasswordRequest request) {
         Optional<UserEntity> optionalUser = userRepository.findByEmail(request.getEmail());
+
         if (optionalUser.isEmpty()) {
             log.warn("존재하지 않는 이메일로 비밀번호 재설정 시도: {}", request.getEmail());
-            return null;
+            throw new NotFoundException("해당 이메일로 등록된 계정이 없습니다.");
         }
+
         UserEntity user = optionalUser.get();
         if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
-            log.warn("이메일과 전화번호가 일지하지 않습니다: {}", request.getEmail());
-            return null;
+            log.warn("이메일과 전화번호가 일치하지 않습니다: {}", request.getEmail());
+            throw new NotFoundException("이메일과 전화번호가 일치하지 않습니다.");
         }
+
         String tempPassword = generateTempPassword();
+
         try {
             sendTempPasswordEmail(user.getEmail(), tempPassword);
             user.setPassword(passwordEncoder.encode(tempPassword));
@@ -91,27 +99,42 @@ public class AuthService {
             return tempPassword;
         } catch (Exception e) {
             log.error("비밀번호 재설정 실패: {}", e.getMessage());
-            return null;
+            throw new RuntimeException("임시 비밀번호 발송에 실패했습니다.", e);
         }
     }
 
-    // ===== 내부 유틸/헬퍼 =====
+    @Transactional
+    public void updateLastLogin(String email) {
+        try {
+            userRepository.touchLastLogin(email);
+        } catch (Exception e) {
+            log.warn("마지막 로그인 시간 업데이트 실패: {}", email, e);
+            // 로그인은 성공시키고 로그만 남김
+        }
+    }
+
+    // ===== 내부 유틸/헬퍼 메서드 =====
 
     private UserEntity authenticateUser(LoginRequest request) {
         UserEntity user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new com.example.backend.common.error.UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다."));
+            .orElseThrow(() -> new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다."));
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new com.example.backend.common.error.UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
+            throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
         }
+
         return user;
     }
 
     private String maskEmail(String email) {
         if (email == null || !email.contains("@")) return email;
+
         String[] parts = email.split("@", 2);
         String local = parts[0];
         String domain = parts[1];
+
         if (local.length() <= 2) return email;
+
         String masked = local.substring(0, 2) + "*".repeat(Math.max(1, local.length() - 2));
         return masked + "@" + domain;
     }
@@ -121,7 +144,11 @@ public class AuthService {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
-        for (int i = 0; i < length; i++) sb.append(chars.charAt(random.nextInt(chars.length())));
+
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
         return sb.toString();
     }
 
@@ -137,11 +164,5 @@ public class AuthService {
                 "감사합니다."
         );
         mailSender.send(message);
-    }
-
-    // 인증 실패 시 401로 매핑될 수 있도록 유지(선택적으로 @ControllerAdvice에서 처리해도 됨)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public static class AuthenticationException extends RuntimeException {
-        public AuthenticationException(String message) { super(message); }
     }
 }

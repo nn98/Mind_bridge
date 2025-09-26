@@ -1,0 +1,112 @@
+name: CD - Build and Deploy JAR
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK 17 with Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build with Maven (force update snapshots)
+        run: |
+          set -e
+          mvn -B -U clean package -DskipTests
+
+      - name: Locate built JAR (multi-module safe)
+        id: locate
+        shell: bash
+        run: |
+          set -e
+          JAR_PATH="$(find . -type f -path '*/target/*.jar' ! -name '*sources*' ! -name '*javadoc*' | sort -r | head -n 1)"
+          echo "Found JAR: ${JAR_PATH:-<none>}"
+          if [[ -z "$JAR_PATH" ]]; then
+            echo "No jar found under */target/"
+            exit 1
+          fi
+          echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare upload payload (server.jar.new)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p upload
+          cp -f "${{ steps.locate.outputs.jar }}" "upload/server.jar.new"
+          ls -al upload
+
+      # 1) 원격 정리: 과거에 잘못 생성된 server.jar.new 디렉터리/파일 제거
+      - name: Pre-clean conflicting path on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            mkdir -p "${{ secrets.DEPLOY_PATH }}"
+            if [ -d "${{ secrets.DEPLOY_PATH }}/server.jar.new" ]; then
+              rm -rf "${{ secrets.DEPLOY_PATH }}/server.jar.new"
+            fi
+            if [ -f "${{ secrets.DEPLOY_PATH }}/server.jar.new" ]; then
+              rm -f "${{ secrets.DEPLOY_PATH }}/server.jar.new"
+            fi
+
+      # 2) 업로드: target은 디렉터리만, 경로 평탄화(strip_components)
+      - name: Copy JAR to server directory
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "upload/server.jar.new"
+          target: "${{ secrets.DEPLOY_PATH }}/"
+          overwrite: true
+          strip_components: 1
+
+      # 3) 활성화: 원자적 교체 및 systemd 재시작
+      - name: Activate new jar and restart systemd service
+        uses: appleboy/ssh-action@v1
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DEPLOY_PATH,SERVICE_NAME
+          script: |
+            set -euo pipefail
+            cd "$DEPLOY_PATH"
+            if [ ! -f server.jar.new ]; then
+              echo "server.jar.new not found in $DEPLOY_PATH"
+              ls -al
+              exit 1
+            fi
+            if [ -f server.jar ]; then
+              cp -f server.jar "server.jar.bak.$(date +%Y%m%d%H%M%S)"
+            fi
+            mv -f server.jar.new server.jar
+            sudo systemctl restart "$SERVICE_NAME"
+            sudo systemctl --no-pager --full status "$SERVICE_NAME"
