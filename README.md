@@ -3,18 +3,10 @@
 ***
 
 > ## Architecture
-> ![](https://velog.velcdn.com/images/nn98/post/8d6dd7ff-cf5a-40dc-90a0-442c12827114/image.png)
-
-***
-
+> <img width="2543" height="1125" alt="image" src="https://github.com/user-attachments/assets/ade9a6bd-3a58-4ffb-9565-0782e9d49fb6" />
+>
 > ## Usecase
-> ![](https://velog.velcdn.com/images/nn98/post/b6020032-0105-484c-a67a-b94fe91b2d1b/image.png)
-
-***
-
-> ## Commit Convention
-> - ### 숙지 후 제거
-> <img src="https://github.com/user-attachments/assets/059f14b1-7da7-4685-a39a-7272016cac24" style="width:500px"/>
+> <img width="1682" height="785" alt="image" src="https://github.com/user-attachments/assets/7633464e-d444-4312-8c44-b35e934409bb" />
 
 ***
 
