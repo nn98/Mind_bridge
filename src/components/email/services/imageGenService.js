@@ -7,7 +7,7 @@ export async function generateImageFromPrompt(imagePrompt) {
     const promptTemplate = `
 쿄애니(京都アニメーション, Kyoto Animation) 스타일의 귀여운 일러스트입니다.
 1. 아래 설명을 최우선 반영: "${imagePrompt}"
-2. 상담 맥락에 어울리도록 감정이 느껴지게.
+2. 채팅 맥락에 어울리도록 감정이 느껴지게.
 3. 강압적이지 않고 편안한 분위기.
 `;
 

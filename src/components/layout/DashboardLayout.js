@@ -16,14 +16,15 @@ export default function DashboardLayout() {
     };
 
     const menu = [
-        {label: "챗 상담", to: "/", section: "탐색"},
+        {label: "챗 채팅", to: "/", section: "탐색"},
         {label: "감성", to: "/emotion", section: "탐색"},
         {label: "이메일", to: "/img", section: "탐색"},
         {label: "게시판", to: "/board", section: "탐색"},
         {label: "병원 목록", to: "/map", section: "서비스"},
         {label: "자료실", to: "/library", section: "서비스"},
+
+        {label: "도움말/문의하기", to: "/help", section: "계정"},
         isLoggedIn && {label: "회원정보", to: "/profile", section: "계정"},
-        !isAdmin && {label: "도움말/문의하기", to: "/help", section: "계정"},
         isAdmin && isLoggedIn && {
             label: "관리자 페이지",
             to: "/admin",
@@ -76,7 +77,7 @@ export default function DashboardLayout() {
         <div className="dash-wrap nav-open">
             <aside className="dash-sidebar">
                 <div className="brand">
-                    <Link to="/" className="brand" aria-label="챗 상담으로 이동">
+                    <Link to="/" className="brand" aria-label="챗 채팅으로 이동">
                         <img src="/img/로고3.png" alt="Mind Bridge 로고" className="avatar"/>
                         <div className="brand-text">
                             <div className="title">MindBridge</div>

@@ -55,7 +55,7 @@ const CalendarPanel = ({date, setDate}) => {
         setWeekRange({start, end});
     }, [safeDate]);
 
-    /* ───────── 주간 상담/접속 데이터 ───────── */
+    /* ───────── 주간 채팅/접속 데이터 ───────── */
     useEffect(() => {
         if (!weekRange.start || !weekRange.end) return;
 
@@ -93,7 +93,7 @@ const CalendarPanel = ({date, setDate}) => {
                     "[📊 주간 데이터]",
                     merged.map((d) => ({
                         날짜: d.iso,
-                        상담: d.counselling,
+                        채팅: d.counselling,
                         접속자: d.visitors,
                     }))
                 );
@@ -121,7 +121,7 @@ const CalendarPanel = ({date, setDate}) => {
                 // ✅ 콘솔 출력
                 console.log(todayBody);
                 console.log("[👥 오늘 접속자 수]", todayBody?.visitCount || 0, "명");
-                console.log("[🗨️ 오늘 상담 횟수]", todayBody?.chatCount || 0, "회");
+                console.log("[🗨️ 오늘 채팅 횟수]", todayBody?.chatCount || 0, "회");
             } catch (e) {
                 console.error("금일 접속자 로드 실패:", e);
                 setTodayVisitors(0);
@@ -183,13 +183,13 @@ const CalendarPanel = ({date, setDate}) => {
                     </LocalizationProvider>
                 </div>
 
-                {/* 📌 상담 통계 + 연령/성별 분포 */}
+                {/* 📌 채팅 통계 + 연령/성별 분포 */}
                 <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
                     <div
                         className="admin-card counselling-stats"
                         aria-label="daily-count"
                     >
-                        <h3>선택한 날짜 상담 횟수</h3>
+                        <h3>선택한 날짜 채팅 횟수</h3>
                         <p className="selected-date">{selectedDateText}</p>
                         <div className="count-badge">{selectedDayCount} 회</div>
 
@@ -210,7 +210,7 @@ const CalendarPanel = ({date, setDate}) => {
 
             {/* 📌 주간 그래프 */}
             <div className="admin-card counselling-chart" aria-label="weekly-chart">
-                <h3>주간 상담/접속 현황</h3>
+                <h3>주간 채팅/접속 현황</h3>
                 <div className="chart-frame">
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart
@@ -229,7 +229,7 @@ const CalendarPanel = ({date, setDate}) => {
                                 formatter={(val, name) =>
                                     name === "접속자"
                                         ? [`${val}명`, "접속자"]
-                                        : [`${val}회`, "상담"]
+                                        : [`${val}회`, "채팅"]
                                 }
                                 wrapperStyle={{transition: "none"}} // ✅ 애니메이션 제거
                                 followCursor={true}                   // ✅ 커서 따라오기 유지
@@ -237,7 +237,7 @@ const CalendarPanel = ({date, setDate}) => {
                             <Legend/>
                             <Bar
                                 yAxisId="left"
-                                name="상담"
+                                name="채팅"
                                 dataKey="counselling"
                                 fill="#a18cd1"
                                 radius={[6, 6, 0, 0]}

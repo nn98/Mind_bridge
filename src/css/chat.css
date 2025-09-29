@@ -317,7 +317,7 @@
     border-color: #dc3545;
 }
 
-/* ===== 상담 말풍선/정렬 통일 (ai 왼쪽, user 오른쪽) ===== */
+/* ===== 채팅 말풍선/정렬 통일 (ai 왼쪽, user 오른쪽) ===== */
 .chat-container {
     padding: 16px;
     background: var(--surface);

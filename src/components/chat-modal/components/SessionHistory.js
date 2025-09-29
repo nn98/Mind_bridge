@@ -19,7 +19,7 @@ const SessionHistory = ({ userEmail }) => {
                 console.log(JSON.stringify(response));
                 setHistory(response.data);
             } catch (error) {
-                console.error("상담 이력 조회 실패:", error);
+                console.error("채팅 이력 조회 실패:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -28,11 +28,11 @@ const SessionHistory = ({ userEmail }) => {
         fetchHistory();
     }, [userEmail]);
 
-    //if (isLoading) return <p>상담 이력을 불러오는 중...</p>;
+    //if (isLoading) return <p>채팅 이력을 불러오는 중...</p>;
 
     return (
         <div className="session-history">
-            <h4>상담 이력</h4>
+            <h4>채팅 이력</h4>
             {history.length > 0 ? (
                 <ul>
                     {history.map(item => (
@@ -43,7 +43,7 @@ const SessionHistory = ({ userEmail }) => {
                     ))}
                 </ul>
             ) : (
-                <p>진행된 상담 내역이 없습니다.</p>
+                <p>진행된 채팅 내역이 없습니다.</p>
             )}
         </div>
     );

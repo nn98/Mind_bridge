@@ -10,8 +10,8 @@ export function prefillFromUser(customUser) {
         성별: customUser.gender || "",
         나이: customUser.age || "",
         상태: customUser.mentalState || customUser.status || customUser.bio || "",
-        상담받고싶은내용: customUser.intent || customUser.want || "",
-        이전상담경험: customUser.pastCounselling || customUser.experience || "",
+        채팅받고싶은내용: customUser.intent || customUser.want || "",
+        이전채팅경험: customUser.pastCounselling || customUser.experience || "",
     };
 
     let filledCount = 0;

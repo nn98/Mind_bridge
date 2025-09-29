@@ -3,7 +3,7 @@ export const sectionLabels = {
   services: '기능',
   info: '문의하기',
   board: '게시판',
-  chat: 'AI 상담',
+  chat: 'AI 채팅',
   map: '회사 위치',
   email: '메일',
   login: '로그인',

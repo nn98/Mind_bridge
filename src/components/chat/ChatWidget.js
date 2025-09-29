@@ -18,7 +18,7 @@ export default function ChatWidget({ setIsOpen, customUser }) {
     return (
         <div className="chat-container card">
             <div className="chat-header">
-                <div className="chat-title">상담</div>
+                <div className="chat-title">채팅</div>
                 <div className="chat-actions">
                     <button className="btn" onClick={handleRestartChat} disabled={isTyping}>
                         다시 시작
@@ -35,7 +35,7 @@ export default function ChatWidget({ setIsOpen, customUser }) {
 
                 {isTyping && (
                     <div className="msg ai">
-                        <div className="bubble">상담사가 답변을 작성 중이에요…</div>
+                        <div className="bubble">채팅사가 답변을 작성 중이에요…</div>
                     </div>
                 )}
                 <div ref={chatEndRef} />
@@ -46,7 +46,7 @@ export default function ChatWidget({ setIsOpen, customUser }) {
                     ref={inputRef}
                     className="chat-input"
                     type="text"
-                    placeholder={isChatEnded ? "상담이 종료되었습니다" : "메시지를 입력하세요"}
+                    placeholder={isChatEnded ? "채팅이 종료되었습니다" : "메시지를 입력하세요"}
                     disabled={isTyping || isChatEnded}
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
@@ -64,7 +64,7 @@ export default function ChatWidget({ setIsOpen, customUser }) {
             </div>
 
             <button className="btn chat-end" onClick={handleEndChat} disabled={isTyping || isChatEnded}>
-                상담 종료
+                채팅 종료
             </button>
         </div>
     );

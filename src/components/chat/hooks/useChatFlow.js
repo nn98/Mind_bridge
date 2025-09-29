@@ -9,8 +9,8 @@ const guestQuestions = [
     "성별을 입력해주세요.",
     "나이를 입력해주세요.",
     "현재 상태를 간단히 적어주세요.",
-    "상담받고 싶은 내용을 말씀해주세요.",
-    "이전에 상담 경험이 있었나요?",
+    "채팅받고 싶은 내용을 말씀해주세요.",
+    "이전에 채팅 경험이 있었나요?",
 ];
 
 /** 감정 팔레트 (파스텔 톤) */
@@ -115,11 +115,11 @@ export function useChatFlow({
             : (isLoggedIn
                 ? [{
                     sender: "ai",
-                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
+                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 채팅을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
                     isNew: true,
                 }]
                 : [
-                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요.", isNew: true},
+                    {sender: "ai", message: "안녕하세요 게스트님, 채팅을 위해 몇 가지 정보를 입력해주세요.", isNew: true},
                     {sender: "ai", message: guestQuestions[0], isNew: true},
                 ])
     );
@@ -146,24 +146,24 @@ export function useChatFlow({
         if (isLoggedIn && chatHistory.length > 0 && chatHistory[0]?.message?.includes("게스트님")) {
             setChatHistory([{
                 sender: "ai",
-                message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
+                message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 채팅을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
                 isNew: true,
             }]);
             setStep(guestQuestions.length);
         }
     }, [isLoggedIn, customUser, chatHistory]);
 
-    // === 새 상담 시작 ===
+    // === 새 채팅 시작 ===
     const handleRestartChat = useCallback(() => {
         setChatHistory(
             isLoggedIn
                 ? [{
                     sender: "ai",
-                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
+                    message: `안녕하세요 ${customUser?.fullName || customUser?.name || "고객"}님, 채팅을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
                     isNew: true,
                 }]
                 : [
-                    {sender: "ai", message: "안녕하세요 게스트님, 상담을 위해 몇 가지 정보를 입력해주세요.", isNew: true},
+                    {sender: "ai", message: "안녕하세요 게스트님, 채팅을 위해 몇 가지 정보를 입력해주세요.", isNew: true},
                     {sender: "ai", message: guestQuestions[0], isNew: true},
                 ]
         );
@@ -190,7 +190,7 @@ export function useChatFlow({
 
         // 게스트 정보 수집 단계
         if (!isLoggedIn && step < guestQuestions.length) {
-            const keys = ["이름", "성별", "나이", "상태", "상담내용", "이전상담경험"];
+            const keys = ["이름", "성별", "나이", "상태", "채팅내용", "이전채팅경험"];
             setGuestForm((prev) => ({...prev, [keys[step]]: input}));
             const nextStep = step + 1;
             setStep(nextStep);
@@ -205,7 +205,7 @@ export function useChatFlow({
                 ...prev,
                 {
                     sender: "ai",
-                    message: `감사합니다, ${guestForm["이름"] || input}님. 이제 상담을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
+                    message: `감사합니다, ${guestForm["이름"] || input}님. 이제 채팅을 시작해볼까요? 어떤 것이 가장 고민되시나요?`,
                     isNew: true,
                 }
             ]);
@@ -229,7 +229,7 @@ export function useChatFlow({
                     email,
                     name,
                     guestForm["나이"] || "0",
-                    guestForm["상담내용"] || "",
+                    guestForm["채팅내용"] || "",
                     guestForm["성별"] || "미상",
                     guestForm["상태"] || "",
                     effectiveChatStyle
@@ -258,7 +258,7 @@ export function useChatFlow({
                         {
                             id: Date.now(),
                             sender: "ai",
-                            message: result["상담사_응답"] || "응답 오류",
+                            message: result["채팅사_응답"] || "응답 오류",
                             isNew: true
                         }
                     ];
@@ -271,8 +271,8 @@ export function useChatFlow({
                 if (result["세션_종료"]) setIsChatEnded(true);
             }
         } catch (err) {
-            console.error("상담 오류:", err);
-            toast.error("상담 중 오류 발생");
+            console.error("채팅 오류:", err);
+            toast.error("채팅 중 오류 발생");
         } finally {
             setIsTyping(false);
         }
@@ -284,7 +284,7 @@ export function useChatFlow({
             setIsChatEnded(true);
             setChatHistory((prev) => [
                 ...prev,
-                {sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜", isNew: true}
+                {sender: "ai", message: "채팅을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜", isNew: true}
             ]);
             return;
         }
@@ -294,7 +294,7 @@ export function useChatFlow({
             setIsChatEnded(true);
             setChatHistory((prev) => [
                 ...prev,
-                {sender: "ai", message: "상담을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜", isNew: true}
+                {sender: "ai", message: "채팅을 종료했어요. 필요할 때 언제든 다시 찾아주세요 💜", isNew: true}
             ]);
         } catch (err) {
             console.error("세션 종료 실패:", err);

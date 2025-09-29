@@ -864,7 +864,7 @@ function ChatConsultInner({profile}) {
                     handleSubmit();
                 }}
             >
-                {isEnding && <div className="system-message">상담을 종료 중입니다</div>}
+                {isEnding && <div className="system-message">채팅을 종료 중입니다</div>}
 
                 <div className="consult-input-wrapper">
                     {/* 스타일 선택 드롭다운 (왼쪽) */}
@@ -972,7 +972,7 @@ function ChatConsultInner({profile}) {
                                     inputRef.current?.focus();
                                 }}
                             >
-                                새 상담 시작
+                                새 채팅 시작
                             </button>
                         )}
                     </div>
@@ -1011,7 +1011,7 @@ export default function ChatConsult() {
       100% { background-position: 0% 50%; }
     }
 
-    /* ✅ 상담 페이지 전용 */
+    /* ✅ 채팅 페이지 전용 */
     .consult-wrap .emotion-bg {
       position: fixed;
       top: 0;

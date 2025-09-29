@@ -367,11 +367,11 @@ export default function SessionDetailModal({open, onClose, session}) {
                             <h5>📈 메시지별 감정 변화</h5>
                             <EmotionProgressGraph data={emotionData}/>
                             <p className={styles.graphDescription}>
-                                📝 상담 중 각 메시지에서 분석된 감정의 변화 추이를 보여줍니다
+                                📝 채팅 중 각 메시지에서 분석된 감정의 변화 추이를 보여줍니다
                             </p>
 
                             <div className={styles.emotionSummary}>
-                                <h6>📊 상담 중 감정 비율 (종합)</h6>
+                                <h6>📊 채팅 중 감정 비율 (종합)</h6>
                                 <div className={styles.emotionGrid}>
                                     {Object.entries(emotions)
                                         .filter(([, val]) => val > 0)

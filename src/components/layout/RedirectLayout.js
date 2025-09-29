@@ -26,9 +26,9 @@ export default function RedirectLayout({
         target === "/login"
             ? "로그인 페이지"
             : target === "/"
-                ? "상담 페이지"
+                ? "채팅 페이지"
                 : target === "/chat"
-                    ? "상담 페이지"
+                    ? "채팅 페이지"
                     : "다음 페이지";
 
     return (
