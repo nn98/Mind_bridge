@@ -258,7 +258,7 @@ export function useChatFlow({
                         {
                             id: Date.now(),
                             sender: "ai",
-                            message: result["채팅사_응답"] || "응답 오류",
+                            message: result["상담사_응답"] || "응답 오류",
                             isNew: true
                         }
                     ];
