@@ -1,11 +1,11 @@
-import {useMemo} from "react";
+import { useMemo } from "react";
 
 export default function PolygonGraph({
-                                         emotions = {},
-                                         size = 200,
-                                         showLabels = true,
-                                         compact = false,
-                                     }) {
+    emotions = {},
+    size = 200,
+    showLabels = true,
+    compact = false,
+}) {
     const graphData = useMemo(() => {
         // 감정 데이터를 배열로 변환하고 정렬
         const emotionEntries = Object.entries(emotions)
@@ -16,13 +16,13 @@ export default function PolygonGraph({
             return {
                 vertices: [],
                 dataPoints: [],
-                center: {x: size / 2, y: size / 2},
+                center: { x: size / 2, y: size / 2 },
             };
         }
 
         // 중심점, 반지름 계산
         const pad = compact ? 12 : 20;
-        const center = {x: size / 2, y: size / 2};
+        const center = { x: size / 2, y: size / 2 };
         const radius = (size - pad * 2) / 2;
         const angleStep = (2 * Math.PI) / emotionEntries.length;
 
@@ -62,16 +62,16 @@ export default function PolygonGraph({
             };
         });
 
-        return {vertices, dataPoints, center};
+        return { vertices, dataPoints, center };
     }, [emotions, size, compact]);
 
-    const {vertices, dataPoints, center} = graphData;
+    const { vertices, dataPoints, center } = graphData;
 
     if (vertices.length === 0) {
         return (
             <div
                 className="polygon-graph empty"
-                style={{width: size, height: size}}
+                style={{ width: size, height: size }}
             >
                 <span>감정 데이터 없음</span>
             </div>
@@ -95,7 +95,7 @@ export default function PolygonGraph({
             height={size}
             viewBox={viewBox}
             className="polygon-graph"
-            style={{overflow: "visible"}}
+            style={{ overflow: "visible" }}
         >
             {/* 배경 격자선 (중심에서 각 꼭짓점으로) */}
             {vertices.map((vertex, index) => (
